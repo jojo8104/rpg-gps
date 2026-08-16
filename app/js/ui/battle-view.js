@@ -1,0 +1,90 @@
+const previousPositions = new Map();
+
+/** Vue animée : les unités progressent, les héros restent ancrés à leur camp. */
+export function renderBattleView({ element, battle, playerTeamId, message, selectedUnitId = null, onSelectUnit, onAssign, onDragState, onSurrender }) {
+  const player = battle.teams.find((team) => team.id === playerTeamId);
+  const enemy = battle.teams.find((team) => team.id !== playerTeamId);
+  const allEntities = battle.teams.flatMap((team) => [...team.heroes, ...team.units].map((entity) => ({ entity, team })));
+  const findEntity = (id) => allEntities.find((item) => item.entity.id === id) ?? null;
+  const letter = (entity) => entity.kind === "hero" ? "H" : entity.symbol ?? "U";
+  const activeHeroes = (team) => team.heroes.filter((hero) => hero.state === "active").length;
+  const latestAttack = findLatestAttack(battle);
+
+  const positionFor = (entity, team, index = 0) => {
+    const allied = team.id === playerTeamId;
+    const x = 50;
+    if (entity.kind === "hero") return { x: 50, y: allied ? 93 : 7 };
+    const baseY = allied ? 87 - entity.progress * 43 : 13 + entity.progress * 43;
+    return { x, y: Math.max(10, Math.min(90, baseY + index * (allied ? 4 : -4))) };
+  };
+
+  const fieldToken = (entity, team, index) => {
+    const allied = team.id === playerTeamId; const position = positionFor(entity, team, index);
+    const attacking = latestAttack?.attackerId === entity.id; const targeted = latestAttack?.targetId === entity.id;
+    return `<article class="unit-token field-token ${allied ? "is-ally" : "is-enemy"} ${entity.kind === "hero" ? "is-hero" : ""} ${attacking ? "is-attacking" : ""} ${targeted ? "is-targeted" : ""}" style="left:${position.x}%;top:${position.y}%" data-field-entity="${entity.id}" data-x="${position.x}" data-y="${position.y}" title="${entity.kind === "hero" ? "Héros immobile" : `Progression ${Math.round(entity.progress * 100)} %`}"><strong>${letter(entity)}</strong><small>${entity.kind === "hero" ? entity.health : entity.quantity}</small></article>`;
+  };
+
+  const lane = (index) => {
+    const enemyHero = enemy.heroes.find((hero) => hero.lane === index && hero.state === "active");
+    const playerHero = player.heroes.find((hero) => hero.lane === index && hero.state === "active");
+    const enemyUnits = enemy.units.filter((unit) => unit.lane === index && unit.state === "active");
+    const playerUnits = player.units.filter((unit) => unit.lane === index && unit.state === "active");
+    return `<section class="vertical-lane" data-line="${index}" aria-label="Ligne ${index + 1}"><span class="vertical-lane-label">${index + 1}</span><div class="lane-centerline"></div>${enemyHero ? fieldToken(enemyHero, enemy, 0) : ""}${enemyUnits.map((unit, unitIndex) => fieldToken(unit, enemy, unitIndex)).join("")}${playerUnits.map((unit, unitIndex) => fieldToken(unit, player, unitIndex)).join("")}${playerHero ? fieldToken(playerHero, player, 0) : ""}</section>`;
+  };
+
+  const hand = player.units.filter((unit) => unit.lane === null && unit.state === "active");
+  const handCard = (unit) => `<article class="unit-token hand-token is-ally ${unit.id === selectedUnitId ? "is-selected" : ""}" draggable="true" tabindex="0" data-unit="${unit.id}" title="Comportement : ${unit.behavior}"><strong>${letter(unit)}</strong><small>${unit.quantity}</small></article>`;
+  const attackVisual = createAttackVisual(latestAttack, findEntity, positionFor);
+
+  element.innerHTML = `<div class="battle-screen"><header class="enemy-side"><strong>Héros ennemis : ${activeHeroes(enemy)}</strong></header><p class="battle-message">${message}</p><main class="vertical-battlefield">${[0, 1, 2].map(lane).join("")}${attackVisual.svg}</main>${attackVisual.label}<section class="player-hand"><div><strong>Vos unités</strong><small>Glissez une carte sur une ligne</small></div><div class="hand-cards">${hand.map(handCard).join("") || "<span>Toutes les unités sont engagées</span>"}</div></section><footer class="player-side"><strong>Vos héros : ${activeHeroes(player)}</strong><button type="button" class="surrender-button" data-surrender ${battle.status !== "active" ? "disabled" : ""}>Se rendre</button></footer></div>`;
+
+  animateMovement(element);
+  element.querySelectorAll("[data-unit]").forEach((item) => {
+    item.classList.toggle("is-selected", item.dataset.unit === selectedUnitId);
+    item.addEventListener("dragstart", (event) => { event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", item.dataset.unit); onDragState(true); });
+    item.addEventListener("dragend", () => onDragState(false));
+    item.addEventListener("click", () => onSelectUnit(item.dataset.unit));
+  });
+  element.querySelectorAll("[data-line]").forEach((target) => {
+    target.addEventListener("dragenter", (event) => { event.preventDefault(); target.classList.add("is-drop-target"); });
+    target.addEventListener("dragleave", () => target.classList.remove("is-drop-target"));
+    target.addEventListener("dragover", (event) => { event.preventDefault(); event.dataTransfer.dropEffect = "move"; });
+    target.addEventListener("drop", (event) => { event.preventDefault(); target.classList.remove("is-drop-target"); const unitId = event.dataTransfer.getData("text/plain") || selectedUnitId; onDragState(false); if (unitId) onAssign(unitId, Number(target.dataset.line)); });
+    target.addEventListener("click", (event) => { if (selectedUnitId && !event.target.closest("[data-unit]")) onAssign(selectedUnitId, Number(target.dataset.line)); });
+  });
+  element.querySelector("[data-surrender]").addEventListener("click", onSurrender);
+}
+
+function findLatestAttack(battle) {
+  for (let index = battle.eventLog.length - 1; index >= 0; index -= 1) {
+    const event = battle.eventLog[index];
+    if (!["attack", "breakthrough_attack"].includes(event.type)) continue;
+    if (battle.state.elapsedMs - event.elapsedMs <= 1_200) return event;
+    return null;
+  }
+  return null;
+}
+
+function createAttackVisual(event, findEntity, positionFor) {
+  if (!event) return { svg: "", label: "" };
+  const attacker = findEntity(event.attackerId); const target = findEntity(event.targetId);
+  if (!attacker || !target) return { svg: "", label: "" };
+  const attackerPosition = positionFor(attacker.entity, attacker.team); const targetPosition = positionFor(target.entity, target.team);
+  const attackerX = (attacker.entity.lane + attackerPosition.x / 100) * (100 / 3);
+  const targetX = (target.entity.lane + targetPosition.x / 100) * (100 / 3);
+  return {
+    svg: `<svg class="attack-overlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><line x1="${attackerX}" y1="${attackerPosition.y}" x2="${targetX}" y2="${targetPosition.y}"></line></svg>`,
+    label: `<p class="attack-caption">${attacker.entity.kind === "hero" ? "H" : attacker.entity.symbol ?? "U"} attaque ${target.entity.kind === "hero" ? "H" : target.entity.symbol ?? "U"} · ${event.damage} dégâts${event.type === "breakthrough_attack" ? ` · percée ×${event.multiplier}` : ""}</p>`,
+  };
+}
+
+function animateMovement(element) {
+  const present = new Set();
+  element.querySelectorAll("[data-field-entity]").forEach((token) => {
+    const id = token.dataset.fieldEntity; const current = { x: Number(token.dataset.x), y: Number(token.dataset.y) }; const previous = previousPositions.get(id);
+    present.add(id);
+    if (previous && (previous.x !== current.x || previous.y !== current.y) && typeof token.animate === "function") token.animate([{ left: `${previous.x}%`, top: `${previous.y}%` }, { left: `${current.x}%`, top: `${current.y}%` }], { duration: 480, easing: "linear" });
+    previousPositions.set(id, current);
+  });
+  for (const id of previousPositions.keys()) if (!present.has(id)) previousPositions.delete(id);
+}

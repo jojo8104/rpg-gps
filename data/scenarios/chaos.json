@@ -1,0 +1,36 @@
+{
+  "id": "chaos",
+  "name": "La fuite du royaume",
+  "intro": "Sous l'influence du Seigneur du Chaos, le royaume devient dangereux. Les héros doivent fuir.",
+  "initialPhaseId": "escape",
+  "playerStart": {
+    "resources": { "gold": 50, "wood": 20, "iron": 10, "population": 3 },
+    "unitStacks": [{ "typeId": "militia", "quantity": 6 }]
+  },
+  "locationSlots": [
+    { "id": "refuge", "type": "fort", "roles": ["military", "spawn"] },
+    { "id": "village", "type": "village", "roles": ["social", "quest"] },
+    { "id": "bandit-camp", "type": "camp", "roles": ["military", "objective"] }
+  ],
+  "factions": [
+    { "id": "kingdom", "name": "Royaume" },
+    { "id": "bandits", "name": "Brigands" },
+    { "id": "barbarians", "name": "Barbares" }
+  ],
+  "phases": [
+    { "id": "escape", "title": "La fuite", "description": "Atteignez le refuge.", "objectives": [{ "id": "reach-refuge", "text": "Atteindre le refuge." }], "eventIds": ["refuge-reached"], "transitions": [{ "nextPhase": "installation" }] },
+    { "id": "installation", "title": "Installation", "description": "Faites du fort votre base.", "objectives": [{ "id": "secure-refuge", "text": "Sécuriser le refuge." }], "eventIds": ["refuge-secured"], "transitions": [{ "nextPhase": "village" }] },
+    { "id": "village", "title": "Le village", "description": "Explorez le village voisin.", "objectives": [{ "id": "reach-village", "text": "Rencontrer les habitants." }], "eventIds": ["village-discovered"], "transitions": [{ "nextPhase": "bandits" }] },
+    { "id": "bandits", "title": "Les brigands", "description": "Affrontez la menace locale.", "objectives": [{ "id": "resolve-bandits", "text": "Résoudre la menace des brigands." }], "eventIds": ["bandits-encountered"], "transitions": [{ "nextPhase": "barbarians" }] },
+    { "id": "barbarians", "title": "Les barbares", "description": "Une menace plus grande se révèle.", "objectives": [{ "id": "discover-barbarians", "text": "Découvrir les barbares." }], "eventIds": ["barbarians-revealed"], "transitions": [] }
+  ],
+  "events": [
+    { "id": "refuge-reached", "effects": [{ "type": "showNarration", "text": "Le refuge est atteint." }] },
+    { "id": "refuge-secured", "effects": [{ "type": "showNarration", "text": "Le fort devient votre base." }] },
+    { "id": "village-discovered", "effects": [{ "type": "revealLocation", "locationSlotId": "village" }] },
+    { "id": "bandits-encountered", "effects": [{ "type": "showNarration", "text": "Les brigands vous barrent la route." }] },
+    { "id": "barbarians-revealed", "effects": [{ "type": "showNarration", "text": "Les barbares approchent." }] }
+  ],
+  "victoryConditions": [],
+  "defeatConditions": []
+}

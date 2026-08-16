@@ -1,0 +1,169 @@
+/** Définition immuable d'un scénario, indépendante de la partie et de la géographie réelle. */
+export class Scenario {
+  constructor({ id, name, intro, initialPhaseId, playerStart = {}, locationSlots = [], factions = [], phases, events = [], victoryConditions = [], defeatConditions = [] }) {
+    this.id = Scenario.#requireText(id, "L'identifiant du scénario");
+    this.name = Scenario.#requireText(name, "Le nom du scénario");
+    this.intro = Scenario.#requireText(intro, "Le contexte initial");
+    this.playerStart = Scenario.#createPlayerStart(playerStart);
+    this.locationSlots = Scenario.#createRecords(locationSlots, "Les lieux", ["id", "type"]);
+    this.factions = Scenario.#createRecords(factions, "Les factions", ["id", "name"]);
+    this.events = Scenario.#createEvents(events);
+    this.phases = Scenario.#createPhases(phases);
+    this.initialPhaseId = Scenario.#requireText(initialPhaseId, "La phase initiale");
+    if (!this.phases.some((phase) => phase.id === this.initialPhaseId)) throw new RangeError("La phase initiale n'existe pas.");
+    this.victoryConditions = Scenario.#createTextList(victoryConditions, "Les conditions de victoire");
+    this.defeatConditions = Scenario.#createTextList(defeatConditions, "Les conditions de défaite");
+  }
+
+  getPhase(phaseId) { return this.phases.find((phase) => phase.id === phaseId) ?? null; }
+  getEvent(eventId) { return this.events.find((event) => event.id === eventId) ?? null; }
+
+  toJSON() {
+    return {
+      id: this.id, name: this.name, intro: this.intro, initialPhaseId: this.initialPhaseId, playerStart: { resources: { ...this.playerStart.resources }, unitStacks: this.playerStart.unitStacks.map((stack) => ({ ...stack })) },
+      locationSlots: this.locationSlots.map((location) => ({ ...location, roles: [...location.roles] })),
+      factions: this.factions.map((faction) => ({ ...faction })),
+      phases: this.phases.map((phase) => ({
+        ...phase,
+        objectives: phase.objectives.map((objective) => ({ ...objective })),
+        eventIds: [...phase.eventIds],
+        transitions: phase.transitions.map((transition) => ({ ...transition })),
+      })),
+      events: this.events.map((event) => ({ ...event, effects: event.effects.map((effect) => ({ ...effect })) })),
+      victoryConditions: [...this.victoryConditions], defeatConditions: [...this.defeatConditions],
+    };
+  }
+
+  static #createPhases(phases) {
+    if (!Array.isArray(phases) || phases.length === 0) throw new RangeError("Le scénario doit contenir au moins une phase.");
+    const ids = new Set();
+    return phases.map((phase) => {
+      Scenario.#requireObject(phase, "Une phase");
+      const id = Scenario.#requireText(phase.id, "L'identifiant de phase");
+      if (ids.has(id)) throw new RangeError("Les identifiants de phase doivent être uniques.");
+      ids.add(id);
+      const objectives = Scenario.#createObjectives(phase.objectives ?? []);
+      const eventIds = Scenario.#createTextList(phase.eventIds ?? [], "Les événements de phase");
+      const transitions = Scenario.#createTransitions(phase.transitions ?? []);
+      return { id, title: Scenario.#requireText(phase.title, "Le titre de phase"), description: Scenario.#requireText(phase.description, "La description de phase"), type: Scenario.#requireText(phase.type ?? "main", "Le type de phase"), objectives, eventIds, transitions };
+    });
+  }
+
+  static #createPlayerStart(playerStart) {
+    Scenario.#requireObject(playerStart, "Les ressources de départ");
+    const resources = playerStart.resources ?? {};
+    if (resources === null || Array.isArray(resources) || typeof resources !== "object") throw new TypeError("Les ressources de départ doivent être un objet.");
+    const unitStacks = playerStart.unitStacks ?? [];
+    if (!Array.isArray(unitStacks)) throw new TypeError("Les unités de départ doivent être une liste.");
+    return {
+      resources: Object.fromEntries(Object.entries(resources).map(([name, amount]) => {
+        if (!Number.isFinite(amount) || amount < 0) throw new RangeError("Une ressource de départ doit être positive ou nulle.");
+        return [Scenario.#requireText(name, "Le nom de ressource"), amount];
+      })),
+      unitStacks: unitStacks.map((stack) => {
+        Scenario.#requireObject(stack, "Une unité de départ");
+        if (!Number.isInteger(stack.quantity) || stack.quantity <= 0) throw new RangeError("L'effectif de départ doit être un entier positif.");
+        return { typeId: Scenario.#requireText(stack.typeId, "Le type d'unité"), quantity: stack.quantity };
+      }),
+    };
+  }
+
+  static #createObjectives(objectives) {
+    if (!Array.isArray(objectives)) throw new TypeError("Les objectifs doivent être une liste.");
+    const ids = new Set();
+    return objectives.map((objective) => {
+      Scenario.#requireObject(objective, "Un objectif");
+      const id = Scenario.#requireText(objective.id, "L'identifiant d'objectif");
+      if (ids.has(id)) throw new RangeError("Les identifiants d'objectif doivent être uniques dans une phase.");
+      ids.add(id);
+      return { id, text: Scenario.#requireText(objective.text, "Le texte de l'objectif") };
+    });
+  }
+
+  static #createTransitions(transitions) {
+    if (!Array.isArray(transitions)) throw new TypeError("Les transitions doivent être une liste.");
+    return transitions.map((transition) => {
+      Scenario.#requireObject(transition, "Une transition");
+      const result = { nextPhase: Scenario.#requireText(transition.nextPhase, "La phase suivante") };
+      if (transition.condition !== undefined) result.condition = Scenario.#requireText(transition.condition, "La condition de transition");
+      return result;
+    });
+  }
+
+  static #createEvents(events) {
+    if (!Array.isArray(events)) throw new TypeError("Les événements doivent être une liste.");
+    const ids = new Set();
+    return events.map((event) => {
+      Scenario.#requireObject(event, "Un événement");
+      const id = Scenario.#requireText(event.id, "L'identifiant d'événement");
+      if (ids.has(id)) throw new RangeError("Les identifiants d'événement doivent être uniques.");
+      ids.add(id);
+      if (!Array.isArray(event.effects)) throw new TypeError("Les effets d'événement doivent être une liste.");
+      return { id, effects: event.effects.map((effect) => ({ ...effect, type: Scenario.#requireText(effect.type, "Le type d'effet") })) };
+    });
+  }
+
+  static #createRecords(records, label, requiredKeys) {
+    if (!Array.isArray(records)) throw new TypeError(`${label} doivent être une liste.`);
+    return records.map((record) => {
+      Scenario.#requireObject(record, label);
+      const normalized = Object.fromEntries(requiredKeys.map((key) => [key, Scenario.#requireText(record[key], `Le champ ${key}`)]));
+      if (record.roles !== undefined) normalized.roles = Scenario.#createTextList(record.roles, "Les rôles de lieu");
+      return normalized;
+    });
+  }
+
+  static #createTextList(values, label) { if (!Array.isArray(values)) throw new TypeError(`${label} doivent être une liste.`); return [...new Set(values.map((value) => Scenario.#requireText(value, "Un identifiant")))]; }
+  static #requireObject(value, label) { if (value === null || Array.isArray(value) || typeof value !== "object") throw new TypeError(`${label} doit être un objet.`); }
+  static #requireText(value, label) { if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label} doit être un texte non vide.`); return value.trim(); }
+}
+
+/** Progression sérialisable d'un scénario dans une partie donnée. */
+export class ScenarioState {
+  constructor(scenario) {
+    if (!(scenario instanceof Scenario)) throw new TypeError("L'état doit être créé à partir d'un scénario.");
+    this.scenarioId = scenario.id;
+    this.currentPhaseId = scenario.initialPhaseId;
+    this.phaseStates = Object.fromEntries(scenario.phases.map((phase) => [phase.id, {
+      status: phase.id === scenario.initialPhaseId ? "active" : "locked",
+      objectives: phase.objectives.map((objective) => ({ ...objective, state: phase.id === scenario.initialPhaseId ? "active" : "locked" })),
+    }]));
+    this.triggeredEventIds = [];
+  }
+
+  getCurrentPhaseState() { return this.phaseStates[this.currentPhaseId]; }
+  getObjective(objectiveId) { return this.getCurrentPhaseState().objectives.find((objective) => objective.id === objectiveId) ?? null; }
+
+  completeObjective(objectiveId) {
+    const objective = this.getObjective(objectiveId);
+    if (objective === null || objective.state !== "active") return false;
+    objective.state = "completed";
+    return true;
+  }
+
+  triggerEvent(scenario, eventId) {
+    const phase = scenario.getPhase(this.currentPhaseId);
+    if (phase === null || !phase.eventIds.includes(eventId) || this.triggeredEventIds.includes(eventId)) return null;
+    const event = scenario.getEvent(eventId);
+    if (event === null) throw new RangeError("L'événement de phase n'existe pas.");
+    this.triggeredEventIds.push(eventId);
+    return event;
+  }
+
+  advance(scenario, nextPhaseId) {
+    const phase = scenario.getPhase(this.currentPhaseId);
+    if (phase === null || !this.getCurrentPhaseState().objectives.every((objective) => objective.state === "completed")) return false;
+    if (!phase.transitions.some((transition) => transition.nextPhase === nextPhaseId)) return false;
+    const nextState = this.phaseStates[nextPhaseId];
+    if (nextState === undefined || nextState.status !== "locked") return false;
+    this.getCurrentPhaseState().status = "completed";
+    nextState.status = "active";
+    nextState.objectives.forEach((objective) => { objective.state = "active"; });
+    this.currentPhaseId = nextPhaseId;
+    return true;
+  }
+
+  toJSON() {
+    return { scenarioId: this.scenarioId, currentPhaseId: this.currentPhaseId, phaseStates: structuredClone(this.phaseStates), triggeredEventIds: [...this.triggeredEventIds] };
+  }
+}

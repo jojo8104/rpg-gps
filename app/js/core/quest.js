@@ -1,0 +1,1 @@
+// Entité représentant une quête.

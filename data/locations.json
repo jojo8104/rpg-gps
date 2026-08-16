@@ -1,0 +1,49 @@
+[
+  {
+    "id": "fort-nord",
+    "name": "Fort du! Nord",
+    "type": "fort",
+    "roles": ["military", "strategic"],
+    "source": "scenario",
+    "position": { "latitude": 48.79237, "longitude": 2.2645 },
+    "interactionRadius": 1000,
+    "features": { "capturable": true, "garrison": true, "recruitment": true, "upgradeable": true },
+    "recruitment": { "availableUnitTypeIds": ["militia", "archer"] },
+    "qr": { "enabled": false }
+  },
+  {
+    "id": "village-vert",
+    "name": "Village vert",
+    "type": "village",
+    "roles": ["social", "quest"],
+    "source": "scenario",
+    "position": { "latitude": 48.8600, "longitude": 2.3600 },
+    "interactionRadius": 90,
+    "features": { "recruitment": true },
+    "recruitment": { "availableUnitTypeIds": ["militia"] },
+    "qr": { "enabled": false }
+  },
+  {
+    "id": "bandit-camp",
+    "name": "Camp des brigands",
+    "type": "camp",
+    "roles": ["military", "objective"],
+    "source": "scenario",
+    "position": { "latitude": 48.8650, "longitude": 2.3650 },
+    "interactionRadius": 80,
+    "features": { "battle": true },
+    "qr": { "enabled": false }
+  },
+  {
+    "id": "gold-mine",
+    "name": "Mine d'or abandonnée",
+    "type": "mine",
+    "roles": ["resource", "strategic"],
+    "source": "generated",
+    "position": { "latitude": 48.8520, "longitude": 2.3450 },
+    "interactionRadius": 75,
+    "features": { "resourceProduction": true },
+    "resources": { "production": { "gold": 5 }, "stock": { "gold": 35 }, "storageCapacity": 100 },
+    "qr": { "enabled": false }
+  }
+]

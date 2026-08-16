@@ -1,0 +1,22 @@
+[
+  {
+    "id": "militia",
+    "name": "Miliciens",
+    "faction": "kingdom",
+    "maxQuantity": 12,
+    "stats": { "attack": 3, "defense": 2, "ranged": 0, "mobility": 2, "morale": 4 },
+    "abilities": [],
+    "costs": { "gold": 20, "wood": 0, "stone": 0, "iron": 0, "population": 2 },
+    "tags": ["human", "infantry"]
+  },
+  {
+    "id": "archer",
+    "name": "Archer",
+    "faction": "kingdom",
+    "maxQuantity": 10,
+    "stats": { "attack": 4, "defense": 2, "ranged": 6, "mobility": 3, "morale": 5 },
+    "abilities": ["ranged_attack"],
+    "costs": { "gold": 30, "wood": 10, "stone": 0, "iron": 5, "population": 2 },
+    "tags": ["human", "infantry", "ranged"]
+  }
+]

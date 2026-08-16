@@ -1,0 +1,5 @@
+[
+  { "id": "warrior", "name": "Guerrier", "abilityIds": ["shield_wall"], "startingResources": { "gold": 15 }, "startingUnits": [{ "typeId": "militia", "quantity": 6 }] },
+  { "id": "ranger", "name": "Éclaireur", "abilityIds": ["scout"], "startingResources": { "wood": 10 }, "startingUnits": [] },
+  { "id": "mage", "name": "Mage", "abilityIds": ["arcane_blast"] }
+]
