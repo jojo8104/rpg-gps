@@ -137,6 +137,10 @@ export class Game {
     return { success: true, collected };
   }
 
+  produceLocationResources(cycles = 1) {
+    return this.locations.map((location) => ({ locationId: location.id, produced: location.produceResources(cycles) })).filter((result) => Object.keys(result.produced).length > 0);
+  }
+
   garrisonUnit({ playerId, heroId, locationId, unitId }) {
     const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
     if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id) || location.features.garrison !== true) return false;

@@ -18,3 +18,15 @@ test("une location conserve son état persistant et sa garnison", () => {
   data.resources.stock.stone = 0;
   assert.equal(location.resources.stock.stone, 8);
 });
+
+test("une mine produit des ressources sans dépasser sa capacité", () => {
+  const mine = new Location({
+    id: "mine-1", name: "Mine", type: "mine", source: "generated",
+    position: { latitude: 48.85, longitude: 2.35 }, features: { resourceProduction: true },
+    resources: { production: { gold: 5 }, stock: { gold: 92 }, storageCapacity: 100 }, qr: { enabled: false },
+  });
+  assert.deepEqual(mine.produceResources(1), { gold: 5 });
+  assert.deepEqual(mine.produceResources(1), { gold: 3 });
+  assert.deepEqual(mine.produceResources(1), {});
+  assert.equal(mine.resources.stock.gold, 100);
+});

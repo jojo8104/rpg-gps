@@ -58,8 +58,8 @@ export class MapView {
     const icon = L.divIcon({ className: `location-marker ${location.nearby ? "is-nearby" : ""}`, html: location.state === "UNKNOWN" ? "?" : "◆", iconSize: [34, 34], iconAnchor: [17, 17] });
     const marker = this.locations.get(location.id);
     if (!marker) {
-      const created = L.marker(asLatLng(location.position), { icon }).addTo(this.map);
-      created.on("click", () => this.onLocationSelect(location.id));
+      const created = L.marker(asLatLng(location.position), { icon, bubblingMouseEvents: false, keyboard: true, title: location.name }).addTo(this.map);
+      created.on("click", (event) => { if (event.originalEvent) L.DomEvent.stopPropagation(event.originalEvent); this.onLocationSelect(location.id); });
       this.locations.set(location.id, created);
     } else marker.setIcon(icon).setLatLng(asLatLng(location.position));
   }

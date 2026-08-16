@@ -1,4 +1,4 @@
-const CACHE = "rpg-gps-field-v1";
+const CACHE = "rpg-gps-field-v3";
 const local = (path) => new URL(path, self.location).href;
 const APP_SHELL = [local("./"), local("./index.html"), local("./app/"), local("./app/index.html"), local("./app/css/style.css"), local("./app/js/main.js"), local("./app/js/gps.js"), local("./app/manifest.webmanifest"), local("./app/icon.svg"), local("./data/scenarios/chaos.json"), local("./data/hero-classes.json"), local("./data/units.json"), local("./data/locations.json"), "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css", "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"];
 self.addEventListener("install", (event) => event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())));

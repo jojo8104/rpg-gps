@@ -74,6 +74,21 @@ export class Location {
     this.ownerId = Location.#createOptionalId(ownerId, "L'identifiant du propriétaire");
   }
 
+  produceResources(cycles = 1) {
+    if (!Number.isFinite(cycles) || cycles <= 0) throw new RangeError("Le nombre de cycles doit être positif.");
+    if (this.features.resourceProduction !== true) return {};
+    const produced = {};
+    let remainingCapacity = Math.max(0, this.resources.storageCapacity - Object.values(this.resources.stock).reduce((sum, amount) => sum + amount, 0));
+    for (const [resource, rate] of Object.entries(this.resources.production)) {
+      const amount = Math.min(remainingCapacity, rate * cycles);
+      if (amount <= 0) continue;
+      this.resources.stock[resource] = (this.resources.stock[resource] ?? 0) + amount;
+      produced[resource] = amount;
+      remainingCapacity -= amount;
+    }
+    return produced;
+  }
+
   toJSON() {
     return {
       id: this.id, name: this.name, type: this.type, roles: [...this.roles], source: this.source,

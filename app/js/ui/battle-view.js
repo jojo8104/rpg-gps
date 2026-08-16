@@ -33,10 +33,10 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
   };
 
   const hand = player.units.filter((unit) => unit.lane === null && unit.state === "active");
-  const handCard = (unit) => `<article class="unit-token hand-token is-ally ${unit.id === selectedUnitId ? "is-selected" : ""}" draggable="true" tabindex="0" data-unit="${unit.id}" title="Comportement : ${unit.behavior}"><strong>${letter(unit)}</strong><small>${unit.quantity}</small></article>`;
+  const handCard = (unit) => `<button type="button" class="unit-token hand-token is-ally ${unit.id === selectedUnitId ? "is-selected" : ""}" draggable="true" data-unit="${unit.id}" aria-label="Sélectionner une unité, quantité ${unit.quantity}" title="Comportement : ${unit.behavior}"><strong>${letter(unit)}</strong><small>${unit.quantity}</small></button>`;
   const attackVisual = createAttackVisual(latestAttack, findEntity, positionFor);
 
-  element.innerHTML = `<div class="battle-screen"><header class="enemy-side"><strong>Héros ennemis : ${activeHeroes(enemy)}</strong></header><p class="battle-message">${message}</p><main class="vertical-battlefield">${[0, 1, 2].map(lane).join("")}${attackVisual.svg}</main>${attackVisual.label}<section class="player-hand"><div><strong>Vos unités</strong><small>Glissez une carte sur une ligne</small></div><div class="hand-cards">${hand.map(handCard).join("") || "<span>Toutes les unités sont engagées</span>"}</div></section><footer class="player-side"><strong>Vos héros : ${activeHeroes(player)}</strong><button type="button" class="surrender-button" data-surrender ${battle.status !== "active" ? "disabled" : ""}>Se rendre</button></footer></div>`;
+  element.innerHTML = `<div class="battle-screen"><header class="enemy-side"><strong>Héros ennemis : ${activeHeroes(enemy)}</strong></header><p class="battle-message">${message}</p><main class="vertical-battlefield">${[0, 1, 2].map(lane).join("")}${attackVisual.svg}</main>${attackVisual.label}<section class="player-hand"><div><strong>Vos unités</strong><small>Glissez, ou touchez une unité puis une ligne</small></div><div class="hand-cards">${hand.map(handCard).join("") || "<span>Toutes les unités sont engagées</span>"}</div></section><footer class="player-side"><strong>Vos héros : ${activeHeroes(player)}</strong><button type="button" class="surrender-button" data-surrender ${battle.status !== "active" ? "disabled" : ""}>Se rendre</button></footer></div>`;
 
   animateMovement(element);
   element.querySelectorAll("[data-unit]").forEach((item) => {
@@ -44,6 +44,7 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
     item.addEventListener("dragstart", (event) => { event.dataTransfer.effectAllowed = "move"; event.dataTransfer.setData("text/plain", item.dataset.unit); onDragState(true); });
     item.addEventListener("dragend", () => onDragState(false));
     item.addEventListener("click", () => onSelectUnit(item.dataset.unit));
+    enablePointerDrag(item, element, onAssign, onDragState);
   });
   element.querySelectorAll("[data-line]").forEach((target) => {
     target.addEventListener("dragenter", (event) => { event.preventDefault(); target.classList.add("is-drop-target"); });
@@ -53,6 +54,28 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
     target.addEventListener("click", (event) => { if (selectedUnitId && !event.target.closest("[data-unit]")) onAssign(selectedUnitId, Number(target.dataset.line)); });
   });
   element.querySelector("[data-surrender]").addEventListener("click", onSurrender);
+}
+
+function enablePointerDrag(item, element, onAssign, onDragState) {
+  let active = false; let moved = false; let target = null;
+  item.addEventListener("pointerdown", (event) => {
+    if (event.pointerType === "mouse") return;
+    event.preventDefault(); active = true; moved = false; onDragState(true); item.setPointerCapture?.(event.pointerId); item.classList.add("is-dragging");
+  });
+  item.addEventListener("pointermove", (event) => {
+    if (!active) return;
+    event.preventDefault(); moved = true;
+    const next = document.elementFromPoint(event.clientX, event.clientY)?.closest("[data-line]");
+    if (target !== next) { target?.classList.remove("is-drop-target"); target = next; target?.classList.add("is-drop-target"); }
+  });
+  const finish = (event) => {
+    if (!active) return;
+    event.preventDefault(); active = false; item.classList.remove("is-dragging"); target?.classList.remove("is-drop-target"); onDragState(false);
+    if (moved && target && element.contains(target)) onAssign(item.dataset.unit, Number(target.dataset.line)); else item.click();
+    target = null;
+  };
+  item.addEventListener("pointerup", finish);
+  item.addEventListener("pointercancel", finish);
 }
 
 function findLatestAttack(battle) {
