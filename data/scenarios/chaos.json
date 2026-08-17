@@ -4,7 +4,7 @@
   "intro": "Sous l'influence du Seigneur du Chaos, le royaume devient dangereux. Les héros doivent fuir.",
   "initialPhaseId": "escape",
   "playerStart": {
-    "resources": { "gold": 50, "wood": 20, "iron": 10, "population": 3 },
+    "resources": { "gold": 50, "wood": 20, "iron": 10 },
     "unitStacks": [{ "typeId": "militia", "quantity": 6 }]
   },
   "locationSlots": [

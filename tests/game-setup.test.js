@@ -32,3 +32,10 @@ test("la densité calcule un nombre de lieux borné par la superficie", () => {
   assert.equal(setup.rules.timeLimitMinutes, 90);
   assert.equal(setup.getGeneratedLocationCount(), 12);
 });
+
+test("la configuration avancée conserve une politique de portée", () => {
+  const setup = new GameSetup({ id: "setup-ranges", name: "Portées", mode: "custom", scenarioId: "chaos", playArea, locationSetup: { rangePolicy: { mode: "fixed", maxInteractionMeters: 25, typeOverrides: { fort: { interactionRadius: 18 } } } } });
+  assert.equal(setup.locationSetup.rangePolicy.mode, "fixed");
+  assert.equal(setup.locationSetup.rangePolicy.maxInteractionMeters, 25);
+  assert.equal(setup.locationSetup.rangePolicy.typeOverrides.fort.interactionRadius, 18);
+});

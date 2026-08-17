@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { Game } from "../app/js/core/game.js";
 
-const definition = { id: "militia", maxQuantity: 10, stats: { attack: 4, defense: 2, ranged: 0, mobility: 2 } };
+const definition = { id: "militia", maxQuantity: 10, stats: { attack: 4, defense: 2, range: 1, speed: 2 } };
 const setup = { id: "s", name: "Partie", mode: "quick", scenarioId: "chaos", playerCount: 2, playArea: { id: "a", name: "A", polygon: [{ latitude: 0, longitude: 0 }, { latitude: 0, longitude: 1 }, { latitude: 1, longitude: 0 }] }, participants: [{ playerId: "p1", name: "A" }, { playerId: "p2", name: "B" }] };
 const heroClasses = [{ id: "fighter", name: "Combattant", abilityIds: [] }];
 

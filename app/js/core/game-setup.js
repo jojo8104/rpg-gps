@@ -9,6 +9,7 @@ const MODES = {
 const JOIN_POLICIES = new Set(["closed", "invite", "open"]);
 const STATUSES = new Set(["draft", "ready", "started", "closed"]);
 const LOCATION_DENSITIES = { low: 5, balanced: 10, high: 16 };
+const RANGE_MODES = new Set(["auto", "fixed"]);
 
 /** Configuration validée d'une partie, avant l'instanciation de Game. */
 export class GameSetup {
@@ -85,7 +86,7 @@ export class GameSetup {
     return {
       id: this.id, name: this.name, mode: this.mode, scenarioId: this.scenarioId, playerCount: this.playerCount,
       playArea: this.playArea.toJSON(), participants: this.participants.map((participant) => ({ ...participant })),
-      teams: this.teams.map((team) => ({ ...team })), locationSetup: { ...this.locationSetup },
+      teams: this.teams.map((team) => ({ ...team })), locationSetup: structuredClone(this.locationSetup),
       qrSetup: { ...this.qrSetup }, rules: { ...this.rules }, join: { ...this.join }, status: this.status,
     };
   }
@@ -143,7 +144,30 @@ export class GameSetup {
     return {
       generationMode, density, minLocations, maxLocations,
       allowedSources: [...new Set(allowedSources.map((source) => GameSetup.#requireText(source, "Une source de lieu")))],
+      rangePolicy: GameSetup.#createRangePolicy(locationSetup.rangePolicy ?? {}),
     };
+  }
+
+  static #createRangePolicy(policy) {
+    GameSetup.#requireObject(policy, "La politique de portée");
+    const mode = policy.mode ?? "auto";
+    if (!RANGE_MODES.has(mode)) throw new RangeError("Le mode de calcul des portées est invalide.");
+    const number = (value, fallback, label) => { const result = value ?? fallback; if (!Number.isFinite(result) || result <= 0) throw new RangeError(`${label} doit être positif.`); return result; };
+    const typeOverrides = policy.typeOverrides ?? {};
+    GameSetup.#requireObject(typeOverrides, "Les portées par type de lieu");
+    const rangePolicy = {
+      mode,
+      interactionScale: number(policy.interactionScale, 1, "L'échelle d'interaction"),
+      detectionScale: number(policy.detectionScale, 1, "L'échelle de détection"),
+      minInteractionMeters: number(policy.minInteractionMeters, 10, "L'interaction minimale"),
+      maxInteractionMeters: number(policy.maxInteractionMeters, 50, "L'interaction maximale"),
+      minDetectionMeters: number(policy.minDetectionMeters, 40, "La détection minimale"),
+      maxDetectionMeters: number(policy.maxDetectionMeters, 200, "La détection maximale"),
+      typeOverrides: structuredClone(typeOverrides),
+    };
+    if (rangePolicy.minInteractionMeters > rangePolicy.maxInteractionMeters) throw new RangeError("Les bornes d'interaction sont inversées.");
+    if (rangePolicy.minDetectionMeters > rangePolicy.maxDetectionMeters) throw new RangeError("Les bornes de détection sont inversées.");
+    return rangePolicy;
   }
 
   static #createQrSetup(qrSetup) {

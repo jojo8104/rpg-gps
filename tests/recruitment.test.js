@@ -4,8 +4,8 @@ import { Game } from "../app/js/core/game.js";
 
 const unitDefinitions = [{
   id: "archer", name: "Archer", faction: "kingdom", maxQuantity: 10,
-  stats: { attack: 4, defense: 2, ranged: 6, mobility: 3, morale: 5 },
-  abilities: ["ranged_attack"], costs: { gold: 30, wood: 10, iron: 5, population: 2 }, tags: ["ranged"],
+  stats: { attack: 4, defense: 2, speed: 3, range: 3, morale: 5 },
+  abilities: ["ranged_attack"], costs: { gold: 30, wood: 10, iron: 5 }, tags: ["ranged"],
 }];
 const setup = {
   id: "setup-1", name: "Partie", mode: "quick", scenarioId: "chaos", playerCount: 1,
@@ -14,11 +14,11 @@ const setup = {
 };
 const scenario = {
   id: "chaos", name: "Chaos", intro: "Fuyez.", initialPhaseId: "escape",
-  playerStart: { resources: { gold: 50, wood: 20, iron: 10, population: 3 }, unitStacks: [] },
+  playerStart: { resources: { gold: 50, wood: 20, iron: 10 }, unitStacks: [] },
   phases: [{ id: "escape", title: "Fuite", description: "Fuir.", objectives: [], eventIds: [], transitions: [] }],
 };
 const heroClasses = [{ id: "warrior", name: "Guerrier", abilityIds: [], startingResources: { gold: 10 }, startingUnits: [] }];
-const locations = [{ id: "fort-1", name: "Fort", type: "fort", source: "scenario", position: { latitude: 0, longitude: 0 }, features: { recruitment: true, garrison: true }, recruitment: { availableUnitTypeIds: ["archer"] } }];
+const locations = [{ id: "fort-1", name: "Fort", type: "fort", source: "scenario", position: { latitude: 0, longitude: 0 }, features: { recruitment: true, garrison: true }, recruitment: { availableUnitTypeIds: ["archer"], stock: { archer: 20 }, production: { archer: 2 }, capacity: 30, variance: 0.25 } }];
 
 test("le début attribue les ressources de classe et scénario, puis recrute au fort", () => {
   let id = 1;
@@ -26,14 +26,16 @@ test("le début attribue les ressources de classe et scénario, puis recrute au 
   const hero = game.chooseHero("player-1", { name: "Aldric", classId: "warrior" });
   game.start();
   const player = game.getPlayer("player-1");
-  assert.equal(player.getResourceAmount("gold"), 60);
+  assert.equal(hero.getResourceAmount("gold"), 60);
   assert.equal(game.recruitUnit({ playerId: player.id, heroId: hero.id, locationId: "fort-1", unitTypeId: "archer" }).reason, "hero_not_at_location");
   game.getLocation("fort-1").addHero(hero.id);
   const result = game.recruitUnit({ playerId: player.id, heroId: hero.id, locationId: "fort-1", unitTypeId: "archer" });
   assert.equal(result.success, true);
   assert.equal(result.unit.ownerPlayerId, player.id);
-  assert.equal(player.getResourceAmount("gold"), 30);
-  assert.equal(hero.army.getUnit(result.unit.id).quantity, 10);
+  assert.equal(hero.getResourceAmount("gold"), 30);
+  assert.equal(game.getLocation("fort-1").recruitment.stock.archer, 14);
+  assert.equal(hero.army.getUnit(result.unit.id).quantity, 6);
+  assert.equal(hero.army.getUnit(result.unit.id).rank, "soldier");
 });
 
 test("une unité appartient toujours à son joueur après un dépôt et un retrait de garnison", () => {

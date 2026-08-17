@@ -6,8 +6,8 @@ import { Hero } from "../app/js/core/hero.js";
 test("un héros gère son armée, ses capacités et sa progression", () => {
   const hero = new Hero({ id: "hero-1", playerId: "player-1", name: "Ariane", abilityIds: ["charge"] });
 
-  assert.equal(hero.addUnit({ id: "unit-1", ownerPlayerId: "player-1", typeId: "archer", quantity: 8, maxQuantity: 10 }), true);
-  assert.equal(hero.addUnit({ id: "unit-1", ownerPlayerId: "player-1", typeId: "archer", quantity: 8, maxQuantity: 10 }), false);
+  assert.equal(hero.addUnit({ id: "unit-1", ownerPlayerId: "player-1", typeId: "archer", quantity: 6 }), true);
+  assert.equal(hero.addUnit({ id: "unit-1", ownerPlayerId: "player-1", typeId: "archer", quantity: 6 }), false);
   assert.equal(hero.addAbility("healing"), true);
   hero.addExperience(25);
   hero.setLevel(2);
@@ -19,6 +19,13 @@ test("un héros gère son armée, ses capacités et sa progression", () => {
   assert.equal(hero.level, 2);
 });
 
+test("le grade de commandement du héros progresse avec son expérience", () => {
+  const hero = new Hero({ id: "commander", playerId: "player-1", name: "Ariane" });
+  assert.equal(hero.commandRank, "captain"); assert.equal(hero.maxUnitStacks, 3);
+  hero.addExperience(250); assert.equal(hero.commandRank, "banneret"); assert.equal(hero.maxUnitStacks, 4);
+  hero.addExperience(950); assert.equal(hero.commandRank, "marshal"); assert.equal(hero.maxUnitStacks, 6);
+});
+
 test("un héros accepte une position GPS sérialisable", () => {
   const hero = new Hero({ id: "hero-1", playerId: "player-1", name: "Ariane" });
   hero.updatePosition({ latitude: 48.8566, longitude: 2.3522, accuracy: 8, updatedAt: "2026-08-12T10:30:00.000Z" });
@@ -28,4 +35,10 @@ test("un héros accepte une position GPS sérialisable", () => {
 
   assert.equal(hero.position.latitude, 48.8566);
   assert.deepEqual(hero.position, { latitude: 48.8566, longitude: 2.3522, accuracy: 8, updatedAt: "2026-08-12T10:30:00.000Z" });
+});
+
+test("un héros détient ses ressources mais jamais de population", () => {
+  const hero = new Hero({ id: "hero-resources", playerId: "player-1", name: "Ariane", resources: { gold: 20 } });
+  hero.addResource("gold", 5); assert.equal(hero.spendResource("gold", 8), true); assert.equal(hero.getResourceAmount("gold"), 17);
+  assert.throws(() => new Hero({ id: "invalid", playerId: "player-1", name: "Ariane", resources: { population: 2 } }), /population/);
 });

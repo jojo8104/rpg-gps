@@ -16,3 +16,13 @@ test("la recherche devient possible après Battle et le site expire", () => {
   assert.equal(site.canSearch(center), true); now = 1000;
   assert.equal(site.isExpired(), true); assert.equal(site.isVisibleTo({ playerId: "p", position: center }), false);
 });
+
+test("butin, informations et survivants sont trois recherches indépendantes", () => {
+  const site = new BattleSite({ id: "searchable", battleId: "battle", position: center, participantPlayerIds: ["p1"] });
+  site.finish();
+  assert.equal(site.search({ type: "loot", playerId: "p1", position: center }).success, true);
+  assert.equal(site.search({ type: "information", playerId: "p1", position: center }).success, true);
+  assert.equal(site.search({ type: "survivors", playerId: "p1", position: center }).success, true);
+  assert.equal(site.search({ type: "loot", playerId: "p1", position: center }).reason, "already_searched");
+  assert.deepEqual(site.toJSON().searches, { loot: ["p1"], information: ["p1"], survivors: ["p1"] });
+});

@@ -61,3 +61,42 @@ test("la reddition termine immédiatement la bataille au profit de l'adversaire"
   assert.equal(battle.teams[0].units[0].state, "captured");
   assert.ok(battle.eventLog.some((event) => event.type === "team_surrendered"));
 });
+
+test("all attacks prepared during one tick are resolved simultaneously", () => {
+  const battle = new BattleEngine({ id: "simultaneous", teams: [
+    { id: "red", heroes: [{ id: "hr", playerId: "red" }], units: [{ id: "ur", playerId: "red", attack: 100, defense: 0, speed: 1, range: 1, quantity: 1, maxQuantity: 1 }] },
+    { id: "blue", heroes: [{ id: "hb", playerId: "blue" }], units: [{ id: "ub", playerId: "blue", attack: 100, defense: 0, speed: 1, range: 1, quantity: 1, maxQuantity: 1 }] },
+  ] });
+  battle.getEntity("ur").progress = 0.8;
+  battle.getEntity("ub").progress = 0.8;
+  battle.tick(500);
+  assert.equal(battle.getEntity("ur").state, "defeated");
+  assert.equal(battle.getEntity("ub").state, "defeated");
+  assert.equal(battle.eventLog.filter((event) => event.type === "attack").length, 2);
+});
+
+test("retreat orders successively select the foremost eligible unit", () => {
+  const battle = new BattleEngine({ id: "retreat-order", teams: [
+    { id: "red", heroes: [{ id: "hr", playerId: "red" }], units: [
+      { id: "front", playerId: "red", attack: 1, defense: 1, speed: 1, quantity: 2, maxQuantity: 2 },
+      { id: "rear", playerId: "red", attack: 1, defense: 1, speed: 1, quantity: 2, maxQuantity: 2 },
+    ] },
+    { id: "blue", heroes: [{ id: "hb", playerId: "blue" }], units: [] },
+  ] });
+  battle.start(); battle.getEntity("front").progress = 0.8; battle.getEntity("rear").progress = 0.4;
+  assert.equal(battle.orderRetreat("red", 1).unitId, "front");
+  assert.equal(battle.orderRetreat("red", 1).unitId, "rear");
+  assert.deepEqual(battle.orderRetreat("red", 1), { success: false, reason: "no_retreat_candidate" });
+});
+
+test("a retreating unit returns to the hand using its retreat statistics", () => {
+  const battle = new BattleEngine({ id: "retreat-hand", teams: [
+    { id: "red", heroes: [{ id: "hr", playerId: "red" }], units: [{ id: "ur", playerId: "red", attack: 5, defense: 1, speed: 1, range: 1, retreat: { speed: 4, defense: 5, attack: 3, range: 2 }, quantity: 5, maxQuantity: 5 }] },
+    { id: "blue", heroes: [{ id: "hb", playerId: "blue" }], units: [] },
+  ] });
+  battle.start(); const unit = battle.getEntity("ur"); unit.progress = 0.3;
+  battle.orderRetreat("red", 1); battle.tick(1_000);
+  assert.equal(unit.lane, null); assert.equal(unit.retreating, false); assert.equal(unit.state, "active");
+  assert.deepEqual(unit.retreat, { speed: 4, defense: 5, attack: 3, range: 2 });
+  assert.ok(battle.eventLog.some((event) => event.type === "unit_returned_to_hand" && event.unitId === "ur"));
+});
