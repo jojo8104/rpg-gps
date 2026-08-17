@@ -1,4 +1,5 @@
 import { Army } from "./army.js";
+import { HERO_COMMAND_RANKS, rankForExperience, requireRank } from "./rank-system.js";
 
 /** Représente un personnage contrôlé sur la carte. */
 export class Hero {
@@ -19,6 +20,8 @@ export class Hero {
     carryCapacity = 20,
     carriedLoot = [],
     abilityIds = [],
+    resources = {},
+    commandRank = "captain",
   }) {
     this.id = Hero.#requireText(id, "L'identifiant du héros");
     this.playerId = Hero.#requireText(playerId, "L'identifiant du joueur");
@@ -30,6 +33,8 @@ export class Hero {
     this.pursuitCooldownUntil = pursuitCooldownUntil === null ? null : Hero.#requireNonNegativeNumber(pursuitCooldownUntil, "La fin du cooldown");
     this.army = army instanceof Army ? army : new Army(army);
     this.position = Hero.#createPosition(position);
+    this.resources = Hero.#createResources(resources);
+    this.commandRank = requireRank(HERO_COMMAND_RANKS, commandRank, "Le grade de commandement").id;
     this.experience = Hero.#requireNonNegativeNumber(experience, "L'expérience");
     this.level = Hero.#requirePositiveInteger(level, "Le niveau");
     this.equipment = Hero.#createEquipment(equipment);
@@ -39,8 +44,11 @@ export class Hero {
   }
 
   addUnit(unit) {
+    if (this.army.units.length >= this.maxUnitStacks) return false;
     return this.army.addUnit(unit);
   }
+
+  get maxUnitStacks() { return requireRank(HERO_COMMAND_RANKS, this.commandRank, "Le grade de commandement").capacity; }
 
   removeUnit(unitId) {
     return this.army.removeUnit(unitId);
@@ -52,7 +60,14 @@ export class Hero {
 
   addExperience(amount) {
     this.experience += Hero.#requirePositiveNumber(amount, "Le gain d'expérience");
+    this.refreshCommandRank();
   }
+
+  getResourceAmount(resourceName) { return this.resources[Hero.#requireText(resourceName, "Le nom de la ressource")] ?? 0; }
+  addResource(resourceName, amount) { const name = Hero.#requireText(resourceName, "Le nom de la ressource"); this.resources[name] = this.getResourceAmount(name) + Hero.#requirePositiveNumber(amount, "Le montant"); }
+  spendResource(resourceName, amount) { const name = Hero.#requireText(resourceName, "Le nom de la ressource"); const value = Hero.#requirePositiveNumber(amount, "Le montant"); if (this.getResourceAmount(name) < value) return false; this.resources[name] -= value; return true; }
+
+  refreshCommandRank() { this.commandRank = rankForExperience(HERO_COMMAND_RANKS, this.experience).id; return this.commandRank; }
 
   setBattleState({ health, state }) {
     this.health = Hero.#requireHealth(health, this.maxHealth, true);
@@ -101,6 +116,9 @@ export class Hero {
       experience: this.experience,
       level: this.level,
       equipment: { ...this.equipment },
+      resources: { ...this.resources },
+      commandRank: this.commandRank,
+      maxUnitStacks: this.maxUnitStacks,
       carryCapacity: this.carryCapacity,
       carriedLoot: this.carriedLoot.map((entry) => ({ ...entry })),
       abilityIds: [...this.abilityIds],
@@ -150,6 +168,12 @@ export class Hero {
         Hero.#requireText(itemId, "L'identifiant de l'équipement"),
       ]),
     );
+  }
+
+  static #createResources(resources) {
+    if (resources === null || Array.isArray(resources) || typeof resources !== "object") throw new TypeError("Les ressources du hÃ©ros doivent Ãªtre un objet.");
+    if (Object.hasOwn(resources, "population")) throw new RangeError("La population n'est pas une ressource de hÃ©ros.");
+    return Object.fromEntries(Object.entries(resources).map(([name, amount]) => [Hero.#requireText(name, "Le nom de la ressource"), Hero.#requireNonNegativeNumber(amount, "Une ressource initiale")]));
   }
 
   static #createCarriedLoot(entries) {

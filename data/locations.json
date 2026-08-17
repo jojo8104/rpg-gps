@@ -6,9 +6,10 @@
     "roles": ["military", "strategic"],
     "source": "scenario",
     "position": { "latitude": 48.79237, "longitude": 2.2645 },
-    "interactionRadius": 1000,
+    "interactionRadius": 20,
+    "detectionRadius": 150,
     "features": { "capturable": true, "garrison": true, "recruitment": true, "upgradeable": true },
-    "recruitment": { "availableUnitTypeIds": ["militia", "archer"] },
+    "recruitment": { "availableUnitTypeIds": ["militia", "archer", "mounted-archer"], "production": { "militia": 2, "archer": 1, "mounted-archer": 1 }, "stock": { "militia": 12, "archer": 10, "mounted-archer": 8 }, "capacity": 48, "variance": 0.15 },
     "qr": { "enabled": false }
   },
   {
@@ -18,9 +19,10 @@
     "roles": ["social", "quest"],
     "source": "scenario",
     "position": { "latitude": 48.8600, "longitude": 2.3600 },
-    "interactionRadius": 90,
+    "interactionRadius": 15,
+    "detectionRadius": 120,
     "features": { "recruitment": true },
-    "recruitment": { "availableUnitTypeIds": ["militia"] },
+    "recruitment": { "availableUnitTypeIds": ["militia"], "production": { "militia": 3 }, "stock": { "militia": 12 }, "capacity": 24, "variance": 0.3 },
     "qr": { "enabled": false }
   },
   {
@@ -30,7 +32,8 @@
     "roles": ["military", "objective"],
     "source": "scenario",
     "position": { "latitude": 48.8650, "longitude": 2.3650 },
-    "interactionRadius": 80,
+    "interactionRadius": 20,
+    "detectionRadius": 90,
     "features": { "battle": true },
     "qr": { "enabled": false }
   },
@@ -41,7 +44,8 @@
     "roles": ["resource", "strategic"],
     "source": "generated",
     "position": { "latitude": 48.8520, "longitude": 2.3450 },
-    "interactionRadius": 75,
+    "interactionRadius": 12,
+    "detectionRadius": 70,
     "features": { "resourceProduction": true },
     "resources": { "production": { "gold": 5 }, "stock": { "gold": 35 }, "storageCapacity": 100 },
     "qr": { "enabled": false }

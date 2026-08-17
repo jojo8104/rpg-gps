@@ -4,9 +4,10 @@
     "name": "Miliciens",
     "faction": "kingdom",
     "maxQuantity": 12,
-    "stats": { "attack": 3, "defense": 2, "ranged": 0, "mobility": 2, "morale": 4 },
+    "stats": { "attack": 3, "defense": 2, "speed": 2, "range": 1, "morale": 4 },
+    "retreat": { "attack": 0, "defense": 0, "speed": 3, "range": 1 },
     "abilities": [],
-    "costs": { "gold": 20, "wood": 0, "stone": 0, "iron": 0, "population": 2 },
+    "costs": { "gold": 20, "wood": 0, "stone": 0, "iron": 0 },
     "tags": ["human", "infantry"]
   },
   {
@@ -14,9 +15,21 @@
     "name": "Archer",
     "faction": "kingdom",
     "maxQuantity": 10,
-    "stats": { "attack": 4, "defense": 2, "ranged": 6, "mobility": 3, "morale": 5 },
+    "stats": { "attack": 4, "defense": 2, "speed": 3, "range": 3, "morale": 5 },
+    "retreat": { "attack": 4, "defense": 2, "speed": 4, "range": 3 },
     "abilities": ["ranged_attack"],
-    "costs": { "gold": 30, "wood": 10, "stone": 0, "iron": 5, "population": 2 },
+    "costs": { "gold": 30, "wood": 10, "stone": 0, "iron": 5 },
     "tags": ["human", "infantry", "ranged"]
+  },
+  {
+    "id": "mounted-archer",
+    "name": "Archer à cheval",
+    "faction": "kingdom",
+    "maxQuantity": 8,
+    "stats": { "attack": 4, "defense": 2, "speed": 5, "range": 3, "morale": 6 },
+    "retreat": { "attack": 5, "defense": 3, "speed": 7, "range": 4 },
+    "abilities": ["ranged_attack", "skirmisher"],
+    "costs": { "gold": 55, "wood": 10, "stone": 0, "iron": 10 },
+    "tags": ["human", "cavalry", "ranged", "harassment"]
   }
 ]

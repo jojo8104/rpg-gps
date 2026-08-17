@@ -38,7 +38,10 @@ export class BattleConsequenceService {
     }
     unit.quantity = snapshot.quantity;
     unit.state = "active";
-    report.survivors.push({ unitId: unit.id, quantity: unit.quantity, returnedFrom: snapshot.state });
+    const damageExperience = battle.eventLog.filter((event) => event.attackerId === snapshot.id).reduce((total, event) => total + (event.damage ?? 0), 0);
+    const experienceGained = Math.max(1, Math.round(damageExperience)) + 10 + (battle.getTeamForEntity(snapshot.id)?.id === battle.winnerTeamId ? 20 : 0);
+    const previousRank = unit.rank; unit.addExperience(experienceGained);
+    report.survivors.push({ unitId: unit.id, quantity: unit.quantity, returnedFrom: snapshot.state, experienceGained, previousRank, rank: unit.rank });
   }
 
   #removeUnitFromGame(game, unitId) {

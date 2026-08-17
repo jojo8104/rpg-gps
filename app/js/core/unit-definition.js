@@ -3,12 +3,13 @@
  * Cette classe ne contient aucun état propre à l'armée d'un joueur.
  */
 export class UnitDefinition {
-  constructor({ id, name, faction, maxQuantity, stats, abilities = [], costs = {}, tags = [] }) {
+  constructor({ id, name, faction, maxQuantity, stats, retreat = {}, abilities = [], costs = {}, tags = [] }) {
     this.id = UnitDefinition.#requireText(id, "L'identifiant du type d'unité");
     this.name = UnitDefinition.#requireText(name, "Le nom du type d'unité");
     this.faction = UnitDefinition.#requireText(faction, "La faction de l'unité");
     this.maxQuantity = UnitDefinition.#requirePositiveInteger(maxQuantity, "L'effectif maximal");
     this.stats = UnitDefinition.#createStats(stats);
+    this.retreat = UnitDefinition.#createRetreat(retreat, this.stats);
     this.abilities = UnitDefinition.#createTextList(abilities, "Les capacités");
     this.costs = UnitDefinition.#createAmounts(costs, "Les coûts");
     this.tags = UnitDefinition.#createTextList(tags, "Les tags");
@@ -21,6 +22,7 @@ export class UnitDefinition {
       faction: this.faction,
       maxQuantity: this.maxQuantity,
       stats: { ...this.stats },
+      retreat: { ...this.retreat },
       abilities: [...this.abilities],
       costs: { ...this.costs },
       tags: [...this.tags],
@@ -32,7 +34,7 @@ export class UnitDefinition {
       throw new TypeError("Les statistiques doivent être un objet.");
     }
 
-    const requiredStats = ["attack", "defense", "ranged", "mobility", "morale"];
+    const requiredStats = ["attack", "defense", "speed", "range", "morale"];
     const normalizedStats = {};
 
     for (const statName of requiredStats) {
@@ -43,6 +45,16 @@ export class UnitDefinition {
     }
 
     return normalizedStats;
+  }
+
+  static #createRetreat(retreat, stats) {
+    if (retreat === null || Array.isArray(retreat) || typeof retreat !== "object") throw new TypeError("Les statistiques de retraite doivent etre un objet.");
+    return {
+      speed: UnitDefinition.#requirePositiveNumber(retreat.speed ?? stats.speed, "La vitesse de retraite"),
+      defense: UnitDefinition.#requireNonNegativeNumber(retreat.defense ?? stats.defense, "La defense de retraite"),
+      attack: UnitDefinition.#requireNonNegativeNumber(retreat.attack ?? stats.attack, "L'attaque de retraite"),
+      range: UnitDefinition.#requirePositiveNumber(retreat.range ?? stats.range, "La portee de retraite"),
+    };
   }
 
   static #createAmounts(amounts, label) {
@@ -87,6 +99,11 @@ export class UnitDefinition {
       throw new RangeError(`${label} doit être un nombre positif ou nul.`);
     }
 
+    return value;
+  }
+
+  static #requirePositiveNumber(value, label) {
+    if (!Number.isFinite(value) || value <= 0) throw new RangeError(`${label} doit etre un nombre strictement positif.`);
     return value;
   }
 }

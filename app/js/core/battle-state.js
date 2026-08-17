@@ -93,7 +93,23 @@ function createHero(entity, lane, ids) {
 function createUnit(entity, lane, ids) {
   const base = common(entity, "unit", ids);
   const maxQuantity = positiveInteger(entity.maxQuantity, "L'effectif maximal");
-  return { ...base, maxQuantity, quantity: Math.min(maxQuantity, nonNegativeInteger(entity.quantity, "L'effectif")), morale: nonNegative(entity.morale ?? 5, "Le moral"), lane, behavior: entity.behavior ?? "advance", symbol: entity.symbol ?? "U" };
+  const retreat = entity.retreat ?? {};
+  return {
+    ...base,
+    maxQuantity,
+    quantity: Math.min(maxQuantity, nonNegativeInteger(entity.quantity, "L'effectif")),
+    morale: nonNegative(entity.morale ?? 5, "Le moral"),
+    lane,
+    behavior: entity.behavior ?? "advance",
+    symbol: entity.symbol ?? "U",
+    retreating: entity.retreating === true,
+    retreat: {
+      speed: positive(retreat.speed ?? base.speed, "La vitesse de retraite"),
+      defense: nonNegative(retreat.defense ?? base.defense, "La defense de retraite"),
+      attack: nonNegative(retreat.attack ?? base.attack, "L'attaque de retraite"),
+      range: positive(retreat.range ?? base.range, "La portee de retraite"),
+    },
+  };
 }
 
 function positive(value, label) { if (!Number.isFinite(value) || value <= 0) throw new RangeError(`${label} doit être positif.`); return value; }

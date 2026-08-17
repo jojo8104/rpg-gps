@@ -1,10 +1,11 @@
 const SIMULATION_BOUNDS = [[0, 0], [100, 100]];
 
 export class MapView {
-  constructor({ element, mode = "simulation", initialPosition = null, onHeroMove, onLocationSelect, onMapClick = () => {} }) {
+  constructor({ element, mode = "simulation", initialPosition = null, onHeroMove, onLocationSelect, onDynamicSiteSelect = () => {}, onMapClick = () => {} }) {
     this.mode = mode;
     this.onHeroMove = onHeroMove;
     this.onLocationSelect = onLocationSelect;
+    this.onDynamicSiteSelect = onDynamicSiteSelect;
     this.onMapClick = onMapClick;
     const real = mode === "gps";
     this.map = L.map(element, real ? { zoomControl: true } : { crs: L.CRS.Simple, zoomControl: false, attributionControl: false, minZoom: -1, maxZoom: 2 });
@@ -16,7 +17,11 @@ export class MapView {
       L.rectangle(SIMULATION_BOUNDS, { color: "#54715a", weight: 1, fillColor: "#203b27", fillOpacity: 1 }).addTo(this.map);
     }
     this.map.on("click", ({ latlng }) => this.onMapClick(toPosition(latlng)));
+    const legend = L.control({ position: "bottomleft" });
+    legend.onAdd = () => { const element = L.DomUtil.create("div", "range-legend"); element.innerHTML = '<span class="is-detection">Détection</span><span class="is-interaction">Interaction</span>'; return element; };
+    legend.addTo(this.map);
     this.locations = new Map();
+    this.locationRanges = new Map();
     this.dynamicSites = new Map();
     this.hero = null;
     this.accuracy = null;
@@ -28,6 +33,7 @@ export class MapView {
   render({ heroPosition, accuracy = null, locations = [], playAreaPoints = [], dynamicSites = [], gridCells = [], heatmapVisible = true }) {
     locations.forEach((location) => this.#location(location));
     this.#removeMissing(this.locations, new Set(locations.map((item) => item.id)));
+    this.#removeMissing(this.locationRanges, new Set(locations.map((item) => item.id)));
     this.#hero(heroPosition, accuracy);
     this.#area(playAreaPoints);
     dynamicSites.forEach((site) => this.#site(site));
@@ -62,6 +68,19 @@ export class MapView {
       created.on("click", (event) => { if (event.originalEvent) L.DomEvent.stopPropagation(event.originalEvent); this.onLocationSelect(location.id); });
       this.locations.set(location.id, created);
     } else marker.setIcon(icon).setLatLng(asLatLng(location.position));
+    const center = asLatLng(location.position);
+    let ranges = this.locationRanges.get(location.id);
+    if (!ranges) {
+      ranges = L.layerGroup([
+        L.circle(center, { radius: location.detectionRadius, color: "#62a8ff", weight: 1, opacity: .65, fillColor: "#62a8ff", fillOpacity: .06, interactive: false }),
+        L.circle(center, { radius: location.interactionRadius, color: "#78e08f", weight: 2, opacity: .85, fillColor: "#78e08f", fillOpacity: .12, interactive: false }),
+      ]).addTo(this.map);
+      this.locationRanges.set(location.id, ranges);
+    } else {
+      const [detection, interaction] = ranges.getLayers();
+      detection.setLatLng(center).setRadius(location.detectionRadius);
+      interaction.setLatLng(center).setRadius(location.interactionRadius);
+    }
   }
 
   #area(points) {
@@ -72,7 +91,11 @@ export class MapView {
   #site(site) {
     const marker = this.dynamicSites.get(site.id);
     const icon = L.divIcon({ className: `dynamic-marker is-${site.kind}`, html: site.kind === "loot" ? "💰" : "⚔", iconSize: [38, 38], iconAnchor: [19, 19] });
-    if (!marker) this.dynamicSites.set(site.id, L.marker(asLatLng(site.position), { icon }).addTo(this.map).bindTooltip(site.kind === "loot" ? "Butin" : "Champ de bataille"));
+    if (!marker) {
+      const created = L.marker(asLatLng(site.position), { icon, bubblingMouseEvents: false }).addTo(this.map).bindTooltip(site.kind === "loot" ? "Butin" : "Champ de bataille");
+      created.on("click", (event) => { if (event.originalEvent) L.DomEvent.stopPropagation(event.originalEvent); this.onDynamicSiteSelect(site.id); });
+      this.dynamicSites.set(site.id, created);
+    }
     else marker.setLatLng(asLatLng(site.position)).setIcon(icon);
   }
 

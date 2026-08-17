@@ -1,107 +1,18 @@
-/**
- * Représente le joueur humain et ses possessions globales.
- * Les héros sont référencés par leur identifiant : ils restent gérés par Game.
- */
+/** Le compte joueur conserve les héros et les informations connues, pas leurs possessions. */
 export class Player {
-  constructor({ id, name, heroIds = [], resources = {} }) {
+  constructor({ id, name, heroIds = [], discoveredLocationIds = [] }) {
     this.id = Player.#requireText(id, "L'identifiant du joueur");
     this.name = Player.#requireText(name, "Le nom du joueur");
-    this.heroIds = Player.#createHeroIds(heroIds);
-    this.resources = Player.#createResources(resources);
+    this.heroIds = Player.#createIds(heroIds, "Les héros du joueur");
+    this.discoveredLocationIds = Player.#createIds(discoveredLocationIds, "Les lieux découverts");
   }
-
-  addHero(heroId) {
-    const validHeroId = Player.#requireText(heroId, "L'identifiant du héros");
-
-    if (this.heroIds.includes(validHeroId)) {
-      return false;
-    }
-
-    this.heroIds.push(validHeroId);
-    return true;
-  }
-
-  removeHero(heroId) {
-    const index = this.heroIds.indexOf(heroId);
-
-    if (index === -1) {
-      return false;
-    }
-
-    this.heroIds.splice(index, 1);
-    return true;
-  }
-
-  getResourceAmount(resourceName) {
-    const validName = Player.#requireText(resourceName, "Le nom de la ressource");
-    return this.resources[validName] ?? 0;
-  }
-
-  addResource(resourceName, amount) {
-    const validName = Player.#requireText(resourceName, "Le nom de la ressource");
-    Player.#requirePositiveAmount(amount);
-
-    this.resources[validName] = this.getResourceAmount(validName) + amount;
-  }
-
-  spendResource(resourceName, amount) {
-    const validName = Player.#requireText(resourceName, "Le nom de la ressource");
-    Player.#requirePositiveAmount(amount);
-
-    if (this.getResourceAmount(validName) < amount) {
-      return false;
-    }
-
-    this.resources[validName] -= amount;
-    return true;
-  }
-
-  toJSON() {
-    return {
-      id: this.id,
-      name: this.name,
-      heroIds: [...this.heroIds],
-      resources: { ...this.resources },
-    };
-  }
-
-  static #createHeroIds(heroIds) {
-    if (!Array.isArray(heroIds)) {
-      throw new TypeError("Les héros du joueur doivent être une liste.");
-    }
-
-    return [...new Set(heroIds.map((heroId) => Player.#requireText(heroId, "L'identifiant du héros")))];
-  }
-
-  static #createResources(resources) {
-    if (resources === null || Array.isArray(resources) || typeof resources !== "object") {
-      throw new TypeError("Les ressources du joueur doivent être un objet.");
-    }
-
-    return Object.fromEntries(
-      Object.entries(resources).map(([name, amount]) => {
-        Player.#requireText(name, "Le nom de la ressource");
-
-        if (!Number.isFinite(amount) || amount < 0) {
-          throw new RangeError("Une ressource initiale doit être un nombre positif ou nul.");
-        }
-
-        return [name, amount];
-      }),
-    );
-  }
-
-  static #requireText(value, label) {
-    if (typeof value !== "string" || value.trim() === "") {
-      throw new TypeError(`${label} doit être un texte non vide.`);
-    }
-
-    return value.trim();
-  }
-
-  static #requirePositiveAmount(amount) {
-    if (!Number.isFinite(amount) || amount <= 0) {
-      throw new RangeError("Le montant doit être un nombre strictement positif.");
-    }
-  }
+  addHero(heroId) { return Player.#addUnique(this.heroIds, heroId, "L'identifiant du héros"); }
+  removeHero(heroId) { const index = this.heroIds.indexOf(heroId); if (index < 0) return false; this.heroIds.splice(index, 1); return true; }
+  discoverLocation(locationId) { return Player.#addUnique(this.discoveredLocationIds, locationId, "L'identifiant du lieu"); }
+  knowsLocation(locationId) { return this.discoveredLocationIds.includes(locationId); }
+  receiveLocationInformation(locationIds) { if (!Array.isArray(locationIds)) throw new TypeError("Les informations de lieux doivent être une liste."); return locationIds.filter((id) => this.discoverLocation(id)); }
+  toJSON() { return { id: this.id, name: this.name, heroIds: [...this.heroIds], discoveredLocationIds: [...this.discoveredLocationIds] }; }
+  static #addUnique(ids, value, label) { const id = Player.#requireText(value, label); if (ids.includes(id)) return false; ids.push(id); return true; }
+  static #createIds(ids, label) { if (!Array.isArray(ids)) throw new TypeError(`${label} doivent être une liste.`); return [...new Set(ids.map((id) => Player.#requireText(id, "Un identifiant")))]; }
+  static #requireText(value, label) { if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label} doit être un texte non vide.`); return value.trim(); }
 }

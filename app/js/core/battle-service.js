@@ -53,7 +53,7 @@ export class BattleService {
     return hero.army.units.filter((unit) => unit.quantity > 0).map((unit, index) => {
       const definition = this.unitDefinitions.get(unit.typeId);
       if (definition === undefined) throw new RangeError("La définition d'une unité engagée n'existe pas.");
-      return { id: `battle-unit-${unit.id}`, sourceId: unit.id, playerId: unit.ownerPlayerId, quantity: unit.quantity, maxQuantity: unit.maxQuantity, attack: definition.stats.attack, defense: definition.stats.defense, rangedAttack: definition.stats.ranged, speed: Math.max(1, definition.stats.mobility), range: definition.stats.ranged > 0 ? 3 : 1, morale: definition.stats.morale, behavior: definition.behavior ?? "advance", symbol: (definition.name ?? unit.typeId ?? "U").slice(0, 1).toUpperCase() };
+      return { id: `battle-unit-${unit.id}`, sourceId: unit.id, playerId: unit.ownerPlayerId, quantity: unit.quantity, maxQuantity: unit.maxQuantity, attack: definition.stats.attack, defense: definition.stats.defense, speed: definition.stats.speed, range: definition.stats.range, morale: definition.stats.morale, behavior: definition.behavior ?? "advance", retreat: { ...definition.retreat }, symbol: (definition.name ?? unit.typeId ?? "U").slice(0, 1).toUpperCase() };
     });
   }
 }

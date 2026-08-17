@@ -10,6 +10,7 @@ export class Location {
     source,
     position,
     interactionRadius = 25,
+    detectionRadius = interactionRadius * 3,
     state = "active",
     visibility = "hidden",
     ownerId = null,
@@ -34,6 +35,8 @@ export class Location {
     this.source = Location.#requireText(source, "La source du lieu");
     this.position = Location.#createPosition(position);
     this.interactionRadius = Location.#requirePositiveNumber(interactionRadius, "Le rayon d'interaction");
+    this.detectionRadius = Location.#requirePositiveNumber(detectionRadius, "Le rayon de détection");
+    if (this.detectionRadius < this.interactionRadius) throw new RangeError("Le rayon de détection doit couvrir le rayon d'interaction.");
     this.state = Location.#requireText(state, "L'état du lieu");
     this.visibility = Location.#requireText(visibility, "La visibilité du lieu");
     this.ownerId = Location.#createOptionalId(ownerId, "L'identifiant du propriétaire");
@@ -89,14 +92,30 @@ export class Location {
     return produced;
   }
 
+  produceRecruits(cycles = 1, random = Math.random) {
+    if (!Number.isFinite(cycles) || cycles <= 0) throw new RangeError("Le nombre de cycles doit être positif.");
+    if (typeof random !== "function") throw new TypeError("La source aléatoire doit être une fonction.");
+    if (this.features.recruitment !== true) return {};
+    const produced = {};
+    let remainingCapacity = Math.max(0, this.recruitment.capacity - Object.values(this.recruitment.stock).reduce((sum, amount) => sum + amount, 0));
+    for (const [typeId, rate] of Object.entries(this.recruitment.production)) {
+      const factor = 1 + (random() * 2 - 1) * this.recruitment.variance;
+      const amount = Math.min(remainingCapacity, Math.max(0, Math.floor(rate * cycles * factor)));
+      if (amount <= 0) continue;
+      this.recruitment.stock[typeId] = (this.recruitment.stock[typeId] ?? 0) + amount;
+      produced[typeId] = amount; remainingCapacity -= amount;
+    }
+    return produced;
+  }
+
   toJSON() {
     return {
       id: this.id, name: this.name, type: this.type, roles: [...this.roles], source: this.source,
-      position: { ...this.position }, interactionRadius: this.interactionRadius, state: this.state,
+      position: { ...this.position }, interactionRadius: this.interactionRadius, detectionRadius: this.detectionRadius, state: this.state,
       visibility: this.visibility, ownerId: this.ownerId, controllerId: this.controllerId, level: this.level,
       features: { ...this.features }, resources: Location.#copyResources(this.resources),
       infrastructure: { ...this.infrastructure }, heroIds: [...this.heroIds], garrison: this.garrison.toJSON(),
-      recruitment: { availableUnitTypeIds: [...this.recruitment.availableUnitTypeIds] },
+      recruitment: Location.#copyRecruitment(this.recruitment),
       questIds: [...this.questIds], eventIds: [...this.eventIds], interactionIds: [...this.interactionIds],
       qr: { ...this.qr }, statistics: { ...this.statistics },
     };
@@ -134,9 +153,14 @@ export class Location {
 
   static #createRecruitment(recruitment) {
     if (recruitment === null || Array.isArray(recruitment) || typeof recruitment !== "object") throw new TypeError("Le recrutement doit être un objet.");
-    const ids = recruitment.availableUnitTypeIds ?? [];
-    return { availableUnitTypeIds: Location.#createTextList(ids, "Les unités recrutables") };
+    const ids = Location.#createTextList(recruitment.availableUnitTypeIds ?? [], "Les unités recrutables");
+    const production = Location.#createNonNegativeMap(recruitment.production ?? {}, "La production de recrues");
+    const stock = Location.#createNonNegativeMap(recruitment.stock ?? {}, "Le stock de recrues");
+    for (const typeId of [...Object.keys(production), ...Object.keys(stock)]) if (!ids.includes(typeId)) throw new RangeError("Un stock de recrues doit correspondre à une unité disponible.");
+    return { availableUnitTypeIds: ids, production, stock, capacity: Location.#requireNonNegativeNumber(recruitment.capacity ?? 0, "La capacité de recrutement"), variance: Location.#requireRatio(recruitment.variance ?? 0, "La variance de recrutement") };
   }
+
+  static #copyRecruitment(value) { return { availableUnitTypeIds: [...value.availableUnitTypeIds], production: { ...value.production }, stock: { ...value.stock }, capacity: value.capacity, variance: value.variance }; }
 
   static #createStatistics(statistics) {
     if (statistics === null || Array.isArray(statistics) || typeof statistics !== "object") throw new TypeError("Les statistiques doivent être un objet.");
@@ -166,4 +190,5 @@ export class Location {
   static #requirePositiveInteger(value, label) { if (!Number.isInteger(value) || value <= 0) throw new RangeError(`${label} doit être un entier strictement positif.`); return value; }
   static #requirePositiveNumber(value, label) { if (!Number.isFinite(value) || value <= 0) throw new RangeError(`${label} doit être un nombre strictement positif.`); return value; }
   static #requireNonNegativeNumber(value, label) { if (!Number.isFinite(value) || value < 0) throw new RangeError(`${label} doit être un nombre positif ou nul.`); return value; }
+  static #requireRatio(value, label) { if (!Number.isFinite(value) || value < 0 || value > 1) throw new RangeError(`${label} doit être comprise entre 0 et 1.`); return value; }
 }
