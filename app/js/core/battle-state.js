@@ -10,6 +10,7 @@ export class BattleState {
       reinforcementDelayMs: nonNegative(config.reinforcementDelayMs ?? 3_000, "reinforcementDelayMs"),
       pursuitLossRate: nonNegative(config.pursuitLossRate ?? 0.2, "pursuitLossRate"),
       breakthroughHeroDamageMultiplier: positive(config.breakthroughHeroDamageMultiplier ?? 1.5, "breakthroughHeroDamageMultiplier"),
+      retreatCommandCost: positiveInteger(config.retreatCommandCost ?? 1, "retreatCommandCost"),
     };
     this.teams = createTeams(teams);
     this.loot = createLoot(loot);
@@ -86,8 +87,9 @@ function common(entity, kind, ids) {
 
 function createHero(entity, lane, ids) {
   const base = common(entity, "hero", ids);
-  const maxHealth = positive(entity.maxHealth ?? 100, "Les PV maximum");
-  return { ...base, maxHealth, health: Math.min(maxHealth, nonNegative(entity.health ?? maxHealth, "Les PV")), lane, command: positive(entity.command ?? entity.commandRadius ?? 1, "Le commandement") };
+  const maxHealth = positive(entity.maxHealth ?? 20, "Les PV maximum");
+  const maxCommandPoints = positiveInteger(entity.maxCommandPoints ?? entity.command ?? 3, "Les points de commandement maximum");
+  return { ...base, maxHealth, health: Math.min(maxHealth, nonNegative(entity.health ?? maxHealth, "Les PV")), lane, command: maxCommandPoints, maxCommandPoints, commandPoints: Math.min(maxCommandPoints, nonNegativeInteger(entity.commandPoints ?? maxCommandPoints, "Les points de commandement")), skillIds: normalizeIds(entity.skillIds ?? entity.abilityIds ?? []), specialPowerIds: normalizeIds(entity.specialPowerIds ?? []) };
 }
 
 function createUnit(entity, lane, ids) {
@@ -99,6 +101,7 @@ function createUnit(entity, lane, ids) {
     maxQuantity,
     quantity: Math.min(maxQuantity, nonNegativeInteger(entity.quantity, "L'effectif")),
     morale: nonNegative(entity.morale ?? 5, "Le moral"),
+    specialPowerIds: normalizeIds(entity.specialPowerIds ?? []),
     lane,
     behavior: entity.behavior ?? "advance",
     symbol: entity.symbol ?? "U",
@@ -117,3 +120,4 @@ function nonNegative(value, label) { if (!Number.isFinite(value) || value < 0) t
 function positiveInteger(value, label) { if (!Number.isInteger(value) || value <= 0) throw new RangeError(`${label} doit être un entier positif.`); return value; }
 function nonNegativeInteger(value, label) { if (!Number.isInteger(value) || value < 0) throw new RangeError(`${label} doit être un entier positif ou nul.`); return value; }
 function requireText(value, label) { if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label} est requis.`); return value.trim(); }
+function normalizeIds(values) { if (!Array.isArray(values)) throw new TypeError("Les identifiants doivent être une liste."); return [...new Set(values.map((value) => requireText(value, "Un identifiant")))]; }

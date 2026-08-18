@@ -8,7 +8,7 @@ export class Hero {
     playerId,
     name,
     classId = null,
-    maxHealth = 100,
+    maxHealth = 30,
     health = maxHealth,
     state = "active",
     pursuitCooldownUntil = null,
@@ -20,8 +20,14 @@ export class Hero {
     carryCapacity = 20,
     carriedLoot = [],
     abilityIds = [],
+    skillIds = abilityIds,
+    specialPowerIds = [],
+    maxCommandPoints = 3,
+    commandPoints = maxCommandPoints,
     resources = {},
     commandRank = "captain",
+    commandStats = {},
+    moraleHistory = [],
   }) {
     this.id = Hero.#requireText(id, "L'identifiant du héros");
     this.playerId = Hero.#requireText(playerId, "L'identifiant du joueur");
@@ -35,12 +41,18 @@ export class Hero {
     this.position = Hero.#createPosition(position);
     this.resources = Hero.#createResources(resources);
     this.commandRank = requireRank(HERO_COMMAND_RANKS, commandRank, "Le grade de commandement").id;
+    this.commandStats = Hero.#createCommandStats(commandStats);
+    this.moraleHistory = Hero.#createMoraleHistory(moraleHistory);
     this.experience = Hero.#requireNonNegativeNumber(experience, "L'expérience");
     this.level = Hero.#requirePositiveInteger(level, "Le niveau");
     this.equipment = Hero.#createEquipment(equipment);
     this.carryCapacity = Hero.#requirePositiveNumber(carryCapacity, "La capacité de transport");
     this.carriedLoot = Hero.#createCarriedLoot(carriedLoot);
-    this.abilityIds = Hero.#createUniqueIds(abilityIds, "Les capacités du héros");
+    this.skillIds = Hero.#createUniqueIds(skillIds, "Les compétences du héros");
+    this.abilityIds = this.skillIds;
+    this.specialPowerIds = Hero.#createUniqueIds(specialPowerIds, "Les pouvoirs du héros");
+    this.maxCommandPoints = Hero.#requirePositiveInteger(maxCommandPoints, "Les points de commandement maximum");
+    this.commandPoints = Hero.#requireCommandPoints(commandPoints, this.maxCommandPoints);
   }
 
   addUnit(unit) {
@@ -98,7 +110,18 @@ export class Hero {
   addCarriedLoot(entries) { this.carriedLoot.push(...Hero.#createCarriedLoot(entries)); }
 
   addAbility(abilityId) {
-    return Hero.#addUniqueId(this.abilityIds, abilityId, "L'identifiant de la capacité");
+    return this.addSkill(abilityId);
+  }
+
+  addSkill(skillId) { return Hero.#addUniqueId(this.skillIds, skillId, "L'identifiant de la compétence"); }
+  addSpecialPower(powerId) { return Hero.#addUniqueId(this.specialPowerIds, powerId, "L'identifiant du pouvoir"); }
+  spendCommandPoints(cost) { const value = Hero.#requirePositiveInteger(cost, "Le coût de commandement"); if (this.commandPoints < value) return false; this.commandPoints -= value; return true; }
+  restoreCommandPoints(amount = this.maxCommandPoints) { const value = Hero.#requirePositiveInteger(amount, "La récupération de commandement"); this.commandPoints = Math.min(this.maxCommandPoints, this.commandPoints + value); return this.commandPoints; }
+
+  recordMoraleFactor(source, value, reason = null) {
+    const factor = Hero.#createMoraleHistory([{ source, value, reason }])[0];
+    this.moraleHistory.push(factor);
+    return factor;
   }
 
   toJSON() {
@@ -118,10 +141,16 @@ export class Hero {
       equipment: { ...this.equipment },
       resources: { ...this.resources },
       commandRank: this.commandRank,
+      commandStats: { ...this.commandStats },
+      moraleHistory: this.moraleHistory.map((entry) => ({ ...entry })),
       maxUnitStacks: this.maxUnitStacks,
       carryCapacity: this.carryCapacity,
       carriedLoot: this.carriedLoot.map((entry) => ({ ...entry })),
       abilityIds: [...this.abilityIds],
+      skillIds: [...this.skillIds],
+      specialPowerIds: [...this.specialPowerIds],
+      maxCommandPoints: this.maxCommandPoints,
+      commandPoints: this.commandPoints,
     };
   }
 
@@ -174,6 +203,24 @@ export class Hero {
     if (resources === null || Array.isArray(resources) || typeof resources !== "object") throw new TypeError("Les ressources du hÃ©ros doivent Ãªtre un objet.");
     if (Object.hasOwn(resources, "population")) throw new RangeError("La population n'est pas une ressource de hÃ©ros.");
     return Object.fromEntries(Object.entries(resources).map(([name, amount]) => [Hero.#requireText(name, "Le nom de la ressource"), Hero.#requireNonNegativeNumber(amount, "Une ressource initiale")]));
+  }
+
+  static #createCommandStats(stats) {
+    if (stats === null || Array.isArray(stats) || typeof stats !== "object") throw new TypeError("Les bonus de commandement doivent être un objet.");
+    return Object.fromEntries(["attackBonus", "defenseBonus", "moraleBonus"].map((name) => {
+      const value = stats[name] ?? 0;
+      if (!Number.isFinite(value)) throw new RangeError(`Le bonus ${name} doit être un nombre.`);
+      return [name, value];
+    }));
+  }
+
+  static #createMoraleHistory(entries) {
+    if (!Array.isArray(entries)) throw new TypeError("L'historique de moral doit être une liste.");
+    return entries.map((entry) => {
+      const value = entry.value;
+      if (!Number.isFinite(value)) throw new RangeError("La variation de moral doit être un nombre.");
+      return { source: Hero.#requireText(entry.source, "La source de moral"), value, reason: entry.reason === null || entry.reason === undefined ? null : Hero.#requireText(entry.reason, "La raison du moral") };
+    });
   }
 
   static #createCarriedLoot(entries) {
@@ -249,4 +296,5 @@ export class Hero {
     }
     return value;
   }
+  static #requireCommandPoints(value, maximum) { if (!Number.isInteger(value) || value < 0 || value > maximum) throw new RangeError("Les points de commandement doivent être compris entre zéro et leur maximum."); return value; }
 }

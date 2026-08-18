@@ -36,6 +36,11 @@ test("le début attribue les ressources de classe et scénario, puis recrute au 
   assert.equal(game.getLocation("fort-1").recruitment.stock.archer, 14);
   assert.equal(hero.army.getUnit(result.unit.id).quantity, 6);
   assert.equal(hero.army.getUnit(result.unit.id).rank, "soldier");
+  assert.equal(result.unit.name, "1re Archer");
+  assert.equal(result.unit.number, 1);
+  const secondResult = game.recruitUnit({ playerId: player.id, heroId: hero.id, locationId: "fort-1", unitTypeId: "archer" });
+  assert.equal(secondResult.unit.name, "2e Archer");
+  assert.equal(secondResult.unit.number, 2);
 });
 
 test("une unité appartient toujours à son joueur après un dépôt et un retrait de garnison", () => {

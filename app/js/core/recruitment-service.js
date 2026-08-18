@@ -7,14 +7,16 @@ export class RecruitmentService {
     this.unitDefinitions = unitDefinitions;
   }
 
-  createUnit({ ownerPlayerId, typeId, quantity, idGenerator }) {
+  createUnit({ ownerPlayerId, typeId, quantity, idGenerator, number = 1, name = null }) {
     const definition = this.unitDefinitions.get(typeId);
     if (definition === undefined) throw new RangeError("Le type d'unité n'existe pas.");
     if (!Number.isInteger(quantity) || quantity <= 0 || quantity > UNIT_RANKS[0].capacity) throw new RangeError("L'effectif ne respecte pas le grade initial de l'unité.");
-    return new Unit({ id: idGenerator("unit"), ownerPlayerId, typeId, quantity, rank: "soldier" });
+    const ordinal = number === 1 ? "1re" : `${number}e`;
+    const typeName = definition.name ?? `${typeId.slice(0, 1).toUpperCase()}${typeId.slice(1).replaceAll("-", " ")}`;
+    return new Unit({ id: idGenerator("unit"), ownerPlayerId, typeId, quantity, number, name: name ?? `${ordinal} ${typeName}`, rank: "soldier" });
   }
 
-  recruit({ player, hero, location, typeId, idGenerator }) {
+  recruit({ player, hero, location, typeId, idGenerator, number = 1 }) {
     if (!location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
     if (location.features.recruitment !== true) return { success: false, reason: "recruitment_not_available" };
     if (!location.recruitment.availableUnitTypeIds.includes(typeId)) return { success: false, reason: "unit_not_available" };
@@ -26,7 +28,7 @@ export class RecruitmentService {
     if (!Object.entries(definition.costs).every(([resource, amount]) => hero.getResourceAmount(resource) >= amount)) return { success: false, reason: "insufficient_resources" };
     Object.entries(definition.costs).forEach(([resource, amount]) => { if (amount > 0) hero.spendResource(resource, amount); });
     location.recruitment.stock[typeId] -= recruitQuantity;
-    const unit = this.createUnit({ ownerPlayerId: player.id, typeId, quantity: recruitQuantity, idGenerator });
+    const unit = this.createUnit({ ownerPlayerId: player.id, typeId, quantity: recruitQuantity, idGenerator, number });
     hero.addUnit(unit);
     return { success: true, unit };
   }

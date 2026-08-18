@@ -47,3 +47,28 @@ test("un village produit un stock variable de recrues sans dépasser sa capacit�
   assert.deepEqual(village.produceRecruits(1, () => 0), {});
   assert.equal(village.toJSON().recruitment.capacity, 10);
 });
+
+test("la population plafonne la capacité et le stock total de recrues", () => {
+  const village = new Location({
+    id: "village-population", name: "Petit village", type: "village", source: "generated", population: 24,
+    position: { latitude: 48, longitude: 2 }, features: { recruitment: true },
+    recruitment: { availableUnitTypeIds: ["militia", "archer"], production: { militia: 10, archer: 10 }, stock: { militia: 20, archer: 20 }, capacity: 100 },
+  });
+  assert.equal(village.recruitment.capacity, 24);
+  assert.equal(Object.values(village.recruitment.stock).reduce((sum, amount) => sum + amount, 0), 24);
+  assert.deepEqual(village.produceRecruits(1, () => 0.5), {});
+});
+
+test("le contentement expert ralentit la production et le lieu conserve les dépôts", () => {
+  const village = new Location({
+    id: "village-content", name: "Village", type: "village", source: "scenario",
+    position: { latitude: 48, longitude: 2 }, contentment: 0,
+    features: { resourceProduction: true }, resources: { production: { gold: 8 }, stock: {}, storageCapacity: 20 },
+  });
+  assert.equal(village.getContentmentModifier(true), 0.25);
+  assert.deepEqual(village.produceResources(1, village.getContentmentModifier(true)), { gold: 2 });
+  assert.equal(village.depositResource("wood", 30), 18);
+  village.depositItem({ id: "loot-1", itemId: "banner", quantity: 1, portable: true, weightPerUnit: 1, valuePerUnit: 5 });
+  assert.equal(village.adjustContentment(15), 15);
+  assert.equal(village.toJSON().storedItems[0].itemId, "banner");
+});

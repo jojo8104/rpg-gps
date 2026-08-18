@@ -47,7 +47,7 @@ export class BattleEngine {
     return { success: true, winnerTeamId: this.winnerTeamId };
   }
 
-  orderRetreat(teamId, lane) {
+  orderRetreat(teamId, lane, heroId = null) {
     if (this.status !== "active") return { success: false, reason: "battle_not_active" };
     const team = this.teams.find((item) => item.id === teamId);
     if (!team || !Number.isInteger(lane) || lane < 0 || lane > 2) return { success: false, reason: "invalid_line" };
@@ -55,10 +55,25 @@ export class BattleEngine {
       .filter((item) => item.state === "active" && item.lane === lane && !item.retreating)
       .sort((first, second) => second.progress - first.progress || first.id.localeCompare(second.id))[0];
     if (!unit) return { success: false, reason: "no_retreat_candidate" };
+    const commander = this.#commanderFor(team, unit.playerId, heroId);
+    if (!commander) return { success: false, reason: "no_commander" };
+    if (!this.#spendCommand(commander, this.config.retreatCommandCost, "retreat", { unitId: unit.id })) return { success: false, reason: "insufficient_command_points" };
     unit.retreating = true;
     unit.targetId = null;
     this.#log("retreat_ordered", { teamId, lane, unitId: unit.id });
     return { success: true, unitId: unit.id, lane };
+  }
+
+  activateSpecialPower({ teamId, userId, powerId, cost = 1, targetId = null }) {
+    if (this.status !== "active") return { success: false, reason: "battle_not_active" };
+    const team = this.teams.find((item) => item.id === teamId); const user = this.getEntity(userId);
+    if (!team || !user || this.getTeamForEntity(userId)?.id !== teamId) return { success: false, reason: "invalid_user" };
+    if (!user.specialPowerIds?.includes(powerId)) return { success: false, reason: "unknown_power" };
+    const commander = user.kind === "hero" ? user : this.#commanderFor(team, user.playerId);
+    if (!commander) return { success: false, reason: "no_commander" };
+    if (!this.#spendCommand(commander, cost, "special_power", { userId, powerId, targetId })) return { success: false, reason: "insufficient_command_points" };
+    this.#log("special_power_activated", { teamId, commanderId: commander.id, userId, powerId, targetId, cost });
+    return { success: true, commanderId: commander.id, remainingCommandPoints: commander.commandPoints };
   }
 
   tick(deltaMs = this.config.tickMs) {
@@ -148,5 +163,7 @@ export class BattleEngine {
   #finish(winnerTeamId) { this.state.status = "finished"; this.state.finishedAt = this.state.now(); this.state.winnerTeamId = winnerTeamId; this.#log("battle_finished", { winnerTeamId }); }
   #mark(id, state) { const unit = this.getEntity(id); if (unit?.kind !== "unit" || unit.state !== "active") return false; unit.state = state; this.#log(`unit_${state}`, { unitId: id }); return true; }
   #recordContribution(playerId, field, amount) { const entry = this.state.contributions[playerId] ??= { damageDealt: 0, damageTaken: 0, support: 0, total: 0 }; entry[field] += amount; entry.total = entry.damageDealt + entry.damageTaken * 0.25 + entry.support; }
+  #commanderFor(team, playerId, heroId = null) { return team.heroes.find((hero) => hero.state === "active" && (heroId ? hero.id === heroId : hero.playerId === playerId)) ?? null; }
+  #spendCommand(hero, cost, action, details) { if (!Number.isInteger(cost) || cost <= 0) throw new RangeError("Le coût de commandement doit être un entier positif."); if (hero.commandPoints < cost) return false; hero.commandPoints -= cost; this.#log("command_spent", { heroId: hero.id, action, cost, remainingCommandPoints: hero.commandPoints, ...details }); return true; }
   #log(type, details = {}) { this.eventLog.push({ type, ...details, at: this.state.now(), elapsedMs: this.state.elapsedMs }); }
 }

@@ -1,0 +1,23 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { MAP_LAYER_ORDER, MAP_LAYER_Z_INDEX } from "../app/js/map/MapLayers.js";
+import { zoomLevel } from "../app/js/map/MapRenderer.js";
+import { locationPresentation } from "../app/js/map/LocationRenderer.js";
+
+test("les panes cartographiques ont un ordre explicite et strict", () => {
+  const values = MAP_LAYER_ORDER.map((name) => MAP_LAYER_Z_INDEX[name]);
+  assert.deepEqual([...values].sort((a, b) => a - b), values);
+  assert.equal(new Set(values).size, values.length);
+});
+
+test("la densité visuelle dépend du zoom sans dépendre du DOM", () => {
+  assert.equal(zoomLevel(13), "far"); assert.equal(zoomLevel(15), "medium"); assert.equal(zoomLevel(18), "near");
+  assert.equal(zoomLevel(-1), "far"); assert.equal(zoomLevel(.5), "medium"); assert.equal(zoomLevel(2), "near");
+});
+
+test("le renderer déduit le langage visuel depuis les données métier", () => {
+  const enemy = locationPresentation({ type: "camp", owner: "enemy", state: "DISCOVERED", name: "Camp", nearby: true });
+  assert.equal(enemy.owner, "enemy"); assert.equal(enemy.status, "active"); assert.equal(enemy.badge, "⚔");
+  const conquered = locationPresentation({ type: "camp", owner: "ally", state: "DISCOVERED", name: "Camp conquis", nearby: true });
+  assert.equal(conquered.owner, "ally"); assert.equal(conquered.badge, "");
+});

@@ -26,6 +26,9 @@ test("la résolution conserve les survivants et transforme les déserteurs en Ro
   assert.ok(first.army.units[0].experience > 0);
   assert.equal(first.experience, 50);
   assert.equal(second.experience, 20);
+  assert.equal(result.heroProgression.find((entry) => entry.heroId === first.id).experienceGained, 50);
+  assert.equal(result.heroProgression.find((entry) => entry.heroId === second.id).experienceGained, 20);
+  assert.equal(result.consequences.survivors[0].name, "1re Militia");
   assert.equal(result.destroyedLocationId, "enemy-camp");
   assert.equal(game.getLocation("enemy-camp").state, "destroyed");
   assert.equal(game.getLocation("enemy-camp").features.battle, false);

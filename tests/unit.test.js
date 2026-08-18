@@ -18,13 +18,15 @@ test("une définition d'unité est configurable et sérialisable", () => {
 });
 
 test("une unité conserve son identité après des pertes et des renforts", () => {
-  const unit = new Unit({ id: "unit-1", ownerPlayerId: "player-1", typeId: "archer", quantity: 8, rank: "corporal" });
+  const unit = new Unit({ id: "unit-1", ownerPlayerId: "player-1", typeId: "archer", name: "Diables rouges", number: 3, quantity: 8, rank: "corporal" });
   assert.equal(unit.lose(3), 3);
   assert.equal(unit.quantity, 5);
   assert.equal(unit.reinforce(8), 5);
   assert.equal(unit.quantity, 10);
   assert.equal(unit.lose(12), 10);
   assert.equal(unit.state, "defeated");
+  assert.equal(unit.toJSON().name, "Diables rouges");
+  assert.equal(unit.toJSON().number, 3);
 });
 
 test("une armée contient des unités aux identifiants uniques", () => {

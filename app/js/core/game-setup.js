@@ -108,6 +108,9 @@ export class GameSetup {
       maxUnitsPerHero: GameSetup.#positiveIntegerOrDefault(rules.maxUnitsPerHero, 4, "Le maximum d'unités"),
       timeLimitMinutes: GameSetup.#optionalPositiveInteger(rules.timeLimitMinutes, "La limite de temps"),
       allowPvP: rules.allowPvP ?? false, allowCapture: rules.allowCapture ?? true,
+      enableContentment: rules.enableContentment ?? false,
+      moraleMode: GameSetup.#moraleMode(rules.moraleMode ?? "casual"),
+      locationMode: GameSetup.#moraleMode(rules.locationMode ?? "casual"),
       engagementRadiusMeters: GameSetup.#positiveIntegerOrDefault(rules.engagementRadiusMeters, 75, "Le rayon d'engagement"),
       fleeConfirmations: GameSetup.#positiveIntegerOrDefault(rules.fleeConfirmations, 2, "Les confirmations de fuite"),
       pursuitCooldownMinutes: GameSetup.#positiveIntegerOrDefault(rules.pursuitCooldownMinutes, 10, "Le cooldown de poursuite"),
@@ -202,4 +205,5 @@ export class GameSetup {
   static #requireText(value, label) { if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label} doit être un texte non vide.`); return value.trim(); }
   static #positiveIntegerOrDefault(value, fallback, label) { const result = value ?? fallback; if (!Number.isInteger(result) || result <= 0) throw new RangeError(`${label} doit être un entier positif.`); return result; }
   static #optionalPositiveInteger(value, label) { if (value === undefined || value === null) return null; return GameSetup.#positiveIntegerOrDefault(value, 1, label); }
+  static #moraleMode(value) { if (!["casual", "expert"].includes(value)) throw new RangeError("Le mode de moral est invalide."); return value; }
 }
