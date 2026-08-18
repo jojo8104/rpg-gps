@@ -38,3 +38,11 @@ test("un joueur peut recevoir des informations de lieux sans doublon", () => {
   assert.deepEqual(player.receiveLocationInformation(["fort", "mine"]), ["mine"]);
   assert.deepEqual(player.discoveredLocationIds, ["fort", "mine"]);
 });
+
+test("la connaissance d'un lieu progresse sans pouvoir régresser", () => {
+  const player = new Player({ id: "player-1", name: "Ariane" });
+  assert.equal(player.discoverLocation("fort", 2), true);
+  assert.equal(player.discoverLocation("fort", 1), false);
+  assert.equal(player.discoverLocation("fort", 3), true);
+  assert.equal(player.getLocationKnowledge("fort"), 3);
+});

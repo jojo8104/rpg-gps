@@ -24,3 +24,13 @@ test("une bataille applique les survivants et l'état ghost au monde", () => {
   assert.equal(game.getHero(second.id).state, "ghost");
   assert.equal(game.getHero(second.id).health, 0);
 });
+
+test("les unités de garnison sont les défenseurs persistants de la bataille", () => {
+  let nextId = 1;
+  const game = new Game({ setup, heroClasses, unitDefinitions: [definition], locations: [{ id: "fort", name: "Fort", type: "fort", source: "scenario", position: { latitude: 0, longitude: 0 }, ownerId: "p2", features: { capturable: true, garrison: true }, garrison: { units: [{ id: "fort-guard", ownerPlayerId: "p2", typeId: "militia", quantity: 6, rank: "soldier" }] } }], idGenerator: (prefix) => `${prefix}-${nextId++}` });
+  const attacker = game.chooseHero("p1", { name: "A", classId: "fighter" }); game.chooseHero("p2", { name: "B", classId: "fighter" }); game.start();
+  const battle = game.createBattle({ teamParticipants: [{ id: "attackers", heroIds: [attacker.id] }, { id: "defenders", heroIds: [], locationId: "fort" }], sourceLocationId: "fort", sourceEnemyTeamId: "defenders" });
+  assert.equal(battle.teams[1].units[0].sourceId, "fort-guard");
+  assert.equal(battle.teams[1].units[0].quantity, 6);
+  assert.equal(battle.teams[1].heroes[0].sourceId, "location-fort");
+});

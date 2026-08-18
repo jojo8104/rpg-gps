@@ -1,0 +1,30 @@
+#map { isolation:isolate; background:var(--map-bg); }
+.leaflet-tile-pane { filter:saturate(.45) brightness(.82) contrast(.9) sepia(.12); }
+.rpg-simulation-base { stroke:#655f4a; fill:#1c2920; }
+.rpg-marker-host { background:none; border:0; }
+.rpg-location { position:relative; width:48px; height:48px; color:#e8d7a9; filter:drop-shadow(var(--map-shadow)); transition:transform var(--map-fast),filter var(--map-fast); }
+.rpg-location svg,.rpg-hero svg { width:100%; height:100%; overflow:visible; }
+.rpg-icon__back { fill:#242620; stroke:currentColor; stroke-width:2; }
+.rpg-icon__shape { fill:none; stroke:currentColor; stroke-width:2.4; stroke-linecap:round; stroke-linejoin:round; }
+.rpg-location[data-owner="ally"] { color:#8fc5df; filter:drop-shadow(0 0 8px rgb(76 120 147 / 75%)); }
+.rpg-location[data-owner="enemy"] { color:#f0a095; filter:drop-shadow(0 0 9px rgb(184 79 69 / 80%)); }
+.rpg-location[data-owner="enemy"] .rpg-icon__back { animation:enemy-location-pulse 1.35s ease-in-out infinite; transform-origin:center; }
+.rpg-location[data-owner="ally"] .rpg-icon__back { animation:ally-location-arrival .7s ease-out 1; transform-origin:center; }
+@keyframes enemy-location-pulse{50%{opacity:.62;transform:scale(1.09)}}
+@keyframes ally-location-arrival{0%{opacity:.35;transform:scale(.72)}65%{transform:scale(1.14)}100%{opacity:1;transform:scale(1)}}
+.rpg-location[data-status="unknown"] { opacity:.45; filter:grayscale(1) drop-shadow(var(--map-shadow)); }
+.rpg-location[data-status="active"] { transform:scale(1.12); }
+.rpg-location__badge { position:absolute; display:grid; place-items:center; right:-3px; top:-4px; min-width:18px; height:18px; padding:0 4px; border-radius:9px; background:var(--rpg-danger); color:white; font:800 12px/1 system-ui; }
+.rpg-location[data-type="mine"] .rpg-location__badge,.rpg-location[data-type="quest"] .rpg-location__badge { background:var(--rpg-gold); color:#231b0c; }
+.rpg-location__label { position:absolute; left:50%; top:47px; translate:-50% 0; width:max-content; max-width:120px; padding:2px 6px; border:1px solid rgb(210 168 95 / 35%); border-radius:5px; background:rgb(23 25 29 / 88%); color:#f2ead6; font:700 10px/1.3 system-ui; text-align:center; }
+.rpg-hero { width:50px; height:50px; color:#f1d47b; filter:drop-shadow(0 3px 7px #000b) drop-shadow(0 0 8px #d2a85f88); }
+.rpg-hero path:first-child { fill:#293b45; stroke:#f1d47b; stroke-width:2; }.rpg-hero path:last-child{fill:#f1d47b;stroke:#33270d;stroke-width:1.5}.hero-direction{display:block;transform-origin:center;transition:transform var(--map-fast)}
+.rpg-terrain { stroke-width:1.5; stroke-dasharray:5 4; pointer-events:none; }
+.rpg-terrain--forest { fill:var(--terrain-forest); fill-opacity:.42; stroke:#6f9676; }
+.rpg-terrain--plains { fill:var(--terrain-plains); fill-opacity:.3; stroke:#aaa568; }
+.rpg-exploration-edge { fill:transparent; stroke:#d6c78d; stroke-width:3; stroke-opacity:.25; stroke-dasharray:3 8; filter:drop-shadow(0 0 9px #000); }
+.rpg-gps-accuracy { fill:#6cb2dc; fill-opacity:.07; stroke:#87c8ee; stroke-opacity:.5; }
+.rpg-danger-effect { fill:transparent; stroke:var(--rpg-danger); stroke-width:3; transform-box:fill-box; transform-origin:center; animation:rpg-danger var(--map-pulse) ease-out infinite; }
+#map[data-zoom-level="far"] .rpg-location[data-type="mine"],#map[data-zoom-level="far"] .rpg-location[data-type="camp"],#map[data-zoom-level="medium"] .rpg-location__label { opacity:0; pointer-events:none; }
+@keyframes rpg-danger { 0%{stroke-opacity:.9;transform:scale(.55)} 75%,100%{stroke-opacity:0;transform:scale(1.35)} }
+@media (prefers-reduced-motion:reduce){.rpg-danger-effect,.rpg-location .rpg-icon__back{animation:none}.rpg-location,.hero-direction{transition:none}}

@@ -16,7 +16,7 @@ export class BattleConsequenceService {
     if (unit === null) return;
     if (snapshot.state === "defeated" || snapshot.quantity === 0) {
       this.#removeUnitFromGame(game, unit.id);
-      report.losses.push({ unitId: unit.id, reason: "defeated" });
+      report.losses.push({ unitId: unit.id, name: unit.name, typeId: unit.typeId, reason: "defeated" });
       return;
     }
     if (snapshot.state === "deserted") {
@@ -27,13 +27,13 @@ export class BattleConsequenceService {
         behavior: "roaming", morale: snapshot.morale ?? 3, history: [{ type: "deserted_from_battle", battleId: battle.id }],
       });
       game.rogueArmies.push(rogueArmy);
-      report.deserters.push({ unitId: unit.id, rogueArmyId: rogueArmy.id });
+      report.deserters.push({ unitId: unit.id, name: unit.name, typeId: unit.typeId, rogueArmyId: rogueArmy.id });
       report.rogueArmyIds.push(rogueArmy.id);
       return;
     }
     if (snapshot.state === "captured") {
       this.#removeUnitFromGame(game, unit.id);
-      report.prisoners.push({ unitId: unit.id, ownerPlayerId: unit.ownerPlayerId, capturedByTeamId: battle.winnerTeamId });
+      report.prisoners.push({ unitId: unit.id, name: unit.name, typeId: unit.typeId, ownerPlayerId: unit.ownerPlayerId, capturedByTeamId: battle.winnerTeamId });
       return;
     }
     unit.quantity = snapshot.quantity;
@@ -41,7 +41,7 @@ export class BattleConsequenceService {
     const damageExperience = battle.eventLog.filter((event) => event.attackerId === snapshot.id).reduce((total, event) => total + (event.damage ?? 0), 0);
     const experienceGained = Math.max(1, Math.round(damageExperience)) + 10 + (battle.getTeamForEntity(snapshot.id)?.id === battle.winnerTeamId ? 20 : 0);
     const previousRank = unit.rank; unit.addExperience(experienceGained);
-    report.survivors.push({ unitId: unit.id, quantity: unit.quantity, returnedFrom: snapshot.state, experienceGained, previousRank, rank: unit.rank });
+    report.survivors.push({ unitId: unit.id, name: unit.name, typeId: unit.typeId, quantity: unit.quantity, returnedFrom: snapshot.state, experienceGained, previousRank, rank: unit.rank });
   }
 
   #removeUnitFromGame(game, unitId) {

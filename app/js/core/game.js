@@ -11,6 +11,9 @@ import { ScenarioEffectResolver } from "./scenario-effect-resolver.js";
 import { LootDistributionService } from "./loot-distribution-service.js";
 import { BattleSite } from "./battle-site.js";
 import { ScenarioLocationBinding } from "./scenario-location-binding.js";
+import { LocationAccessPolicy } from "./location-access-policy.js";
+import { LocationCaptureService } from "./location-capture-service.js";
+import { LocationProgressionService } from "./location-progression-service.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
 export class Game {
@@ -19,6 +22,9 @@ export class Game {
     this.heroClasses = Game.#createHeroClassMap(heroClasses);
     this.unitDefinitions = Game.#createUnitDefinitionMap(unitDefinitions);
     this.recruitmentService = new RecruitmentService(this.unitDefinitions);
+    this.locationAccessPolicy = new LocationAccessPolicy({ participants: this.setup.participants });
+    this.locationCaptureService = new LocationCaptureService();
+    this.locationProgressionService = new LocationProgressionService({ mode: this.setup.rules.locationMode });
     this.battleService = new BattleService(this.unitDefinitions);
     this.battleConsequenceService = new BattleConsequenceService();
     this.lootDistributionService = new LootDistributionService();
@@ -27,6 +33,7 @@ export class Game {
     if (this.scenario !== null && this.scenario.id !== this.setup.scenarioId) throw new RangeError("Le scénario ne correspond pas au GameSetup.");
     this.scenarioState = this.scenario === null ? null : new ScenarioState(this.scenario);
     this.locations = Game.#createLocations(locations);
+    this.locations.forEach((location) => this.locationProgressionService.initialize(location));
     this.scenarioLocationBindings = this.scenario === null
       ? []
       : ScenarioLocationBinding.validateAll(scenarioLocationBindings, this.scenario, this.locations);
@@ -116,13 +123,44 @@ export class Game {
     return this.scenarioState.advance(this.scenario, nextPhaseId);
   }
 
+  getLocationRelation(playerId, locationId) {
+    const location = this.getLocation(locationId);
+    return location === null ? null : this.locationAccessPolicy.getRelation(playerId, location);
+  }
+
+  canPerformLocationAction({ playerId, locationId, action }) {
+    const location = this.getLocation(locationId);
+    if (location === null || !this.locationAccessPolicy.can(playerId, location, action)) return false;
+    if (action === "attack" && location.features.capturable === true) return this.getLocationCaptureRequirement({ playerId, locationId }).state === "battle_required";
+    return true;
+  }
+
+  getLocationCaptureRequirement({ playerId, locationId }) {
+    const location = this.getLocation(locationId);
+    if (location === null) return { state: "location_not_found" };
+    return this.locationCaptureService.getRequirement({ location, relation: this.locationAccessPolicy.getRelation(playerId, location), isQuestCompleted: (id) => this.isObjectiveCompleted(id) });
+  }
+
+  attemptLocationCapture({ playerId, heroId, locationId }) {
+    const hero = this.getHero(heroId); const location = this.getLocation(locationId);
+    if (hero === null || location === null || hero.playerId !== playerId || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
+    const result = this.locationCaptureService.capture({ location, playerId, relation: this.locationAccessPolicy.getRelation(playerId, location), isQuestCompleted: (id) => this.isObjectiveCompleted(id) });
+    if (result.success) this.eventLog.push({ type: "location_captured", ...result, heroId, at: this.now() });
+    return result;
+  }
+
+  isObjectiveCompleted(objectiveId) {
+    return this.scenarioState !== null && Object.values(this.scenarioState.phaseStates).some((phase) => phase.objectives.some((objective) => objective.id === objectiveId && objective.state === "completed"));
+  }
+
   recruitUnit({ playerId, heroId, locationId, unitTypeId }) {
     if (this.status !== "started") return { success: false, reason: "game_not_started" };
     const player = this.getPlayer(playerId);
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
     if (player === null || hero === null || location === null || hero.playerId !== player.id) return { success: false, reason: "invalid_recruitment_request" };
-    return this.recruitmentService.recruit({ player, hero, location, typeId: unitTypeId, idGenerator: this.idGenerator });
+    if (!this.locationAccessPolicy.can(player.id, location, "recruit")) return { success: false, reason: "location_access_denied" };
+    return this.recruitmentService.recruit({ player, hero, location, typeId: unitTypeId, idGenerator: this.idGenerator, number: this.#nextUnitNumber(player.id, unitTypeId) });
   }
 
   collectLocationResources({ playerId, heroId, locationId }) {
@@ -130,20 +168,44 @@ export class Game {
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
     if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
-    if (location.features.resourceProduction !== true) return { success: false, reason: "collection_not_available" };
+    if (!this.locationAccessPolicy.can(player.id, location, "collect")) return { success: false, reason: "location_access_denied" };
     const collected = { ...location.resources.stock };
     if (Object.values(collected).every((amount) => amount <= 0)) return { success: false, reason: "empty_stock" };
     Object.entries(collected).forEach(([resource, amount]) => { if (amount > 0) { hero.addResource(resource, amount); location.resources.stock[resource] = 0; } });
     return { success: true, collected };
   }
 
+  depositLocationResource({ playerId, heroId, locationId, resourceName, amount }) {
+    const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
+    if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
+    if (!this.locationAccessPolicy.can(player.id, location, "deposit")) return { success: false, reason: "location_access_denied" };
+    const available = hero.getResourceAmount(resourceName);
+    const requested = Math.min(available, amount ?? available);
+    if (requested <= 0) return { success: false, reason: "nothing_to_deposit" };
+    const deposited = location.depositResource(resourceName, requested);
+    if (deposited <= 0) return { success: false, reason: "storage_full" };
+    hero.spendResource(resourceName, deposited);
+    return { success: true, resourceName, deposited };
+  }
+
+  depositLocationItem({ playerId, heroId, locationId, lootId }) {
+    const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
+    if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
+    if (!this.locationAccessPolicy.can(player.id, location, "deposit")) return { success: false, reason: "location_access_denied" };
+    const index = hero.carriedLoot.findIndex((item) => item.id === lootId);
+    if (index === -1) return { success: false, reason: "item_not_carried" };
+    const [item] = hero.carriedLoot.splice(index, 1);
+    location.depositItem(item);
+    return { success: true, item: { ...item } };
+  }
+
   produceLocationResources(cycles = 1, random = Math.random) {
-    return this.locations.map((location) => ({ locationId: location.id, produced: location.produceResources(cycles), producedRecruits: location.produceRecruits(cycles, random) })).filter((result) => Object.keys(result.produced).length > 0 || Object.keys(result.producedRecruits).length > 0);
+    return this.locations.map((location) => { const modifier = location.getContentmentModifier(this.setup.rules.enableContentment); return { locationId: location.id, contentmentModifier: modifier, produced: location.produceResources(cycles, modifier), producedRecruits: location.produceRecruits(cycles, random, modifier) }; }).filter((result) => Object.keys(result.produced).length > 0 || Object.keys(result.producedRecruits).length > 0);
   }
 
   garrisonUnit({ playerId, heroId, locationId, unitId }) {
     const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
-    if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id) || location.features.garrison !== true) return false;
+    if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id) || !this.locationAccessPolicy.can(player.id, location, "garrison")) return false;
     const unit = hero.army.getUnit(unitId);
     if (unit === null || unit.ownerPlayerId !== player.id || location.garrison.hasUnit(unitId)) return false;
     hero.removeUnit(unitId);
@@ -153,7 +215,7 @@ export class Game {
 
   withdrawGarrisonUnit({ playerId, heroId, locationId, unitId }) {
     const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
-    if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return false;
+    if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id) || !this.locationAccessPolicy.can(player.id, location, "withdrawGarrison")) return false;
     if (hero.army.units.length >= hero.maxUnitStacks) return false;
     const unit = location.garrison.getUnit(unitId);
     if (unit === null || unit.ownerPlayerId !== player.id) return false;
@@ -203,16 +265,20 @@ export class Game {
     const droppedLoot = this.#extractDroppedEquipment(battle);
     const outcome = this.battleService.applyOutcome({ game: this, battle });
     const consequences = this.battleConsequenceService.resolve({ game: this, battle, idGenerator: this.idGenerator });
+    const heroProgression = [];
     battle.teams.forEach((team) => team.heroes.forEach((snapshot) => {
       const participant = this.getHero(snapshot.sourceId); if (participant === null) return;
-      participant.addExperience(team.id === battle.winnerTeamId ? 50 : 20);
+      const previousExperience = participant.experience; const previousRank = participant.commandRank;
+      const experienceGained = team.id === battle.winnerTeamId ? 50 : 20; participant.addExperience(experienceGained);
+      heroProgression.push({ heroId: participant.id, playerId: participant.playerId, name: participant.name, experienceGained, previousExperience, experience: participant.experience, previousRank, rank: participant.commandRank, state: participant.state });
     }));
     const position = battle.engagementContext?.center ?? battle.lootPosition;
     const lootSite = position === null || position === undefined ? null : this.lootDistributionService.createSite({ id: this.idGenerator("loot-site"), battle, position, extraLoot: droppedLoot, now: this.now });
     if (lootSite !== null) this.lootSites.push(lootSite);
     this.battleSites.find((site) => site.battleId === battle.id)?.finish();
-    const destroyedLocationId = this.#destroyDefeatedEnemySource(battle);
-    return { ...outcome, consequences, lootSite: lootSite?.toJSON() ?? null, destroyedLocationId };
+    const capturedLocation = this.#captureDefeatedLocation(battle);
+    const destroyedLocationId = capturedLocation === null ? this.#destroyDefeatedEnemySource(battle) : null;
+    return { ...outcome, consequences, heroProgression, lootSite: lootSite?.toJSON() ?? null, destroyedLocationId, capturedLocationId: capturedLocation?.locationId ?? null };
   }
 
   searchBattlefield({ battleSiteId, playerId, heroId, position, searchType = "loot" }) {
@@ -337,9 +403,24 @@ export class Game {
     if (battle.sourceLocationId === null || battle.sourceEnemyTeamId === null || battle.winnerTeamId === battle.sourceEnemyTeamId) return null;
     const location = this.getLocation(battle.sourceLocationId);
     if (location === null || location.features.battle !== true) return null;
-    location.state = "destroyed"; location.features.battle = false; location.heroIds = [];
-    this.eventLog.push({ type: "enemy_location_destroyed", locationId: location.id, battleId: battle.id, at: this.now() });
-    return location.id;
+    const attackPoints = this.setup.rules.locationMode === "casual"
+      ? location.durability?.maxHealth ?? 1
+      : 30 + battle.teams.find((team) => team.id === battle.winnerTeamId)?.units.reduce((sum, unit) => sum + Math.max(0, unit.quantity) * Math.max(1, unit.attack ?? 1), 0);
+    const result = this.locationProgressionService.applyAttack(location, attackPoints);
+    this.eventLog.push({ type: result.destroyed ? "enemy_location_destroyed" : "enemy_location_damaged", locationId: location.id, battleId: battle.id, result, at: this.now() });
+    return result.destroyed ? location.id : null;
+  }
+
+  #captureDefeatedLocation(battle) {
+    if (battle.sourceLocationId === null || battle.sourceEnemyTeamId === null || battle.winnerTeamId === null || battle.winnerTeamId === battle.sourceEnemyTeamId) return null;
+    const location = this.getLocation(battle.sourceLocationId); const winner = battle.teams.find((team) => team.id === battle.winnerTeamId);
+    const playerId = winner?.heroes.map((snapshot) => this.getHero(snapshot.sourceId)?.playerId).find(Boolean) ?? null;
+    if (location === null || playerId === null || location.features.capturable !== true) return null;
+    const result = this.locationCaptureService.capture({ location, playerId, relation: this.locationAccessPolicy.getRelation(playerId, location), isQuestCompleted: (id) => this.isObjectiveCompleted(id), afterBattle: true });
+    if (!result.success) return null;
+    location.garrison.units = [];
+    this.eventLog.push({ type: "location_captured", ...result, battleId: battle.id, at: this.now() });
+    return result;
   }
 
   findUnit(unitId) {
@@ -417,8 +498,16 @@ export class Game {
   #addStartingUnits(hero, playerId, stacks) {
     stacks.forEach((stack) => {
       if (hero.army.units.length >= hero.maxUnitStacks) throw new Error("Les unités de départ dépassent la capacité de commandement du héros.");
-      hero.addUnit(this.recruitmentService.createUnit({ ownerPlayerId: playerId, typeId: stack.typeId, quantity: stack.quantity, idGenerator: this.idGenerator }));
+      hero.addUnit(this.recruitmentService.createUnit({ ownerPlayerId: playerId, typeId: stack.typeId, quantity: stack.quantity, idGenerator: this.idGenerator, number: this.#nextUnitNumber(playerId, stack.typeId) }));
     });
+  }
+
+  #nextUnitNumber(playerId, typeId) {
+    const units = [
+      ...this.heroes.flatMap((hero) => hero.army.units),
+      ...this.locations.flatMap((location) => location.garrison.units),
+    ].filter((unit) => unit.ownerPlayerId === playerId && unit.typeId === typeId);
+    return Math.max(0, ...units.map((unit) => unit.number ?? 0)) + 1;
   }
 
   #extractDroppedEquipment(battle) {

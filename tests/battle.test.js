@@ -100,3 +100,15 @@ test("a retreating unit returns to the hand using its retreat statistics", () =>
   assert.deepEqual(unit.retreat, { speed: 4, defense: 5, attack: 3, range: 2 });
   assert.ok(battle.eventLog.some((event) => event.type === "unit_returned_to_hand" && event.unitId === "ur"));
 });
+
+test("les retraites et pouvoirs spéciaux consomment le commandement du héros", () => {
+  const battle = new BattleEngine({ id: "command", teams: [
+    { id: "red", heroes: [{ id: "hr", playerId: "red", maxCommandPoints: 3, specialPowerIds: ["rally"] }], units: [{ id: "ur", playerId: "red", attack: 1, defense: 1, speed: 1, quantity: 2, maxQuantity: 2, specialPowerIds: ["charge"] }] },
+    { id: "blue", heroes: [{ id: "hb", playerId: "blue" }], units: [] },
+  ] });
+  battle.start();
+  assert.equal(battle.orderRetreat("red", 1).success, true);
+  assert.deepEqual(battle.activateSpecialPower({ teamId: "red", userId: "hr", powerId: "rally", cost: 1 }), { success: true, commanderId: "hr", remainingCommandPoints: 1 });
+  assert.equal(battle.activateSpecialPower({ teamId: "red", userId: "ur", powerId: "charge", cost: 2 }).reason, "insufficient_command_points");
+  assert.equal(battle.eventLog.filter((event) => event.type === "command_spent").length, 2);
+});

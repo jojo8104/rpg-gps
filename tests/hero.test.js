@@ -42,3 +42,12 @@ test("un héros détient ses ressources mais jamais de population", () => {
   hero.addResource("gold", 5); assert.equal(hero.spendResource("gold", 8), true); assert.equal(hero.getResourceAmount("gold"), 17);
   assert.throws(() => new Hero({ id: "invalid", playerId: "player-1", name: "Ariane", resources: { population: 2 } }), /population/);
 });
+
+test("les compétences sont passives et les pouvoirs sont séparés du commandement", () => {
+  const hero = new Hero({ id: "tactician", playerId: "player-1", name: "Ariane", skillIds: ["inspiring"], specialPowerIds: ["rally"], maxCommandPoints: 4 });
+  assert.deepEqual(hero.skillIds, ["inspiring"]);
+  assert.deepEqual(hero.specialPowerIds, ["rally"]);
+  assert.equal(hero.spendCommandPoints(3), true);
+  assert.equal(hero.commandPoints, 1);
+  assert.equal(hero.spendCommandPoints(2), false);
+});

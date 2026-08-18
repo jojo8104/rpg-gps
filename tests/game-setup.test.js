@@ -39,3 +39,8 @@ test("la configuration avancée conserve une politique de portée", () => {
   assert.equal(setup.locationSetup.rangePolicy.maxInteractionMeters, 25);
   assert.equal(setup.locationSetup.rangePolicy.typeOverrides.fort.interactionRadius, 18);
 });
+
+test("le contentement reste une règle experte optionnelle", () => {
+  assert.equal(new GameSetup({ id: "normal", name: "Normal", mode: "quick", scenarioId: "chaos", playArea }).rules.enableContentment, false);
+  assert.equal(new GameSetup({ id: "expert", name: "Expert", mode: "quick", scenarioId: "chaos", playArea, rules: { enableContentment: true } }).rules.enableContentment, true);
+});

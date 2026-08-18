@@ -10,7 +10,7 @@ export class GpsTracker {
   start() {
     if (!("geolocation" in navigator) || this.watchId !== null) return false;
     this.watchId = navigator.geolocation.watchPosition(
-      ({ coords, timestamp }) => this.onPosition({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, updatedAt: new Date(timestamp).toISOString() }),
+      ({ coords, timestamp }) => this.onPosition({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy, heading: Number.isFinite(coords.heading) ? coords.heading : null, speed: Number.isFinite(coords.speed) ? coords.speed : null, updatedAt: new Date(timestamp).toISOString() }),
       this.onError,
       this.options,
     );
