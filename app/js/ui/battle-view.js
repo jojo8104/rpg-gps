@@ -7,25 +7,31 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
   const allEntities = battle.teams.flatMap((team) => [...team.heroes, ...team.units].map((entity) => ({ entity, team })));
   const findEntity = (id) => allEntities.find((item) => item.entity.id === id) ?? null;
   const letter = (entity) => entity.kind === "hero" ? "H" : entity.symbol ?? "U";
-  const activeHeroes = (team) => team.heroes.filter((hero) => hero.state === "active").length;
   const latestAttacks = findLatestAttacks(battle);
   const latestAttack = latestAttacks[0] ?? null;
   const commanders = player.heroes.filter((hero) => hero.state === "active");
   const totalCommand = commanders.reduce((sum, hero) => sum + hero.commandPoints, 0);
   const retreatCost = battle.config.retreatCommandCost;
+  const healthBar = (unit) => {
+    const total = Math.max(1, unit.maxQuantity ?? unit.initialQuantity ?? unit.soldierHealth?.length ?? unit.quantity);
+    const green = unit.combatantCount ?? unit.quantity;
+    const red = unit.woundedCount ?? 0;
+    const black = Math.max(0, total - green - red);
+    return `<div class="casualty-bar" role="img" aria-label="${green} combattants, ${red} blessés, ${black} morts ou places libres"><i class="is-dead" style="flex:${black}"></i><i class="is-wounded" style="flex:${red}"></i><i class="is-combatant" style="flex:${green}"></i></div>`;
+  };
 
   const positionFor = (entity, team, index = 0) => {
     const allied = team.id === playerTeamId;
     const x = 50;
     if (entity.kind === "hero") return { x: 50, y: allied ? 93 : 7 };
-    const baseY = allied ? 87 - entity.progress * 43 : 13 + entity.progress * 43;
+    const baseY = allied ? 87 - entity.progress * 74 : 13 + entity.progress * 74;
     return { x, y: Math.max(10, Math.min(90, baseY + index * (allied ? 4 : -4))) };
   };
 
   const fieldToken = (entity, team, index) => {
     const allied = team.id === playerTeamId; const position = positionFor(entity, team, index);
     const attacking = latestAttack?.attackerId === entity.id; const targeted = latestAttack?.targetId === entity.id;
-    return `<article class="unit-token field-token ${allied ? "is-ally" : "is-enemy"} ${entity.kind === "hero" ? "is-hero" : ""} ${attacking ? "is-attacking" : ""} ${targeted ? "is-targeted" : ""}" style="left:${position.x}%;top:${position.y}%" data-field-entity="${entity.id}" data-x="${position.x}" data-y="${position.y}" title="${entity.kind === "hero" ? "Héros immobile" : `Progression ${Math.round(entity.progress * 100)} %`}"><strong>${letter(entity)}</strong><small>${entity.kind === "hero" ? entity.health : entity.quantity}</small></article>`;
+    return `<article class="unit-token field-token ${allied ? "is-ally" : "is-enemy"} ${entity.kind === "hero" ? "is-hero" : ""} ${entity.range > 1 ? "is-ranged" : "is-melee"} ${attacking ? "is-attacking" : ""} ${targeted ? "is-targeted" : ""}" style="left:${position.x}%;top:${position.y}%" data-field-entity="${entity.id}" data-x="${position.x}" data-y="${position.y}" title="${entity.kind === "hero" ? "Héros immobile" : `${entity.name ?? entity.typeName ?? "Unité"} · ${entity.combatantCount} combattants · ${entity.woundedCount} blessés · ${Math.max(0, entity.maxQuantity - entity.combatantCount - entity.woundedCount)} morts ou places libres`}"><strong>${letter(entity)}</strong><small>${entity.kind === "hero" ? entity.health : entity.combatantCount}</small>${entity.kind === "unit" ? healthBar(entity) : ""}</article>`;
   };
 
   const lane = (index) => {
@@ -33,22 +39,19 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
     const playerHero = player.heroes.find((hero) => hero.lane === index && hero.state === "active");
     const enemyUnits = enemy.units.filter((unit) => unit.lane === index && unit.state === "active");
     const playerUnits = player.units.filter((unit) => unit.lane === index && unit.state === "active");
-    return `<section class="vertical-lane" data-line="${index}" aria-label="Ligne ${index + 1}"><span class="vertical-lane-label">${index + 1}</span><div class="lane-centerline"></div>${enemyHero ? fieldToken(enemyHero, enemy, 0) : ""}${enemyUnits.map((unit, unitIndex) => fieldToken(unit, enemy, unitIndex)).join("")}${playerUnits.map((unit, unitIndex) => fieldToken(unit, player, unitIndex)).join("")}${playerHero ? fieldToken(playerHero, player, 0) : ""}</section>`;
+    const canRetreat = playerUnits.some((unit) => !unit.retreating) && battle.status === "active" && totalCommand >= retreatCost;
+    return `<section class="vertical-lane" data-line="${index}" aria-label="Ligne ${index + 1}"><div class="lane-centerline"></div>${enemyHero ? fieldToken(enemyHero, enemy, 0) : ""}${enemyUnits.map((unit, unitIndex) => fieldToken(unit, enemy, unitIndex)).join("")}${playerUnits.map((unit, unitIndex) => fieldToken(unit, player, unitIndex)).join("")}${playerHero ? fieldToken(playerHero, player, 0) : ""}<button type="button" class="lane-retreat" data-retreat-line="${index}" aria-label="Faire retraiter l'unité la plus avancée de la colonne ${index + 1}" title="Retraite colonne ${index + 1} · ◆ ${retreatCost}" ${canRetreat ? "" : "disabled"}><span aria-hidden="true">↩</span><small>◆${retreatCost}</small></button></section>`;
   };
 
   const hand = player.units.filter((unit) => unit.lane === null && unit.state === "active");
-  const handCard = (unit) => `<button type="button" class="unit-token hand-token is-ally ${unit.id === selectedUnitId ? "is-selected" : ""}" draggable="true" data-unit="${unit.id}" aria-label="Sélectionner ${unit.name ?? unit.typeName ?? "une unité"}, quantité ${unit.quantity}" title="${unit.name ?? unit.typeName ?? "Unité"} · comportement : ${unit.behavior}"><strong>${letter(unit)}</strong><small>${unit.quantity}</small></button>`;
+  const handCard = (unit) => `<button type="button" class="unit-token hand-token is-ally ${unit.id === selectedUnitId ? "is-selected" : ""}" draggable="true" data-unit="${unit.id}" aria-label="Sélectionner ${unit.name ?? unit.typeName ?? "une unité"}, ${unit.combatantCount} combattants"><strong>${letter(unit)}</strong><small>${unit.combatantCount}</small>${healthBar(unit)}</button>`;
   const attackVisual = createAttackVisual(latestAttacks, findEntity, positionFor);
 
-  const commandCards = commanders.map((hero) => `<article class="command-card"><div><strong>${hero.name ?? "Héros"}</strong><span class="command-points">◆ ${hero.commandPoints}/${hero.maxCommandPoints}</span></div><small>Compétences passives : ${hero.skillIds.join(", ") || "aucune"}</small><div class="power-buttons">${hero.specialPowerIds.map((powerId) => powerButton(hero, powerId, 1)).join("") || "<span>Aucun pouvoir de héros</span>"}</div></article>`).join("");
-  const unitPowerCards = player.units.filter((unit) => unit.state === "active" && unit.specialPowerIds.length > 0).map((unit) => `<article class="command-card unit-power-card"><small>${unit.name ?? unit.typeName ?? "Unité"}</small><div class="power-buttons">${unit.specialPowerIds.map((powerId) => powerButton(unit, powerId, 1)).join("")}</div></article>`).join("");
-  element.innerHTML = `<div class="battle-screen"><header class="enemy-side"><strong>Héros ennemis : ${activeHeroes(enemy)}</strong></header><p class="battle-message">${message}</p><section class="command-panel" aria-label="Commandement"><div class="command-heading"><strong>Commandement</strong><span>◆ ${totalCommand} disponible${totalCommand > 1 ? "s" : ""}</span></div>${commandCards}${unitPowerCards}</section><main class="vertical-battlefield">${[0, 1, 2].map(lane).join("")}${attackVisual.svg}</main>${attackVisual.label}<section class="player-hand"><div><strong>Vos unités</strong><small>Glissez, ou touchez une unité puis une ligne</small></div><div class="hand-cards">${hand.map(handCard).join("") || "<span>Toutes les unités sont engagées</span>"}</div></section><footer class="player-side"><strong>Vos héros : ${activeHeroes(player)}</strong><button type="button" class="surrender-button" data-surrender ${battle.status !== "active" ? "disabled" : ""}>Se rendre</button></footer></div>`;
+  const powers = commanders.flatMap((hero) => hero.specialPowerIds.map((powerId) => powerButton(hero, powerId, 1))).concat(player.units.filter((unit) => unit.state === "active").flatMap((unit) => unit.specialPowerIds.map((powerId) => powerButton(unit, powerId, 1)))).join("");
+  const heroHud = (team, side) => `<div class="battle-hero-hud is-${side}">${team.heroes.map((hero) => `<span class="hero-health ${hero.state !== "active" ? "is-out" : ""}"><b>${hero.name ?? "H"}</b><i><em style="width:${Math.round(hero.health / hero.maxHealth * 100)}%"></em></i><small>${hero.health}/${hero.maxHealth}</small></span>`).join("")}</div>`;
+  const countdown = battle.status === "countdown" ? `<div class="battle-countdown" role="status"><strong>${Math.max(1, Math.ceil(battle.state.countdownRemainingMs / 1_000))}</strong><span>Préparez vos lignes</span></div>` : "";
+  element.innerHTML = `<div class="battle-screen"><main class="vertical-battlefield">${heroHud(enemy, "enemy")}${[0, 1, 2].map(lane).join("")}${heroHud(player, "player")}${attackVisual.svg}${attackVisual.effects}${countdown}</main><section class="battle-action-dock"><div class="battle-feedback" aria-live="polite">${message}</div><div class="battle-quick-actions"><span class="command-points">◆ ${totalCommand}</span><div class="power-buttons">${powers}</div><button type="button" class="surrender-button" data-surrender ${battle.status !== "active" ? "disabled" : ""}>Se rendre</button></div><section class="player-hand" aria-label="Unités disponibles"><div class="hand-cards">${hand.map(handCard).join("") || "<span>Toutes les unités sont engagées</span>"}</div><small>Glissez une unité vers une colonne</small></section></section></div>`;
 
-  const controls = [0, 1, 2].map((index) => {
-    const available = player.units.some((unit) => unit.state === "active" && unit.lane === index && !unit.retreating);
-    return `<button type="button" data-retreat-line="${index}" ${battle.status !== "active" || !available || totalCommand < retreatCost ? "disabled" : ""}>Retraite ${index + 1} <small>◆ ${retreatCost}</small></button>`;
-  }).join("");
-  element.querySelector(".vertical-battlefield").insertAdjacentHTML("afterend", `<div class="retreat-controls" aria-label="Ordres de retraite">${controls}</div>`);
   player.units.filter((unit) => unit.retreating).forEach((unit) => {
     const token = element.querySelector(`[data-field-entity="${unit.id}"]`);
     token?.classList.add("is-retreating");
@@ -67,7 +70,7 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
     target.addEventListener("dragleave", () => target.classList.remove("is-drop-target"));
     target.addEventListener("dragover", (event) => { event.preventDefault(); event.dataTransfer.dropEffect = "move"; });
     target.addEventListener("drop", (event) => { event.preventDefault(); target.classList.remove("is-drop-target"); const unitId = event.dataTransfer.getData("text/plain") || selectedUnitId; onDragState(false); if (unitId) onAssign(unitId, Number(target.dataset.line)); });
-    target.addEventListener("click", (event) => { if (selectedUnitId && !event.target.closest("[data-unit]")) onAssign(selectedUnitId, Number(target.dataset.line)); });
+    target.addEventListener("click", (event) => { if (selectedUnitId && !event.target.closest("[data-unit], [data-retreat-line]")) onAssign(selectedUnitId, Number(target.dataset.line)); });
   });
   element.querySelectorAll("[data-retreat-line]").forEach((button) => button.addEventListener("click", () => onRetreatLine(Number(button.dataset.retreatLine))));
   element.querySelectorAll("[data-power-user]").forEach((button) => button.addEventListener("click", () => onActivatePower({ userId: button.dataset.powerUser, powerId: button.dataset.powerId, cost: Number(button.dataset.powerCost) })));
@@ -116,19 +119,30 @@ function findLatestAttacks(battle) {
 }
 
 function createAttackVisual(events, findEntity, positionFor) {
-  if (events.length === 0) return { svg: "", label: "" };
+  if (events.length === 0) return { svg: "", effects: "" };
   const lines = events.map((event) => {
     const attacker = findEntity(event.attackerId); const target = findEntity(event.targetId);
     if (!attacker || !target) return "";
     const attackerPosition = positionFor(attacker.entity, attacker.team); const targetPosition = positionFor(target.entity, target.team);
     const attackerX = (attacker.entity.lane + attackerPosition.x / 100) * (100 / 3);
     const targetX = (target.entity.lane + targetPosition.x / 100) * (100 / 3);
-    return `<line x1="${attackerX}" y1="${attackerPosition.y}" x2="${targetX}" y2="${targetPosition.y}"></line>`;
+    if (attacker.entity.range <= 1) return "";
+    return `<line class="is-ranged" x1="${attackerX}" y1="${attackerPosition.y}" x2="${targetX}" y2="${targetPosition.y}"></line>`;
   }).join("");
-  const totalDamage = events.reduce((sum, event) => sum + event.damage, 0);
+  const damageByTarget = new Map();
+  events.forEach((event) => {
+    const total = damageByTarget.get(event.targetId) ?? { damage: 0, losses: 0 };
+    total.damage += event.damage ?? 0; total.losses += event.losses ?? 0; damageByTarget.set(event.targetId, total);
+  });
+  const effects = [...damageByTarget].map(([targetId, total]) => {
+    const target = findEntity(targetId); if (!target) return "";
+    const position = positionFor(target.entity, target.team); const x = (target.entity.lane + position.x / 100) * (100 / 3);
+    const value = target.entity.kind === "hero" ? `-${total.damage} PV` : `-${total.damage} PV${total.losses > 0 ? ` · ${total.losses} mort${total.losses > 1 ? "s" : ""}` : ""}`;
+    return `<span class="damage-pop ${target.entity.kind === "hero" ? "is-hero-damage" : "is-unit-loss"}" style="left:${x}%;top:${position.y}%">${value}</span>`;
+  }).join("");
   return {
     svg: `<svg class="attack-overlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>`,
-    label: `<p class="attack-caption">${events.length} attaque${events.length > 1 ? "s" : ""} simultanée${events.length > 1 ? "s" : ""} · ${totalDamage} dégâts</p>`,
+    effects,
   };
 }
 

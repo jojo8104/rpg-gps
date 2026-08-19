@@ -44,3 +44,24 @@ test("une unité monte en grade par expérience ou par nomination d'un PNJ", () 
   assert.equal(unit.appointOfficer("lieutenant"), true); assert.equal(unit.maxQuantity, 24);
   assert.equal(unit.appointOfficer("sergeant"), false);
 });
+
+test("les PV individuels distinguent soldats aptes et blessés", () => {
+  const unit = new Unit({ id: "health", ownerPlayerId: "player-1", typeId: "militia", quantity: 3, healthPerSoldier: 10, combatHealthThreshold: 4, soldierHealth: [10, 4, 1] });
+  assert.equal(unit.combatantCount, 1);
+  assert.equal(unit.woundedCount, 2);
+  assert.equal(unit.unavailableCount, 3);
+  assert.deepEqual(unit.applyBattleHealth([8, 3, 0]), { quantity: 2, combatants: 1, wounded: 1 });
+  assert.equal(unit.unavailableCount, 4);
+  assert.deepEqual(unit.toJSON().soldierHealth, [8, 3]);
+});
+
+test("une définition complète expose dégâts, santé et cadence", () => {
+  const definition = new UnitDefinition({
+    id: "horse-archer", name: "Archer monté", faction: "kingdom", maxQuantity: 10,
+    stats: { attack: 4, defense: 2, damageMin: 2, damageMax: 4, healthPerSoldier: 9, combatHealthThreshold: 4, attackIntervalMs: 900, speed: 5, range: 3, morale: 6 },
+  });
+  assert.deepEqual(
+    Object.fromEntries(["damageMin", "damageMax", "healthPerSoldier", "combatHealthThreshold", "attackIntervalMs"].map((key) => [key, definition.stats[key]])),
+    { damageMin: 2, damageMax: 4, healthPerSoldier: 9, combatHealthThreshold: 4, attackIntervalMs: 900 },
+  );
+});

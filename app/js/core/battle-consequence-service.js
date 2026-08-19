@@ -36,12 +36,11 @@ export class BattleConsequenceService {
       report.prisoners.push({ unitId: unit.id, name: unit.name, typeId: unit.typeId, ownerPlayerId: unit.ownerPlayerId, capturedByTeamId: battle.winnerTeamId });
       return;
     }
-    unit.quantity = snapshot.quantity;
-    unit.state = "active";
+    unit.applyBattleHealth(snapshot.soldierHealth);
     const damageExperience = battle.eventLog.filter((event) => event.attackerId === snapshot.id).reduce((total, event) => total + (event.damage ?? 0), 0);
     const experienceGained = Math.max(1, Math.round(damageExperience)) + 10 + (battle.getTeamForEntity(snapshot.id)?.id === battle.winnerTeamId ? 20 : 0);
     const previousRank = unit.rank; unit.addExperience(experienceGained);
-    report.survivors.push({ unitId: unit.id, name: unit.name, typeId: unit.typeId, quantity: unit.quantity, returnedFrom: snapshot.state, experienceGained, previousRank, rank: unit.rank });
+    report.survivors.push({ unitId: unit.id, name: unit.name, typeId: unit.typeId, quantity: unit.quantity, combatants: unit.combatantCount, wounded: unit.woundedCount, dead: snapshot.deadCount ?? 0, returnedFrom: snapshot.state, experienceGained, previousRank, rank: unit.rank });
   }
 
   #removeUnitFromGame(game, unitId) {

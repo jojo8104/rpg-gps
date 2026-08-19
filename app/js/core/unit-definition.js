@@ -44,6 +44,23 @@ export class UnitDefinition {
       );
     }
 
+    normalizedStats.damageMin = UnitDefinition.#requirePositiveNumber(
+      stats.damageMin ?? Math.max(1, Math.floor(normalizedStats.attack / 2)),
+      "Les degats minimum",
+    );
+    normalizedStats.damageMax = UnitDefinition.#requirePositiveNumber(
+      stats.damageMax ?? Math.max(normalizedStats.damageMin, normalizedStats.attack),
+      "Les degats maximum",
+    );
+    if (normalizedStats.damageMax < normalizedStats.damageMin) throw new RangeError("Les degats maximum doivent etre superieurs aux degats minimum.");
+    normalizedStats.healthPerSoldier = UnitDefinition.#requirePositiveInteger(stats.healthPerSoldier ?? 10, "Les PV par soldat");
+    normalizedStats.combatHealthThreshold = UnitDefinition.#requireNonNegativeInteger(stats.combatHealthThreshold ?? 4, "Le seuil de blessure");
+    if (normalizedStats.combatHealthThreshold >= normalizedStats.healthPerSoldier) throw new RangeError("Le seuil de blessure doit etre inferieur aux PV par soldat.");
+    normalizedStats.attackIntervalMs = UnitDefinition.#requirePositiveNumber(
+      stats.attackIntervalMs ?? Math.max(350, 1_500 - normalizedStats.speed * 100),
+      "La cadence d'attaque",
+    );
+
     return normalizedStats;
   }
 
@@ -99,6 +116,11 @@ export class UnitDefinition {
       throw new RangeError(`${label} doit être un nombre positif ou nul.`);
     }
 
+    return value;
+  }
+
+  static #requireNonNegativeInteger(value, label) {
+    if (!Number.isInteger(value) || value < 0) throw new RangeError(`${label} doit etre un entier positif ou nul.`);
     return value;
   }
 

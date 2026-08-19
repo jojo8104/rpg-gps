@@ -13,7 +13,7 @@ export class RecruitmentService {
     if (!Number.isInteger(quantity) || quantity <= 0 || quantity > UNIT_RANKS[0].capacity) throw new RangeError("L'effectif ne respecte pas le grade initial de l'unité.");
     const ordinal = number === 1 ? "1re" : `${number}e`;
     const typeName = definition.name ?? `${typeId.slice(0, 1).toUpperCase()}${typeId.slice(1).replaceAll("-", " ")}`;
-    return new Unit({ id: idGenerator("unit"), ownerPlayerId, typeId, quantity, number, name: name ?? `${ordinal} ${typeName}`, rank: "soldier" });
+    return new Unit({ id: idGenerator("unit"), ownerPlayerId, typeId, quantity, number, name: name ?? `${ordinal} ${typeName}`, rank: "soldier", healthPerSoldier: definition.stats.healthPerSoldier, combatHealthThreshold: definition.stats.combatHealthThreshold });
   }
 
   recruit({ player, hero, location, typeId, idGenerator, number = 1 }) {
