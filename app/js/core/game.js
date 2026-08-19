@@ -32,7 +32,7 @@ export class Game {
     this.scenario = scenario === null ? null : (scenario instanceof Scenario ? scenario : new Scenario(scenario));
     if (this.scenario !== null && this.scenario.id !== this.setup.scenarioId) throw new RangeError("Le scénario ne correspond pas au GameSetup.");
     this.scenarioState = this.scenario === null ? null : new ScenarioState(this.scenario);
-    this.locations = Game.#createLocations(locations);
+    this.locations = Game.#createLocations(locations, this.unitDefinitions);
     this.locations.forEach((location) => this.locationProgressionService.initialize(location));
     this.scenarioLocationBindings = this.scenario === null
       ? []
@@ -226,7 +226,7 @@ export class Game {
 
   createBattle({ teamParticipants, loot = [], position = null, sourceLocationId = null, sourceEnemyTeamId = null, config = {} }) {
     if (this.status !== "started") throw new Error("La partie doit être démarrée pour créer une bataille.");
-    const battle = this.battleService.createBattle({ id: this.idGenerator("battle"), game: this, teamParticipants, loot, config, now: this.now });
+    const battle = this.battleService.createBattle({ id: this.idGenerator("battle"), game: this, teamParticipants, loot, config: { countdownMs: 3_000, ...config }, now: this.now });
     battle.lootPosition = position === null ? null : { ...position };
     battle.sourceLocationId = sourceLocationId;
     battle.sourceEnemyTeamId = sourceEnemyTeamId;
@@ -339,7 +339,7 @@ export class Game {
   updateBattleHeroPosition({ battleId, heroId, position }) {
     const battle = this.battles.find((item) => item.id === battleId);
     const hero = this.getHero(heroId);
-    if (battle === undefined || hero === null || battle.status !== "active" || battle.getEntity(`battle-hero-${heroId}`) === null) return { state: "ignored" };
+    if (battle === undefined || hero === null || !["countdown", "active"].includes(battle.status) || battle.getEntity(`battle-hero-${heroId}`) === null) return { state: "ignored" };
     hero.updatePosition(position);
     const battleHero = battle.getEntity(`battle-hero-${heroId}`);
     if (!this.engagementService.isOutsideBattleZone(hero.position, battle.engagementContext)) {
@@ -381,7 +381,12 @@ export class Game {
       const escapeFactor = battleUnit.speed * morale;
       const lossRatio = Math.min(0.8, battle.config.pursuitLossRate * (pursuitPower / Math.max(1, escapeFactor)));
       const losses = Math.min(battleUnit.quantity, Math.floor(battleUnit.quantity * lossRatio));
-      battleUnit.quantity -= losses;
+      const livingIndexes = losses === 0 ? [] : battleUnit.soldierHealth.map((health, index) => ({ health, index })).filter(({ health }) => health > 0).slice(-losses);
+      livingIndexes.forEach(({ index }) => { battleUnit.soldierHealth[index] = 0; });
+      battleUnit.deadCount = battleUnit.soldierHealth.filter((health) => health === 0).length;
+      battleUnit.woundedCount = battleUnit.soldierHealth.filter((health) => health > 0 && health <= battleUnit.combatHealthThreshold).length;
+      battleUnit.combatantCount = battleUnit.soldierHealth.filter((health) => health > battleUnit.combatHealthThreshold).length;
+      battleUnit.quantity = battleUnit.combatantCount + battleUnit.woundedCount;
       if (battleUnit.quantity === 0) battleUnit.state = "defeated";
       battle.eventLog.push({ type: "pursuit_losses", unitId: battleUnit.sourceId, losses, survivors: battleUnit.quantity, at: this.now() });
     });
@@ -541,9 +546,21 @@ export class Game {
     return stacks.map((stack) => { if (!Number.isInteger(stack.quantity) || stack.quantity <= 0) throw new RangeError("L'effectif initial doit être positif."); return { typeId: Game.#requireText(stack.typeId, "Le type d'unité"), quantity: stack.quantity }; });
   }
 
-  static #createLocations(locations) {
+  static #createLocations(locations, unitDefinitions) {
     if (!Array.isArray(locations)) throw new TypeError("Les lieux doivent être une liste.");
-    return locations.map((location) => (location instanceof Location ? location : new Location(location)));
+    return locations.map((location) => {
+      if (location instanceof Location) return location;
+      const units = (location.garrison?.units ?? []).map((unit) => {
+        const definition = unitDefinitions.get(unit.typeId);
+        if (definition === undefined) throw new RangeError(`La définition de l'unité ${unit.typeId} n'existe pas.`);
+        return {
+          ...unit,
+          healthPerSoldier: unit.healthPerSoldier ?? definition.stats.healthPerSoldier ?? 10,
+          combatHealthThreshold: unit.combatHealthThreshold ?? definition.stats.combatHealthThreshold ?? 4,
+        };
+      });
+      return new Location({ ...location, garrison: { ...(location.garrison ?? {}), units } });
+    });
   }
 
   static #defaultIdGenerator(prefix) {

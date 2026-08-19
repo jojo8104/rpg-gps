@@ -14,7 +14,7 @@ export function renderBattleResultView({ element, battle, result, playerId, play
   const unitName = (entry) => entry.name ?? battleUnits.get(entry.unitId)?.name ?? battleUnits.get(entry.unitId)?.typeName ?? "Unité";
   const unitRows = result.consequences.survivors.filter((entry) => ownedUnitIds.has(entry.unitId)).map((entry) => {
     const promotion = entry.previousRank !== entry.rank ? ` · ${label(UNIT_RANKS, entry.previousRank)} → ${label(UNIT_RANKS, entry.rank)}` : "";
-    return `<li><strong>${unitName(entry)}</strong><span>${entry.quantity} survivants · +${entry.experienceGained} XP${promotion}</span></li>`;
+    return `<li><strong>${unitName(entry)}</strong><span>${entry.combatants ?? entry.quantity} aptes · ${entry.wounded ?? 0} blessés · ${entry.dead ?? 0} morts · +${entry.experienceGained} XP${promotion}</span></li>`;
   }).join("");
   const losses = result.consequences.losses.filter((entry) => ownedUnitIds.has(entry.unitId));
   const lossRows = losses.map((entry) => `<li><strong>${unitName(entry)}</strong><span>Unité perdue</span></li>`).join("");

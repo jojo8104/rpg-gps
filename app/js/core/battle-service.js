@@ -28,8 +28,8 @@ export class BattleService {
     battle.teams.forEach((team) => team.units.forEach((snapshot) => {
       const unit = game.findUnit(snapshot.sourceId);
       if (unit !== null) {
-        unit.quantity = snapshot.quantity;
-        unit.state = snapshot.state === "fled" ? "active" : snapshot.state;
+        unit.applyBattleHealth(snapshot.soldierHealth);
+        if (snapshot.state !== "fled" && snapshot.state !== "retreated") unit.state = snapshot.state;
       }
     }));
     return { winnerTeamId: battle.winnerTeamId, battleId: battle.id };
@@ -63,20 +63,20 @@ export class BattleService {
 
   #createGarrisonUnitSnapshots(location) {
     if (location === null) return [];
-    return location.garrison.units.filter((unit) => unit.quantity > 0).map((unit) => {
+    return location.garrison.units.filter((unit) => unit.combatantCount > 0).map((unit) => {
       const definition = this.unitDefinitions.get(unit.typeId);
       if (definition === undefined) throw new RangeError("La définition d'une unité de garnison n'existe pas.");
-      return { id: `battle-unit-${unit.id}`, sourceId: unit.id, playerId: unit.ownerPlayerId, name: unit.name ?? definition.name, typeName: definition.name, quantity: unit.quantity, maxQuantity: unit.maxQuantity, attack: definition.stats.attack, defense: definition.stats.defense, speed: definition.stats.speed, range: definition.stats.range, morale: definition.stats.morale, behavior: definition.behavior ?? "advance", retreat: { ...definition.retreat }, symbol: (definition.name ?? unit.typeId ?? "U").slice(0, 1).toUpperCase() };
+      return { id: `battle-unit-${unit.id}`, sourceId: unit.id, playerId: unit.ownerPlayerId, name: unit.name ?? definition.name, typeName: definition.name, quantity: unit.quantity, maxQuantity: unit.maxQuantity, soldierHealth: [...unit.soldierHealth], healthPerSoldier: definition.stats.healthPerSoldier, combatHealthThreshold: definition.stats.combatHealthThreshold, damageMin: definition.stats.damageMin, damageMax: definition.stats.damageMax, attackIntervalMs: definition.stats.attackIntervalMs, attack: definition.stats.attack, defense: definition.stats.defense, speed: definition.stats.speed, range: definition.stats.range, morale: definition.stats.morale, behavior: definition.behavior ?? "advance", retreat: { ...definition.retreat }, symbol: (definition.name ?? unit.typeId ?? "U").slice(0, 1).toUpperCase() };
     });
   }
 
   #createUnitSnapshots(game, heroId, modifiers = this.#createModifiers(game, heroId, "casual")) {
     const hero = game.getHero(heroId);
-    return hero.army.units.filter((unit) => unit.quantity > 0).map((unit, index) => {
+    return hero.army.units.filter((unit) => unit.combatantCount > 0).map((unit, index) => {
       const definition = this.unitDefinitions.get(unit.typeId);
       if (definition === undefined) throw new RangeError("La définition d'une unité engagée n'existe pas.");
       const retreat = definition.retreat ?? definition.stats;
-      return { id: `battle-unit-${unit.id}`, sourceId: unit.id, playerId: unit.ownerPlayerId, name: unit.name ?? definition.name, typeName: definition.name, quantity: unit.quantity, maxQuantity: unit.maxQuantity, attack: Math.max(0, definition.stats.attack + modifiers.attackBonus), defense: Math.max(0, definition.stats.defense + modifiers.defenseBonus), speed: Math.max(0.1, definition.stats.speed * modifiers.speedMultiplier), range: definition.stats.range, morale: Math.max(0, (definition.stats.morale ?? 5) + modifiers.moraleBonus), specialPowerIds: [...new Set([...(definition.abilities ?? []), ...unit.specialPowerIds])], modifiers: structuredClone(modifiers), behavior: definition.behavior ?? "advance", retreat: { ...retreat, speed: Math.max(0.1, retreat.speed * modifiers.speedMultiplier) }, symbol: (definition.name ?? unit.typeId ?? "U").slice(0, 1).toUpperCase() };
+      return { id: `battle-unit-${unit.id}`, sourceId: unit.id, playerId: unit.ownerPlayerId, name: unit.name ?? definition.name, typeName: definition.name, quantity: unit.quantity, maxQuantity: unit.maxQuantity, soldierHealth: [...unit.soldierHealth], healthPerSoldier: definition.stats.healthPerSoldier, combatHealthThreshold: definition.stats.combatHealthThreshold, damageMin: definition.stats.damageMin, damageMax: definition.stats.damageMax, attackIntervalMs: definition.stats.attackIntervalMs, attack: Math.max(0, definition.stats.attack + modifiers.attackBonus), defense: Math.max(0, definition.stats.defense + modifiers.defenseBonus), speed: Math.max(0.1, definition.stats.speed * modifiers.speedMultiplier), range: definition.stats.range, morale: Math.max(0, (definition.stats.morale ?? 5) + modifiers.moraleBonus), specialPowerIds: [...new Set([...(definition.abilities ?? []), ...unit.specialPowerIds])], modifiers: structuredClone(modifiers), behavior: definition.behavior ?? "advance", retreat: { ...retreat, speed: Math.max(0.1, retreat.speed * modifiers.speedMultiplier) }, symbol: (definition.name ?? unit.typeId ?? "U").slice(0, 1).toUpperCase() };
     });
   }
 }
