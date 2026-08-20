@@ -31,6 +31,8 @@ test("les unités de garnison sont les défenseurs persistants de la bataille", 
   const attacker = game.chooseHero("p1", { name: "A", classId: "fighter" }); game.chooseHero("p2", { name: "B", classId: "fighter" }); game.start();
   const battle = game.createBattle({ teamParticipants: [{ id: "attackers", heroIds: [attacker.id] }, { id: "defenders", heroIds: [], locationId: "fort" }], sourceLocationId: "fort", sourceEnemyTeamId: "defenders" });
   assert.equal(battle.teams[1].units[0].sourceId, "fort-guard");
+  assert.equal(battle.teams[1].units[0].typeId, "militia");
+  assert.deepEqual(battle.teams[1].units[0].tags, []);
   assert.equal(battle.teams[1].units[0].quantity, 6);
   assert.deepEqual(battle.teams[1].units[0].soldierHealth, [8, 8, 8, 8, 8, 8]);
   assert.equal(battle.teams[1].heroes[0].sourceId, "location-fort");

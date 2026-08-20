@@ -163,6 +163,23 @@ export class Game {
     return this.recruitmentService.recruit({ player, hero, location, typeId: unitTypeId, idGenerator: this.idGenerator, number: this.#nextUnitNumber(player.id, unitTypeId) });
   }
 
+  completeHeroUnits({ playerId, heroId, locationId }) {
+    const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
+    if (player === null || hero === null || location === null || hero.playerId !== player.id) return { success: false, reason: "invalid_reinforcement_request", reinforced: [] };
+    if (!this.locationAccessPolicy.can(player.id, location, "reinforce")) return { success: false, reason: "location_access_denied", reinforced: [] };
+    return this.recruitmentService.completeUnits({ hero, location });
+  }
+
+  healHeroUnits({ playerId, heroId, locationId, timeUnits = 1 }) {
+    const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
+    if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location", restoredHealth: 0 };
+    if (!this.locationAccessPolicy.can(player.id, location, "heal")) return { success: false, reason: "location_access_denied", restoredHealth: 0 };
+    if (!Number.isInteger(timeUnits) || timeUnits <= 0) return { success: false, reason: "invalid_time", restoredHealth: 0 };
+    const units = hero.army.units.map((unit) => ({ unitId: unit.id, ...unit.heal(timeUnits) })).filter((result) => result.restoredHealth > 0);
+    const restoredHealth = units.reduce((sum, result) => sum + result.restoredHealth, 0);
+    return restoredHealth > 0 ? { success: true, timeUnits, restoredHealth, units } : { success: false, reason: "no_wounded_soldiers", restoredHealth: 0, units: [] };
+  }
+
   collectLocationResources({ playerId, heroId, locationId }) {
     const player = this.getPlayer(playerId);
     const hero = this.getHero(heroId);
@@ -207,7 +224,7 @@ export class Game {
     const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
     if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id) || !this.locationAccessPolicy.can(player.id, location, "garrison")) return false;
     const unit = hero.army.getUnit(unitId);
-    if (unit === null || unit.ownerPlayerId !== player.id || location.garrison.hasUnit(unitId)) return false;
+    if (unit === null || unit.ownerPlayerId !== player.id || location.garrison.hasUnit(unitId) || location.garrison.units.length >= location.defenseSlots) return false;
     hero.removeUnit(unitId);
     location.garrison.addUnit(unit);
     return true;
@@ -222,6 +239,18 @@ export class Game {
     location.garrison.removeUnit(unitId);
     hero.addUnit(unit);
     return true;
+  }
+
+  disbandUnit({ playerId, heroId, unitId }) {
+    const player = this.getPlayer(playerId); const hero = this.getHero(heroId);
+    if (player === null || hero === null || hero.playerId !== player.id) return { success: false, reason: "invalid_hero" };
+    const isInBattle = this.battles.some((battle) => battle.status !== "finished" && battle.teams.some((team) => team.heroes.some((snapshot) => snapshot.sourceId === hero.id)));
+    if (isInBattle) return { success: false, reason: "battle_active" };
+    const unit = hero.army.getUnit(unitId);
+    if (unit === null || unit.ownerPlayerId !== player.id) return { success: false, reason: "invalid_unit" };
+    hero.removeUnit(unit.id);
+    this.eventLog.push({ type: "unit_disbanded", playerId: player.id, heroId: hero.id, unitId: unit.id, unitName: unit.name, typeId: unit.typeId, quantity: unit.quantity, at: this.now() });
+    return { success: true, unit: unit.toJSON() };
   }
 
   createBattle({ teamParticipants, loot = [], position = null, sourceLocationId = null, sourceEnemyTeamId = null, config = {} }) {

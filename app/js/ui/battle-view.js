@@ -1,3 +1,5 @@
+import { renderUnitTypeIcon } from "./unit-icon.js";
+
 const previousPositions = new Map();
 
 /** Vue animée : les unités progressent, les héros restent ancrés à leur camp. */
@@ -6,7 +8,7 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
   const enemy = battle.teams.find((team) => team.id !== playerTeamId);
   const allEntities = battle.teams.flatMap((team) => [...team.heroes, ...team.units].map((entity) => ({ entity, team })));
   const findEntity = (id) => allEntities.find((item) => item.entity.id === id) ?? null;
-  const letter = (entity) => entity.kind === "hero" ? "H" : entity.symbol ?? "U";
+  const entityIcon = (entity) => entity.kind === "hero" ? "<strong>H</strong>" : renderUnitTypeIcon(entity);
   const latestAttacks = findLatestAttacks(battle);
   const latestAttack = latestAttacks[0] ?? null;
   const commanders = player.heroes.filter((hero) => hero.state === "active");
@@ -31,7 +33,7 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
   const fieldToken = (entity, team, index) => {
     const allied = team.id === playerTeamId; const position = positionFor(entity, team, index);
     const attacking = latestAttack?.attackerId === entity.id; const targeted = latestAttack?.targetId === entity.id;
-    return `<article class="unit-token field-token ${allied ? "is-ally" : "is-enemy"} ${entity.kind === "hero" ? "is-hero" : ""} ${entity.range > 1 ? "is-ranged" : "is-melee"} ${attacking ? "is-attacking" : ""} ${targeted ? "is-targeted" : ""}" style="left:${position.x}%;top:${position.y}%" data-field-entity="${entity.id}" data-x="${position.x}" data-y="${position.y}" title="${entity.kind === "hero" ? "Héros immobile" : `${entity.name ?? entity.typeName ?? "Unité"} · ${entity.combatantCount} combattants · ${entity.woundedCount} blessés · ${Math.max(0, entity.maxQuantity - entity.combatantCount - entity.woundedCount)} morts ou places libres`}"><strong>${letter(entity)}</strong><small>${entity.kind === "hero" ? entity.health : entity.combatantCount}</small>${entity.kind === "unit" ? healthBar(entity) : ""}</article>`;
+    return `<article class="unit-token field-token ${allied ? "is-ally" : "is-enemy"} ${entity.kind === "hero" ? "is-hero" : ""} ${entity.range > 1 ? "is-ranged" : "is-melee"} ${attacking ? "is-attacking" : ""} ${targeted ? "is-targeted" : ""}" style="left:${position.x}%;top:${position.y}%" data-field-entity="${entity.id}" data-x="${position.x}" data-y="${position.y}" title="${entity.kind === "hero" ? "Héros immobile" : `${entity.name ?? entity.typeName ?? "Unité"} · ${entity.combatantCount} combattants · ${entity.woundedCount} blessés · ${Math.max(0, entity.maxQuantity - entity.combatantCount - entity.woundedCount)} morts ou places libres`}">${entityIcon(entity)}<small>${entity.kind === "hero" ? entity.health : entity.combatantCount}</small>${entity.kind === "unit" ? healthBar(entity) : ""}</article>`;
   };
 
   const lane = (index) => {
@@ -44,7 +46,7 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
   };
 
   const hand = player.units.filter((unit) => unit.lane === null && unit.state === "active");
-  const handCard = (unit) => `<button type="button" class="unit-token hand-token is-ally ${unit.id === selectedUnitId ? "is-selected" : ""}" draggable="true" data-unit="${unit.id}" aria-label="Sélectionner ${unit.name ?? unit.typeName ?? "une unité"}, ${unit.combatantCount} combattants"><strong>${letter(unit)}</strong><small>${unit.combatantCount}</small>${healthBar(unit)}</button>`;
+  const handCard = (unit) => `<button type="button" class="unit-token hand-token is-ally ${unit.id === selectedUnitId ? "is-selected" : ""}" draggable="true" data-unit="${unit.id}" aria-label="Sélectionner ${unit.name ?? unit.typeName ?? "une unité"}, ${unit.combatantCount} combattants">${entityIcon(unit)}<small>${unit.combatantCount}</small>${healthBar(unit)}</button>`;
   const attackVisual = createAttackVisual(latestAttacks, findEntity, positionFor);
 
   const powers = commanders.flatMap((hero) => hero.specialPowerIds.map((powerId) => powerButton(hero, powerId, 1))).concat(player.units.filter((unit) => unit.state === "active").flatMap((unit) => unit.specialPowerIds.map((powerId) => powerButton(unit, powerId, 1)))).join("");

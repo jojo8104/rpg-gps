@@ -16,5 +16,7 @@ test("le cooldown empêche une réentrée immédiate", () => {
   assert.equal(engine.update({ actorId: "hero", position: location.position }).length, 1); now = 10;
   engine.update({ actorId: "hero", position: { latitude: 48.01, longitude: 2 } }); now = 20;
   assert.deepEqual(engine.update({ actorId: "hero", position: location.position }), []);
+  assert.equal(engine.getState("hero", "village"), LOCATION_STATES.EXITED);
+  now = 1010;
+  assert.equal(engine.update({ actorId: "hero", position: location.position })[0].type, "LocationEntered");
 });
-

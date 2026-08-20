@@ -57,7 +57,7 @@ export class Location {
     this.contentment = contentment === null ? null : Location.#requirePercentage(contentment, "Le contentement");
     this.capture = Location.#createCapture(capture);
     this.infrastructure = Location.#createNonNegativeMap(infrastructure, "Les infrastructures");
-    this.recruitment = Location.#createRecruitment(recruitment, this.population);
+    this.recruitment = Location.#createRecruitment(recruitment);
     this.heroIds = Location.#createTextList(heroIds, "Les héros présents");
     this.garrison = garrison instanceof Army ? garrison : new Army(garrison);
     this.questIds = Location.#createTextList(questIds, "Les quêtes");
@@ -214,14 +214,13 @@ export class Location {
     return normalized;
   }
 
-  static #createRecruitment(recruitment, population) {
+  static #createRecruitment(recruitment) {
     if (recruitment === null || Array.isArray(recruitment) || typeof recruitment !== "object") throw new TypeError("Le recrutement doit être un objet.");
     const ids = Location.#createTextList(recruitment.availableUnitTypeIds ?? [], "Les unités recrutables");
     const production = Location.#createNonNegativeMap(recruitment.production ?? {}, "La production de recrues");
     const stock = Location.#createNonNegativeMap(recruitment.stock ?? {}, "Le stock de recrues");
     for (const typeId of [...Object.keys(production), ...Object.keys(stock)]) if (!ids.includes(typeId)) throw new RangeError("Un stock de recrues doit correspondre à une unité disponible.");
-    const configuredCapacity = Location.#requireNonNegativeNumber(recruitment.capacity ?? 0, "La capacité de recrutement");
-    const capacity = population === null ? configuredCapacity : Math.min(configuredCapacity, population);
+    const capacity = Location.#requireNonNegativeNumber(recruitment.capacity ?? 0, "La capacité de recrutement");
     let remainingCapacity = capacity;
     for (const typeId of Object.keys(stock)) { stock[typeId] = Math.min(stock[typeId], remainingCapacity); remainingCapacity -= stock[typeId]; }
     return { availableUnitTypeIds: ids, production, stock, capacity, variance: Location.#requireRatio(recruitment.variance ?? 0, "La variance de recrutement") };

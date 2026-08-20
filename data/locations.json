@@ -15,8 +15,8 @@
     "defenseSlots": 3,
     "infrastructure": { "muraille": 2, "tour": 1 },
     "resources": { "stock": {}, "storageCapacity": 100 },
-    "features": { "capturable": true, "garrison": true, "recruitment": true, "upgradeable": true },
-    "recruitment": { "availableUnitTypeIds": ["militia", "archer", "mounted-archer"], "production": { "militia": 2, "archer": 1, "mounted-archer": 1 }, "stock": { "militia": 12, "archer": 10, "mounted-archer": 8 }, "capacity": 48, "variance": 0.15 },
+    "features": { "capturable": true, "garrison": true, "recruitment": true, "healing": true, "upgradeable": true },
+    "recruitment": { "availableUnitTypeIds": ["militia", "archer", "mounted-archer"], "production": { "militia": 2, "archer": 1, "mounted-archer": 1 }, "stock": { "militia": 6, "archer": 4, "mounted-archer": 2 }, "capacity": 48, "variance": 0.15 },
     "qr": { "enabled": false }
   },
   {
@@ -34,7 +34,7 @@
     "defenseSlots": 1,
     "infrastructure": { "palissade": 1 },
     "resources": { "stock": {}, "storageCapacity": 80 },
-    "features": { "capturable": true, "recruitment": true },
+    "features": { "capturable": true, "recruitment": true, "healing": true },
     "recruitment": { "availableUnitTypeIds": ["militia"], "production": { "militia": 3 }, "stock": { "militia": 12 }, "capacity": 24, "variance": 0.3 },
     "qr": { "enabled": false }
   },
@@ -75,7 +75,7 @@
       { "id": "red-fort-militia", "ownerPlayerId": "bandits", "typeId": "militia", "quantity": 6, "rank": "soldier" },
       { "id": "red-fort-archers", "ownerPlayerId": "bandits", "typeId": "archer", "quantity": 6, "rank": "soldier" }
     ] },
-    "features": { "battle": true, "capturable": true, "garrison": true, "upgradeable": true },
+    "features": { "battle": true, "capturable": true, "garrison": true, "healing": true, "upgradeable": true },
     "qr": { "enabled": false }
   },
   {

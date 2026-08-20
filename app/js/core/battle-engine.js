@@ -133,7 +133,7 @@ export class BattleEngine {
       }
       return intent;
     }
-    unit.progress = Math.min(1, unit.progress + unit.speed * deltaMs / 10_000);
+    unit.progress = Math.min(1, unit.progress + unit.speed * deltaMs / this.config.advanceTravelBaseMs);
     if (!target && unit.progress >= 1) {
       const hero = this.#breakthroughHero(unit, enemy);
       if (hero) {
