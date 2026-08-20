@@ -23,6 +23,7 @@ export function renderGarrisonSheet({ element, location, hero, playerId, message
     clearSelection();
   };
   cleanupBySheet.set(element, cleanupDrag);
+  element.oncontextmenu = (event) => event.preventDefault();
   const transfer = (source, unitId, target) => {
     if ((source === "army" && target !== "garrison") || (source === "garrison" && target !== "army")) return false;
     clearSelection(); onTransfer({ direction: source === "army" ? "deposit" : "withdraw", unitId }); return true;
