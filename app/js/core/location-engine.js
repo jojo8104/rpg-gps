@@ -21,9 +21,15 @@ export class LocationEngine {
       const isInside = distance <= radius || (wasInside && distance <= radius + this.exitMarginMeters);
       if (isInside && !wasInside) {
         const allowed = this.now() - previous.lastExitedAt >= this.cooldownMs;
-        const next = { ...previous, state: allowed ? LOCATION_STATES.ENTERED : LOCATION_STATES.INSIDE };
-        this.presences.set(key, next);
-        if (allowed) events.push({ type: "LocationEntered", actorId, locationId: location.id, at: this.now() });
+        if (allowed) {
+          const enteredAt = this.now();
+          this.presences.set(key, { ...previous, state: LOCATION_STATES.ENTERED });
+          events.push({ type: "LocationEntered", actorId, locationId: location.id, at: enteredAt });
+        } else {
+          // Keep the actor outside until the cooldown expires. Setting INSIDE here
+          // would swallow all later entry events while the actor remains nearby.
+          this.presences.set(key, previous);
+        }
       } else if (isInside) this.presences.set(key, { ...previous, state: LOCATION_STATES.INSIDE });
       else if (wasInside) { this.presences.set(key, { state: LOCATION_STATES.EXITED, lastExitedAt: this.now() }); events.push({ type: "LocationExited", actorId, locationId: location.id, at: this.now() }); }
       else this.presences.set(key, { ...previous, state: LOCATION_STATES.OUTSIDE });

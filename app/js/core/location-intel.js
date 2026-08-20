@@ -9,7 +9,7 @@ export function buildLocationIntel({ location, snapshot, knowledgeLevel, owner =
   const production = Object.entries(location.resources.production).map(([id, amount]) => ({ id, amount: known(2, amount), capacity: known(3, location.resources.storageCapacity) }));
   const recruitProduction = Object.entries(location.recruitment.production).map(([id, amount]) => ({ id: `recrues · ${id}`, amount: known(2, amount), capacity: known(3, location.recruitment.capacity) }));
   const stock = [...Object.entries(location.resources.stock).map(([id, amount]) => ({ id, amount: known(3, amount), capacity: known(3, location.resources.storageCapacity) })), ...location.storedItems.map(({ itemId, quantity }) => ({ id: itemId, amount: known(3, quantity), capacity: known(3, location.resources.storageCapacity) })), ...Object.entries(location.recruitment.stock).map(([id, amount]) => ({ id: `recrues · ${id}`, amount: known(3, amount), capacity: known(3, location.recruitment.capacity) }))];
-  const units = location.garrison.units.map((unit) => ({ id: unit.id, type: known(3, unit.typeId), rank: known(3, unit.rank), quantity: known(3, unit.quantity) }));
+  const units = location.garrison.units.map((unit) => ({ id: unit.id, ownerPlayerId: unit.ownerPlayerId, type: known(3, unit.typeId), rank: known(3, unit.rank), quantity: known(3, unit.quantity), name: known(3, unit.name ?? unit.typeId) }));
   const occupiedSlots = Math.min(location.defenseSlots, units.length);
   const presences = heroes.map((hero) => {
     if (knowledgeLevel < 2) return { id: hero.id, label: "?", stats: [] };
@@ -30,7 +30,7 @@ export function buildLocationIntel({ location, snapshot, knowledgeLevel, owner =
     stock,
     storageCapacity: known(3, location.resources.storageCapacity),
     presences,
-    defense: { slots: known(2, location.defenseSlots), occupiedSlots: known(2, occupiedSlots), units: knowledgeLevel >= 2 ? units : [], structures: knowledgeLevel >= 2 ? Object.entries(location.infrastructure).map(([type, level]) => ({ type, level: known(3, level) })) : [] },
+    defense: { slots: known(2, location.defenseSlots), occupiedSlots: known(2, occupiedSlots), units: knowledgeLevel >= 2 ? units : [], reinforcements: knowledgeLevel >= 2 ? (snapshot.defense?.reinforcements ?? []) : [], defenders: knowledgeLevel >= 2 ? [...units, ...(snapshot.defense?.reinforcements ?? [])] : [], structures: knowledgeLevel >= 2 ? Object.entries(location.infrastructure).map(([type, level]) => ({ type, level: known(3, level) })) : [] },
     description,
   };
 }

@@ -12,8 +12,10 @@ test("un lieu seulement repéré masque ses informations sensibles", () => {
 });
 
 test("une visite révèle le stock et la garnison", () => {
-  const intel = buildLocationIntel({ location, snapshot, knowledgeLevel: 3, owner: { id: "p1", name: "Ariane", color: "blue" } });
+  const defendedSnapshot = { ...snapshot, defense: { reinforcements: [{ id: "passing", name: "Archers", type: "archer", quantity: 4, ownerPlayerId: "p2", heroId: "enemy", heroName: "Rask", source: "hero" }] } };
+  const intel = buildLocationIntel({ location, snapshot: defendedSnapshot, knowledgeLevel: 3, owner: { id: "p1", name: "Ariane", color: "blue" } });
   assert.equal(intel.population, 30); assert.equal(intel.stock[0].amount, 9); assert.equal(intel.defense.units[0].quantity, 6);
+  assert.equal(intel.defense.reinforcements[0].heroName, "Rask"); assert.equal(intel.defense.defenders.length, 2);
 });
 
 test("l'identité et les statistiques d'un héros se révèlent progressivement", () => {

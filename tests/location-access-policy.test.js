@@ -15,6 +15,14 @@ test("la relation au lieu distingue possession, alliance, neutralité et ennemi"
   assert.equal(policy.getRelation("p1", location("p3")), LOCATION_RELATIONS.ENEMY);
 });
 
+test("seuls le propriétaire et ses alliés défendent une localisation", () => {
+  const alliedLocation = location("p1");
+  assert.equal(policy.isDefender("p1", alliedLocation), true);
+  assert.equal(policy.isDefender("p2", alliedLocation), true);
+  assert.equal(policy.isDefender("p3", alliedLocation), false);
+  assert.equal(policy.isDefender("p1", location(null)), false);
+});
+
 test("les actions économiques sont interdites chez l'ennemi", () => {
   const enemyMine = location("p3", { resourceProduction: true, recruitment: true, garrison: true, battle: true });
   assert.equal(policy.can("p1", enemyMine, "collect"), false);

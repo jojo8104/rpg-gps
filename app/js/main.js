@@ -23,11 +23,15 @@ import { buildLocationIntel } from "./core/location-intel.js";
 import { renderLocationDetail, renderWorldDirectory } from "./ui/world-view.js";
 import { renderBattleResultView } from "./ui/battle-result-view.js";
 import { HeroArmyModifier } from "./core/hero-army-modifier.js";
+import { GameSetupView } from "./ui/game-setup-view.js";
+import { renderGarrisonSheet } from "./ui/garrison-sheet.js";
+import { renderUnitTypeIcon } from "./ui/unit-icon.js";
 
 const $ = (selector) => document.querySelector(selector);
 const rankLabel = (ranks, id) => ranks.find((rank) => rank.id === id)?.label ?? id;
 const unitHealthBar = (unit) => { const total = Math.max(1, unit.maxQuantity ?? unit.soldierHealth?.length ?? unit.quantity); const wounded = unit.woundedCount ?? 0; const combatants = unit.combatantCount ?? unit.quantity; const unavailable = Math.max(0, total - combatants - wounded); return `<div class="army-health-bar" role="img" aria-label="${combatants} combattants, ${wounded} blessés, ${unavailable} morts ou places libres"><i class="is-dead" style="flex:${unavailable}"></i><i class="is-wounded" style="flex:${wounded}"></i><i class="is-combatant" style="flex:${combatants}"></i></div>`; };
 const ui = { setup: $("#setup-screen"), game: $("#game-screen"), name: $("#hero-name"), heroClass: $("#hero-class"), create: $("#create-game"), status: $("#setup-status"), mode: $("#top-mode"), health: $("#top-health"), army: $("#top-army"), gold: $("#top-gold"), worldContent: $("#world-content"), heroContent: $("#hero-content"), armyContent: $("#army-content"), inventory: $("#inventory-content"), quests: $("#quests-content"), battle: $("#battle-content"), sheet: $("#bottom-sheet"), recenter: $("#recenter-map"), tools: $("#field-tools"), gpsStatus: $("#gps-status"), questStatus: $("#distance-quest-status"), questPlace: $("#place-quest-location"), sitesStatus: $("#dynamic-sites-status"), log: $("#field-log") };
+const setupView = new GameSetupView(ui.setup);
 const simulationPositions = { "fort-nord": [22, 22], "village-vert": [60, 50], "bandit-camp": [78, 78], "enemy-fort": [72, 35], "gold-mine": [42, 70] };
 const simulationRadii = { "fort-nord": 12, "village-vert": 10, "bandit-camp": 9, "enemy-fort": 12, "gold-mine": 8 };
 const simulationDetectionRadii = { "fort-nord": 24, "village-vert": 20, "bandit-camp": 18, "enemy-fort": 24, "gold-mine": 16 };
@@ -35,6 +39,7 @@ const simulationStartPosition = [50, 30];
 const descriptions = { "fort-nord": "Votre refuge frontalier.", "village-vert": "Les habitants connaissent les menaces locales.", "bandit-camp": "Une zone de combat testable.", "enemy-fort": "Un fort ennemi de niveau 3 protégé par une garnison.", "gold-mine": "Une mine contenant de l'or." };
 let data, game, hero, enemyHero, mapView, gpsTracker, locationEngine, interactionEngine, rangePolicy, activeBattle, battleTimer, productionTimer;
 let mode = "simulation", heroPosition, gpsAccuracy = null, firstGpsFix = true, interactionMode = null, currentLocationId = null, locationMessage = "", currentEncounter = null;
+let activeGarrisonLocationId = null;
 let heroHeading = 0, lastCompassAt = 0;
 let worldMessage = "";
 let worldSelectedLocationId = null;
@@ -54,12 +59,12 @@ const gpsAccuracyStatus = document.createElement("p"); gpsAccuracyStatus.id = "g
 $("#field-tools .tool-block p").textContent = "Active le tracé puis touche la carte pour poser au moins 3 sommets. La validation crée des cellules de 15 m × 15 m.";
 
 async function loadData() { const load = async (path) => (await fetch(path)).json(); const [scenario, heroClasses, unitDefinitions, locations] = await Promise.all([load("../data/scenarios/chaos.json"), load("../data/hero-classes.json"), load("../data/units.json"), load("../data/locations.json")]); return { scenario, heroClasses, unitDefinitions, locations }; }
-function buildSetup() { const expert = $("#expert-contentment").checked; return { id: "chaos-field-test", name: "Essai terrain", mode: "quick", scenarioId: "chaos", playerCount: 2, rules: { enableContentment: expert, locationMode: expert ? "expert" : "casual" }, playArea: { id: "initial-area", name: "Zone provisoire", polygon: [{ latitude: -89, longitude: -179 }, { latitude: -89, longitude: 179 }, { latitude: 89, longitude: 0 }] }, participants: [{ playerId: "local", name: "Joueur" }, { playerId: "bandits", name: "Chef brigand" }] }; }
-
 function start() {
-  mode = document.querySelector('input[name="test-mode"]:checked').value;
+  let setup;
+  try { setup = setupView.readSetup(); } catch (error) { setupView.showError(error); return; }
+  mode = setupView.readPositionMode();
   const bindings = [{ locationSlotId: "refuge", locationId: "fort-nord" }, { locationSlotId: "village", locationId: "village-vert" }, { locationSlotId: "bandit-camp", locationId: "bandit-camp" }];
-  game = new Game({ setup: buildSetup(), scenario: data.scenario, heroClasses: data.heroClasses, unitDefinitions: data.unitDefinitions, locations: data.locations, scenarioLocationBindings: bindings });
+  game = new Game({ setup, scenario: data.scenario, heroClasses: data.heroClasses, unitDefinitions: data.unitDefinitions, locations: data.locations, scenarioLocationBindings: bindings });
   rangePolicy = new LocationRangePolicy(game.setup.locationSetup.rangePolicy);
   hero = game.chooseHero("local", { name: ui.name.value.trim() || "Aldric", classId: ui.heroClass.value });
   hero.maxHealth = 150; hero.health = 150;
@@ -93,21 +98,34 @@ function positionFor(id) { return runtimePositions.get(id); }
 function rangesFor(location) { return mode === "gps" ? rangePolicy.resolve(location, game.setup.playArea) : { interactionRadius: simulationRadii[location.id] ?? 8, detectionRadius: simulationDetectionRadii[location.id] ?? 16 }; }
 function radiusFor(location) { return rangesFor(location).interactionRadius; }
 function rebuildLocationEngine() { locationEngine = new LocationEngine({ locations: game.locations.filter((location) => location.state !== "destroyed").map((location) => ({ id: location.id, position: positionFor(location.id), interactionRadius: radiusFor(location) })), cooldownMs: 2_000, exitMarginMeters: mode === "gps" ? 10 : 1, distanceFn: distance, validatePositionFn: () => {} }); }
+function unitDefenseSummary(unit, source, hero = null) { return { id: unit.id, name: unit.name ?? unit.typeId, type: unit.typeId, quantity: unit.quantity, ownerPlayerId: unit.ownerPlayerId, source, heroId: hero?.id ?? null, heroName: hero?.name ?? null }; }
+function locationDefenseSnapshot(location) {
+  const units = location.garrison.units.map((unit) => unitDefenseSummary(unit, "garrison"));
+  const reinforcements = location.heroIds.flatMap((heroId) => {
+    const presentHero = game.getHero(heroId);
+    if (!presentHero || presentHero.id === hero.id || !game.locationAccessPolicy.isDefender(presentHero.playerId, location)) return [];
+    return presentHero.army.units.map((unit) => unitDefenseSummary(unit, "hero", presentHero));
+  });
+  return { slots: location.defenseSlots, units, reinforcements, defenders: [...units, ...reinforcements] };
+}
 
 function mappedLocations({ knownOnly = true } = {}) {
   const player = game.getPlayer("local");
   return game.locations.filter((location) => location.state !== "destroyed" && (!knownOnly || player.knowsLocation(location.id))).map((location) => {
     const position = positionFor(location.id); const d = distance(heroPosition, position); const ranges = rangesFor(location); const nearby = d <= ranges.interactionRadius;
     const relation = game.getLocationRelation(player.id, location.id); const can = (action) => game.canPerformLocationAction({ playerId: player.id, locationId: location.id, action }); const actions = [];
-    if (can("recruit")) location.recruitment.availableUnitTypeIds.forEach((type) => { const definition = game.unitDefinitions.get(type); actions.push({ id: `recruit:${type}`, label: `Recruter ${definition?.name ?? type}`, details: { name: definition?.name ?? type, available: location.recruitment.stock[type] ?? 0, stats: definition ? { ...definition.stats } : {}, costs: definition ? { ...definition.costs } : {} } }); });
+    if (can("recruit")) { const totalAvailable = Object.values(location.recruitment.stock).reduce((sum, amount) => sum + amount, 0); location.recruitment.availableUnitTypeIds.forEach((type) => { const definition = game.unitDefinitions.get(type); actions.push({ id: `recruit:${type}`, label: `Recruter ${definition?.name ?? type}`, details: { name: definition?.name ?? type, available: location.recruitment.stock[type] ?? 0, totalAvailable, capacity: location.recruitment.capacity, stats: definition ? { ...definition.stats } : {}, costs: definition ? { ...definition.costs } : {} } }); }); }
+    if (can("reinforce") && hero.army.units.some((unit) => unit.missingQuantity > 0 && (location.recruitment.stock[unit.typeId] ?? 0) > 0)) actions.push({ id: "complete-units", label: "Compléter les unités" });
+    if (can("heal") && hero.army.units.some((unit) => unit.soldierHealth.some((health) => health < unit.healthPerSoldier))) actions.push({ id: "heal-units", label: "Soigner (1 unité de temps)" });
     if (can("collect")) { const stock = Object.entries(location.resources.stock).map(([id, amount]) => `${Math.floor(amount)} ${id}`).join(", ") || "vide"; actions.push({ id: "collect", label: `Récupérer (${stock})` }); }
     if (can("attack")) actions.push({ id: "battle", label: relation === "neutral" ? "Prendre le contrôle" : "Attaquer" });
     if (can("deposit")) { Object.entries(hero.resources).filter(([, amount]) => amount > 0).forEach(([id, amount]) => actions.push({ id: `deposit-resource:${id}`, label: `Déposer ${Math.floor(amount)} ${id}`, details: { resourceName: id, available: amount } })); hero.carriedLoot.forEach((item) => actions.push({ id: `deposit-item:${item.id}`, label: `Déposer ${item.quantity} ${item.itemId}`, details: { itemName: item.itemId, quantity: item.quantity } })); }
-    return { id: location.id, name: location.name, type: location.type, position, radius: ranges.interactionRadius, interactionRadius: ranges.interactionRadius, detectionRadius: ranges.detectionRadius, distance: d, nearby, relation, state: "DISCOVERED", description: descriptions[location.id] ?? "Lieu créé pendant le test terrain.", actions };
+    const defense = locationDefenseSnapshot(location);
+    return { id: location.id, name: location.name, type: location.type, position, radius: ranges.interactionRadius, interactionRadius: ranges.interactionRadius, detectionRadius: ranges.detectionRadius, distance: d, nearby, relation, state: "DISCOVERED", description: descriptions[location.id] ?? "Lieu créé pendant le test terrain.", defense, actions };
   });
 }
 
-function runProductionCycle() { const results = game.produceLocationResources(1); if (results.length === 0) return; const mine = results.find((result) => result.locationId === "gold-mine"); if (mine) logTest(`La mine produit ${mine.produced.gold ?? 0} or.`); render(); if (currentLocationId && !ui.sheet.hidden && results.some((result) => result.locationId === currentLocationId)) selectLocation(currentLocationId); }
+function runProductionCycle() { const results = game.produceLocationResources(1); if (results.length === 0) return; const mine = results.find((result) => result.locationId === "gold-mine"); if (mine) logTest(`La mine produit ${mine.produced.gold ?? 0} or.`); render(); if (!activeGarrisonLocationId && currentLocationId && !ui.sheet.hidden && results.some((result) => result.locationId === currentLocationId)) selectLocation(currentLocationId); }
 function applyPosition(position) {
   heroPosition = normalizePosition(position, mode); gpsAccuracy = mode === "gps" ? position.accuracy ?? null : null; hero.updatePosition(asGps(heroPosition));
   const playAreaEvent = playAreaPresence.update(asGps(heroPosition));
@@ -120,7 +138,35 @@ function applyPosition(position) {
   render();
 }
 function updatePresence() { if (!game) return; const player = game.getPlayer("local"); mappedLocations({ knownOnly: false }).forEach((item) => { const location = game.getLocation(item.id); if (item.distance <= item.detectionRadius) player.discoverLocation(item.id, item.nearby ? 3 : 1); if (item.nearby) location.addHero(hero.id); else location.removeHero(hero.id); }); }
-function handleLocationEvent(event) { const interaction = interactionEngine.handle(event); if (!interaction) return; if (event.type === "LocationExited") { if (currentLocationId === event.locationId) { currentLocationId = null; locationMessage = ""; if (currentEncounter?.locationId === event.locationId) currentEncounter = null; closeSheet(ui.sheet); } return; } currentLocationId = event.locationId; const capture = game.attemptLocationCapture({ playerId: "local", heroId: hero.id, locationId: event.locationId }); if (capture.success) { locationMessage = "Lieu capturé sans combat."; deviceAlerts.notify("notice"); logTest(`${game.getLocation(event.locationId).name} passe sous votre contrôle.`); } else if (capture.reason === "quest_required") locationMessage = `Capture protégée par la quête ${capture.objectiveId}.`; if (interaction.type === "encounter") { currentEncounter = interaction.encounter; interaction.autoBattle ? openBattle({ ambushTeamId: "bandits" }) : renderEncounter(); } else selectLocation(event.locationId); }
+function handleLocationEvent(event) {
+  const interaction = interactionEngine.handle(event);
+  if (!interaction) return;
+  if (event.type === "LocationExited") {
+    if (currentLocationId === event.locationId) {
+      currentLocationId = null;
+      activeGarrisonLocationId = null;
+      locationMessage = "";
+      if (currentEncounter?.locationId === event.locationId) currentEncounter = null;
+      closeSheet(ui.sheet);
+    }
+    return;
+  }
+  currentLocationId = event.locationId;
+  const capture = game.attemptLocationCapture({ playerId: "local", heroId: hero.id, locationId: event.locationId });
+  if (capture.success) {
+    locationMessage = "Lieu capturé sans combat.";
+    deviceAlerts.notify("notice");
+    logTest(`${game.getLocation(event.locationId).name} passe sous votre contrôle.`);
+  } else if (capture.reason === "quest_required") {
+    locationMessage = `Capture protégée par la quête ${capture.objectiveId}.`;
+  }
+  if (interaction.type === "encounter") {
+    currentEncounter = interaction.encounter;
+    interaction.autoBattle ? openBattle({ ambushTeamId: "bandits" }) : renderEncounter();
+  } else {
+    selectLocation(event.locationId);
+  }
+}
 
 function handleMapClick(position) {
   const point = mode === "gps" ? position : [position.latitude, position.longitude];
@@ -137,14 +183,35 @@ function placeQuestLocation() {
 }
 
 function renderEncounter() { ui.sheet.hidden = false; ui.sheet.innerHTML = `<button class="sheet-close" type="button">Fermer</button><span class="sheet-state">Rencontre</span><h2>Ennemi détecté</h2><p>${currentEncounter.enemy.name}</p><div class="sheet-actions"><button data-encounter="fight">Combattre</button><button class="secondary-button" data-encounter="avoid">Éviter</button></div>`; ui.sheet.querySelector(".sheet-close").onclick = () => closeSheet(ui.sheet); ui.sheet.querySelectorAll("[data-encounter]").forEach((button) => button.onclick = () => { currentEncounter.choose(button.dataset.encounter); button.dataset.encounter === "fight" ? openBattle() : closeSheet(ui.sheet); }); }
-function selectLocation(id) { const location = mappedLocations().find((item) => item.id === id); if (!location) return; currentLocationId = id; renderLocationSheet({ element: ui.sheet, location, message: locationMessage, onClose: () => { currentLocationId = null; closeSheet(ui.sheet); }, onAction: runAction, onOpenWorld: () => openLocationDetail(id) }); }
+function selectLocation(id) { const location = mappedLocations().find((item) => item.id === id); if (!location) return; activeGarrisonLocationId = null; currentLocationId = id; renderLocationSheet({ element: ui.sheet, location, message: locationMessage, onClose: () => { currentLocationId = null; activeGarrisonLocationId = null; closeSheet(ui.sheet); }, onAction: runAction, onOpenWorld: () => openLocationDetail(id), onOpenGarrison: () => openGarrisonManager(id) }); }
 function selectDynamicSite(id) {
   const site = game.battleSites.find((item) => item.id === id); if (!site || site.status !== "FINISHED") return;
   ui.sheet.hidden = false; ui.sheet.innerHTML = `<button class="sheet-close" type="button">Fermer</button><span class="sheet-state">Champ de bataille</span><h2>Traces du combat</h2><p>Ce site disparaîtra bientôt.</p><div class="sheet-actions"><button data-site-search="loot">Chercher du butin</button><button data-site-search="information">Chercher des informations</button><button data-site-search="survivors">Chercher des survivants</button></div>`;
   ui.sheet.querySelector(".sheet-close").onclick = () => closeSheet(ui.sheet);
   ui.sheet.querySelectorAll("[data-site-search]").forEach((button) => button.onclick = () => { searchBattlefield(button.dataset.siteSearch, site.id); closeSheet(ui.sheet); });
 }
-function runAction(action, { returnToWorld = false } = {}) { const location = game.getLocation(currentLocationId); if (action.startsWith("recruit:")) { const result = game.recruitUnit({ playerId: "local", heroId: hero.id, locationId: location.id, unitTypeId: action.split(":")[1] }); locationMessage = result.success ? "Unité recrutée." : `Impossible : ${result.reason}.`; } else if (action === "collect") { const result = game.collectLocationResources({ playerId: "local", heroId: hero.id, locationId: location.id }); locationMessage = result.success ? "Ressources récupérées." : "Collecte impossible."; } else if (action.startsWith("deposit-resource:")) { const [resourceName, requestedAmount] = action.slice("deposit-resource:".length).split(":"); const amount = requestedAmount === undefined ? undefined : Number(requestedAmount); const result = game.depositLocationResource({ playerId: "local", heroId: hero.id, locationId: location.id, resourceName, amount }); locationMessage = result.success ? `${result.deposited} ${resourceName} déposé.` : `Dépôt impossible : ${result.reason}.`; } else if (action.startsWith("deposit-item:")) { const result = game.depositLocationItem({ playerId: "local", heroId: hero.id, locationId: location.id, lootId: action.slice("deposit-item:".length) }); locationMessage = result.success ? `${result.item.quantity} ${result.item.itemId} déposé.` : `Dépôt impossible : ${result.reason}.`; } else if (action === "battle") openBattle(); render(); if (action !== "battle") { if (returnToWorld) { worldMessage = locationMessage; renderWorld(); } else selectLocation(currentLocationId); } }
+function runAction(action, { returnToWorld = false } = {}) {
+  const location = game.getLocation(currentLocationId);
+  if (action.startsWith("recruit:")) {
+    const result = game.recruitUnit({ playerId: "local", heroId: hero.id, locationId: location.id, unitTypeId: action.split(":")[1] });
+    locationMessage = result.success ? "Unité recrutée." : `Impossible : ${result.reason}.`;
+  } else if (action === "complete-units") {
+    const result = game.completeHeroUnits({ playerId: "local", heroId: hero.id, locationId: location.id });
+    const added = result.reinforced.reduce((sum, unit) => sum + unit.added, 0);
+    locationMessage = result.success ? `${added} soldat(s) ont complété vos unités.` : `Renfort impossible : ${result.reason}.`;
+  } else if (action === "heal-units") {
+    const result = game.healHeroUnits({ playerId: "local", heroId: hero.id, locationId: location.id, timeUnits: 1 });
+    locationMessage = result.success ? `${result.restoredHealth} PV restauré(s) aux soldats.` : `Soin impossible : ${result.reason}.`;
+  } else if (action === "collect") {
+    const result = game.collectLocationResources({ playerId: "local", heroId: hero.id, locationId: location.id }); locationMessage = result.success ? "Ressources récupérées." : "Collecte impossible.";
+  } else if (action.startsWith("deposit-resource:")) {
+    const [resourceName, requestedAmount] = action.slice("deposit-resource:".length).split(":"); const amount = requestedAmount === undefined ? undefined : Number(requestedAmount); const result = game.depositLocationResource({ playerId: "local", heroId: hero.id, locationId: location.id, resourceName, amount }); locationMessage = result.success ? `${result.deposited} ${resourceName} déposé.` : `Dépôt impossible : ${result.reason}.`;
+  } else if (action.startsWith("deposit-item:")) {
+    const result = game.depositLocationItem({ playerId: "local", heroId: hero.id, locationId: location.id, lootId: action.slice("deposit-item:".length) }); locationMessage = result.success ? `${result.item.quantity} ${result.item.itemId} déposé.` : `Dépôt impossible : ${result.reason}.`;
+  } else if (action === "battle") openBattle();
+  render();
+  if (action !== "battle") { if (returnToWorld) { worldMessage = locationMessage; renderWorld(); } else selectLocation(currentLocationId); }
+}
 
 function openBattle({ ambushTeamId = null } = {}) {
   if (activeBattle && activeBattle.status !== "finished") return; closeSheet(ui.sheet); enemyHero.updatePosition(asGps(heroPosition));
@@ -180,14 +247,22 @@ function restoreFieldTestState() {
 function renderGpsAccuracySummary() { const summary = gpsAccuracyLog.getSummary(); gpsAccuracyStatus.textContent = summary.count ? `Journal GPS · ${summary.count} relevé(s) · moyenne ±${Math.round(summary.average)} m · min ${Math.round(summary.minimum)} m · max ${Math.round(summary.maximum)} m` : "Journal GPS : aucun relevé."; }
 function directoryLocations() { const player = game.getPlayer("local"); return mappedLocations().map((snapshot) => { const location = game.getLocation(snapshot.id); const ownerPlayer = location.ownerId ? game.getPlayer(location.ownerId) : null; const owner = location.ownerId ? { id: location.ownerId, name: ownerPlayer?.name ?? location.ownerId, color: location.ownerId === "local" ? "#62a8ff" : location.ownerId === "bandits" ? "#d86868" : "#d8b862" } : null; const heroes = location.heroIds.map((id) => game.getHero(id)).filter((item) => item && item.playerId !== player.id).map((item) => ({ ...item, className: data.heroClasses.find((heroClass) => heroClass.id === item.classId)?.name ?? item.classId })); return buildLocationIntel({ location, snapshot, knowledgeLevel: player.getLocationKnowledge(location.id), owner, heroes, description: descriptions[location.id] ?? "Un lieu dont l'histoire reste à découvrir." }); }); }
 function filteredDirectoryLocations() { const search = worldFilters.search.trim().toLocaleLowerCase("fr"); const locations = directoryLocations().filter((location) => (!search || location.name.toLocaleLowerCase("fr").includes(search)) && (!worldFilters.type || location.nature === worldFilters.type) && (!worldFilters.owner || (worldFilters.owner === "known" ? location.owner.id : !location.owner.id))); const compare = worldFilters.sort === "name" ? (a, b) => a.name.localeCompare(b.name, "fr") : worldFilters.sort === "type" ? (a, b) => a.nature.localeCompare(b.nature, "fr") : worldFilters.sort === "owner" ? (a, b) => a.owner.name.localeCompare(b.owner.name, "fr") : (a, b) => a.distance - b.distance; return locations.sort(compare); }
-function openLocationDetail(id) { worldSelectedLocationId = id; worldMessage = ""; closeSheet(ui.sheet); switchView("world"); }
+function openLocationDetail(id) { activeGarrisonLocationId = null; worldSelectedLocationId = id; worldMessage = ""; closeSheet(ui.sheet); switchView("world"); }
 function showLocationOnMap(id) { const location = directoryLocations().find((item) => item.id === id); if (!location) return; switchView("map"); mapView.focus(location.position); }
+function openGarrisonManager(locationId, message = "") {
+  const location = game.getLocation(locationId); if (!location) return;
+  activeGarrisonLocationId = locationId; currentLocationId = locationId;
+  renderGarrisonSheet({ element: ui.sheet, location, hero, playerId: "local", message, onClose: () => { activeGarrisonLocationId = null; closeSheet(ui.sheet); }, onTransfer: ({ direction, unitId }) => {
+    const success = direction === "deposit" ? game.garrisonUnit({ playerId: "local", heroId: hero.id, locationId, unitId }) : game.withdrawGarrisonUnit({ playerId: "local", heroId: hero.id, locationId, unitId });
+    renderWorld(); openGarrisonManager(locationId, success ? (direction === "deposit" ? "Unité affectée à la garnison." : "Unité reprise dans votre armée.") : "Transfert impossible : vérifiez les slots, la capacité de l’armée et le propriétaire de l’unité.");
+  } });
+}
 function renderWorld() {
   if (!game || !ui.worldContent) return;
   const locations = filteredDirectoryLocations();
   if (!worldSelectedLocationId) return renderWorldDirectory({ element: ui.worldContent, locations, types: [...new Set(directoryLocations().map((location) => location.nature))].sort(), filters: worldFilters, onFilter: (key, value) => { worldFilters[key] = value; renderWorld(); if (key === "search") { const input = ui.worldContent.querySelector('[data-filter="search"]'); input?.focus(); input?.setSelectionRange(value.length, value.length); } }, onOpen: openLocationDetail, onShowMap: showLocationOnMap });
   const allLocations = directoryLocations().sort((a, b) => a.name.localeCompare(b.name, "fr")); const index = Math.max(0, allLocations.findIndex((item) => item.id === worldSelectedLocationId)); const location = allLocations[index]; if (!location) { worldSelectedLocationId = null; return renderWorld(); }
-  renderLocationDetail({ element: ui.worldContent, location, index, total: allLocations.length, message: worldMessage, onBack: () => { worldSelectedLocationId = null; worldMessage = ""; renderWorld(); }, onPrevious: () => { if (index > 0) { worldSelectedLocationId = allLocations[index - 1].id; worldMessage = ""; renderWorld(); } }, onNext: () => { if (index < allLocations.length - 1) { worldSelectedLocationId = allLocations[index + 1].id; worldMessage = ""; renderWorld(); } }, onShowMap: () => showLocationOnMap(location.id), onAction: (action) => { currentLocationId = location.id; runAction(action, { returnToWorld: true }); } });
+  renderLocationDetail({ element: ui.worldContent, location, index, total: allLocations.length, message: worldMessage, onBack: () => { worldSelectedLocationId = null; worldMessage = ""; renderWorld(); }, onPrevious: () => { if (index > 0) { worldSelectedLocationId = allLocations[index - 1].id; worldMessage = ""; renderWorld(); } }, onNext: () => { if (index < allLocations.length - 1) { worldSelectedLocationId = allLocations[index + 1].id; worldMessage = ""; renderWorld(); } }, onShowMap: () => showLocationOnMap(location.id), onAction: (action) => { currentLocationId = location.id; runAction(action, { returnToWorld: true }); }, onOpenGarrison: () => openGarrisonManager(location.id) });
 }
 function render() {
   if (!game || !mapView) return; const sites = visibleSites(); mapView.render({ heroPosition, heroHeading, accuracy: gpsAccuracy, locations: mappedLocations(), playAreaPoints: field.playAreaPoints, dynamicSites: sites, gridCells: playAreaGrid?.cells ?? [], heatmapVisible });
@@ -205,7 +280,13 @@ function render() {
   ui.heroContent.innerHTML = `<article class="hero-card compact-hero-card"><header><div><h3>${hero.name}</h3><span class="eyebrow">${heroClass?.name ?? hero.classId} · ${rankLabel(HERO_COMMAND_RANKS, hero.commandRank)}</span></div><span class="hero-state">${hero.state}</span></header><section class="hero-bars"><div class="hero-bar-label"><strong>Points de vie</strong><span>${hero.health}/${hero.maxHealth}</span></div><div class="hero-progress health-progress" role="progressbar" aria-label="Points de vie" aria-valuemin="0" aria-valuemax="${hero.maxHealth}" aria-valuenow="${hero.health}"><span style="width:${healthPercent}%"></span></div><div class="hero-bar-label"><strong>Niveau ${hero.level}</strong><span>${levelExperience}/100 XP</span></div><div class="hero-progress experience-progress" role="progressbar" aria-label="Expérience du niveau ${hero.level}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${levelExperience}"><span style="width:${experiencePercent}%"></span></div></section><div class="compact-hero-stats"><div><strong>${signed(heroModifiers.attackBonus)}</strong><span>Attaque</span></div><div><strong>${signed(heroModifiers.defenseBonus)}</strong><span>Défense</span></div><div><strong>${signed(heroModifiers.moraleBonus)}</strong><span>Moral</span></div><div><strong>×${heroModifiers.speedMultiplier.toFixed(2)}</strong><span>Mobilité</span></div><div><strong>◆ ${hero.commandPoints}/${hero.maxCommandPoints}</strong><span>Commandement</span></div><div><strong>${hero.army.units.length}/${hero.maxUnitStacks}</strong><span>Unités</span></div><div><strong>${carriedWeight.toFixed(1)}/${hero.carryCapacity}</strong><span>Charge</span></div></div><section class="trait-section"><h4>Compétences passives</h4><div class="trait-list">${hero.skillIds.map((id) => traitButton(id, "skill")).join("") || '<span class="text-muted">Aucune</span>'}</div></section><section class="trait-section"><h4>Pouvoirs spéciaux</h4><div class="trait-list">${hero.specialPowerIds.map((id) => traitButton(id, "power")).join("") || '<span class="text-muted">Aucun</span>'}</div></section>${traitDetail}<div class="hero-equipment"><strong>Équipement</strong><span>${Object.values(hero.equipment).join(", ") || "aucun"}</span></div></article>`;
   ui.heroContent.querySelectorAll("[data-trait-id]").forEach((button) => button.addEventListener("click", () => { const next = { id: button.dataset.traitId, type: button.dataset.traitType }; selectedHeroTrait = selectedHeroTrait?.id === next.id && selectedHeroTrait.type === next.type ? null : next; render(); }));
   ui.heroContent.onclick = (event) => { if (selectedHeroTrait && !event.target.closest("[data-trait-id]")) { selectedHeroTrait = null; render(); } };
-  ui.armyContent.innerHTML = `<div class="army-list">${hero.army.units.map((unit) => { const definition = game.unitDefinitions.get(unit.typeId); const unitName = unit.name ?? definition?.name ?? unit.typeId; const illustration = definition?.tags?.includes("cavalry") ? "♞" : definition?.tags?.includes("ranged") ? "➶" : "⚔"; const stats = definition?.stats; return `<article class="army-card"><div class="army-illustration" aria-hidden="true">${illustration}</div><div class="army-card__content"><p class="eyebrow">${rankLabel(UNIT_RANKS, unit.rank)} · niveau ${unit.level}</p><h3>${unitName}</h3>${unitHealthBar(unit)}<div class="army-card__meta"><strong>${unit.combatantCount} aptes · ${unit.woundedCount} blessés</strong><span>${unit.experience} XP</span>${stats ? `<span>ATQ ${stats.attack} · DÉF ${stats.defense} · VIT ${stats.speed}</span>` : ""}</div></div></article>`; }).join("") || '<p class="text-muted">Aucune unité.</p>'}</div>`; ui.inventory.innerHTML = `<article class="unit-row"><strong>Ressources</strong><span>${Object.entries(hero.resources).map(([key, value]) => `${key}: ${value}`).join(" · ")}</span></article><article class="unit-row"><strong>Butin transporté</strong><span>${hero.carriedLoot.map((item) => `${item.quantity} ${item.itemId}`).join(" · ") || "Aucun"}</span></article>`;
+  ui.armyContent.innerHTML = `<div class="army-list">${hero.army.units.map((unit) => { const definition = game.unitDefinitions.get(unit.typeId); const unitName = unit.name ?? definition?.name ?? unit.typeId; const stats = definition?.stats; const illustration = renderUnitTypeIcon({ typeId: unit.typeId, tags: definition?.tags ?? [], range: stats?.range ?? 1 }); return `<article class="army-card"><div class="army-illustration" aria-hidden="true">${illustration}</div><div class="army-card__content"><p class="eyebrow">${rankLabel(UNIT_RANKS, unit.rank)} · niveau ${unit.level}</p><div class="army-card__heading"><h3>${unitName}</h3><button type="button" class="disband-unit-button" data-disband-unit="${unit.id}" aria-label="Dissoudre ${unitName}">Dissoudre</button></div>${unitHealthBar(unit)}<div class="army-card__meta"><strong>${unit.combatantCount} aptes · ${unit.woundedCount} blessés</strong><span>${unit.experience} XP</span>${stats ? `<span>ATQ ${stats.attack} · DÉF ${stats.defense} · VIT ${stats.speed}</span>` : ""}</div></div></article>`; }).join("") || '<p class="text-muted">Aucune unité.</p>'}</div>`; ui.inventory.innerHTML = `<article class="unit-row"><strong>Ressources</strong><span>${Object.entries(hero.resources).map(([key, value]) => `${key}: ${value}`).join(" · ")}</span></article><article class="unit-row"><strong>Butin transporté</strong><span>${hero.carriedLoot.map((item) => `${item.quantity} ${item.itemId}`).join(" · ") || "Aucun"}</span></article>`;
+  ui.armyContent.querySelectorAll("[data-disband-unit]").forEach((button) => button.addEventListener("click", () => {
+    const unit = hero.army.getUnit(button.dataset.disbandUnit); if (unit === null) return;
+    if (!window.confirm(`Dissoudre définitivement ${unit.name ?? unit.typeId} ? Aucun remboursement ne sera accordé.`)) return;
+    const result = game.disbandUnit({ playerId: hero.playerId, heroId: hero.id, unitId: unit.id });
+    if (result.success) { logTest(`${result.unit.name ?? result.unit.typeId} a été dissoute.`); render(); }
+  }));
   ui.quests.innerHTML = `<article class="quest-card"><strong>Marche des 300 mètres</strong><span>${field.questStart ? `${Math.round(field.questDistanceMeters)} / 300 m` : "Non démarrée"}</span></article>`; ui.sitesStatus.textContent = `${game.battleSites.length} champ(s) de bataille · ${game.lootSites.length} site(s) de butin · ${sites.length} visible(s)`;
   $("#grid-status").textContent = playAreaGrid ? `${playAreaGrid.cells.length} cellule(s) · ${playAreaGrid.cells.filter((cell) => cell.visits > 0).length} visitée(s) · ${playAreaGrid.cells.reduce((sum, cell) => sum + cell.visits, 0)} passage(s)` : "Aucune grille.";
   if ($("#world-view").classList.contains("is-active")) renderWorld();
@@ -225,6 +306,6 @@ ui.questPlace.onclick = placeQuestLocation; $("#test-battle").onclick = openBatt
 document.querySelectorAll("[data-view]").forEach((button) => button.onclick = () => switchView(button.dataset.view));
 document.addEventListener("visibilitychange", () => { if (!game) return; if (document.visibilityState === "hidden") { persistFieldState(); logTest("Application suspendue : le suivi GPS peut être interrompu par iOS."); } else logTest("Application de nouveau active : reprise du suivi GPS."); });
 
-try { data = await loadData(); ui.heroClass.innerHTML = data.heroClasses.filter((item) => item.id !== "mage").map((item) => `<option value="${item.id}">${item.name}</option>`).join(""); ui.status.textContent = "Le banc d'essai terrain est prêt."; } catch (error) { ui.status.textContent = `Chargement impossible : ${error.message}`; ui.create.disabled = true; }
+try { data = await loadData(); setupView.setScenarios([data.scenario]); ui.heroClass.innerHTML = data.heroClasses.filter((item) => item.id !== "mage").map((item) => `<option value="${item.id}">${item.name}</option>`).join(""); ui.status.textContent = "Le banc d'essai terrain est prêt."; } catch (error) { ui.status.textContent = `Chargement impossible : ${error.message}`; ui.create.disabled = true; }
 
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("../service-worker.js", { scope: "../" }).catch(() => {}));

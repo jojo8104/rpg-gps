@@ -50,6 +50,17 @@ export class Unit {
     return reinforcements;
   }
 
+  heal(timeUnits = 1) {
+    if (!Number.isInteger(timeUnits) || timeUnits <= 0) throw new RangeError("Le temps de soin doit être un entier positif.");
+    let restoredHealth = 0;
+    this.soldierHealth = this.soldierHealth.map((health) => {
+      const healed = Math.min(this.healthPerSoldier, health + timeUnits);
+      restoredHealth += healed - health;
+      return healed;
+    });
+    return { restoredHealth, healedSoldiers: this.soldierHealth.filter((health) => health === this.healthPerSoldier).length };
+  }
+
   applyBattleHealth(soldierHealth) {
     this.soldierHealth = Unit.#soldierHealth(soldierHealth, null, this.healthPerSoldier)
       .filter((health) => health > 0)

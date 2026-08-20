@@ -32,4 +32,18 @@ export class RecruitmentService {
     hero.addUnit(unit);
     return { success: true, unit };
   }
+
+  completeUnits({ hero, location }) {
+    if (!location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location", reinforced: [] };
+    if (location.features.recruitment !== true) return { success: false, reason: "recruitment_not_available", reinforced: [] };
+    const reinforced = [];
+    for (const unit of hero.army.units) {
+      const available = Math.floor(location.recruitment.stock[unit.typeId] ?? 0);
+      if (unit.missingQuantity <= 0 || available <= 0 || !location.recruitment.availableUnitTypeIds.includes(unit.typeId)) continue;
+      const added = unit.reinforce(Math.min(unit.missingQuantity, available));
+      location.recruitment.stock[unit.typeId] -= added;
+      reinforced.push({ unitId: unit.id, typeId: unit.typeId, added, quantity: unit.quantity, maxQuantity: unit.maxQuantity });
+    }
+    return reinforced.length > 0 ? { success: true, reinforced } : { success: false, reason: "no_compatible_recruits", reinforced };
+  }
 }

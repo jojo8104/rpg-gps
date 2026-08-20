@@ -3,6 +3,8 @@ export const LOCATION_RELATIONS = Object.freeze({ OWNED: "owned", ALLIED: "allie
 const ACTION_RELATIONS = Object.freeze({
   inspect: new Set(["owned", "allied", "neutral", "enemy"]),
   recruit: new Set(["owned", "allied", "neutral"]),
+  reinforce: new Set(["owned", "allied", "neutral"]),
+  heal: new Set(["owned", "allied", "neutral"]),
   collect: new Set(["owned", "allied", "neutral"]),
   deposit: new Set(["owned", "allied", "neutral"]),
   garrison: new Set(["owned", "neutral"]),
@@ -25,11 +27,18 @@ export class LocationAccessPolicy {
     return playerTeam !== null && playerTeam === controllerTeam ? LOCATION_RELATIONS.ALLIED : LOCATION_RELATIONS.ENEMY;
   }
 
+  isDefender(playerId, location) {
+    const relation = this.getRelation(playerId, location);
+    return relation === LOCATION_RELATIONS.OWNED || relation === LOCATION_RELATIONS.ALLIED;
+  }
+
   can(playerId, location, action) {
     const allowedRelations = ACTION_RELATIONS[action];
     if (allowedRelations === undefined) return false;
     if (!allowedRelations.has(this.getRelation(playerId, location))) return false;
     if (action === "recruit") return location.features.recruitment === true;
+    if (action === "reinforce") return location.features.recruitment === true;
+    if (action === "heal") return location.features.healing === true;
     if (action === "collect") return location.features.resourceProduction === true;
     if (action === "garrison" || action === "withdrawGarrison") return location.features.garrison === true;
     if (action === "attack") return location.features.battle === true || location.features.capturable === true;

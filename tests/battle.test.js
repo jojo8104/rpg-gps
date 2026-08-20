@@ -29,6 +29,16 @@ test("une unité avance selon son comportement propre sans ordre joueur", () => 
   assert.equal(typeof battle.issueOrder, "undefined");
 });
 
+test("l'avance laisse au joueur le temps d'observer le champ de bataille", () => {
+  const battle = new BattleEngine({ id: "paced-movement", teams: [
+    { id: "red", heroes: [{ id: "hr", playerId: "red" }], units: [{ id: "ur", playerId: "red", attack: 1, defense: 1, speed: 2, quantity: 1, maxQuantity: 1 }] },
+    { id: "blue", heroes: [{ id: "hb", playerId: "blue" }], units: [] },
+  ] });
+  battle.tick(1_500);
+  assert.equal(battle.config.advanceTravelBaseMs, 15_000);
+  assert.equal(battle.getEntity("ur").progress, 0.2);
+});
+
 test("un combat normal attend un compte à rebours de trois secondes", () => {
   const battle = new BattleEngine({ id: "countdown", config: { countdownMs: 3_000 }, teams: [
     { id: "red", heroes: [{ id: "hr", playerId: "red" }], units: [{ id: "ur", playerId: "red", attack: 2, defense: 1, speed: 1, range: 1, quantity: 5, maxQuantity: 5 }] },
@@ -54,7 +64,7 @@ test("après une percée, une unité reste sur sa ligne et inflige des dégâts 
   const battle = createBattle(); const unit = battle.teams[0].units[0];
   unit.lane = null;
   battle.assignUnit(unit.id, battle.teams[0].heroes[0].id, 0);
-  for (let index = 0; index < 10 && !battle.eventLog.some((event) => event.type === "breakthrough_attack"); index += 1) battle.tick(500);
+  for (let index = 0; index < 20 && !battle.eventLog.some((event) => event.type === "breakthrough_attack"); index += 1) battle.tick(500);
   const attack = battle.eventLog.find((event) => event.type === "breakthrough_attack");
   assert.equal(unit.lane, 0); assert.equal(attack.targetId, "hero-blue"); assert.equal(attack.multiplier, 1.5);
 });

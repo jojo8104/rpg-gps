@@ -5,6 +5,7 @@ export class BattleState {
     this.id = id;
     this.config = {
       tickMs: positive(config.tickMs ?? 500, "tickMs"),
+      advanceTravelBaseMs: positive(config.advanceTravelBaseMs ?? 15_000, "advanceTravelBaseMs"),
       unitHealthPerSurvivor: positive(config.unitHealthPerSurvivor ?? 10, "unitHealthPerSurvivor"),
       defenseBase: positive(config.defenseBase ?? 5, "defenseBase"),
       reinforcementDelayMs: nonNegative(config.reinforcementDelayMs ?? 3_000, "reinforcementDelayMs"),
@@ -115,6 +116,8 @@ function createUnit(entity, lane, ids) {
   if (damageMax < damageMin) throw new RangeError("Les degats maximum doivent etre superieurs aux degats minimum.");
   return {
     ...base,
+    typeId: entity.typeId ?? null,
+    tags: normalizeIds(entity.tags ?? []),
     maxQuantity,
     quantity: counts.alive,
     initialQuantity: soldierHealth.length,
