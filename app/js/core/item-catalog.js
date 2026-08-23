@@ -8,6 +8,7 @@ export const ITEM_DEFINITIONS = Object.freeze({
   horse: item("horse", "Cheval", "livestock", 1, "🐎"),
   population: item("population", "Population", "population", 5, "👥"),
   royal_geologist: item("royal_geologist", "Géologue royal", "character", 1, "🧭", { unique: true }),
+  incomplete_mine_report: item("incomplete_mine_report", "Rapport incomplet des prospecteurs", "unique", 1, "📜", { unique: true }),
   abandoned_mine_report: item("abandoned_mine_report", "Rapport sur la mine", "unique", 1, "📜", { unique: true }),
   iron_sword: item("iron_sword", "Épée de fer", "equipment", 1, "⚔", { unique: true, equipmentSlot: "mainHand", modifiers: { attack: 2 } }),
   round_shield: item("round_shield", "Bouclier rond", "equipment", 1, "◉", { unique: true, equipmentSlot: "offHand", modifiers: { defense: 2 } }),

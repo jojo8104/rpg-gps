@@ -1,10 +1,11 @@
-const CACHE = "rpg-gps-field-v66";
+const CACHE = "rpg-gps-field-v69";
 const local = (path) => new URL(path, self.location).href;
 const APP_SHELL = [local("./"), local("./index.html"), local("./app/"), local("./app/index.html"), local("./app/css/style.css"), local("./app/js/main.js"), local("./app/js/gps.js"), local("./app/js/orientation.js"), local("./app/js/position-adapter.js"), local("./app/js/device-alerts.js"), local("./app/js/field-state-storage.js"), local("./app/js/wake-lock.js"), local("./app/js/ui/game-setup-view.js"), local("./app/js/ui/world-view.js"), local("./app/js/core/gps-accuracy-log.js"), local("./app/js/core/heading.js"), local("./app/js/core/location-intel.js"), local("./app/js/core/location-range-policy.js"), local("./app/js/core/play-area-presence.js"), local("./app/manifest.webmanifest"), local("./app/icon.svg"), local("./data/scenarios/chaos.json"), local("./data/hero-classes.json"), local("./data/units.json"), local("./data/locations.json")];
 APP_SHELL.push(local("./app/js/ui/garrison-sheet.js"), local("./app/js/ui/bottom-sheet.js"), local("./app/js/ui/unit-icon.js"), local("./app/js/ui/map-view.js"), local("./app/js/map/MapRenderer.js"), local("./app/js/map/UnitRenderer.js"));
 APP_SHELL.push(local("./app/js/core/hero-progression-config.js"), local("./app/js/core/hero-progression-service.js"), local("./app/js/core/hero-aptitude.js"), local("./data/hero-aptitudes.json"));
 APP_SHELL.push(local("./app/js/core/battle-aptitude-service.js"));
 APP_SHELL.push(local("./app/js/core/army-pursuit.js"));
+APP_SHELL.push(local("./app/js/core/ambush-service.js"));
 APP_SHELL.push(local("./app/js/core/hero-recovery-service.js"));
 APP_SHELL.push(local("./app/js/core/hero-class-feature-service.js"));
 APP_SHELL.push(local("./app/js/core/quest-runtime.js"), local("./app/js/core/scenario-runtime-builder.js"), local("./app/js/ui/quest-hud.js"));

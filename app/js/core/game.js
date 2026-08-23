@@ -34,6 +34,7 @@ import { QuestRuntime } from "./quest-runtime.js";
 import { ScenarioRuntimeBuilder } from "./scenario-runtime-builder.js";
 import { HeroClassFeatureService } from "./hero-class-feature-service.js";
 import { distanceMeters } from "./geo.js";
+import { HeroTravelExperienceService } from "./hero-travel-experience-service.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
 export class Game {
@@ -42,6 +43,7 @@ export class Game {
     this.heroClasses = Game.#createHeroClassMap(heroClasses);
     this.heroClassFeatureService = new HeroClassFeatureService({ classDefinitions: this.heroClasses, now });
     this.heroProgressionService = new HeroProgressionService({ aptitudeDefinitions: heroAptitudes, now });
+    this.heroTravelExperienceService = new HeroTravelExperienceService();
     this.unitDefinitions = Game.#createUnitDefinitionMap(unitDefinitions);
     this.recruitmentService = new RecruitmentService(this.unitDefinitions);
     this.locationAccessPolicy = new LocationAccessPolicy({ participants: this.setup.participants });
@@ -121,6 +123,13 @@ export class Game {
   gainHeroExperience({ heroId, amount, source }) {
     const hero = this.getHero(heroId); if (hero === null) throw new RangeError("Le héros n'existe pas.");
     return this.heroProgressionService.addExperience(hero, amount, source, this.heroClasses.get(hero.classId));
+  }
+
+  recordHeroTravel({ heroId, position, accuracy = position?.accuracy ?? 0 }) {
+    const hero = this.getHero(heroId); if (hero === null) throw new RangeError("Le héros n'existe pas.");
+    const travel = this.heroTravelExperienceService.record(hero, position, { accuracy });
+    if (travel.experienceGained > 0) travel.progression = this.gainHeroExperience({ heroId, amount: travel.experienceGained, source: "travel:gps" });
+    return travel;
   }
 
   selectHeroLevelUp({ heroId, pendingId, upgradeId }) {
