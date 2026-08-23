@@ -32,6 +32,7 @@ import { renderInventoryView } from "./ui/inventory-view.js";
 import { bindEquipmentView, renderEquipmentView } from "./ui/equipment-view.js";
 import { renderLootStockSheet } from "./ui/loot-stock-sheet.js";
 import { renderUnitHealthBar } from "./ui/unit-health-bar.js";
+import { renderUnitExperienceBar } from "./ui/unit-experience-bar.js";
 import { closeDialogueView, renderDialogueView } from "./ui/dialogue-view.js";
 import { AutonomousGroupTrace } from "./core/autonomous-group-trace.js";
 import { AutonomousGroup } from "./core/autonomous-group.js";
@@ -106,7 +107,7 @@ function start() {
   rebuildLocationEngine();
   interactionEngine = new InteractionEngine({ locations: game.locations, enemyResolver: resolveLocationEnemy });
   ui.setup.hidden = true; ui.game.hidden = false;
-  mapView = new MapView({ element: $("#map"), mode, initialPosition: heroPosition, onHeroMove: applyPosition, onLocationSelect: selectLocation, onDynamicSiteSelect: selectDynamicSite, onTraceSelect: inspectQuestTrace, onMapClick: handleMapClick });
+  mapView = new MapView({ element: $("#map"), mode, initialPosition: heroPosition, onHeroMove: applyPosition, onLocationSelect: selectLocation, onDynamicSiteSelect: selectDynamicSite, onTraceSelect: inspectQuestTrace, onAutonomousGroupSelect: selectAutonomousGroup, onMapClick: handleMapClick });
   mapFollowMode = "centered"; updateMapFollowButton(); mapView.map.on("dragstart", () => { mapView.setBearingEnabled(false); mapFollowMode = "free"; updateMapFollowButton(); });
   capitalPlaced = false; gpsSetupActive = true; ui.game.classList.add("is-gps-setup"); ui.gpsSetup.classList.toggle("is-simulation", mode === "simulation"); ui.gpsSetup.hidden = false; renderGpsLocationButtons();
   if (mode === "simulation") { restoreFieldTestState(); ui.gpsAreaStatus.textContent = "Sélectionne la capitale, puis touche son emplacement sur la carte."; render(); setTimeout(() => mapView.map.invalidateSize(), 0); return; }
@@ -142,6 +143,10 @@ function rangesFor(location) { return mode === "gps" ? rangePolicy.resolve(locat
 function resolveLocationEnemy({ location }) { return location.features.battle && game.getLocationRelation("local", location.id) === "enemy" ? { name: location.ownerId === "chaos" ? "Créatures du Chaos" : "Brigands", danger: 2, aggressive: false } : null; }
 function radiusFor(location) { return rangesFor(location).interactionRadius; }
 function isLocationEnabled(location) {
+  if (location.id === "prospector-battlefield") {
+    const phaseId = game?.scenarioState?.currentPhaseId;
+    if (!["prospectors-battlefield", "free-gold-mine", "return-to-capital", "prologue-complete"].includes(phaseId)) return false;
+  }
   const binding = game?.scenarioLocationBindings.find((candidate) => candidate.locationId === location.id);
   const placement = binding ? game.scenarioRuntime?.placements[binding.locationSlotId] : null;
   if (placement && placement.status !== "placed") return false;
@@ -197,7 +202,7 @@ function mappedLocations({ knownOnly = true } = {}) {
   });
 }
 
-function runProductionCycle() { const siteCount = game.battleSites.length; game.update(); syncAutonomousBattle(); game.cleanupDynamicSites(); const siteExpired = game.battleSites.length < siteCount; if (siteExpired) updateDynamicSitePresence(); const cycle = game.advanceCycle(1); const mine = cycle.locations.find((result) => result.locationId === "gold-mine"); const recovery = cycle.heroes.find((result) => result.heroId === hero.id && result.restoredHealth > 0); if (mine) logTest(`La mine produit ${mine.produced.gold ?? 0} or.`); if (cycle.recoveredUnits.length > 0) logTest(`${cycle.recoveredUnits.length} unité(s) récupèrent des PV.`); if (recovery?.revived) logTest(`Retour à la base : héros actif avec ${recovery.restoredHealth} PV.`); else if (recovery?.locationHealing > 0) logTest(`Soins de localisation : +${recovery.restoredHealth} PV.`); if (cycle.locations.length === 0 && cycle.recoveredUnits.length === 0 && !recovery && !siteExpired) return; render(); if (!activeGarrisonLocationId && currentLocationId && !ui.sheet.hidden && cycle.locations.some((result) => result.locationId === currentLocationId)) selectLocation(currentLocationId); }
+function runProductionCycle() { const siteCount = game.battleSites.length; game.update(); checkSimulationAutonomousAggression(); syncAutonomousBattle(); game.cleanupDynamicSites(); const siteExpired = game.battleSites.length < siteCount; if (siteExpired) updateDynamicSitePresence(); const cycle = game.advanceCycle(1); const mine = cycle.locations.find((result) => result.locationId === "gold-mine"); const recovery = cycle.heroes.find((result) => result.heroId === hero.id && result.restoredHealth > 0); if (mine) logTest(`La mine produit ${mine.produced.gold ?? 0} or.`); if (cycle.recoveredUnits.length > 0) logTest(`${cycle.recoveredUnits.length} unité(s) récupèrent des PV.`); if (recovery?.revived) logTest(`Retour à la base : héros actif avec ${recovery.restoredHealth} PV.`); else if (recovery?.locationHealing > 0) logTest(`Soins de localisation : +${recovery.restoredHealth} PV.`); render(); if (!activeGarrisonLocationId && currentLocationId && !ui.sheet.hidden && cycle.locations.some((result) => result.locationId === currentLocationId)) selectLocation(currentLocationId); }
 
 function createRoamingChaosArmy() {
   if (game.getAutonomousGroup("chaos-roaming-test") !== null) return;
@@ -211,7 +216,7 @@ function createRoamingChaosArmy() {
   game.addAutonomousGroup(new AutonomousGroup({
     id: "chaos-roaming-test", type: "army", owner: { kind: "faction", id: "chaos" }, factionId: "chaos",
     position: spawn, status: "idle", behavior: "aggressive", morale: 6,
-    mission: { kind: "roam", center: spawn, radiusMeters: 500 },
+    mission: { kind: "roam", center: spawn, radiusMeters: mode === "simulation" ? 600_000 : 500, speedMetersPerSecond: mode === "simulation" ? 12_000 : undefined },
     army: { units: [{ id: "chaos-roaming-raiders", ownerPlayerId: "chaos", typeId: "chaos-raider", quantity: 6, healthPerSoldier: 10, combatHealthThreshold: 4 }] },
     history: [{ type: "spawned_for_field_test", at: Date.now() }],
   }));
@@ -220,6 +225,37 @@ function createRoamingChaosArmy() {
 
 function visibleAutonomousGroups() {
   return autonomousGroupDetectionService.detect({ observer: { position: asGps(heroPosition), classId: hero.classId, skillIds: hero.skillIds }, groups: game.autonomousGroups, baseRadius: mode === "gps" ? 250 : 22 }).map((group) => ({ ...group, position: mode === "simulation" ? [group.position.latitude, group.position.longitude] : group.position }));
+}
+function visibleAutonomousTraces() {
+  const questIds = new Set(["prospectors-trace-1", "prospectors-trace-2"]); const now = Date.now();
+  const detectedGroups = new Map(visibleAutonomousGroups().map((group) => [group.id, group]));
+  const observer = asGps(heroPosition); const scoutBonus = hero.classId === "ranger" || hero.skillIds.includes("scouting") ? 2 : 0;
+  return game.autonomousGroupTraces.filter((trace) => {
+    if (questIds.has(trace.id)) return false;
+    const traceDistance = mode === "gps" ? distanceMeters(observer, trace.position) : Math.hypot(observer.latitude - trace.position.latitude, observer.longitude - trace.position.longitude);
+    return trace.isDetectable({ at: now, minimumScore: 1, distance: traceDistance, distancePerPoint: mode === "gps" ? 50 : 5, detectionBonus: scoutBonus });
+  }).map((trace) => ({
+    id: trace.id, position: mode === "simulation" ? [trace.position.latitude, trace.position.longitude] : trace.position,
+    color: trace.owner.kind === "player" && trace.owner.id === "local" ? "blue" : !detectedGroups.has(trace.groupId) ? "gray" : trace.owner.id === "chaos" ? "red" : trace.owner.kind === "independent" ? "yellow" : "gray",
+  }));
+}
+function beginAutonomousBattle(group) {
+  if (activeBattle?.status === "active" || group.status === "destroyed") return false;
+  group.status = "interrupted";
+  const battle = game.createBattle({ teamParticipants: [{ id: "heroes", heroIds: [hero.id] }, { id: `autonomous-${group.id}`, heroIds: [], autonomousGroupId: group.id }], position: group.position });
+  closeSheet(ui.sheet); activateBattle(battle); return true;
+}
+function selectAutonomousGroup(groupId) {
+  const group = game.getAutonomousGroup(groupId); if (!group) return;
+  const snapshot = visibleAutonomousGroups().find((item) => item.id === groupId); if (!snapshot) return;
+  const attackRange = mode === "gps" ? game.setup.rules.engagementRadiusMeters : 8; const canAttack = snapshot.distance <= attackRange;
+  ui.sheet.hidden = false; ui.sheet.innerHTML = `<button class="sheet-close" type="button">Fermer</button><span class="sheet-state">Groupe autonome détecté</span><h2>Armée du Chaos</h2><p>${snapshot.soldiers} soldats · distance ${Math.round(snapshot.distance)}${mode === "gps" ? " m" : ""}</p><div class="sheet-actions"><button data-autonomous-attack ${canAttack ? "" : "disabled"}>Attaquer</button></div>${canAttack ? "" : `<p class="sheet-feedback">Approchez-vous à moins de ${attackRange}${mode === "gps" ? " m" : " unités"}.</p>`}`;
+  ui.sheet.querySelector(".sheet-close").onclick = () => closeSheet(ui.sheet); ui.sheet.querySelector("[data-autonomous-attack]").onclick = () => beginAutonomousBattle(group);
+}
+function checkSimulationAutonomousAggression() {
+  if (mode !== "simulation" || activeBattle?.status === "active") return;
+  const target = visibleAutonomousGroups().find((group) => group.behavior === "aggressive" && group.distance <= 8);
+  if (target) beginAutonomousBattle(game.getAutonomousGroup(target.id));
 }
 function applyPosition(position) {
   heroPosition = normalizePosition(position, mode); gpsAccuracy = mode === "gps" ? position.accuracy ?? null : null; hero.updatePosition(asGps(heroPosition));
@@ -265,12 +301,13 @@ function handleLocationEvent(event) {
 
 function applyQuestFeedback(progress) {
   const narration = progress.appliedEvents.flatMap((entry) => entry.appliedEffects).find((effect) => effect.type === "narration");
-  progress.appliedEvents.flatMap((entry) => entry.appliedEffects).filter((effect) => effect.type === "location_revealed").forEach((effect) => game.getPlayer("local").discoverLocation(effect.locationId, 2));
+  progress.appliedEvents.flatMap((entry) => entry.appliedEffects).filter((effect) => effect.type === "location_revealed").forEach((effect) => { game.getPlayer("local").discoverLocation(effect.locationId, 2); if (enabledGpsLocationIds !== null) enabledGpsLocationIds.add(effect.locationId); });
   locationMessage = narration?.text ?? "Objectif accompli.";
   deviceAlerts.notify("notice");
   logTest(locationMessage);
   if (progress.nextPhaseId) game.startCurrentScenarioPlacements(asGps(heroPosition));
   syncQuestTrace();
+  syncQuestBattlefield();
 }
 
 function syncQuestTrace() {
@@ -282,6 +319,13 @@ function syncQuestTrace() {
 }
 
 function visibleQuestTraces() { syncQuestTrace(); return game.autonomousGroupTraces.filter((trace) => ["prospectors-trace-1", "prospectors-trace-2"].includes(trace.id) && trace.getScore(Date.now()) > 0).map((trace) => ({ id: trace.id, position: mode === "simulation" ? [trace.position.latitude, trace.position.longitude] : trace.position })); }
+function syncQuestBattlefield() {
+  if (game.scenarioState?.currentPhaseId !== "prospectors-battlefield") return;
+  const player = game.getPlayer("local"); if (player.knowsLocation("prospector-battlefield")) return;
+  const base = Array.isArray(heroPosition) ? heroPosition : [heroPosition.latitude, heroPosition.longitude];
+  const target = mode === "simulation" ? [base[0] + 11, base[1] + 7] : { latitude: base[0] + 140 / 111320, longitude: base[1] + 110 / (111320 * Math.max(.01, Math.cos(base[0] * Math.PI / 180))) };
+  player.discoverLocation("prospector-battlefield", 2); if (enabledGpsLocationIds !== null) enabledGpsLocationIds.add("prospector-battlefield"); moveLocation("prospector-battlefield", target); rebuildLocationEngine();
+}
 function inspectQuestTrace(traceId) {
   const trace = game.autonomousGroupTraces.find((item) => item.id === traceId); if (!trace) return;
   const tracePosition = mode === "simulation" ? [trace.position.latitude, trace.position.longitude] : trace.position;
@@ -580,7 +624,7 @@ function renderWorld() {
   renderLocationDetail({ element: ui.worldContent, location, index, total: allLocations.length, message: worldMessage, initialActionMenu, onBack: () => { worldSelectedLocationId = null; worldMessage = ""; renderWorld(); }, onPrevious: () => { if (index > 0) { worldSelectedLocationId = allLocations[index - 1].id; worldMessage = ""; renderWorld(); } }, onNext: () => { if (index < allLocations.length - 1) { worldSelectedLocationId = allLocations[index + 1].id; worldMessage = ""; renderWorld(); } }, onShowMap: () => showLocationOnMap(location.id), onAction: (action) => { currentLocationId = location.id; runAction(action, { returnToWorld: true }); }, onOpenGarrison: () => openGarrisonManager(location.id) });
 }
 function render() {
-  if (!game || !mapView) return; const sites = visibleSites(); mapView.render({ heroPosition, heroHeading, accuracy: gpsAccuracy, locations: mappedLocations(), autonomousGroups: visibleAutonomousGroups(), playAreaPoints: field.playAreaPoints, dynamicSites: sites, questTraces: visibleQuestTraces(), gridCells: playAreaGrid?.cells ?? [], heatmapVisible });
+  if (!game || !mapView) return; syncQuestBattlefield(); const sites = visibleSites(); mapView.render({ heroPosition, heroHeading, accuracy: gpsAccuracy, locations: mappedLocations(), autonomousGroups: visibleAutonomousGroups(), autonomousTraces: visibleAutonomousTraces(), playAreaPoints: field.playAreaPoints, dynamicSites: sites, questTraces: visibleQuestTraces(), gridCells: playAreaGrid?.cells ?? [], heatmapVisible });
   const player = game.getPlayer("local"); ui.mode.textContent = mode === "gps" ? "GPS réel" : "Maison"; ui.health.textContent = `PV ${hero.health}/${hero.maxHealth}`; ui.army.textContent = `Armée ${hero.army.units.length}`; ui.gold.textContent = `Or ${hero.getResourceAmount("gold")}`;
   const heroClass = data.heroClasses.find((item) => item.id === hero.classId);
   const heroModifiers = HeroArmyModifier.calculate({ hero, units: hero.army.units, unitDefinitions: game.unitDefinitions, moraleMode: game.setup.rules.moraleMode });
@@ -631,6 +675,8 @@ function render() {
   }));
   [...ui.armyContent.querySelectorAll(".army-card")].forEach((card, index) => {
     const unit = hero.army.units[index]; if (!unit) return;
+    card.querySelector(".army-card__summary")?.insertAdjacentHTML("afterend", renderUnitExperienceBar(unit));
+    card.querySelector(".army-card__details")?.insertAdjacentHTML("afterbegin", renderUnitExperienceBar(unit, { detailed: true }));
     const stats = game.unitDefinitions.get(unit.typeId)?.stats;
     if (stats) card.querySelector(".army-card__stats")?.insertAdjacentHTML("beforeend", `<div><strong>${stats.morale}</strong><span>Moral</span></div>`);
     const currentCost = game.getUnitAuthorityCost(unit); const nextCost = unit.nextRank ? game.getUnitAuthorityCost(unit, unit.nextRank.id) : currentCost;

@@ -14,3 +14,11 @@ test("un éclaireur détecte une trace faible et en extrait davantage d'informat
   const reading = value.read({ at, minimumScore: 1, analysisBonus: 8 });
   assert.equal(reading.level, 4); assert.equal(reading.soldierCount, 50); assert.equal(reading.directionDegrees, 90);
 });
+
+test("une trace sort de la perception avec la distance sans être supprimée du moteur", () => {
+  const value = trace(); const at = value.createdAt;
+  assert.equal(value.isDetectable({ at, minimumScore: 1, distance: 100, distancePerPoint: 50 }), true);
+  assert.equal(value.isDetectable({ at, minimumScore: 1, distance: 400, distancePerPoint: 50 }), false);
+  assert.ok(value.getScore(at) > 0);
+  assert.equal(value.isDetectable({ at, minimumScore: 1, distance: 400, distancePerPoint: 50, detectionBonus: 6 }), true);
+});

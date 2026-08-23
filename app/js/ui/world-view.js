@@ -5,7 +5,7 @@ let filtersExpanded = false;
 let activeDetailActionMenu = null;
 let activeDetailLocationId = null;
 
-const LOCATION_ART = Object.freeze({ fort: "assets/markers/fort.png", village: "assets/markers/village.png", mine: "assets/markers/mine.png", camp: "assets/markers/camp.png", quest: "assets/markers/quest.png" });
+const LOCATION_ART = Object.freeze({ fort: "assets/markers/fort.png", village: "assets/markers/village.png", mine: "assets/markers/mine.png", camp: "assets/markers/camp.png", capital: "assets/markers/capital.png", quarry: "assets/markers/quarry.png", "lumber-camp": "assets/markers/lumber-camp.png", quest: "assets/markers/quest.png" });
 
 export function renderWorldDirectory({ element, locations, types = [], filters, onFilter, onOpen, onShowMap }) {
   const activeFilterCount = [filters.search, filters.type, filters.owner].filter(Boolean).length;
@@ -83,7 +83,5 @@ function card(location) {
 }
 
 function artType(type) {
-  if (type === "lumber-camp") return "camp";
-  if (type === "quarry") return "mine";
   return LOCATION_ART[type] ? type : "quest";
 }

@@ -4,12 +4,13 @@ import { MapLayers, createMapPanes } from "../map/MapLayers.js";
 const SIMULATION_BOUNDS = [[0, 0], [100, 100]];
 
 export class MapView {
-  constructor({ element, mode = "simulation", initialPosition = null, onHeroMove, onLocationSelect, onDynamicSiteSelect = () => {}, onTraceSelect = () => {}, onMapClick = () => {} }) {
+  constructor({ element, mode = "simulation", initialPosition = null, onHeroMove, onLocationSelect, onDynamicSiteSelect = () => {}, onTraceSelect = () => {}, onAutonomousGroupSelect = () => {}, onMapClick = () => {} }) {
     this.mode = mode;
     this.onHeroMove = onHeroMove;
     this.onLocationSelect = onLocationSelect;
     this.onDynamicSiteSelect = onDynamicSiteSelect;
     this.onTraceSelect = onTraceSelect;
+    this.onAutonomousGroupSelect = onAutonomousGroupSelect;
     this.onMapClick = onMapClick;
     this.heroHeading = 0;
     this.bearingEnabled = false;
@@ -30,22 +31,34 @@ export class MapView {
     legend.addTo(this.map);
     this.dynamicSites = new Map();
     this.questTraces = new Map();
+    this.autonomousTraces = new Map();
     this.autonomousGroups = new Map();
     this.playArea = null;
     this.draftArea = null;
     this.heatmap = L.layerGroup().addTo(this.map);
   }
 
-  render({ heroPosition, heroHeading = null, accuracy = null, locations = [], autonomousGroups = [], playAreaPoints = [], dynamicSites = [], questTraces = [], gridCells = [], heatmapVisible = true }) {
+  render({ heroPosition, heroHeading = null, accuracy = null, locations = [], autonomousGroups = [], autonomousTraces = [], playAreaPoints = [], dynamicSites = [], questTraces = [], gridCells = [], heatmapVisible = true }) {
     this.renderer.render({ heroPosition, heroHeading, accuracy, locations });
     this.#area(playAreaPoints);
     dynamicSites.forEach((site) => this.#site(site));
     this.#removeMissing(this.dynamicSites, new Set(dynamicSites.map((item) => item.id)));
     questTraces.forEach((trace) => this.#trace(trace));
     this.#removeMissing(this.questTraces, new Set(questTraces.map((item) => item.id)));
+    autonomousTraces.forEach((trace) => this.#autonomousTrace(trace));
+    this.#removeMissing(this.autonomousTraces, new Set(autonomousTraces.map((item) => item.id)));
     autonomousGroups.forEach((group) => this.#autonomousGroup(group));
     this.#removeMissing(this.autonomousGroups, new Set(autonomousGroups.map((item) => item.id)));
     this.#heatmap(gridCells, heatmapVisible);
+  }
+
+  #autonomousTrace(trace) {
+    const center = asLatLng(trace.position); const entry = this.autonomousTraces.get(trace.id);
+    const icon = L.divIcon({ className: `autonomous-trace-marker is-${trace.color ?? "gray"}`, html: "<span></span>", iconSize: [14, 14], iconAnchor: [7, 7] });
+    if (!entry) {
+      const marker = L.marker(center, { pane: MapLayers.EFFECTS, zIndexOffset: 300, icon, interactive: false, title: "Trace de passage" }).addTo(this.map);
+      this.autonomousTraces.set(trace.id, { marker });
+    } else entry.marker.setLatLng(center).setIcon(icon);
   }
 
   #trace(trace) {
@@ -66,6 +79,7 @@ export class MapView {
     const label = `${group.type === "army" ? "Armée" : "Groupe"} ${group.factionId === "chaos" ? "du Chaos" : "autonome"}`;
     if (!entry) {
       const marker = L.marker(center, { pane: MapLayers.UNITS, zIndexOffset: 900, icon, title: label, interactive: true }).addTo(this.map).bindTooltip(`${label} · ${group.soldiers} soldats`);
+      marker.on("click", (event) => { if (event.originalEvent) L.DomEvent.stopPropagation(event.originalEvent); this.onAutonomousGroupSelect(group.id); });
       this.autonomousGroups.set(group.id, { marker });
     } else entry.marker.setLatLng(center).setIcon(icon).setTooltipContent(`${label} · ${group.soldiers} soldats`);
   }

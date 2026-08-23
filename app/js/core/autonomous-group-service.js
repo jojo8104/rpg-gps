@@ -43,8 +43,10 @@ export class AutonomousGroupService {
         events.push({ type: interruption.mode === "immediate_attack" ? "autonomous_group_attack_requested" : "autonomous_group_interception_window", groupId: group.id, target: interruption.target, interruptionId: interruption.id, reactionDeadlineAt: interruption.reactionDeadlineAt, at: detection.occurredAt });
         continue;
       }
+      traces.push(this.#trace(group, "passage", result.segment.to, result.segment.toAt, {
+        directionDegrees: bearingDegrees(result.segment.from, result.segment.to),
+      }));
       if (result.arrived) {
-        traces.push(this.#trace(group, "passage", group.position, result.segment.toAt));
         this.#resolveArrival(group, { locations, now: result.segment.toAt, events });
       }
     }
@@ -87,13 +89,19 @@ export class AutonomousGroupService {
     }
   }
 
-  #trace(group, kind, position, createdAt, { occupiedCargoSlots = group.cargo.length } = {}) {
+  #trace(group, kind, position, createdAt, { occupiedCargoSlots = group.cargo.length, directionDegrees = null } = {}) {
     return new AutonomousGroupTrace({
       id: this.idGenerator("group-trace"), groupId: group.id, groupType: group.type, owner: group.owner,
       kind, position, soldierCount: group.army.units.reduce((sum, unit) => sum + unit.quantity, 0),
-      occupiedCargoSlots, createdAt,
+      occupiedCargoSlots, directionDegrees, createdAt,
     });
   }
+}
+
+function bearingDegrees(from, to) {
+  const dy = to.latitude - from.latitude; const dx = to.longitude - from.longitude;
+  if (dx === 0 && dy === 0) return null;
+  return (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
 }
 
 function defaultSpeed(group) {
