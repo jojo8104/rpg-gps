@@ -18,3 +18,10 @@ test("une quête de pose exige 300 mètres depuis son départ", () => {
   assert.equal(session.updatePosition({ latitude: 48.003, longitude: 2 }).completed, true);
   assert.equal(session.canPlaceQuestLocation({ latitude: 48.003, longitude: 2 }), true);
 });
+
+test("une quête de pose refuse une position hors de la zone de jeu", () => {
+  const session = new FieldTestSession({ minimumQuestDistanceMeters: 300 });
+  const playArea = { contains: (position) => position.latitude < 48.004 };
+  session.startDistanceQuest({ latitude: 48, longitude: 2 });
+  assert.equal(session.canPlaceQuestLocation({ latitude: 48.005, longitude: 2 }, playArea), false);
+});

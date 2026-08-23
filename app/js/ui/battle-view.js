@@ -42,6 +42,14 @@ export function militiaFormationRows(count) {
   return [...patterns[visibleCount]];
 }
 
+export function formationProjectileOffsets(count) {
+  const rows = militiaFormationRows(count);
+  return rows.flatMap((rowSize, rowIndex) => Array.from({ length: rowSize }, (_, columnIndex) => ({
+    x: (columnIndex - (rowSize - 1) / 2) * .85,
+    y: (rowIndex - (rows.length - 1) / 2) * .62,
+  })));
+}
+
 /** Vue animée : les unités progressent, les héros restent ancrés à leur camp. */
 export function renderBattleView({ element, battle, playerTeamId, message, selectedUnitId = null, selectedPower = null, onSelectUnit, onAssign, onDragState, onRetreatLine, onSelectPower, onCancelPower, onActivatePower, onFlee, onSurrender }) {
   const player = battle.teams.find((team) => team.id === playerTeamId);
@@ -193,9 +201,10 @@ function createAttackVisual(events, findEntity, positionFor, elapsedMs) {
     if (attacker.entity.range <= 1) return "";
     if (String(attacker.entity.typeId).toLowerCase() === "archer") {
       const flightAgeMs = Math.min(1_800, Math.max(0, elapsedMs - event.elapsedMs));
-      return [-2, -1, 0, 1, 2].map((offset, index) => {
-        const startX = attackerX + offset * .7; const endX = targetX + offset * .7;
-        return `<g class="arrow-projectile" style="--flight-age:-${flightAgeMs}ms"><ellipse class="arrow-ground-shadow" cx="${startX}" cy="${attackerPosition.y + 2}" rx="1.25" ry=".32"></ellipse><line class="arrow-shaft" x1="${startX}" y1="${attackerPosition.y - 1.8}" x2="${startX}" y2="${attackerPosition.y + 1.8}"></line><animateTransform attributeName="transform" type="translate" from="0 0" to="${endX - startX} ${targetPosition.y - attackerPosition.y}" dur="1.8s" begin="-${flightAgeMs / 1_000}s" fill="freeze"></animateTransform></g>`;
+      return formationProjectileOffsets(attacker.entity.combatantCount ?? attacker.entity.quantity ?? 0).map((offset) => {
+        const startX = attackerX + offset.x; const startY = attackerPosition.y + offset.y;
+        const endX = targetX + offset.x; const endY = targetPosition.y + offset.y;
+        return `<g class="arrow-projectile" style="--flight-age:-${flightAgeMs}ms"><ellipse class="arrow-ground-shadow" cx="${startX}" cy="${startY + 2}" rx="1.25" ry=".32"></ellipse><line class="arrow-shaft" x1="${startX}" y1="${startY - 1.8}" x2="${startX}" y2="${startY + 1.8}"></line><animateTransform attributeName="transform" type="translate" from="0 0" to="${endX - startX} ${endY - startY}" dur="1.8s" begin="-${flightAgeMs / 1_000}s" fill="freeze"></animateTransform></g>`;
       }).join("");
     }
     return `<line class="is-ranged" x1="${attackerX}" y1="${attackerPosition.y}" x2="${targetX}" y2="${targetPosition.y}"></line>`;

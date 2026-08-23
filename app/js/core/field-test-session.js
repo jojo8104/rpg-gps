@@ -33,9 +33,9 @@ export class FieldTestSession {
     return { distanceMeters: this.questDistanceMeters, completed: this.questCompleted };
   }
 
-  canPlaceQuestLocation(position) {
+  canPlaceQuestLocation(position, playArea = null) {
     validatePosition(position);
-    return this.questStart !== null && distanceMeters(this.questStart, position) >= this.minimumQuestDistanceMeters;
+    return (playArea === null || playArea.contains(position)) && this.questStart !== null && distanceMeters(this.questStart, position) >= this.minimumQuestDistanceMeters;
   }
 
   toJSON() {

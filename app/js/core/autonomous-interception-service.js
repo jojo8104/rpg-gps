@@ -2,7 +2,7 @@ import { distanceMeters } from "./geo.js";
 
 /** Détecte une cible sur un segment et crée une interruption sérialisable. */
 export class AutonomousInterceptionService {
-  constructor({ engagementRadiusMeters = 75, minimumReactionMs = 15_000 } = {}) {
+  constructor({ engagementRadiusMeters = 8, minimumReactionMs = 15_000 } = {}) {
     if (!Number.isFinite(engagementRadiusMeters) || engagementRadiusMeters <= 0) throw new RangeError("Le rayon d'interception doit être strictement positif.");
     if (!Number.isFinite(minimumReactionMs) || minimumReactionMs <= 0) throw new RangeError("Le délai de réaction doit être strictement positif.");
     this.engagementRadiusMeters = engagementRadiusMeters;
@@ -14,7 +14,7 @@ export class AutonomousInterceptionService {
     const candidates = targets.filter((target) => target?.position).map((target) => {
       const closest = closestPoint(segment.from, segment.to, target.position);
       return { target, ...closest, distance: distanceMeters(closest.position, target.position) };
-    }).filter((candidate) => candidate.distance <= this.engagementRadiusMeters)
+    }).filter((candidate) => candidate.distance <= this.engagementRadiusMeters * (candidate.target.concealmentMultiplier ?? 1))
       .sort((first, second) => first.fraction - second.fraction || String(first.target.id).localeCompare(String(second.target.id)));
     const match = candidates[0];
     if (!match) return null;

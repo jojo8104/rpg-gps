@@ -21,6 +21,7 @@ export class ScenarioRuntimeBuilder {
       if (config.strategy === "fixed") {
         const position = config.position ?? location.position;
         validatePosition(position);
+        if (!setup.playArea.contains(position)) throw new RangeError(`Le placement fixe ${slot.id} doit être situé dans la PlayArea.`);
         placements[slot.id] = { strategy: "fixed", status: "placed", locationId: location.id, position: { ...position } };
         continue;
       }

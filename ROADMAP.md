@@ -210,6 +210,20 @@ La fuite GPS, la poursuite, les pertes persistantes, les prisonniers, les
 déserteurs et le butin restent des fonctionnalités à conserver. Leur déclenchement
 doit être adapté au nouveau modèle, pas supprimé avec l'ancienne grille.
 
+## TODO — Capacité de placement de la PlayArea
+
+- Estimer le nombre maximal d'emplacements à partir de la forme réelle de la
+  `PlayArea`, de sa surface et de la distance minimale entre éléments.
+- Réserver les emplacements obligatoires, notamment la capitale et les lieux du
+  scénario, avant de calculer la capacité restante pour les lieux et les groupes
+  autonomes.
+- Afficher la capacité et le nombre d'emplacements sélectionnés dans le setup,
+  puis recalculer ces valeurs chaque fois que la zone ou les options changent.
+- Borner les quantités configurables et empêcher la validation d'une sélection
+  qui dépasse la capacité réelle de la zone.
+- Prévoir un message invitant à agrandir la zone ou réduire les contraintes
+  lorsqu'aucune disposition valide n'existe.
+
 ## 8. Résolution physique du butin
 
 Battle conserve un registre de contribution par héros. À la fin du combat, seuls

@@ -5,18 +5,24 @@ import { distanceMeters } from "./geo.js";
 
 /** Orchestre missions, mouvement, interceptions et traces sans dépendre du DOM. */
 export class AutonomousGroupService {
-  constructor({ movementService = new AutonomousMovementService(), interceptionService = new AutonomousInterceptionService(), idGenerator = (prefix) => `${prefix}-${Date.now()}`, random = Math.random } = {}) {
+  constructor({ movementService = new AutonomousMovementService(), interceptionService = new AutonomousInterceptionService(), idGenerator = (prefix) => `${prefix}-${Date.now()}`, random = Math.random, traceSpacingMeters = 15 } = {}) {
     this.movementService = movementService;
     this.interceptionService = interceptionService;
     this.idGenerator = idGenerator;
     this.random = random;
+    this.traceSpacingMeters = traceSpacingMeters;
   }
 
   advance({ groups, locations = [], targets = [], playArea, now, speedFor = defaultSpeed }) {
     const events = []; const traces = [];
     for (const group of groups) {
+      if (group.movement?.destination && playArea && !playArea.contains(group.movement.destination)) {
+        group.movement = null; group.status = "mission_failed";
+        events.push({ type: "autonomous_group_mission_failed", groupId: group.id, reason: "destination_outside_play_area", at: now });
+        continue;
+      }
       if (group.status === "ambushing") {
-        const target = targets.filter((candidate) => candidate.position && isHostile(group, candidate) && distanceMeters(group.position, candidate.position) <= group.ambush.radiusMeters).sort((first, second) => distanceMeters(group.position, first.position) - distanceMeters(group.position, second.position))[0];
+        const target = targets.filter((candidate) => candidate.position && isHostile(group, candidate) && distanceMeters(group.position, candidate.position) <= group.ambush.radiusMeters * (candidate.concealmentMultiplier ?? 1)).sort((first, second) => distanceMeters(group.position, first.position) - distanceMeters(group.position, second.position))[0];
         if (target) {
           const ambush = group.ambush; group.ambush = null; group.status = "interrupted";
           group.interruption = { id: this.idGenerator("interception"), reason: "ambush", target: { kind: target.kind ?? "hero", id: target.id }, position: { ...group.position }, startedAt: now, reactionDeadlineAt: now, mode: "immediate_attack", status: "attacking", resume: null };
@@ -35,6 +41,7 @@ export class AutonomousGroupService {
       if (["idle", "arrived"].includes(group.status)) this.#prepareMission(group, { locations, playArea, now, speedFor, events });
       const result = this.movementService.advance(group, now);
       if (!result.changed) continue;
+      traces.push(...this.#spacedTraces(group, result.segment));
       const hostileTargets = targets.filter((target) => target.id !== group.id && isHostile(group, target));
       const detection = this.interceptionService.detect(result.segment, hostileTargets);
       if (detection) {
@@ -43,9 +50,6 @@ export class AutonomousGroupService {
         events.push({ type: interruption.mode === "immediate_attack" ? "autonomous_group_attack_requested" : "autonomous_group_interception_window", groupId: group.id, target: interruption.target, interruptionId: interruption.id, reactionDeadlineAt: interruption.reactionDeadlineAt, at: detection.occurredAt });
         continue;
       }
-      traces.push(this.#trace(group, "passage", result.segment.to, result.segment.toAt, {
-        directionDegrees: bearingDegrees(result.segment.from, result.segment.to),
-      }));
       if (result.arrived) {
         this.#resolveArrival(group, { locations, now: result.segment.toAt, events });
       }
@@ -71,6 +75,7 @@ export class AutonomousGroupService {
     if (group.mission?.kind === "attack_location") {
       const location = locations.find((item) => item.id === group.mission.targetId);
       if (!location) { group.status = "mission_failed"; events.push({ type: "autonomous_group_mission_failed", groupId: group.id, reason: "target_not_found", at: now }); return; }
+      if (playArea && !playArea.contains(location.position)) { group.status = "mission_failed"; events.push({ type: "autonomous_group_mission_failed", groupId: group.id, reason: "destination_outside_play_area", at: now }); return; }
       this.movementService.start(group, { destination: location.position, speedMetersPerSecond: speedFor(group), now });
       return;
     }
@@ -95,6 +100,22 @@ export class AutonomousGroupService {
       kind, position, soldierCount: group.army.units.reduce((sum, unit) => sum + unit.quantity, 0),
       occupiedCargoSlots, directionDegrees, createdAt,
     });
+  }
+
+  #spacedTraces(group, segment) {
+    const traces = []; let anchor = group.traceAnchor ?? segment.from;
+    let remaining = distanceMeters(anchor, segment.to);
+    while (remaining >= this.traceSpacingMeters) {
+      const ratio = this.traceSpacingMeters / remaining;
+      const position = { latitude: anchor.latitude + (segment.to.latitude - anchor.latitude) * ratio, longitude: anchor.longitude + (segment.to.longitude - anchor.longitude) * ratio };
+      const segmentLength = Math.max(.001, distanceMeters(segment.from, segment.to));
+      const traveled = distanceMeters(segment.from, position);
+      const createdAt = segment.fromAt + Math.max(0, Math.min(1, traveled / segmentLength)) * (segment.toAt - segment.fromAt);
+      traces.push(this.#trace(group, "passage", position, createdAt, { directionDegrees: bearingDegrees(anchor, segment.to) }));
+      anchor = position; remaining = distanceMeters(anchor, segment.to);
+    }
+    group.traceAnchor = { ...anchor };
+    return traces;
   }
 }
 

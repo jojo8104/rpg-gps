@@ -37,6 +37,7 @@ export class Hero {
     progressionHistory = [],
     xpHistory = [],
     appearanceId = null,
+    classFeatureState = {},
   }) {
     this.id = Hero.#requireText(id, "L'identifiant du héros");
     this.playerId = Hero.#requireText(playerId, "L'identifiant du joueur");
@@ -71,6 +72,8 @@ export class Hero {
     this.progressionHistory = structuredClone(Hero.#requireList(progressionHistory, "L'historique de progression"));
     this.xpHistory = structuredClone(Hero.#requireList(xpHistory, "L'historique d'expérience"));
     this.appearanceId = appearanceId === null ? null : Hero.#requireText(appearanceId, "L'apparence du héros");
+    if (classFeatureState === null || Array.isArray(classFeatureState) || typeof classFeatureState !== "object") throw new TypeError("L'état des avantages de classe doit être un objet.");
+    this.classFeatureState = structuredClone(classFeatureState);
   }
 
   addUnit(unit) {
@@ -190,6 +193,7 @@ export class Hero {
       progressionHistory: structuredClone(this.progressionHistory),
       xpHistory: structuredClone(this.xpHistory),
       appearanceId: this.appearanceId,
+      classFeatureState: structuredClone(this.classFeatureState),
     };
   }
 

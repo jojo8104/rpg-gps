@@ -30,10 +30,6 @@ export function createAutomaticHeroChoice() {
   return { name: "Aldric", classId: "warrior", appearanceId: "knight" };
 }
 
-export function isLocationPlacementAllowed({ playArea, position }) {
-  return playArea !== null && playArea !== undefined && playArea.contains(position);
-}
-
 export class GameSetupView {
   constructor(root) { this.root = root; }
 

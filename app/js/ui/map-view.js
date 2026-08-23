@@ -1,7 +1,7 @@
 import { MapRenderer } from "../map/MapRenderer.js";
 import { MapLayers, createMapPanes } from "../map/MapLayers.js";
 
-const SIMULATION_BOUNDS = [[0, 0], [100, 100]];
+const SIMULATION_BOUNDS = [[-89, -179], [89, 179]];
 
 export class MapView {
   constructor({ element, mode = "simulation", initialPosition = null, onHeroMove, onLocationSelect, onDynamicSiteSelect = () => {}, onTraceSelect = () => {}, onAutonomousGroupSelect = () => {}, onMapClick = () => {} }) {
@@ -25,6 +25,7 @@ export class MapView {
       L.rectangle(SIMULATION_BOUNDS, { pane: MapLayers.BASE_MAP, className: "rpg-simulation-base", weight: 1, fillOpacity: 1 }).addTo(this.map);
     }
     this.map.on("click", ({ latlng }) => this.onMapClick(toPosition(latlng)));
+    this.map.on("move zoom resize", () => { if (this.bearingEnabled) this.#applyBearing(); });
     this.renderer = new MapRenderer({ map: this.map, mode, onHeroMove, onLocationSelect });
     const legend = L.control({ position: "bottomleft" });
     legend.onAdd = () => { const element = L.DomUtil.create("div", "range-legend"); element.innerHTML = '<span class="is-detection">Détection</span><span class="is-interaction">Interaction</span>'; return element; };
@@ -32,6 +33,7 @@ export class MapView {
     this.dynamicSites = new Map();
     this.questTraces = new Map();
     this.autonomousTraces = new Map();
+    this.autonomousTraceLines = new Map();
     this.autonomousGroups = new Map();
     this.playArea = null;
     this.draftArea = null;
@@ -47,6 +49,7 @@ export class MapView {
     this.#removeMissing(this.questTraces, new Set(questTraces.map((item) => item.id)));
     autonomousTraces.forEach((trace) => this.#autonomousTrace(trace));
     this.#removeMissing(this.autonomousTraces, new Set(autonomousTraces.map((item) => item.id)));
+    this.#autonomousTracePaths(autonomousTraces);
     autonomousGroups.forEach((group) => this.#autonomousGroup(group));
     this.#removeMissing(this.autonomousGroups, new Set(autonomousGroups.map((item) => item.id)));
     this.#heatmap(gridCells, heatmapVisible);
@@ -54,11 +57,24 @@ export class MapView {
 
   #autonomousTrace(trace) {
     const center = asLatLng(trace.position); const entry = this.autonomousTraces.get(trace.id);
-    const icon = L.divIcon({ className: `autonomous-trace-marker is-${trace.color ?? "gray"}`, html: "<span></span>", iconSize: [14, 14], iconAnchor: [7, 7] });
+    const feet = '<svg viewBox="0 0 28 28" aria-hidden="true"><ellipse cx="9" cy="8" rx="4" ry="7"/><ellipse cx="19" cy="20" rx="4" ry="7"/></svg>';
+    const icon = L.divIcon({ className: `autonomous-trace-marker is-${trace.color ?? "gray"}`, html: `<span style="rotate:${trace.directionDegrees ?? 0}deg">${feet}</span>`, iconSize: [22, 22], iconAnchor: [11, 11] });
     if (!entry) {
       const marker = L.marker(center, { pane: MapLayers.EFFECTS, zIndexOffset: 300, icon, interactive: false, title: "Trace de passage" }).addTo(this.map);
       this.autonomousTraces.set(trace.id, { marker });
     } else entry.marker.setLatLng(center).setIcon(icon);
+  }
+
+  #autonomousTracePaths(traces) {
+    const groups = new Map();
+    for (const trace of traces) { if (!groups.has(trace.groupId)) groups.set(trace.groupId, []); groups.get(trace.groupId).push(trace); }
+    for (const [groupId, entries] of groups) {
+      const points = entries.sort((a, b) => a.createdAt - b.createdAt).map((trace) => asLatLng(trace.position));
+      const color = entries.at(-1)?.color ?? "gray"; const existing = this.autonomousTraceLines.get(groupId);
+      if (existing) existing.setLatLngs(points);
+      else this.autonomousTraceLines.set(groupId, L.polyline(points, { pane: MapLayers.EFFECTS, className: `autonomous-trace-path is-${color}`, interactive: false, weight: 3, dashArray: "2 8", opacity: .8 }).addTo(this.map));
+    }
+    for (const [groupId, line] of this.autonomousTraceLines) if (!groups.has(groupId)) { line.remove(); this.autonomousTraceLines.delete(groupId); }
   }
 
   #trace(trace) {
@@ -98,9 +114,12 @@ export class MapView {
 
   #applyBearing() {
     const container = this.map.getContainer(); const size = this.map.getSize(); const mapPane = this.map.getPane("mapPane");
+    const panePosition = L.DomUtil.getPosition(mapPane) ?? L.point(0, 0);
     container.classList.toggle("map-is-bearing", this.bearingEnabled);
     container.style.setProperty("--map-counter-bearing", `${this.bearingEnabled ? this.heroHeading : 0}deg`);
-    mapPane.style.transformOrigin = `${size.x / 2}px ${size.y / 2}px`;
+    // Leaflet translates mapPane while panning. Compensate that translation so
+    // rotation stays centered on the viewport and every GPS layer remains aligned.
+    mapPane.style.transformOrigin = `${size.x / 2 - panePosition.x}px ${size.y / 2 - panePosition.y}px`;
     mapPane.style.rotate = `${this.bearingEnabled ? -this.heroHeading : 0}deg`;
   }
 

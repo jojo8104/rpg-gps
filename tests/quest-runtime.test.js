@@ -45,6 +45,24 @@ test("placer le camp accomplit l'objectif et enchaîne la phase suivante", () =>
   assert.deepEqual(game.getLocation("camp-real").position, target);
 });
 
+test("un lieu de quête ne peut jamais être placé hors de la zone de jeu", () => {
+  const game = createGame();
+  const outside = { latitude: 2, longitude: 2 };
+  game.startScenarioRuntime({ latitude: 0, longitude: 0 });
+  game.updateScenarioPosition({ position: outside, accuracy: 10 });
+  game.updateScenarioPosition({ position: outside, accuracy: 10 });
+  const result = game.placeScenarioLocation({ locationSlotId: "camp", position: outside });
+  assert.deepEqual(result, { success: false, reason: "outside_play_area" });
+  assert.deepEqual(game.getLocation("camp-real").position, { latitude: 0, longitude: 0 });
+});
+
+test("le déplacement générique d'un lieu refuse aussi de sortir de la PlayArea", () => {
+  const game = createGame();
+  const result = game.updateLocationPosition({ locationId: "camp-real", position: { latitude: 2, longitude: 2 } });
+  assert.deepEqual(result, { success: false, reason: "outside_play_area" });
+  assert.deepEqual(game.getLocation("camp-real").position, { latitude: 0, longitude: 0 });
+});
+
 test("l'interaction locale termine l'objectif actif une seule fois", () => {
   const game = createGame();
   const target = { latitude: 0, longitude: 0.001 };
@@ -65,6 +83,13 @@ test("un setup fixe utilise directement ses coordonnées", () => {
   });
   assert.equal(game.scenarioRuntime.placements.camp.status, "placed");
   assert.deepEqual(game.getLocation("camp-real").position, fixedPosition);
+});
+
+test("un placement fixe hors PlayArea est rejeté dès la construction", () => {
+  assert.throws(() => new Game({
+    setup: { ...setup, locationSetup: { placements: { camp: { strategy: "fixed", position: { latitude: 2, longitude: 2 } } } } },
+    scenario, locations, scenarioLocationBindings: [{ locationSlotId: "camp", locationId: "camp-real" }],
+  }), /placement fixe.*PlayArea/i);
 });
 
 test("les déclencheurs de trace et de victoire restent indépendants de l'interface", () => {

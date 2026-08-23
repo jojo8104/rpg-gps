@@ -29,6 +29,13 @@ test("une armée agressive prend immédiatement l'initiative et demande une bata
   assert.equal(service.resolve(group, { now: interruption.startedAt, action: "attack" }).outcome, "battle_requested");
 });
 
+test("une cible discrète doit passer plus près pour être interceptée", () => {
+  const service = new AutonomousInterceptionService({ engagementRadiusMeters: 100 });
+  const discreet = { id: "scout", position: { latitude: .00072, longitude: .001 }, concealmentMultiplier: .65 };
+  assert.equal(service.detect(segment, [discreet]), null);
+  assert.notEqual(service.detect(segment, [{ ...discreet, concealmentMultiplier: 1 }]), null);
+});
+
 test("un convoi intercepté est pillé puis détruit", () => {
   const service = new AutonomousInterceptionService();
   const group = new AutonomousGroup({ id: "c", type: "convoy", owner: { kind: "player", id: "p2" }, position: { latitude: 0, longitude: 0 }, mission: { kind: "transport" }, cargo: [{ itemId: "wood", quantity: 10 }] });

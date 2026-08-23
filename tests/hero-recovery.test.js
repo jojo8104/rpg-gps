@@ -24,6 +24,15 @@ test("une localisation de soins ajoute son niveau au soin cyclique", () => {
   assert.equal(recovery.naturalHealing, 1); assert.equal(recovery.locationHealing, 2); assert.equal(recovery.restoredHealth, 3); assert.equal(hero.health, 13);
 });
 
+test("l'aura du mage soigne automatiquement les autres héros alliés proches", () => {
+  const setup = { ...setupFor(["p1", "p2", "p3"]), teams: [{ id: "allies", name: "Alliés", factionId: "f1" }, { id: "enemy", name: "Ennemis", factionId: "f2" }], participants: [{ playerId: "p1", name: "p1", teamId: "allies" }, { playerId: "p2", name: "p2", teamId: "allies" }, { playerId: "p3", name: "p3", teamId: "enemy" }] };
+  const classes = [{ id: "mage", name: "Mage", features: { healingAuraRadius: 100, healingAuraPerCycle: 1 } }, { id: "warrior", name: "Guerrier" }];
+  let id = 0; const game = new Game({ setup, heroClasses: classes, idGenerator: (prefix) => `${prefix}-${++id}` });
+  const mage = game.chooseHero("p1", { name: "Mage", classId: "mage" }); const ally = game.chooseHero("p2", { name: "Allié", classId: "warrior" }); const enemy = game.chooseHero("p3", { name: "Ennemi", classId: "warrior" }); game.start();
+  [mage, ally, enemy].forEach((hero) => { hero.health = 10; hero.updatePosition({ latitude: 48.8566, longitude: 2.3522 }); });
+  const results = game.recoverHeroes(1); assert.equal(results.find((entry) => entry.heroId === ally.id).auraHealing, 1); assert.equal(ally.health, 12); assert.equal(mage.health, 11); assert.equal(enemy.health, 11);
+});
+
 test("un ghost revient uniquement à sa base avec la moitié supérieure de ses PV", () => {
   const locations = [baseLocation, { ...baseLocation, id: "clinic", name: "Clinique", roles: [], ownerId: null }];
   const game = new Game({ setup: setupFor(["p1"]), heroClasses: [{ id: "warrior", name: "Guerrier", abilityIds: [], baseStats: { attack: 1, defense: 1, morale: 1, mobility: 1, command: 3, health: 25 } }], locations });
