@@ -24,6 +24,7 @@ export class HeroConcealmentService {
   }
 
   canConceal(at = Date.now()) { return !this.concealed && this.stationarySince !== null && at - this.stationarySince >= this.stationaryDurationMs; }
+  preparationMs(at = Date.now()) { return this.stationarySince === null ? 0 : Math.max(0, at - this.stationarySince); }
   confirm(at = Date.now()) { if (!this.canConceal(at)) return false; this.concealed = true; return true; }
   get signatureMultiplier() { return this.concealed ? this.concealedSignatureMultiplier : 1; }
 }

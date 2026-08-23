@@ -36,6 +36,7 @@ export class Hero {
     pendingLevelUps = [],
     progressionHistory = [],
     xpHistory = [],
+    travelProgress = {},
     appearanceId = null,
     classFeatureState = {},
   }) {
@@ -71,6 +72,7 @@ export class Hero {
     this.pendingLevelUps = structuredClone(Hero.#requireList(pendingLevelUps, "Les level-ups en attente"));
     this.progressionHistory = structuredClone(Hero.#requireList(progressionHistory, "L'historique de progression"));
     this.xpHistory = structuredClone(Hero.#requireList(xpHistory, "L'historique d'expérience"));
+    this.travelProgress = Hero.#createTravelProgress(travelProgress);
     this.appearanceId = appearanceId === null ? null : Hero.#requireText(appearanceId, "L'apparence du héros");
     if (classFeatureState === null || Array.isArray(classFeatureState) || typeof classFeatureState !== "object") throw new TypeError("L'état des avantages de classe doit être un objet.");
     this.classFeatureState = structuredClone(classFeatureState);
@@ -192,6 +194,7 @@ export class Hero {
       pendingLevelUps: structuredClone(this.pendingLevelUps),
       progressionHistory: structuredClone(this.progressionHistory),
       xpHistory: structuredClone(this.xpHistory),
+      travelProgress: structuredClone(this.travelProgress),
       appearanceId: this.appearanceId,
       classFeatureState: structuredClone(this.classFeatureState),
     };
@@ -227,6 +230,15 @@ export class Hero {
     }
 
     return normalizedPosition;
+  }
+
+  static #createTravelProgress(progress) {
+    if (progress === null || Array.isArray(progress) || typeof progress !== "object") throw new TypeError("La progression de déplacement doit être un objet.");
+    return {
+      totalDistanceMeters: Hero.#requireNonNegativeNumber(progress.totalDistanceMeters ?? 0, "La distance totale parcourue"),
+      remainderMeters: Hero.#requireNonNegativeNumber(progress.remainderMeters ?? 0, "La distance restante"),
+      lastPosition: progress.lastPosition == null ? null : Hero.#createPosition(progress.lastPosition, false),
+    };
   }
 
   static #createEquipment(equipment) {
