@@ -15,6 +15,6 @@ export class LocationCaptureService {
     if (afterBattle && !["battle_required", "can_capture"].includes(requirement.state)) return { success: false, reason: requirement.state, objectiveId: requirement.objectiveId ?? null };
     const previousOwnerId = location.ownerId;
     location.setOwner(playerId); location.setController(playerId);
-    return { success: true, locationId: location.id, previousOwnerId, ownerId: playerId, method: afterBattle ? "battle" : (location.capture.questObjectiveId ? "quest" : "presence") };
+    return { success: true, locationId: location.id, previousOwnerId, ownerId: playerId, method: afterBattle ? "battle" : (location.capture.questObjectiveId ? "quest" : "interaction") };
   }
 }

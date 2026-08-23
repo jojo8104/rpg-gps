@@ -1,0 +1,91 @@
+[
+  {
+    "id": "charge", "name": "Charge", "type": "active", "scope": "battle", "classIds": ["warrior"],
+    "description": "Donne temporairement attaque et vitesse à une unité alliée.", "activation": { "cost": 1, "target": "ally_unit" },
+    "effects": {
+      "novice": [{ "kind": "stat_modifier", "stat": "attack", "value": 2, "durationMs": 6000 }, { "kind": "stat_modifier", "stat": "speed", "operation": "multiply", "value": 1.15, "durationMs": 6000 }],
+      "advanced": [{ "kind": "stat_modifier", "stat": "attack", "value": 3, "durationMs": 7000 }, { "kind": "stat_modifier", "stat": "speed", "operation": "multiply", "value": 1.25, "durationMs": 7000 }],
+      "master": [{ "kind": "stat_modifier", "stat": "attack", "value": 4, "durationMs": 8000 }, { "kind": "stat_modifier", "stat": "speed", "operation": "multiply", "value": 1.35, "durationMs": 8000 }]
+    }
+  },
+  {
+    "id": "guard", "name": "Garde", "type": "reaction", "scope": "battle", "classIds": ["warrior"],
+    "description": "Protège temporairement une unité ou un héros allié.", "activation": { "cost": 1, "target": "ally_entity" },
+    "effects": {
+      "novice": [{ "kind": "stat_modifier", "stat": "defense", "value": 3, "durationMs": 8000 }, { "kind": "damage_reduction", "value": 0.10, "durationMs": 8000 }],
+      "advanced": [{ "kind": "stat_modifier", "stat": "defense", "value": 4, "durationMs": 9000 }, { "kind": "damage_reduction", "value": 0.15, "durationMs": 9000 }],
+      "master": [{ "kind": "stat_modifier", "stat": "defense", "value": 5, "durationMs": 10000 }, { "kind": "damage_reduction", "value": 0.20, "durationMs": 10000 }]
+    }
+  },
+  {
+    "id": "war_cry", "name": "Cri de guerre", "type": "active", "scope": "battle", "classIds": ["warrior"],
+    "description": "Augmente temporairement le moral de toute l’armée.", "activation": { "cost": 2, "target": "none" },
+    "effects": {
+      "novice": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "morale", "value": 2, "durationMs": 10000 }],
+      "advanced": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "morale", "value": 3, "durationMs": 12000 }],
+      "master": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "morale", "value": 4, "durationMs": 14000 }]
+    }
+  },
+  {
+    "id": "ambush", "name": "Embuscade", "type": "active", "scope": "battle", "classIds": ["ranger"],
+    "description": "Accélère et renforce les unités mobiles ou à distance.", "activation": { "cost": 2, "target": "none" },
+    "effects": {
+      "novice": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "attack", "value": 1, "durationMs": 8000, "filter": { "tagsAny": ["ranged", "cavalry"] } }, { "kind": "stat_modifier", "recipient": "allied_units", "stat": "speed", "operation": "multiply", "value": 1.15, "durationMs": 8000, "filter": { "tagsAny": ["ranged", "cavalry"] } }],
+      "advanced": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "attack", "value": 2, "durationMs": 10000, "filter": { "tagsAny": ["ranged", "cavalry"] } }, { "kind": "stat_modifier", "recipient": "allied_units", "stat": "speed", "operation": "multiply", "value": 1.25, "durationMs": 10000, "filter": { "tagsAny": ["ranged", "cavalry"] } }],
+      "master": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "attack", "value": 3, "durationMs": 12000, "filter": { "tagsAny": ["ranged", "cavalry"] } }, { "kind": "stat_modifier", "recipient": "allied_units", "stat": "speed", "operation": "multiply", "value": 1.35, "durationMs": 12000, "filter": { "tagsAny": ["ranged", "cavalry"] } }]
+    }
+  },
+  {
+    "id": "harassment", "name": "Harcèlement", "type": "passive", "scope": "battle", "classIds": ["ranger"],
+    "description": "Améliore automatiquement les unités à distance ou montées.",
+    "effects": {
+      "novice": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "attack", "value": 1, "filter": { "tagsAny": ["ranged", "cavalry"] } }, { "kind": "stat_modifier", "recipient": "allied_units", "stat": "speed", "operation": "multiply", "value": 1.05, "filter": { "tagsAny": ["ranged", "cavalry"] } }],
+      "advanced": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "attack", "value": 2, "filter": { "tagsAny": ["ranged", "cavalry"] } }, { "kind": "stat_modifier", "recipient": "allied_units", "stat": "speed", "operation": "multiply", "value": 1.10, "filter": { "tagsAny": ["ranged", "cavalry"] } }],
+      "master": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "attack", "value": 3, "filter": { "tagsAny": ["ranged", "cavalry"] } }, { "kind": "stat_modifier", "recipient": "allied_units", "stat": "speed", "operation": "multiply", "value": 1.15, "filter": { "tagsAny": ["ranged", "cavalry"] } }]
+    }
+  },
+  {
+    "id": "tactical_retreat", "name": "Repli tactique", "type": "reaction", "scope": "battle", "classIds": ["ranger"],
+    "description": "Fait retraiter une unité avec un bonus défensif et de vitesse.", "activation": { "cost": 1, "target": "ally_unit" },
+    "effects": {
+      "novice": [{ "kind": "retreat" }, { "kind": "stat_modifier", "stat": "defense", "value": 2, "durationMs": 8000 }, { "kind": "stat_modifier", "stat": "speed", "operation": "multiply", "value": 1.25, "durationMs": 8000 }],
+      "advanced": [{ "kind": "retreat" }, { "kind": "stat_modifier", "stat": "defense", "value": 3, "durationMs": 9000 }, { "kind": "stat_modifier", "stat": "speed", "operation": "multiply", "value": 1.50, "durationMs": 9000 }],
+      "master": [{ "kind": "retreat" }, { "kind": "stat_modifier", "stat": "defense", "value": 4, "durationMs": 10000 }, { "kind": "stat_modifier", "stat": "speed", "operation": "multiply", "value": 1.75, "durationMs": 10000 }]
+    }
+  },
+  {
+    "id": "offensive_magic", "name": "Magie offensive", "type": "active", "scope": "battle", "classIds": ["mage"],
+    "description": "Inflige immédiatement des dégâts à une cible ennemie.", "activation": { "cost": 2, "target": "enemy_entity" },
+    "effects": { "novice": [{ "kind": "direct_damage", "value": 6 }], "advanced": [{ "kind": "direct_damage", "value": 10 }], "master": [{ "kind": "direct_damage", "value": 15 }] }
+  },
+  {
+    "id": "protective_magic", "name": "Magie protectrice", "type": "reaction", "scope": "battle", "classIds": ["mage"],
+    "description": "Réduit temporairement les dégâts reçus par une cible alliée.", "activation": { "cost": 2, "target": "ally_entity" },
+    "effects": { "novice": [{ "kind": "damage_reduction", "value": 0.20, "durationMs": 8000 }], "advanced": [{ "kind": "damage_reduction", "value": 0.30, "durationMs": 10000 }], "master": [{ "kind": "damage_reduction", "value": 0.40, "durationMs": 12000 }] }
+  },
+  {
+    "id": "control_magic", "name": "Magie de contrôle", "type": "active", "scope": "battle", "classIds": ["mage"],
+    "description": "Ralentit fortement une unité ennemie.", "activation": { "cost": 2, "target": "enemy_unit" },
+    "effects": { "novice": [{ "kind": "stat_modifier", "stat": "speed", "operation": "multiply", "value": 0.65, "durationMs": 8000 }], "advanced": [{ "kind": "stat_modifier", "stat": "speed", "operation": "multiply", "value": 0.50, "durationMs": 10000 }], "master": [{ "kind": "stat_modifier", "stat": "speed", "operation": "multiply", "value": 0.35, "durationMs": 12000 }] }
+  },
+  {
+    "id": "leadership", "name": "Commandement", "type": "passive", "scope": "stats", "classIds": [], "description": "Augmente automatiquement le moral de l’armée.",
+    "effects": { "novice": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "morale", "value": 1 }], "advanced": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "morale", "value": 2 }], "master": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "morale", "value": 3 }] }
+  },
+  {
+    "id": "endurance", "name": "Endurance", "type": "passive", "scope": "global", "classIds": [], "description": "Réduit automatiquement les dégâts subis par le héros.",
+    "effects": { "novice": [{ "kind": "damage_reduction", "recipient": "self", "value": 0.05 }], "advanced": [{ "kind": "damage_reduction", "recipient": "self", "value": 0.10 }], "master": [{ "kind": "damage_reduction", "recipient": "self", "value": 0.15 }] }
+  },
+  {
+    "id": "inspiration", "name": "Inspiration", "type": "passive", "scope": "stats", "classIds": [], "description": "Renforce automatiquement le moral des troupes.",
+    "effects": { "novice": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "morale", "value": 1 }], "advanced": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "morale", "value": 2 }], "master": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "morale", "value": 3 }] }
+  },
+  {
+    "id": "tactics", "name": "Tactique", "type": "passive", "scope": "battle", "classIds": [], "description": "Améliore automatiquement l’attaque et la défense de l’armée.",
+    "effects": {
+      "novice": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "attack", "value": 1 }, { "kind": "stat_modifier", "recipient": "allied_units", "stat": "defense", "value": 1 }],
+      "advanced": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "attack", "value": 2 }, { "kind": "stat_modifier", "recipient": "allied_units", "stat": "defense", "value": 2 }],
+      "master": [{ "kind": "stat_modifier", "recipient": "allied_units", "stat": "attack", "value": 3 }, { "kind": "stat_modifier", "recipient": "allied_units", "stat": "defense", "value": 3 }]
+    }
+  }
+]

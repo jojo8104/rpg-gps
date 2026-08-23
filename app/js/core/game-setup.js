@@ -112,6 +112,7 @@ export class GameSetup {
       moraleMode: GameSetup.#moraleMode(rules.moraleMode ?? "casual"),
       locationMode: GameSetup.#moraleMode(rules.locationMode ?? "casual"),
       engagementRadiusMeters: GameSetup.#positiveIntegerOrDefault(rules.engagementRadiusMeters, 75, "Le rayon d'engagement"),
+      autonomousReactionMinimumSeconds: GameSetup.#positiveIntegerOrDefault(rules.autonomousReactionMinimumSeconds, 15, "Le délai minimal de réaction aux groupes autonomes"),
       fleeConfirmations: GameSetup.#positiveIntegerOrDefault(rules.fleeConfirmations, 2, "Les confirmations de fuite"),
       pursuitCooldownMinutes: GameSetup.#positiveIntegerOrDefault(rules.pursuitCooldownMinutes, 10, "Le cooldown de poursuite"),
     };
@@ -148,7 +149,24 @@ export class GameSetup {
       generationMode, density, minLocations, maxLocations,
       allowedSources: [...new Set(allowedSources.map((source) => GameSetup.#requireText(source, "Une source de lieu")))],
       rangePolicy: GameSetup.#createRangePolicy(locationSetup.rangePolicy ?? {}),
+      placements: GameSetup.#createLocationPlacements(locationSetup.placements ?? {}),
     };
+  }
+
+  static #createLocationPlacements(placements) {
+    GameSetup.#requireObject(placements, "Les placements de lieux");
+    return Object.fromEntries(Object.entries(placements).map(([slotId, placement]) => {
+      GameSetup.#requireObject(placement, `Le placement ${slotId}`);
+      const strategy = GameSetup.#requireText(placement.strategy ?? "fixed", "La stratégie de placement");
+      if (!["fixed", "distance"].includes(strategy)) throw new RangeError("La stratégie de placement doit être fixed ou distance.");
+      const normalized = { ...structuredClone(placement), strategy };
+      if (strategy === "distance") {
+        normalized.minimumDistanceMeters = GameSetup.#positiveNumberOrDefault(placement.minimumDistanceMeters, 300, "La distance de placement");
+        normalized.maximumAccuracyMeters = GameSetup.#positiveNumberOrDefault(placement.maximumAccuracyMeters, 50, "La précision GPS maximale");
+        normalized.confirmations = GameSetup.#positiveIntegerOrDefault(placement.confirmations, 2, "Les confirmations de placement");
+      }
+      return [GameSetup.#requireText(slotId, "L'identifiant de slot"), normalized];
+    }));
   }
 
   static #createRangePolicy(policy) {
@@ -178,6 +196,12 @@ export class GameSetup {
     const { enabled = false, allowed = true } = qrSetup;
     if (typeof enabled !== "boolean" || typeof allowed !== "boolean") throw new TypeError("La configuration QR doit contenir des booléens.");
     return { enabled, allowed };
+  }
+
+  static #positiveNumberOrDefault(value, fallback, label) {
+    const result = value ?? fallback;
+    if (!Number.isFinite(result) || result <= 0) throw new RangeError(`${label} doit être positive.`);
+    return result;
   }
 
   static #createTeams(teams) {

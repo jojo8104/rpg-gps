@@ -46,3 +46,11 @@ test("la connaissance d'un lieu progresse sans pouvoir régresser", () => {
   assert.equal(player.discoverLocation("fort", 3), true);
   assert.equal(player.getLocationKnowledge("fort"), 3);
 });
+
+test("un joueur conserve un renseignement générique sans le confondre avec la carte", () => {
+  const player = new Player({ id: "player-1", name: "Ariane" });
+  assert.equal(player.receiveInformation({ id: "intel-1", content: { text: "Convoi au nord" }, acquiredAt: 10 }), true);
+  assert.equal(player.receiveInformation({ id: "intel-1", content: {}, acquiredAt: 11 }), false);
+  assert.equal(player.getInformation("intel-1").content.text, "Convoi au nord");
+  assert.equal(player.discoveredLocationIds.length, 0);
+});

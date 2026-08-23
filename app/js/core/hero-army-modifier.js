@@ -19,10 +19,10 @@ export class HeroArmyModifier {
     const speed = HeroArmyModifier.#speed(hero, units, unitDefinitions);
     const morale = HeroArmyModifier.#morale(hero, moraleMode, context);
     return {
-      attackBonus: hero.commandStats?.attackBonus ?? 0,
-      defenseBonus: hero.commandStats?.defenseBonus ?? 0,
-      moraleBonus: (hero.commandStats?.moraleBonus ?? 0) + morale.total,
-      speedMultiplier: speed.multiplier,
+      attackBonus: hero.finalStats?.attack ?? hero.commandStats?.attackBonus ?? 0,
+      defenseBonus: hero.finalStats?.defense ?? hero.commandStats?.defenseBonus ?? 0,
+      moraleBonus: (hero.finalStats?.morale ?? hero.commandStats?.moraleBonus ?? 0) + morale.total,
+      speedMultiplier: speed.multiplier * ((hero.finalStats?.mobility ?? 3) / 3),
       details: { speed: speed.details, morale: morale.details },
     };
   }
@@ -39,12 +39,12 @@ export class HeroArmyModifier {
       if (tags.includes("cavalry")) mobility += quantity * 0.012;
       if (tags.includes("heavy_armor")) mobility -= quantity * 0.015;
     }
-    const carriedWeight = hero.carriedLoot.reduce((sum, item) => sum + item.quantity * item.weightPerUnit, 0);
-    const loadRatio = carriedWeight / hero.carryCapacity;
+    const bag = new InventoryService().getHeroBagState(hero);
+    const loadRatio = bag.slotCapacity === 0 ? 0 : bag.usedSlots / bag.slotCapacity;
     const loadPenalty = Math.min(0.45, loadRatio * 0.35);
     const sizePenalty = Math.max(0, soldiers - 20) * 0.003;
     const multiplier = clamp(1 + mobility - loadPenalty - sizePenalty, 0.4, 1.35);
-    return { multiplier, details: { mobility, carriedWeight, loadRatio, loadPenalty, sizePenalty } };
+    return { multiplier, details: { mobility, usedSlots: bag.usedSlots, slotCapacity: bag.slotCapacity, loadRatio, loadPenalty, sizePenalty } };
   }
 
   static #morale(hero, mode, context) {
@@ -57,3 +57,4 @@ export class HeroArmyModifier {
 }
 
 function clamp(value, minimum, maximum) { return Math.max(minimum, Math.min(maximum, value)); }
+import { InventoryService } from "./inventory-service.js";

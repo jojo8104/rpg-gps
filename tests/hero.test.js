@@ -19,11 +19,12 @@ test("un héros gère son armée, ses capacités et sa progression", () => {
   assert.equal(hero.level, 2);
 });
 
-test("le grade de commandement du héros progresse avec son expérience", () => {
+test("l'expérience seule ne change plus le grade de commandement du héros", () => {
   const hero = new Hero({ id: "commander", playerId: "player-1", name: "Ariane" });
   assert.equal(hero.commandRank, "captain"); assert.equal(hero.maxUnitStacks, 3);
-  hero.addExperience(250); assert.equal(hero.commandRank, "banneret"); assert.equal(hero.maxUnitStacks, 4);
-  hero.addExperience(950); assert.equal(hero.commandRank, "marshal"); assert.equal(hero.maxUnitStacks, 6);
+  assert.equal(hero.addExperience(1_000), true); assert.equal(hero.commandRank, "captain");
+  hero.setLevel(5); assert.equal(hero.commandRank, "banneret"); assert.equal(hero.maxUnitStacks, 4);
+  hero.setLevel(20); assert.equal(hero.commandRank, "marshal"); assert.equal(hero.maxUnitStacks, 7);
 });
 
 test("un héros accepte une position GPS sérialisable", () => {

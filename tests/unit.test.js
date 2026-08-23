@@ -13,6 +13,7 @@ test("une définition d'unité est configurable et sérialisable", () => {
     abilities: ["ranged_attack"], costs: { gold: 30, wood: 10, iron: 5 }, tags: ["infantry", "ranged"],
   });
   assert.equal(definition.toJSON().stats.range, 3);
+  assert.equal(definition.toJSON().authorityCost, 1);
   assert.deepEqual(definition.toJSON().retreat, { attack: 3, defense: 2, speed: 4, range: 3 });
   assert.deepEqual(definition.abilities, ["ranged_attack"]);
 });
@@ -37,12 +38,12 @@ test("une armée contient des unités aux identifiants uniques", () => {
   assert.equal(army.removeUnit("unit-1").id, "unit-1");
 });
 
-test("une unité monte en grade par expérience ou par nomination d'un PNJ", () => {
+test("l'expérience rend la promotion d'une unité disponible sans l'appliquer", () => {
   const unit = new Unit({ id: "ranked", ownerPlayerId: "player-1", typeId: "militia", quantity: 6 });
   assert.equal(unit.rank, "soldier"); assert.equal(unit.maxQuantity, 6);
-  unit.addExperience(100); assert.equal(unit.rank, "corporal"); assert.equal(unit.maxQuantity, 10); assert.equal(unit.quantity, 6);
-  assert.equal(unit.appointOfficer("lieutenant"), true); assert.equal(unit.maxQuantity, 24);
-  assert.equal(unit.appointOfficer("sergeant"), false);
+  assert.equal(unit.addExperience(100), true); assert.equal(unit.rank, "soldier"); assert.equal(unit.canPromote, true);
+  assert.equal(unit.promote("corporal"), true); assert.equal(unit.maxQuantity, 10); assert.equal(unit.quantity, 6); assert.equal(unit.level, 2);
+  assert.equal(unit.promote("sergeant"), false);
 });
 
 test("les PV individuels distinguent soldats aptes et blessés", () => {

@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { MAP_LAYER_ORDER, MAP_LAYER_Z_INDEX } from "../app/js/map/MapLayers.js";
 import { zoomLevel } from "../app/js/map/MapRenderer.js";
-import { locationPresentation } from "../app/js/map/LocationRenderer.js";
+import { locationMarkerSvg, locationPresentation } from "../app/js/map/LocationRenderer.js";
+import { dynamicSitePresentation } from "../app/js/ui/map-view.js";
 
 test("les panes cartographiques ont un ordre explicite et strict", () => {
   const values = MAP_LAYER_ORDER.map((name) => MAP_LAYER_Z_INDEX[name]);
@@ -20,4 +21,16 @@ test("le renderer déduit le langage visuel depuis les données métier", () => 
   assert.equal(enemy.owner, "enemy"); assert.equal(enemy.status, "active"); assert.equal(enemy.badge, "⚔");
   const conquered = locationPresentation({ type: "camp", owner: "ally", state: "DISCOVERED", name: "Camp conquis", nearby: true });
   assert.equal(conquered.owner, "ally"); assert.equal(conquered.badge, "");
+});
+
+test("chaque type de lieu possède un symbole vectoriel pour le zoom sémantique", () => {
+  ["fort", "village", "mine", "camp", "quest"].forEach((type) => {
+    const marker = locationMarkerSvg(type); assert.match(marker, /^<svg/); assert.match(marker, /<path/);
+  });
+});
+
+test("un champ de bataille réserve une grande cible tactile au-dessus du héros", () => {
+  const site = dynamicSitePresentation({ kind: "battlefield", interactionRadius: 100 });
+  assert.equal(site.iconSize, 64); assert.equal(site.interactionRadius, 100);
+  assert.equal(site.pane, "effects"); assert.ok(site.zIndexOffset > 1000);
 });

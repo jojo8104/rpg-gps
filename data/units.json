@@ -4,6 +4,7 @@
     "name": "Miliciens",
     "faction": "kingdom",
     "maxQuantity": 12,
+    "authorityCost": 1,
     "stats": { "attack": 3, "defense": 2, "damageMin": 1, "damageMax": 2, "healthPerSoldier": 10, "combatHealthThreshold": 4, "speed": 2, "range": 1, "attackIntervalMs": 1300, "morale": 4 },
     "retreat": { "attack": 0, "defense": 0, "speed": 3, "range": 1 },
     "abilities": [],
@@ -15,7 +16,8 @@
     "name": "Archer",
     "faction": "kingdom",
     "maxQuantity": 10,
-    "stats": { "attack": 4, "defense": 2, "damageMin": 2, "damageMax": 3, "healthPerSoldier": 8, "combatHealthThreshold": 4, "speed": 3, "range": 3, "attackIntervalMs": 1200, "morale": 5 },
+    "authorityCost": 2,
+    "stats": { "attack": 4, "defense": 2, "damageMin": 2, "damageMax": 3, "healthPerSoldier": 8, "combatHealthThreshold": 4, "speed": 3, "range": 3, "attackIntervalMs": 2400, "morale": 5 },
     "retreat": { "attack": 4, "defense": 2, "speed": 4, "range": 3 },
     "abilities": ["ranged_attack"],
     "costs": { "gold": 30, "wood": 10, "stone": 0, "iron": 5 },
@@ -26,10 +28,23 @@
     "name": "Archer à cheval",
     "faction": "kingdom",
     "maxQuantity": 8,
+    "authorityCost": 3,
     "stats": { "attack": 4, "defense": 2, "damageMin": 2, "damageMax": 4, "healthPerSoldier": 9, "combatHealthThreshold": 4, "speed": 5, "range": 3, "attackIntervalMs": 1000, "morale": 6 },
     "retreat": { "attack": 5, "defense": 3, "speed": 7, "range": 4 },
     "abilities": ["ranged_attack", "skirmisher"],
     "costs": { "gold": 55, "wood": 10, "stone": 0, "iron": 10 },
     "tags": ["human", "cavalry", "ranged", "harassment"]
+  },
+  {
+    "id": "chaos-raider",
+    "name": "Maraudeurs du Chaos",
+    "faction": "chaos",
+    "maxQuantity": 12,
+    "authorityCost": 1,
+    "stats": { "attack": 4, "defense": 2, "damageMin": 1, "damageMax": 3, "healthPerSoldier": 10, "combatHealthThreshold": 4, "speed": 2.5, "range": 1, "attackIntervalMs": 1200, "morale": 6 },
+    "retreat": { "attack": 1, "defense": 1, "speed": 3.5, "range": 1 },
+    "abilities": [],
+    "costs": { "gold": 0, "wood": 0, "stone": 0, "iron": 0 },
+    "tags": ["chaos", "infantry", "raider"]
   }
 ]

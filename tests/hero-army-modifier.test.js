@@ -10,7 +10,7 @@ const definitions = new Map([
 ]);
 
 test("les bonus du héros et le train modifient les statistiques de l'armée", () => {
-  const hero = new Hero({ id: "h", playerId: "p", name: "A", commandStats: { attackBonus: 2, defenseBonus: 1, moraleBonus: 1 }, carryCapacity: 20, carriedLoot: [{ itemId: "ore", quantity: 10, weightPerUnit: 1 }] });
+  const hero = new Hero({ id: "h", playerId: "p", name: "A", commandStats: { attackBonus: 2, defenseBonus: 1, moraleBonus: 1 }, carriedLoot: [{ itemId: "ore", quantity: 10 }] });
   const result = HeroArmyModifier.calculate({ hero, units: [{ typeId: "cavalry", quantity: 5 }, { typeId: "heavy", quantity: 5 }], unitDefinitions: definitions });
   assert.equal(result.attackBonus, 2);
   assert.equal(result.defenseBonus, 1);

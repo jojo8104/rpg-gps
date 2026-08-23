@@ -39,3 +39,20 @@ test("une garnison possédée ou neutre peut être renforcée, jamais une garnis
   assert.equal(policy.can("p1", enemy, "garrison"), false);
   assert.equal(policy.can("p1", allied, "withdrawGarrison"), true);
 });
+
+test("les réserves sont gérées uniquement par le propriétaire et le commerce exige un accès", () => {
+  const owned = location("p1", { trade: false }); const allied = location("p2", { trade: true });
+  assert.equal(policy.can("p1", owned, "manageReserves"), true);
+  assert.equal(policy.can("p1", allied, "manageReserves"), false);
+  assert.equal(policy.can("p1", owned, "trade"), false);
+  assert.equal(policy.can("p1", allied, "trade"), true);
+  const chief = location(null); chief.interactionIds.push("local-chief-trade"); chief.statistics.chiefTradeRemaining = 2;
+  assert.equal(policy.can("p1", chief, "trade"), true); chief.statistics.chiefTradeRemaining = 0;
+  assert.equal(policy.can("p1", chief, "trade"), false);
+});
+
+test("un lieu dépeuplé reste attaquable ou capturable", () => {
+  const mine = new Location({ id: "empty-mine", name: "Mine", type: "mine", source: "generated", position: { latitude: 0, longitude: 0 }, population: 0, features: { capturable: true, resourceProduction: true } });
+  assert.equal(policy.can("p1", mine, "attack"), true);
+  assert.equal(policy.can("p1", mine, "collect"), false);
+});

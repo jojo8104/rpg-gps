@@ -78,8 +78,11 @@ engagement. Les unités engagées restent sur le terrain, perdent le commandemen
 ne subissent la poursuite que si elles fuient explicitement.
 
 La résolution persistante d'une bataille produit un rapport de survivants, pertes,
-prisonniers, déserteurs et butin. Les déserteurs peuvent devenir une `RogueArmy`
-persistante, séparée des armées des joueurs.
+prisonniers, déserteurs et butin. Les groupes non joueurs utilisent le modèle
+générique `AutonomousGroup` (`rogue`, armée, messager, convoi ou prospection).
+Chaque groupe possède un propriétaire typé — joueur, faction, lieu ou indépendant —
+distinct de son alignement de faction. Les déserteurs deviennent des groupes
+autonomes `rogue`, séparés des armées des joueurs.
 
 ## Démonstration locale
 

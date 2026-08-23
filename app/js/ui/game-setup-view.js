@@ -10,7 +10,7 @@ const PROVISIONAL_PLAY_AREA = {
   ],
 };
 
-export function createQuickGameSetup({ name, scenarioId, expertRules = false }) {
+export function createQuickGameSetup({ name = "Essai terrain", scenarioId = "chaos", expertRules = false } = {}) {
   return new GameSetup({
     id: "chaos-field-test",
     name,
@@ -26,21 +26,18 @@ export function createQuickGameSetup({ name, scenarioId, expertRules = false }) 
   });
 }
 
+export function createAutomaticHeroChoice() {
+  return { name: "Aldric", classId: "warrior", appearanceId: "knight" };
+}
+
+export function isLocationPlacementAllowed({ playArea, position }) {
+  return playArea !== null && playArea !== undefined && playArea.contains(position);
+}
+
 export class GameSetupView {
   constructor(root) { this.root = root; }
 
-  setScenarios(scenarios) {
-    this.root.querySelector("#game-scenario").innerHTML = scenarios
-      .map((scenario) => `<option value="${scenario.id}">${scenario.name}</option>`).join("");
-  }
-
-  readSetup() {
-    return createQuickGameSetup({
-      name: this.root.querySelector("#game-name").value,
-      scenarioId: this.root.querySelector("#game-scenario").value,
-      expertRules: this.root.querySelector("#expert-contentment").checked,
-    });
-  }
+  readSetup() { return createQuickGameSetup(); }
 
   readPositionMode() { return this.root.querySelector('input[name="test-mode"]:checked').value; }
   showError(error) { this.root.querySelector("#setup-status").textContent = error.message; }

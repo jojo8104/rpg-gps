@@ -1,11 +1,11 @@
 import { MapLayers } from "./MapLayers.js";
 
-const SYMBOLS = Object.freeze({
-  fort: shieldSvg(),
-  village: houseSvg(),
-  mine: mineSvg(),
-  camp: campSvg(),
-  quest: questSvg(),
+const MARKER_ART = Object.freeze({
+  fort: "assets/markers/map/fort.png",
+  village: "assets/markers/map/village.png",
+  mine: "assets/markers/map/mine.png",
+  camp: "assets/markers/map/camp.png",
+  quest: "assets/markers/map/quest.png",
 });
 
 export class LocationRenderer {
@@ -15,8 +15,8 @@ export class LocationRenderer {
     const presentation = locationPresentation(location);
     const icon = L.divIcon({
       className: "rpg-marker-host",
-      html: `<div class="rpg-location" data-type="${presentation.type}" data-owner="${presentation.owner}" data-status="${presentation.status}">${SYMBOLS[presentation.type] ?? SYMBOLS.quest}<span class="rpg-location__badge" aria-hidden="true">${presentation.badge}</span><span class="rpg-location__label">${escapeHtml(presentation.label)}</span></div>`,
-      iconSize: [48, 58], iconAnchor: [24, 29],
+      html: `<div class="rpg-location" data-type="${presentation.type}" data-owner="${presentation.owner}" data-status="${presentation.status}"><span class="rpg-location__frame"><img class="rpg-location__art" src="${MARKER_ART[presentation.type] ?? MARKER_ART.quest}" alt="" draggable="false"><span class="rpg-location__semantic" aria-hidden="true">${locationMarkerSvg(presentation.type)}</span></span><span class="rpg-location__far-dot" aria-hidden="true">${locationMarkerSvg(presentation.type)}</span><span class="rpg-location__badge" aria-hidden="true">${presentation.badge}</span><span class="rpg-location__label">${escapeHtml(presentation.label)}</span></div>`,
+      iconSize: [64, 76], iconAnchor: [32, 38],
     });
     let marker = this.layers.get(location.id);
     if (!marker) {
@@ -29,11 +29,22 @@ export class LocationRenderer {
   removeMissing(ids) { for (const [id, layer] of this.layers) if (!ids.has(id)) { layer.remove(); this.layers.delete(id); } }
 }
 
+export function locationMarkerSvg(type) {
+  const shapes = {
+    fort: '<path d="M12 27V12h5v4h6v-4h5v15M9 27h22M16 27v-7h8v7"/>',
+    village: '<path d="m8 21 7-7 7 7v8H8ZM20 18l5-5 7 7v9H20M12 29v-5h5v5"/>',
+    mine: '<path d="m10 30 7-18M30 30 23 12M14 22h12M8 30h24"/><path d="m12 11 5 3M28 11l-5 3"/>',
+    camp: '<path d="m7 29 13-20 13 20ZM20 9v20M14 29l6-9 6 9"/>',
+    quest: '<path d="M14 13c1-5 13-5 13 2 0 5-7 5-7 10M20 31v1"/>',
+  };
+  return `<svg viewBox="0 0 40 40" focusable="false"><g>${shapes[type] ?? shapes.quest}</g></svg>`;
+}
+
 export function locationPresentation(location) {
   const unknown = String(location.state).toLowerCase() === "unknown";
   const enemy = location.owner === "enemy";
   return {
-    type: SYMBOLS[location.type] ? location.type : "quest",
+    type: MARKER_ART[location.type] ? location.type : "quest",
     owner: enemy ? "enemy" : (location.owner ?? "neutral"),
     status: unknown ? "unknown" : location.nearby ? "active" : "discovered",
     label: unknown ? "Lieu inconnu" : location.name,
@@ -43,9 +54,3 @@ export function locationPresentation(location) {
 
 function asLatLng(value) { return Array.isArray(value) ? value : [value.latitude, value.longitude]; }
 function escapeHtml(value) { const node = document.createElement("span"); node.textContent = value; return node.innerHTML; }
-function svg(body) { return `<svg viewBox="0 0 48 48" aria-hidden="true"><path class="rpg-icon__back" d="M24 2 44 13v22L24 46 4 35V13Z"/><g class="rpg-icon__shape">${body}</g></svg>`; }
-function shieldSvg() { return svg('<path d="M15 14h18v10c0 8-5 12-9 14-4-2-9-6-9-14Z"/><path d="M20 18h8M24 14v18"/>'); }
-function houseSvg() { return svg('<path d="m13 24 11-10 11 10v12H13Z"/><path d="M20 36V26h8v10"/>'); }
-function mineSvg() { return svg('<path d="M12 35h24L31 18H17Z"/><path d="M18 18h12M24 13v5M17 29h14"/>'); }
-function campSvg() { return svg('<path d="m12 36 12-23 12 23ZM16 36l8-12 8 12"/><path d="m14 14 20 20M34 14 14 34"/>'); }
-function questSvg() { return svg('<path d="M18 18c1-7 13-7 13 1 0 6-7 5-7 11M24 36h.01"/>'); }

@@ -17,6 +17,11 @@ test("la recherche devient possible après Battle et le site expire", () => {
   assert.equal(site.isExpired(), true); assert.equal(site.isVisibleTo({ playerId: "p", position: center }), false);
 });
 
+test("un champ de bataille disparaît par défaut après cinq minutes", () => {
+  let now = 10_000; const site = new BattleSite({ id: "five-minutes", battleId: "battle", position: center, participantPlayerIds: [], now: () => now });
+  site.finish(); assert.equal(site.expiresAt, 310_000); now = 309_999; assert.equal(site.isExpired(), false); now = 310_000; assert.equal(site.isExpired(), true);
+});
+
 test("butin, informations et survivants sont trois recherches indépendantes", () => {
   const site = new BattleSite({ id: "searchable", battleId: "battle", position: center, participantPlayerIds: ["p1"] });
   site.finish();
@@ -25,4 +30,10 @@ test("butin, informations et survivants sont trois recherches indépendantes", (
   assert.equal(site.search({ type: "survivors", playerId: "p1", position: center }).success, true);
   assert.equal(site.search({ type: "loot", playerId: "p1", position: center }).reason, "already_searched");
   assert.deepEqual(site.toJSON().searches, { loot: ["p1"], information: ["p1"], survivors: ["p1"] });
+});
+
+test("un champ visité mémorise son état par joueur", () => {
+  const site = new BattleSite({ id: "visited", battleId: "battle", position: center, participantPlayerIds: [] });
+  assert.equal(site.isVisitedBy("p1"), false); assert.equal(site.visit("p1"), true); assert.equal(site.isVisitedBy("p1"), true); assert.equal(site.isVisitedBy("p2"), false);
+  assert.deepEqual(site.toJSON().visitedByPlayerIds, ["p1"]);
 });

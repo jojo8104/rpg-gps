@@ -14,5 +14,7 @@ export function unitIconKind({ typeId = "", tags = [], range = 1 } = {}) {
 /** Une silhouette SVG commune aux vues Armée et Battle. */
 export function renderUnitTypeIcon(unit = {}) {
   const kind = unitIconKind(unit);
+  const artwork = { militia: "militia-thumbnail.png", archer: "archer-thumbnail.png" }[String(unit.typeId).toLowerCase()];
+  if (artwork) return `<img class="unit-art-thumbnail" src="assets/units/${artwork}" alt="" draggable="false">`;
   return `<svg class="unit-type-icon is-${kind}" viewBox="0 0 32 32" aria-hidden="true" focusable="false" data-unit-icon="${kind}">${ICONS[kind]}</svg>`;
 }

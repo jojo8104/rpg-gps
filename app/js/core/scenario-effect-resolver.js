@@ -26,6 +26,30 @@ export class ScenarioEffectResolver {
         game.eventLog.push(entry);
         return entry;
       }
+      case "awardHeroExperience": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game);
+        const amount = ScenarioEffectResolver.#positiveInteger(effect.amount, "La récompense d'expérience");
+        game.gainHeroExperience({ heroId: hero.id, amount, source: `quest:${game.activeScenarioEventId}` });
+        const entry = { type: "hero_experience_awarded", heroId: hero.id, amount, eventId: game.activeScenarioEventId };
+        game.eventLog.push(entry); return entry;
+      }
+      case "grantCarriedItem": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game); const itemId = ScenarioEffectResolver.#requireText(effect.itemId, "L'objet de quête");
+        if (!hero.carriedLoot.some((entry) => entry.itemId === itemId)) hero.addCarriedLoot([{ id: `${itemId}-${game.activeScenarioEventId}`, itemId, quantity: 1, valuePerUnit: 1 }]);
+        const entry = { type: "quest_item_granted", heroId: hero.id, itemId, eventId: game.activeScenarioEventId };
+        game.eventLog.push(entry); return entry;
+      }
+      case "removeCarriedItem": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game); const itemId = ScenarioEffectResolver.#requireText(effect.itemId, "L'objet de quête");
+        const index = hero.carriedLoot.findIndex((entry) => entry.itemId === itemId); if (index >= 0) hero.carriedLoot.splice(index, 1);
+        const entry = { type: "quest_item_removed", heroId: hero.id, itemId, eventId: game.activeScenarioEventId };
+        game.eventLog.push(entry); return entry;
+      }
+      case "grantHeroResource": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game); const resource = ScenarioEffectResolver.#requireText(effect.resource, "La ressource"); const amount = ScenarioEffectResolver.#positiveInteger(effect.amount, "La récompense");
+        hero.addResource(resource, amount); const entry = { type: "hero_resource_granted", heroId: hero.id, resource, amount, eventId: game.activeScenarioEventId };
+        game.eventLog.push(entry); return entry;
+      }
       default:
         throw new RangeError(`Le type d'effet "${effect.type}" n'est pas encore pris en charge.`);
     }
@@ -34,5 +58,11 @@ export class ScenarioEffectResolver {
   static #requireText(value, label) {
     if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label} doit être un texte non vide.`);
     return value.trim();
+  }
+
+  static #positiveInteger(value, label) { if (!Number.isInteger(value) || value <= 0) throw new RangeError(`${label} doit être un entier positif.`); return value; }
+  static #heroFor(effect, game) {
+    const playerId = ScenarioEffectResolver.#requireText(effect.playerId ?? "local", "Le joueur récompensé"); const player = game.getPlayer(playerId); const hero = player?.heroIds.map((id) => game.getHero(id)).find((candidate) => candidate !== null) ?? null;
+    if (hero === null) throw new RangeError("Le héros récompensé n'existe pas."); return hero;
   }
 }

@@ -89,3 +89,16 @@ test("chaque soldat survivant récupère un PV par unité de temps dans un lieu 
   const result = game.healHeroUnits({ playerId: "player-1", heroId: hero.id, locationId: fort.id, timeUnits: 1 });
   assert.equal(result.restoredHealth, unit.quantity); assert.ok(unit.soldierHealth.every((health) => health === unit.healthPerSoldier - 1));
 });
+
+test("les unités récupèrent passivement à chaque cycle hors des localisations", () => {
+  const game = new Game({ setup, scenario, heroClasses, unitDefinitions, locations, idGenerator: () => "unit-cycle-heal" });
+  const hero = game.chooseHero("player-1", { name: "Aldric", classId: "warrior" }); game.start();
+  const fort = game.getLocation("fort-1"); fort.addHero(hero.id);
+  const unit = game.recruitUnit({ playerId: "player-1", heroId: hero.id, locationId: fort.id, unitTypeId: "archer" }).unit;
+  fort.removeHero(hero.id); hero.updatePosition({ latitude: 5, longitude: 5 });
+  unit.soldierHealth = unit.soldierHealth.map((health) => health - 2);
+  const cycle = game.advanceCycle(1, () => 0.5);
+  assert.equal(cycle.recoveredUnits[0].unitId, unit.id);
+  assert.equal(cycle.recoveredUnits[0].restoredHealth, unit.quantity);
+  assert.ok(unit.soldierHealth.every((health) => health === unit.healthPerSoldier - 1));
+});
