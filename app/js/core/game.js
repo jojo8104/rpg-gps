@@ -32,12 +32,15 @@ import { ChiefTradeService } from "./chief-trade-service.js";
 import { MarketService } from "./market-service.js";
 import { QuestRuntime } from "./quest-runtime.js";
 import { ScenarioRuntimeBuilder } from "./scenario-runtime-builder.js";
+import { HeroClassFeatureService } from "./hero-class-feature-service.js";
+import { distanceMeters } from "./geo.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
 export class Game {
   constructor({ setup, scenario = null, scenarioLocationBindings = [], heroClasses = [], heroAptitudes = [], unitDefinitions = [], locations = [], autonomousGroups = [], autonomousGroupTraces = [], now = () => Date.now(), idGenerator = Game.#defaultIdGenerator }) {
     this.setup = setup instanceof GameSetup ? setup : new GameSetup(setup);
     this.heroClasses = Game.#createHeroClassMap(heroClasses);
+    this.heroClassFeatureService = new HeroClassFeatureService({ classDefinitions: this.heroClasses, now });
     this.heroProgressionService = new HeroProgressionService({ aptitudeDefinitions: heroAptitudes, now });
     this.unitDefinitions = Game.#createUnitDefinitionMap(unitDefinitions);
     this.recruitmentService = new RecruitmentService(this.unitDefinitions);
@@ -68,8 +71,7 @@ export class Game {
     this.scenarioRuntimeBuilder = new ScenarioRuntimeBuilder();
     this.scenarioRuntime = this.scenarioRuntimeBuilder.build({ scenario: this.scenario, setup: this.setup, bindings: this.scenarioLocationBindings, locations: this.locations });
     Object.values(this.scenarioRuntime?.placements ?? {}).filter((placement) => placement.status === "placed").forEach((placement) => {
-      const location = this.getLocation(placement.locationId);
-      if (location !== null) location.position = { ...placement.position };
+      this.updateLocationPosition({ locationId: placement.locationId, position: placement.position });
     });
     this.eventLog = [];
     this.activeScenarioEventId = null;
@@ -177,7 +179,7 @@ export class Game {
   }
 
   advanceAutonomousGroups(now = this.now()) {
-    const targets = this.heroes.filter((hero) => hero.state === "active" && hero.position !== null).map((hero) => ({ id: hero.id, kind: "hero", playerId: hero.playerId, position: hero.position, hostile: true }));
+    const targets = this.heroes.filter((hero) => hero.state === "active" && hero.position !== null).map((hero) => ({ id: hero.id, kind: "hero", playerId: hero.playerId, position: hero.position, hostile: true, concealmentMultiplier: (this.heroClassFeatureService.featuresFor(hero).concealmentMultiplier ?? 1) * (hero.classFeatureState.gpsConcealmentMultiplier ?? 1) }));
     const result = this.autonomousGroupService.advance({ groups: this.autonomousGroups, locations: this.locations, targets, playArea: this.setup.playArea, now, speedFor: (group) => this.#autonomousGroupSpeed(group) });
     this.autonomousGroupTraces.push(...result.traces);
     this.autonomousGroupTraces = this.autonomousGroupTraces.filter((trace) => trace.getScore(now) > 0);
@@ -212,6 +214,23 @@ export class Game {
     return { ...result, event };
   }
 
+  prepareHeroAmbush({ playerId, heroId, unitId, position = null, radius = null, durationMs = null }) {
+    const hero = this.getHero(heroId); const player = this.getPlayer(playerId);
+    if (hero === null || player === null || hero.playerId !== player.id) return { success: false, reason: "hero_not_found" };
+    const features = this.heroClassFeatureService.featuresFor(hero);
+    if (features.canPrepareAmbush !== true) return { success: false, reason: "class_cannot_prepare_ambush" };
+    if (hero.state !== "active" || this.#isHeroBusy(hero.id)) return { success: false, reason: "hero_unavailable" };
+    const unit = hero.army.getUnit(unitId); const ambushPosition = position ?? hero.position;
+    if (unit === null) return { success: false, reason: "unit_not_found" };
+    if (!ambushPosition) return { success: false, reason: "hero_position_unknown" };
+    const now = this.now(); const ambushRadius = radius ?? features.ambushRadius ?? 75; const ambushDuration = durationMs ?? features.ambushDurationMs ?? 1_800_000;
+    if (!Number.isFinite(ambushRadius) || ambushRadius <= 0 || !Number.isFinite(ambushDuration) || ambushDuration <= 0) return { success: false, reason: "invalid_ambush_configuration" };
+    hero.removeUnit(unit.id);
+    const group = new AutonomousGroup({ id: this.idGenerator("hero-ambush"), type: "army", owner: { kind: "player", id: player.id }, position: ambushPosition, status: "ambushing", behavior: "aggressive", army: { units: [unit] }, ambush: { radiusMeters: ambushRadius, startedAt: now, expiresAt: now + ambushDuration }, history: [{ type: "hero_ambush_prepared", heroId: hero.id, at: now }] });
+    this.autonomousGroups.push(group); this.eventLog.push({ type: "hero_ambush_prepared", heroId: hero.id, unitId: unit.id, groupId: group.id, at: now });
+    return { success: true, groupId: group.id, unitId: unit.id, expiresAt: now + ambushDuration };
+  }
+
   finish(reason = "manual") {
     if (this.status !== "started") return false;
     this.status = "finished";
@@ -236,18 +255,31 @@ export class Game {
   }
 
   updateScenarioPosition({ position, accuracy = null }) {
+    if (!this.setup.playArea.contains(position)) return [];
     return this.scenarioRuntimeBuilder.update(this.scenarioRuntime, { position, accuracy });
   }
 
   placeScenarioLocation({ locationSlotId, position }) {
+    if (!this.setup.playArea.contains(position)) return { success: false, reason: "outside_play_area" };
     const result = this.scenarioRuntimeBuilder.place(this.scenarioRuntime, locationSlotId, position);
     if (!result.success) return result;
+    const moved = this.updateLocationPosition({ locationId: result.locationId, position: result.position });
+    if (!moved.success) return moved;
     const location = this.getLocation(result.locationId);
-    if (location === null) return { success: false, reason: "location_not_found" };
-    location.position = { ...result.position };
     this.eventLog.push({ type: "scenario_location_placed", locationSlotId, locationId: location.id, position: { ...result.position }, at: this.now() });
     const quest = this.dispatchQuestEvent({ type: "LocationPlaced", locationSlotId, locationId: location.id });
     return { ...result, quest };
+  }
+
+  updateLocationPosition({ locationId, position }) {
+    if (!this.setup.playArea.contains(position)) return { success: false, reason: "outside_play_area" };
+    const location = this.getLocation(locationId);
+    if (location === null) return { success: false, reason: "location_not_found" };
+    location.position = { latitude: position.latitude, longitude: position.longitude };
+    const binding = this.scenarioLocationBindings.find((candidate) => candidate.locationId === locationId);
+    const placement = binding ? this.scenarioRuntime?.placements[binding.locationSlotId] : null;
+    if (placement?.status === "placed") placement.position = { ...location.position };
+    return { success: true, locationId, position: { ...location.position } };
   }
 
   dispatchQuestEvent(event) {
@@ -547,9 +579,22 @@ export class Game {
       }
       const healingLocation = this.locations.find((location) => location.heroIds.includes(hero.id) && location.features.healing === true && this.locationAccessPolicy.can(hero.playerId, location, "heal")) ?? null;
       const result = this.heroRecoveryService.recover(hero, { cycles, healingLocation });
+      const auraHealing = this.heroes.filter((source) => source.id !== hero.id && source.state === "active" && source.position && hero.position && this.#areAlliedPlayers(source.playerId, hero.playerId)).reduce((total, source) => {
+        const aura = this.heroClassFeatureService.healingAura(source);
+        return aura.radius > 0 && distanceMeters(source.position, hero.position) <= aura.radius ? total + aura.healthPerCycle * cycles : total;
+      }, 0);
+      const restoredByAura = auraHealing > 0 ? hero.recoverHealth(auraHealing) : 0;
+      result.restoredHealth += restoredByAura; result.auraHealing = restoredByAura;
       if (result.restoredHealth > 0) this.eventLog.push({ type: "hero_recovered", heroId: hero.id, restoredHealth: result.restoredHealth, locationId: result.locationId, at: this.now() });
       return result;
     });
+  }
+
+  #areAlliedPlayers(firstPlayerId, secondPlayerId) {
+    if (firstPlayerId === secondPlayerId) return true;
+    const first = this.setup.participants.find((participant) => participant.playerId === firstPlayerId);
+    const second = this.setup.participants.find((participant) => participant.playerId === secondPlayerId);
+    return first?.teamId !== null && first?.teamId !== undefined && first.teamId === second?.teamId;
   }
 
   advanceWorldCycle(cycles = 1, random = Math.random) {
@@ -919,7 +964,9 @@ export class Game {
       const aptitudeIds = Game.#createIds(heroClass.aptitudeIds ?? defaults?.aptitudeIds ?? []); const commonAptitudeIds = Game.#createIds(heroClass.commonAptitudeIds ?? defaults?.commonAptitudeIds ?? []);
       const authorityBonus = heroClass.authorityBonus ?? defaults?.authorityBonus ?? ({ warrior: 2, ranger: 1, mage: 0 }[id] ?? 0);
       if (!Number.isInteger(authorityBonus) || authorityBonus < 0) throw new RangeError("Le bonus d'autorite de classe doit etre un entier positif ou nul.");
-      classes.set(id, { id, name, authorityBonus, advantage: heroClass.advantage ?? defaults?.advantage ?? "", abilityIds: [...new Set(abilityIds.map((abilityId) => Game.#requireText(abilityId, "Une capacité")))], baseStats, growthWeights, aptitudeIds, commonAptitudeIds, startingResources, startingUnits, startingItems });
+      const features = heroClass.features ?? defaults?.features ?? {};
+      if (features === null || Array.isArray(features) || typeof features !== "object") throw new TypeError("Les avantages de classe doivent être un objet.");
+      classes.set(id, { id, name, authorityBonus, advantage: heroClass.advantage ?? defaults?.advantage ?? "", features: structuredClone(features), abilityIds: [...new Set(abilityIds.map((abilityId) => Game.#requireText(abilityId, "Une capacité")))], baseStats, growthWeights, aptitudeIds, commonAptitudeIds, startingResources, startingUnits, startingItems });
     });
     return classes;
   }

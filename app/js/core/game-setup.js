@@ -111,7 +111,7 @@ export class GameSetup {
       enableContentment: rules.enableContentment ?? false,
       moraleMode: GameSetup.#moraleMode(rules.moraleMode ?? "casual"),
       locationMode: GameSetup.#moraleMode(rules.locationMode ?? "casual"),
-      engagementRadiusMeters: GameSetup.#positiveIntegerOrDefault(rules.engagementRadiusMeters, 75, "Le rayon d'engagement"),
+      engagementRadiusMeters: GameSetup.#positiveIntegerOrDefault(rules.engagementRadiusMeters, 8, "Le rayon d'engagement"),
       autonomousReactionMinimumSeconds: GameSetup.#positiveIntegerOrDefault(rules.autonomousReactionMinimumSeconds, 15, "Le délai minimal de réaction aux groupes autonomes"),
       fleeConfirmations: GameSetup.#positiveIntegerOrDefault(rules.fleeConfirmations, 2, "Les confirmations de fuite"),
       pursuitCooldownMinutes: GameSetup.#positiveIntegerOrDefault(rules.pursuitCooldownMinutes, 10, "Le cooldown de poursuite"),

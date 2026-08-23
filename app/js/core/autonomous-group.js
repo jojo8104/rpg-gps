@@ -9,7 +9,7 @@ export class AutonomousGroup {
     id, type, owner, position, factionId = null, originLocationId = null,
     status = "idle", behavior = "passive", mission = null, army = {},
     cargo = [], message = null, morale = null, movement = null,
-    interruption = null, ambush = null, history = [],
+    interruption = null, ambush = null, history = [], traceAnchor = null,
   }) {
     this.id = AutonomousGroup.#text(id, "L'identifiant du groupe autonome");
     this.type = AutonomousGroup.#choice(type, AUTONOMOUS_GROUP_TYPES, "Le type du groupe autonome");
@@ -29,6 +29,7 @@ export class AutonomousGroup {
     this.interruption = AutonomousGroup.#optionalRecord(interruption, "L'interruption");
     this.ambush = AutonomousGroup.#optionalRecord(ambush, "L'embuscade");
     this.history = AutonomousGroup.#records(history, "L'historique");
+    this.traceAnchor = traceAnchor === null ? { ...this.position } : AutonomousGroup.#position(traceAnchor);
   }
 
   toJSON() {
@@ -50,6 +51,7 @@ export class AutonomousGroup {
       interruption: this.interruption === null ? null : structuredClone(this.interruption),
       ambush: this.ambush === null ? null : structuredClone(this.ambush),
       history: this.history.map((entry) => structuredClone(entry)),
+      traceAnchor: { ...this.traceAnchor },
     };
   }
 

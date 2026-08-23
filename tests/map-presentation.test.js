@@ -4,6 +4,7 @@ import { MAP_LAYER_ORDER, MAP_LAYER_Z_INDEX } from "../app/js/map/MapLayers.js";
 import { zoomLevel } from "../app/js/map/MapRenderer.js";
 import { locationMarkerSvg, locationPresentation } from "../app/js/map/LocationRenderer.js";
 import { dynamicSitePresentation } from "../app/js/ui/map-view.js";
+import { headingDirection } from "../app/js/map/UnitRenderer.js";
 
 test("les panes cartographiques ont un ordre explicite et strict", () => {
   const values = MAP_LAYER_ORDER.map((name) => MAP_LAYER_Z_INDEX[name]);
@@ -33,4 +34,12 @@ test("un champ de bataille réserve une grande cible tactile au-dessus du héros
   const site = dynamicSitePresentation({ kind: "battlefield", interactionRadius: 100 });
   assert.equal(site.iconSize, 64); assert.equal(site.interactionRadius, 100);
   assert.equal(site.pane, "effects"); assert.ok(site.zIndexOffset > 1000);
+});
+
+test("le sprite du héros choisit une des huit directions de boussole", () => {
+  assert.equal(headingDirection(0).id, "n");
+  assert.equal(headingDirection(44).id, "ne");
+  assert.equal(headingDirection(91).id, "e");
+  assert.equal(headingDirection(181).id, "s");
+  assert.equal(headingDirection(359).id, "n");
 });

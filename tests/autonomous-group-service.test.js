@@ -12,7 +12,15 @@ test("attack_location produit une demande d'attaque à l'arrivée et une trace",
   const first = service.advance({ groups: [group], locations: [{ id: "fort", position: { latitude: 0, longitude: .001 } }], playArea: area, now: 0, speedFor: () => 10 });
   assert.equal(first.events.length, 0); assert.equal(group.status, "traveling");
   const result = service.advance({ groups: [group], locations: [{ id: "fort", position: { latitude: 0, longitude: .001 } }], playArea: area, now: group.movement.arrivesAt, speedFor: () => 10 });
-  assert.equal(result.events[0].type, "autonomous_group_location_attack_requested"); assert.equal(result.traces.length, 1); assert.equal(group.status, "interrupted");
+  assert.equal(result.events[0].type, "autonomous_group_location_attack_requested"); assert.equal(result.traces.length, 7); assert.ok(result.traces.every((trace) => trace.kind === "passage")); assert.equal(group.status, "interrupted");
+});
+
+test("un groupe autonome refuse une destination hors PlayArea", () => {
+  const service = new AutonomousGroupService();
+  const group = new AutonomousGroup({ id: "outside-army", type: "army", owner: { kind: "faction", id: "chaos" }, position: { latitude: 0, longitude: 0 }, mission: { kind: "attack_location", targetId: "outside-fort" } });
+  const result = service.advance({ groups: [group], locations: [{ id: "outside-fort", position: { latitude: .02, longitude: .02 } }], playArea: area, now: 0 });
+  assert.equal(group.status, "mission_failed");
+  assert.equal(result.events[0].reason, "destination_outside_play_area");
 });
 
 test("une embuscade attaque immédiatement une cible entrée dans son rayon", () => {
