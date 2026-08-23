@@ -1,15 +1,18 @@
 {
   "id": "chaos",
   "name": "La fuite du royaume",
-  "intro": "Sous l'influence du Seigneur du Chaos, le royaume devient dangereux. Les héros doivent fuir.",
-  "initialPhaseId": "escape",
+  "intro": "Après de longues années de paix, une équipe de prospection royale disparaît aux frontières du royaume.",
+  "initialPhaseId": "reach-royal-camp",
   "playerStart": {
     "resources": { "gold": 50, "wood": 20, "iron": 10 },
     "unitStacks": [{ "typeId": "militia", "quantity": 6 }]
   },
   "locationSlots": [
-    { "id": "refuge", "type": "fort", "roles": ["military", "spawn"] },
-    { "id": "village", "type": "village", "roles": ["social", "quest"] },
+    { "id": "refuge", "type": "fort", "roles": ["military", "spawn"], "defaultPlacement": { "strategy": "fixed" } },
+    { "id": "capital", "type": "capital", "roles": ["social", "royal", "quest"], "defaultPlacement": { "strategy": "fixed" } },
+    { "id": "royal-camp", "type": "camp", "roles": ["social", "quest"], "defaultPlacement": { "strategy": "distance", "minimumDistanceMeters": 300, "maximumAccuracyMeters": 50, "confirmations": 2 } },
+    { "id": "prospectors-battlefield", "type": "quest", "roles": ["quest", "clue"], "defaultPlacement": { "strategy": "distance", "activationPhaseId": "prospectors-battlefield", "minimumDistanceMeters": 180, "maximumAccuracyMeters": 50, "confirmations": 2 } },
+    { "id": "gold-mine", "type": "mine", "roles": ["resource", "strategic", "quest"], "defaultPlacement": { "strategy": "fixed" } },
     { "id": "bandit-camp", "type": "camp", "roles": ["military", "objective"] }
   ],
   "factions": [
@@ -18,6 +21,14 @@
     { "id": "barbarians", "name": "Barbares" }
   ],
   "phases": [
+    { "id": "reach-royal-camp", "title": "Les prospecteurs disparus", "description": "Éloignez-vous du point de départ pour rejoindre le camp royal de Valgrise.", "objectives": [{ "id": "reach-royal-camp", "text": "Rejoindre le camp royal", "trigger": { "type": "locationPlaced", "locationSlotId": "royal-camp" }, "eventId": "royal-camp-reached" }], "eventIds": ["royal-camp-reached"], "transitions": [{ "nextPhase": "speak-to-camp-chief" }] },
+    { "id": "speak-to-camp-chief", "title": "Les prospecteurs disparus", "description": "Armand de Valgrise vous attend dans la tente de commandement.", "objectives": [{ "id": "speak-to-camp-chief", "text": "Parler au chef du camp", "trigger": { "type": "interactionCompleted", "interactionId": "speak-to-camp-chief", "locationSlotId": "royal-camp", "label": "Questionner Armand sur les prospecteurs", "responseLines": ["Ils étaient six, accompagnés d’un jeune géologue.", "Ils devaient relever le terrain autour des anciennes collines minières et rentrer avant la nuit.", "Nous avons retrouvé leurs premières marques sur le chemin, puis plus rien.", "Suivez leurs traces. Retrouvez mes hommes si vous le pouvez."] }, "eventId": "camp-chief-questioned" }], "eventIds": ["camp-chief-questioned"], "transitions": [{ "nextPhase": "follow-first-trace" }] },
+    { "id": "follow-first-trace", "title": "Les traces des prospecteurs", "description": "Approchez-vous du marqueur de piste et examinez les empreintes.", "objectives": [{ "id": "inspect-first-trace", "text": "Examiner les premières traces", "trigger": { "type": "traceInspected", "traceId": "prospectors-trace-1" }, "eventId": "first-trace-inspected" }], "eventIds": ["first-trace-inspected"], "transitions": [{ "nextPhase": "follow-second-trace" }] },
+    { "id": "follow-second-trace", "title": "La piste se précise", "description": "Suivez le nouveau marqueur laissé par le groupe disparu.", "objectives": [{ "id": "inspect-second-trace", "text": "Examiner les traces de lutte", "trigger": { "type": "traceInspected", "traceId": "prospectors-trace-2" }, "eventId": "second-trace-inspected" }], "eventIds": ["second-trace-inspected"], "transitions": [{ "nextPhase": "prospectors-battlefield" }] },
+    { "id": "prospectors-battlefield", "title": "Le champ de bataille", "description": "La piste conduit au lieu du dernier combat des prospecteurs.", "objectives": [{ "id": "reach-battlefield", "text": "Atteindre le champ de bataille", "trigger": { "type": "locationPlaced", "locationSlotId": "prospectors-battlefield" } }, { "id": "find-mine-report", "text": "Fouiller le champ de bataille", "trigger": { "type": "interactionCompleted", "interactionId": "search-prospectors-battlefield", "locationSlotId": "prospectors-battlefield", "label": "Fouiller le champ de bataille" }, "eventId": "mine-report-found" }], "eventIds": ["mine-report-found"], "transitions": [{ "nextPhase": "free-gold-mine" }] },
+    { "id": "free-gold-mine", "title": "La mine occupée", "description": "Libérez la mine signalée dans le rapport et recherchez le géologue.", "objectives": [{ "id": "defeat-mine-chaos", "text": "Vaincre les forces du Chaos dans la mine", "trigger": { "type": "battleWon", "locationSlotId": "gold-mine" }, "eventId": "mine-liberated" }, { "id": "rescue-geologist", "text": "Libérer le géologue", "trigger": { "type": "interactionCompleted", "interactionId": "rescue-geologist", "locationSlotId": "gold-mine", "label": "Libérer le géologue" }, "eventId": "geologist-rescued" }], "eventIds": ["mine-liberated", "geologist-rescued"], "transitions": [{ "nextPhase": "return-to-capital" }] },
+    { "id": "return-to-capital", "title": "Le rapport de la mine", "description": "Ramenez le géologue et son rapport à la capitale royale.", "objectives": [{ "id": "deliver-mine-report", "text": "Remettre le rapport à la capitale", "trigger": { "type": "enterLocation", "locationSlotId": "capital" }, "eventId": "mine-report-delivered" }], "eventIds": ["mine-report-delivered"], "transitions": [{ "nextPhase": "prologue-complete" }] },
+    { "id": "prologue-complete", "title": "Prologue accompli", "description": "Le royaume sait désormais que les forces du Chaos sont revenues. Les autres missions du prologue seront accessibles depuis la capitale.", "objectives": [], "eventIds": [], "transitions": [] },
     { "id": "escape", "title": "La fuite", "description": "Atteignez le refuge.", "objectives": [{ "id": "reach-refuge", "text": "Atteindre le refuge." }], "eventIds": ["refuge-reached"], "transitions": [{ "nextPhase": "installation" }] },
     { "id": "installation", "title": "Installation", "description": "Faites du fort votre base.", "objectives": [{ "id": "secure-refuge", "text": "Sécuriser le refuge." }], "eventIds": ["refuge-secured"], "transitions": [{ "nextPhase": "village" }] },
     { "id": "village", "title": "Le village", "description": "Explorez le village voisin.", "objectives": [{ "id": "reach-village", "text": "Rencontrer les habitants." }], "eventIds": ["village-discovered"], "transitions": [{ "nextPhase": "bandits" }] },
@@ -25,9 +36,17 @@
     { "id": "barbarians", "title": "Les barbares", "description": "Une menace plus grande se révèle.", "objectives": [{ "id": "discover-barbarians", "text": "Découvrir les barbares." }], "eventIds": ["barbarians-revealed"], "transitions": [] }
   ],
   "events": [
+    { "id": "royal-camp-reached", "effects": [{ "type": "showNarration", "text": "Les sentinelles vous reconnaissent et ouvrent le passage. Le capitaine de Valgrise vous attend." }] },
+    { "id": "camp-chief-questioned", "effects": [{ "type": "showNarration", "text": "Armand vous confie la dernière position connue des prospecteurs." }] },
+    { "id": "first-trace-inspected", "effects": [{ "type": "showNarration", "text": "Des empreintes de bottes et les sillons d’un chariot quittent la route. Parmi elles apparaissent des traces de griffes." }] },
+    { "id": "second-trace-inspected", "effects": [{ "type": "showNarration", "text": "Une sacoche déchirée et des taches de sang jalonnent la piste. Les prospecteurs ont été poursuivis." }] },
+    { "id": "mine-report-found", "effects": [{ "type": "showNarration", "text": "Le silence ne laisse aucun doute : les prospecteurs ont été massacrés par le Chaos. Dans une main crispée, vous trouvez un rapport incomplet indiquant une ancienne mine d’or. Une annotation révèle qu’un géologue y a été emmené vivant." }, { "type": "revealLocation", "locationSlotId": "gold-mine" }] },
+    { "id": "mine-liberated", "effects": [{ "type": "showNarration", "text": "Les dernières créatures du Chaos s’effondrent. Un appel étouffé résonne derrière une porte condamnée." }] },
+    { "id": "geologist-rescued", "effects": [{ "type": "showNarration", "text": "Vous libérez le géologue royal. Il rassemble ses notes et rédige un rapport sur la mine : les forces du Chaos sont revenues. L’ère de paix est terminée. Ramenez-le à la capitale." }, { "type": "grantCarriedItem", "playerId": "local", "itemId": "royal_geologist" }, { "type": "grantCarriedItem", "playerId": "local", "itemId": "abandoned_mine_report" }, { "type": "awardHeroExperience", "playerId": "local", "amount": 100 }] },
+    { "id": "mine-report-delivered", "effects": [{ "type": "showNarration", "text": "Le rapport est remis aux officiers royaux et le géologue confirme votre récit. Mission accomplie. La capitale attend désormais les rapports des autres officiers." }, { "type": "removeCarriedItem", "playerId": "local", "itemId": "royal_geologist" }, { "type": "removeCarriedItem", "playerId": "local", "itemId": "abandoned_mine_report" }, { "type": "awardHeroExperience", "playerId": "local", "amount": 50 }, { "type": "grantHeroResource", "playerId": "local", "resource": "gold", "amount": 25 }] },
     { "id": "refuge-reached", "effects": [{ "type": "showNarration", "text": "Le refuge est atteint." }] },
     { "id": "refuge-secured", "effects": [{ "type": "showNarration", "text": "Le fort devient votre base." }] },
-    { "id": "village-discovered", "effects": [{ "type": "revealLocation", "locationSlotId": "village" }] },
+    { "id": "village-discovered", "effects": [{ "type": "showNarration", "text": "Un village voisin apparaît sur votre carte." }] },
     { "id": "bandits-encountered", "effects": [{ "type": "showNarration", "text": "Les brigands vous barrent la route." }] },
     { "id": "barbarians-revealed", "effects": [{ "type": "showNarration", "text": "Les barbares approchent." }] }
   ],

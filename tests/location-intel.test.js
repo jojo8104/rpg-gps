@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { Location } from "../app/js/core/location.js";
 import { buildLocationIntel } from "../app/js/core/location-intel.js";
 
-const location = new Location({ id: "fort", name: "Fort", type: "fort", source: "scenario", position: { latitude: 48, longitude: 2 }, interactionRadius: 20, detectionRadius: 80, level: 2, population: 30, defenseSlots: 2, ownerId: "p1", features: { garrison: true }, resources: { production: { gold: 2 }, stock: { gold: 9 }, storageCapacity: 20 }, infrastructure: { wall: 2 }, garrison: { units: [{ id: "guard", ownerPlayerId: "p1", typeId: "militia", quantity: 6, rank: "soldier" }] } });
+const location = new Location({ id: "fort", name: "Fort", type: "fort", source: "scenario", position: { latitude: 48, longitude: 2 }, interactionRadius: 20, detectionRadius: 80, level: 2, population: 30, populationCapacity: 40, defenseSlots: 2, ownerId: "p1", features: { garrison: true }, resources: { production: { gold: 2 }, stock: { gold: 9 }, storageCapacity: 20 }, infrastructure: { wall: 2 }, garrison: { units: [{ id: "guard", ownerPlayerId: "p1", typeId: "militia", quantity: 6, rank: "soldier" }] } });
 const snapshot = { id: "fort", name: "Fort", distance: 42, nearby: false, interactionRadius: 20, actions: [] };
 
 test("un lieu seulement repéré masque ses informations sensibles", () => {
@@ -14,7 +14,7 @@ test("un lieu seulement repéré masque ses informations sensibles", () => {
 test("une visite révèle le stock et la garnison", () => {
   const defendedSnapshot = { ...snapshot, defense: { reinforcements: [{ id: "passing", name: "Archers", type: "archer", quantity: 4, ownerPlayerId: "p2", heroId: "enemy", heroName: "Rask", source: "hero" }] } };
   const intel = buildLocationIntel({ location, snapshot: defendedSnapshot, knowledgeLevel: 3, owner: { id: "p1", name: "Ariane", color: "blue" } });
-  assert.equal(intel.population, 30); assert.equal(intel.stock[0].amount, 9); assert.equal(intel.defense.units[0].quantity, 6);
+  assert.equal(intel.population, 30); assert.equal(intel.populationCapacity, 40); assert.equal(intel.stock[0].amount, 9); assert.equal(intel.defense.units[0].quantity, 6);
   assert.equal(intel.defense.reinforcements[0].heroName, "Rask"); assert.equal(intel.defense.defenders.length, 2);
 });
 

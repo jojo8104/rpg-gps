@@ -1,19 +1,23 @@
 import { LootSite } from "./loot-site.js";
 
+export const LOOT_SITE_TTL_MS = 5 * 60_000;
+
 export class LootDistributionService {
-  createSite({ id, battle, position, extraLoot = [], ttlMs = 60 * 60_000, now = () => Date.now() }) {
+  createSite({ id, battle, position, extraLoot = [], ttlMs = LOOT_SITE_TTL_MS, now = () => Date.now() }) {
     if (battle.status !== "finished" || battle.winnerTeamId === null) return null;
     const winners = battle.teams.find((team) => team.id === battle.winnerTeamId)?.heroes.filter((hero) => hero.state === "active") ?? [];
     if (winners.length === 0) return null;
     const rawScores = winners.map((hero) => battle.state.contributions[hero.playerId]?.total ?? 0);
     const total = rawScores.reduce((sum, score) => sum + score, 0);
     const shares = winners.map((hero, index) => ({ playerId: hero.playerId, heroId: hero.sourceId, contribution: rawScores[index], ratio: total > 0 ? rawScores[index] / total : 1 / winners.length }));
-    const entries = [...battle.state.loot, ...extraLoot].filter((entry) => entry.protected !== true).map((entry) => ({ ...structuredClone(entry), allocations: {} }));
+    const entries = [...battle.state.loot, ...extraLoot].filter((entry) => entry.protected !== true && !isBarricade(entry)).map((entry) => ({ ...structuredClone(entry), allocations: {} }));
     if (entries.length === 0) return null;
     entries.filter((entry) => entry.portable).forEach((entry) => allocate(entry, shares));
     return new LootSite({ id, battleId: battle.id, position, entries, shares, expiresAt: now() + ttlMs, now });
   }
 }
+
+function isBarricade(entry) { return ["barricade", "barricades"].includes(entry?.itemId); }
 
 function allocate(entry, shares) {
   const targets = shares.map((share) => ({ share, exact: entry.quantity * share.ratio }));

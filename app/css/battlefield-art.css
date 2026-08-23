@@ -1,0 +1,30 @@
+.vertical-battlefield {
+  background:
+    linear-gradient(180deg, rgb(91 31 35 / 16%), transparent 22% 78%, rgb(29 73 104 / 18%)),
+    url("../assets/battlefields/meadow-camps.jpg") center / cover no-repeat;
+  border: 1px solid #9a895f66;
+  border-radius: 16px;
+  box-shadow: inset 0 0 24px #10150e99, 0 5px 18px #0007;
+}
+
+.vertical-battlefield > .vertical-lane {
+  border-color: rgb(235 220 176 / 13%);
+  background-color: transparent;
+  background-image: none;
+  box-shadow: inset 1px 0 rgb(255 245 215 / 5%), inset -1px 0 rgb(20 15 10 / 8%);
+}
+
+.vertical-battlefield > .vertical-lane:nth-of-type(2) {
+  background-color: transparent;
+}
+
+.lane-centerline {
+  opacity: .16;
+  background: linear-gradient(transparent, #fff8cf88 25% 75%, transparent);
+}
+
+.vertical-battlefield > .vertical-lane.is-drop-target {
+  background-color: transparent;
+  background-image: none;
+  box-shadow: inset 0 0 18px #f6d97188, inset 0 0 0 2px #f6d97199;
+}

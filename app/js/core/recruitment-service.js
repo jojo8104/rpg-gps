@@ -23,8 +23,8 @@ export class RecruitmentService {
     if (hero.army.units.length >= hero.maxUnitStacks) return { success: false, reason: "army_full" };
     const definition = this.unitDefinitions.get(typeId);
     if (definition === undefined) return { success: false, reason: "unknown_unit_type" };
-    const recruitQuantity = UNIT_RANKS[0].capacity;
-    if ((location.recruitment.stock[typeId] ?? 0) < recruitQuantity) return { success: false, reason: "insufficient_recruits" };
+    const recruitQuantity = Math.min(UNIT_RANKS[0].capacity, Math.floor(location.recruitment.stock[typeId] ?? 0));
+    if (recruitQuantity <= 0) return { success: false, reason: "insufficient_recruits" };
     if (!Object.entries(definition.costs).every(([resource, amount]) => hero.getResourceAmount(resource) >= amount)) return { success: false, reason: "insufficient_resources" };
     Object.entries(definition.costs).forEach(([resource, amount]) => { if (amount > 0) hero.spendResource(resource, amount); });
     location.recruitment.stock[typeId] -= recruitQuantity;

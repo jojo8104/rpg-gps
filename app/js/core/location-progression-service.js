@@ -1,10 +1,16 @@
 export const LOCATION_EVOLUTION = Object.freeze({
-  camp: { previousType: null, nextType: "village", maxLevel: 3, baseHealth: 80, healthPerLevel: 20, xpBase: 100 },
+  camp: { previousType: null, nextType: null, maxLevel: 3, baseHealth: 80, healthPerLevel: 20, xpBase: 100 },
   village: { previousType: "camp", nextType: "town", maxLevel: 5, baseHealth: 180, healthPerLevel: 35, xpBase: 220 },
   town: { previousType: "village", nextType: "capital", maxLevel: 5, baseHealth: 400, healthPerLevel: 60, xpBase: 500 },
   capital: { previousType: "town", nextType: null, maxLevel: 10, baseHealth: 850, healthPerLevel: 90, xpBase: 1_000 },
   fort: { previousType: null, nextType: null, maxLevel: 5, baseHealth: 300, healthPerLevel: 65, xpBase: 400 },
   mine: { previousType: null, nextType: null, maxLevel: 5, baseHealth: 140, healthPerLevel: 30, xpBase: 250 },
+});
+
+export const CAMP_LEVELS = Object.freeze({
+  1: Object.freeze({ populationCapacity: 8, defenseSlots: 1 }),
+  2: Object.freeze({ populationCapacity: 15, defenseSlots: 1 }),
+  3: Object.freeze({ populationCapacity: 25, defenseSlots: 2 }),
 });
 
 const MATERIAL_IDS = ["materials", "material", "stone", "wood"];
@@ -18,6 +24,7 @@ export class LocationProgressionService {
 
   initialize(location) {
     const definition = LOCATION_EVOLUTION[location.type];
+    this.#applyLevelProfile(location);
     if (!definition || (this.mode === "casual" && location.type !== "camp")) return null;
     const maxHealth = this.getMaxHealth(location);
     location.durability ??= { health: maxHealth, maxHealth, lastRegenerationAt: null };
@@ -49,10 +56,12 @@ export class LocationProgressionService {
     const definition = LOCATION_EVOLUTION[location.type];
     const required = this.getExperienceRequired(location);
     if (!definition || location.progression.experience < required) return { success: false, reason: "insufficient_experience" };
+    if (location.level >= definition.maxLevel && !definition.nextType) return { success: false, reason: "maximum_level" };
     location.progression.experience -= required;
     if (location.level < definition.maxLevel) location.level += 1;
     else if (definition.nextType) { location.type = definition.nextType; location.level = 1; }
     else return { success: false, reason: "maximum_level" };
+    this.#applyLevelProfile(location);
     const durability = this.initialize(location);
     if (durability) durability.health = durability.maxHealth;
     return { success: true, type: location.type, level: location.level, durability };
@@ -99,6 +108,17 @@ export class LocationProgressionService {
     if (location.level > 1) location.level -= 1;
     else if (definition.previousType) { location.type = definition.previousType; location.level = LOCATION_EVOLUTION[location.type].maxLevel; }
     else { location.level = 0; location.state = "destroyed"; location.features.battle = false; location.heroIds = []; }
+    this.#applyLevelProfile(location);
     return { from, to: { type: location.type, level: location.level }, destroyed: location.state === "destroyed" };
+  }
+
+  #applyLevelProfile(location) {
+    if (location.type !== "camp" || location.level === 0) return null;
+    const profile = CAMP_LEVELS[location.level];
+    if (!profile) throw new RangeError(`Le niveau ${location.level} du camp n'est pas configuré.`);
+    location.populationCapacity = profile.populationCapacity;
+    location.defenseSlots = profile.defenseSlots;
+    location.recalculateStorageCapacity();
+    return profile;
   }
 }

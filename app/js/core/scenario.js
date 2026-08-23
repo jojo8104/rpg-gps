@@ -21,11 +21,11 @@ export class Scenario {
   toJSON() {
     return {
       id: this.id, name: this.name, intro: this.intro, initialPhaseId: this.initialPhaseId, playerStart: { resources: { ...this.playerStart.resources }, unitStacks: this.playerStart.unitStacks.map((stack) => ({ ...stack })) },
-      locationSlots: this.locationSlots.map((location) => ({ ...location, roles: [...location.roles] })),
+      locationSlots: this.locationSlots.map((location) => structuredClone(location)),
       factions: this.factions.map((faction) => ({ ...faction })),
       phases: this.phases.map((phase) => ({
         ...phase,
-        objectives: phase.objectives.map((objective) => ({ ...objective })),
+        objectives: phase.objectives.map((objective) => structuredClone(objective)),
         eventIds: [...phase.eventIds],
         transitions: phase.transitions.map((transition) => ({ ...transition })),
       })),
@@ -76,7 +76,14 @@ export class Scenario {
       const id = Scenario.#requireText(objective.id, "L'identifiant d'objectif");
       if (ids.has(id)) throw new RangeError("Les identifiants d'objectif doivent être uniques dans une phase.");
       ids.add(id);
-      return { id, text: Scenario.#requireText(objective.text, "Le texte de l'objectif") };
+      const normalized = { id, text: Scenario.#requireText(objective.text, "Le texte de l'objectif") };
+      if (objective.trigger !== undefined) {
+        Scenario.#requireObject(objective.trigger, "Le déclencheur d'objectif");
+        normalized.trigger = structuredClone(objective.trigger);
+        normalized.trigger.type = Scenario.#requireText(objective.trigger.type, "Le type de déclencheur");
+      }
+      if (objective.eventId !== undefined) normalized.eventId = Scenario.#requireText(objective.eventId, "L'événement d'objectif");
+      return normalized;
     });
   }
 
@@ -109,6 +116,11 @@ export class Scenario {
       Scenario.#requireObject(record, label);
       const normalized = Object.fromEntries(requiredKeys.map((key) => [key, Scenario.#requireText(record[key], `Le champ ${key}`)]));
       if (record.roles !== undefined) normalized.roles = Scenario.#createTextList(record.roles, "Les rôles de lieu");
+      if (record.defaultPlacement !== undefined) {
+        Scenario.#requireObject(record.defaultPlacement, "Le placement de lieu");
+        normalized.defaultPlacement = structuredClone(record.defaultPlacement);
+        normalized.defaultPlacement.strategy = Scenario.#requireText(record.defaultPlacement.strategy, "La stratégie de placement");
+      }
       return normalized;
     });
   }

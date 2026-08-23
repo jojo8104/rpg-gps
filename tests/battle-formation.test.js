@@ -1,0 +1,18 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { militiaFormationRows } from "../app/js/ui/battle-view.js";
+
+test("la formation des miliciens respecte les onze premières répartitions", () => {
+  const expected = [[1], [2], [3], [2, 2], [1, 2, 2], [3, 3], [1, 3, 3], [4, 4], [3, 3, 3], [1, 3, 3, 3], [1, 5, 5]];
+  expected.forEach((rows, index) => assert.deepEqual(militiaFormationRows(index + 1), rows));
+});
+
+test("une formation reste symétrique, bornée à cinq colonnes et vingt-quatre soldats", () => {
+  for (let count = 1; count <= 24; count += 1) {
+    const rows = militiaFormationRows(count);
+    assert.equal(rows.reduce((sum, row) => sum + row, 0), count);
+    assert.ok(rows.every((row) => row >= 1 && row <= 5));
+    assert.ok(rows.length <= 6);
+  }
+  assert.deepEqual(militiaFormationRows(24), [4, 4, 4, 4, 4, 4]);
+});

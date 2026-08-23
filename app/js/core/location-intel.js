@@ -8,7 +8,7 @@ export function buildLocationIntel({ location, snapshot, knowledgeLevel, owner =
   const known = (required, value, fallback = "?") => knowledgeLevel >= required ? value : fallback;
   const production = Object.entries(location.resources.production).map(([id, amount]) => ({ id, amount: known(2, amount), capacity: known(3, location.resources.storageCapacity) }));
   const recruitProduction = Object.entries(location.recruitment.production).map(([id, amount]) => ({ id: `recrues · ${id}`, amount: known(2, amount), capacity: known(3, location.recruitment.capacity) }));
-  const stock = [...Object.entries(location.resources.stock).map(([id, amount]) => ({ id, amount: known(3, amount), capacity: known(3, location.resources.storageCapacity) })), ...location.storedItems.map(({ itemId, quantity }) => ({ id: itemId, amount: known(3, quantity), capacity: known(3, location.resources.storageCapacity) })), ...Object.entries(location.recruitment.stock).map(([id, amount]) => ({ id: `recrues · ${id}`, amount: known(3, amount), capacity: known(3, location.recruitment.capacity) }))];
+  const stock = [...Object.entries(location.resources.stock).map(([id, amount]) => ({ id, amount: known(3, amount), capacity: known(3, location.resources.storageCapacity) })), ...location.storedItems.map(({ itemId, quantity }) => ({ id: itemId, amount: known(3, quantity), capacity: known(3, location.resources.storageCapacity) })), ...Object.entries(location.recruitment.stock).map(([id, amount]) => ({ id: `recrues · ${id}`, amount: known(3, amount), capacity: known(3, location.recruitment.capacities[id] ?? 0) }))];
   const units = location.garrison.units.map((unit) => ({ id: unit.id, ownerPlayerId: unit.ownerPlayerId, type: known(3, unit.typeId), rank: known(3, unit.rank), quantity: known(3, unit.quantity), name: known(3, unit.name ?? unit.typeId) }));
   const occupiedSlots = Math.min(location.defenseSlots, units.length);
   const presences = heroes.map((hero) => {
@@ -24,6 +24,7 @@ export function buildLocationIntel({ location, snapshot, knowledgeLevel, owner =
     nature: location.type,
     level: known(2, location.level),
     population: known(2, location.population ?? "inconnue", "inconnue"),
+    populationCapacity: known(2, location.populationCapacity ?? "inconnue", "inconnue"),
     contentment: known(2, location.contentment ?? "inconnu", "?"),
     owner: knowledgeLevel >= 2 && owner ? owner : { id: null, name: "inconnu", color: "#738078" },
     production: [...production, ...recruitProduction],

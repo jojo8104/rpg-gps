@@ -5,7 +5,7 @@ export class UnitRenderer {
   render(position, accuracy, heading) {
     const target = asLatLng(position);
     if (!this.marker) {
-      const icon = L.divIcon({ className: "rpg-marker-host", html: '<div class="rpg-hero"><span class="hero-direction"><svg viewBox="0 0 48 48"><path d="M24 4 39 17l-5 23-10 5-10-5-5-23Z"/><path d="m17 25 7-15 7 15-7 8Z"/></svg></span></div>', iconSize: [50, 50], iconAnchor: [25, 25] });
+      const icon = L.divIcon({ className: "rpg-marker-host rpg-hero-marker-host", html: '<div class="rpg-hero"><span class="hero-direction"><svg viewBox="0 0 48 48"><path d="M24 4 39 17l-5 23-10 5-10-5-5-23Z"/><path d="m17 25 7-15 7 15-7 8Z"/></svg></span></div>', iconSize: [50, 50], iconAnchor: [25, 25] });
       this.marker = L.marker(target, { pane: MapLayers.UNITS, draggable: this.mode !== "gps", zIndexOffset: 1000, icon }).addTo(this.map);
       if (this.mode !== "gps") this.marker.on("dragend", () => this.onMove(toPosition(this.marker.getLatLng())));
     } else this.#interpolateTo(target);

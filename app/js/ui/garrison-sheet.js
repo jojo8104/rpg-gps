@@ -1,14 +1,20 @@
+import { renderUnitTypeIcon } from "./unit-icon.js";
+import { renderUnitHealthBar } from "./unit-health-bar.js";
+
 const LONG_PRESS_MS = 300;
 const cleanupBySheet = new WeakMap();
 
-export function renderGarrisonSheet({ element, location, hero, playerId, message = "", onClose, onTransfer }) {
+export function renderGarrisonSheet({ element, location, hero, playerId, unitDefinitions = new Map(), message = "", onClose, onTransfer }) {
   cleanupBySheet.get(element)?.();
   const occupied = location.garrison.units.length;
-  const slots = Array.from({ length: location.defenseSlots }, (_, index) => location.garrison.units[index] ?? null);
-  const unitCard = (unit, source, locked = false) => `<button type="button" class="garrison-unit${locked ? " is-locked" : ""}" data-unit-id="${unit.id}" data-source="${source}" ${locked ? "disabled" : ""}><strong>${unit.name ?? unit.typeId}</strong><span>${unit.quantity}/${unit.maxQuantity} soldats</span>${locked ? `<small>Appartient à ${unit.ownerPlayerId}</small>` : ""}</button>`;
+  const garrisonSlots = Array.from({ length: location.defenseSlots }, (_, index) => location.garrison.units[index] ?? null);
+  const armySlots = Array.from({ length: hero.maxUnitStacks }, (_, index) => hero.army.units[index] ?? null);
+  const unitSlot = (unit, source, index, locked = false) => unit
+    ? renderGarrisonUnitSlot({ unit, source, index, locked, definition: unitDefinitions.get(unit.typeId) })
+    : `<button type="button" class="garrison-slot is-empty" data-slot-index="${index}" data-garrison-target="${source}"><span class="garrison-slot__plus" aria-hidden="true">+</span><strong>Emplacement ${index + 1}</strong><small>Vide</small></button>`;
   element.hidden = false;
   element.classList.add("garrison-sheet");
-  element.innerHTML = `<button class="sheet-close" type="button">Terminer</button><span class="sheet-state">Garnison · ${occupied}/${location.defenseSlots}</span><h2>${location.name}</h2><p class="garrison-help">Glissez une unité ou touchez-la, puis touchez sa destination.</p>${message ? `<p class="sheet-feedback" role="status">${message}</p>` : ""}<section><h3>Slots de garnison</h3><div class="garrison-slots">${slots.map((unit, index) => unit ? `<div class="garrison-slot is-occupied" data-slot-index="${index}">${unitCard(unit, "garrison", unit.ownerPlayerId !== playerId)}</div>` : `<button type="button" class="garrison-slot" data-slot-index="${index}" data-garrison-target="garrison"><span>Slot ${index + 1}</span><small>Vide</small></button>`).join("") || '<p class="text-muted">Cette localisation ne possède aucun slot.</p>'}</div></section><section class="garrison-army-dock"><h3>Mon armée</h3><div class="garrison-army-zone" data-garrison-target="army">${hero.army.units.map((unit) => unitCard(unit, "army")).join("") || '<span class="garrison-empty">Armée vide</span>'}</div></section>`;
+  element.innerHTML = `<button class="sheet-close" type="button">Terminer</button><span class="sheet-state">Garnison · ${occupied}/${location.defenseSlots}</span><h2>${location.name}</h2><p class="garrison-help">Glissez une unité vers un emplacement vide, ou touchez successivement l’unité et sa destination.</p>${message ? `<p class="sheet-feedback" role="status">${message}</p>` : ""}<section><h3>Garnison</h3><div class="garrison-slots">${garrisonSlots.map((unit, index) => unitSlot(unit, "garrison", index, unit?.ownerPlayerId !== playerId)).join("") || '<p class="text-muted">Cette localisation ne possède aucun emplacement.</p>'}</div></section><section class="garrison-army-dock"><h3>Armée du héros · ${hero.army.units.length}/${hero.maxUnitStacks}</h3><div class="garrison-army-zone">${armySlots.map((unit, index) => unitSlot(unit, "army", index)).join("")}</div></section>`;
 
   let selected = null; let drag = null; let suppressClick = false; let pressTimer = null;
   const clearSelection = () => { selected = null; element.querySelectorAll(".is-selected,.is-drop-target").forEach((node) => node.classList.remove("is-selected", "is-drop-target")); };
@@ -58,3 +64,10 @@ export function renderGarrisonSheet({ element, location, hero, playerId, message
 }
 
 function moveGhost(element, x, y) { element.style.left = `${x}px`; element.style.top = `${y}px`; }
+
+export function renderGarrisonUnitSlot({ unit, source, index = 0, locked = false, definition = null }) {
+  const maximum = Math.max(1, unit.maxQuantity ?? unit.quantity);
+  const icon = renderUnitTypeIcon({ typeId: unit.typeId, tags: definition?.tags ?? [], range: definition?.stats?.range ?? 1 });
+  const health = renderUnitHealthBar(unit, { tag: "span" });
+  return `<div class="garrison-slot is-occupied" data-slot-index="${index}"><button type="button" class="garrison-unit${locked ? " is-locked" : ""}" data-unit-id="${unit.id}" data-source="${source}" ${locked ? "disabled" : ""}><span class="garrison-unit__icon">${icon}</span><span class="garrison-unit__body"><strong>${unit.name ?? definition?.name ?? unit.typeId}</strong><small>${unit.rank ?? "soldier"} · ${unit.quantity}/${maximum}</small>${health}${locked ? `<small>Appartient à ${unit.ownerPlayerId}</small>` : ""}</span></button></div>`;
+}

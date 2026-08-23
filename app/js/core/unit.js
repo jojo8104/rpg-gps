@@ -1,4 +1,4 @@
-import { UNIT_RANKS, rankForExperience, requireRank } from "./rank-system.js";
+import { UNIT_RANKS, requireRank } from "./rank-system.js";
 
 /** Troupe persistante dont le grade determine l'effectif maximal. */
 export class Unit {
@@ -25,7 +25,6 @@ export class Unit {
     this.equipmentIds = Unit.#ids(equipmentIds);
     this.specialPowerIds = Unit.#ids(specialPowerIds);
     this.state = Unit.#text(state, "L'etat de l'unite");
-    this.#applyExperienceRank();
   }
 
   get isDefeated() { return this.quantity === 0; }
@@ -70,13 +69,14 @@ export class Unit {
     return { quantity: this.quantity, combatants: this.combatantCount, wounded: this.woundedCount };
   }
 
-  addExperience(amount) { this.experience += Unit.#positiveInteger(amount, "Le gain d'experience"); return this.#applyExperienceRank(); }
-  promote(rank) { const current = UNIT_RANKS.findIndex((item) => item.id === this.rank); const next = UNIT_RANKS.findIndex((item) => item.id === rank); if (next <= current) return false; const value = requireRank(UNIT_RANKS, rank, "Le grade d'unite"); this.rank = value.id; this.maxQuantity = value.capacity; return true; }
+  addExperience(amount) { this.experience += Unit.#positiveInteger(amount, "Le gain d'experience"); return this.canPromote; }
+  get nextRank() { const index = UNIT_RANKS.findIndex((item) => item.id === this.rank); return UNIT_RANKS[index + 1] ?? null; }
+  get canPromote() { return this.nextRank !== null && this.experience >= this.nextRank.experience; }
+  promote(rank) { const current = UNIT_RANKS.findIndex((item) => item.id === this.rank); const next = UNIT_RANKS.findIndex((item) => item.id === rank); if (next !== current + 1) return false; const value = requireRank(UNIT_RANKS, rank, "Le grade d'unite"); if (this.experience < value.experience) return false; this.rank = value.id; this.maxQuantity = value.capacity; this.level += 1; return true; }
   appointOfficer(rank) { return this.promote(rank); }
   setLevel(level) { this.level = Unit.#positiveInteger(level, "Le niveau"); }
   toJSON() { return { id: this.id, ownerPlayerId: this.ownerPlayerId, typeId: this.typeId, name: this.name, number: this.number, quantity: this.quantity, maxQuantity: this.maxQuantity, rank: this.rank, level: this.level, experience: this.experience, equipmentIds: [...this.equipmentIds], specialPowerIds: [...this.specialPowerIds], state: this.state, healthPerSoldier: this.healthPerSoldier, combatHealthThreshold: this.combatHealthThreshold, soldierHealth: [...this.soldierHealth] }; }
 
-  #applyExperienceRank() { const earned = rankForExperience(UNIT_RANKS, this.experience); return earned.id === this.rank ? false : this.promote(earned.id); }
   static #ids(ids) { if (!Array.isArray(ids)) throw new TypeError("Les equipements doivent etre une liste."); return [...new Set(ids.map((id) => Unit.#text(id, "L'identifiant de l'equipement")))]; }
   static #quantity(value, maximum) { if (!Number.isInteger(value) || value < 0 || value > maximum) throw new RangeError("L'effectif depasse la capacite du grade."); return value; }
   static #soldierHealth(values, quantity, maximum) { if (values === null) return Array(quantity).fill(maximum); if (!Array.isArray(values)) throw new TypeError("Les PV des soldats doivent etre une liste."); if (quantity !== null && values.length !== quantity) throw new RangeError("Les PV des soldats ne correspondent pas a l'effectif."); return values.map((health) => { if (!Number.isInteger(health) || health < 0 || health > maximum) throw new RangeError("Les PV d'un soldat sont invalides."); return health; }); }

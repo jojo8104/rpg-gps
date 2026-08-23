@@ -1,5 +1,5 @@
 export class BattleState {
-  constructor({ id, teams, loot = [], config = {}, now = () => Date.now() }) {
+  constructor({ id, teams, loot = [], aptitudeDefinitions = [], config = {}, now = () => Date.now() }) {
     if (typeof id !== "string" || id.trim() === "") throw new TypeError("L'identifiant de bataille est requis.");
     if (!Array.isArray(teams) || teams.length !== 2) throw new RangeError("Une bataille oppose exactement deux équipes.");
     this.id = id;
@@ -18,6 +18,7 @@ export class BattleState {
       randomSeed: nonNegativeInteger(config.randomSeed ?? stableSeed(id), "randomSeed"),
     };
     this.teams = createTeams(teams);
+    this.aptitudeDefinitions = createAptitudeDefinitions(aptitudeDefinitions);
     if (this.config.ambushTeamId !== null && !this.teams.some((team) => team.id === this.config.ambushTeamId)) throw new RangeError("L'équipe d'embuscade doit participer à la bataille.");
     this.loot = createLoot(loot);
     this.contributions = Object.fromEntries(this.teams.flatMap((team) => team.heroes.map((hero) => [hero.playerId, { damageDealt: 0, damageTaken: 0, support: 0, total: 0 }])));
@@ -48,7 +49,7 @@ export class BattleState {
     return {
       id: this.id, config: structuredClone(this.config), teams: structuredClone(this.teams), status: this.status,
       elapsedMs: this.elapsedMs, countdownRemainingMs: this.countdownRemainingMs, startedAt: this.startedAt, finishedAt: this.finishedAt,
-      winnerTeamId: this.winnerTeamId, loot: structuredClone(this.loot), contributions: structuredClone(this.contributions), eventLog: structuredClone(this.eventLog), randomState: this.randomState,
+      winnerTeamId: this.winnerTeamId, loot: structuredClone(this.loot), aptitudeDefinitions: structuredClone(this.aptitudeDefinitions), contributions: structuredClone(this.contributions), eventLog: structuredClone(this.eventLog), randomState: this.randomState,
     };
   }
 }
@@ -58,7 +59,7 @@ function createLoot(loot) {
   return loot.filter((entry) => entry.protected !== true).map((entry) => ({
     id: requireText(entry.id, "L'identifiant de butin"), itemId: requireText(entry.itemId ?? entry.id, "L'objet de butin"),
     quantity: positiveInteger(entry.quantity ?? 1, "La quantité de butin"), portable: entry.portable !== false,
-    weightPerUnit: nonNegative(entry.weightPerUnit ?? 1, "Le poids du butin"), valuePerUnit: positive(entry.valuePerUnit ?? 1, "La valeur du butin"),
+    valuePerUnit: positive(entry.valuePerUnit ?? 1, "La valeur du butin"),
   }));
 }
 
@@ -91,6 +92,7 @@ function common(entity, kind, ids) {
     attack: nonNegative(entity.attack ?? 0, "L'attaque"), defense: nonNegative(entity.defense ?? 0, "La défense"),
     speed: positive(entity.speed ?? 1, "La vitesse"), range: positive(entity.range ?? 1, "La portée"),
     state: entity.state ?? "active", targetId: null, attackCooldownMs: 0, progress: 0,
+    activeEffects: Array.isArray(entity.activeEffects) ? structuredClone(entity.activeEffects) : [],
   };
 }
 
@@ -98,7 +100,7 @@ function createHero(entity, lane, ids) {
   const base = common(entity, "hero", ids);
   const maxHealth = positive(entity.maxHealth ?? 20, "Les PV maximum");
   const maxCommandPoints = positiveInteger(entity.maxCommandPoints ?? entity.command ?? 3, "Les points de commandement maximum");
-  return { ...base, maxHealth, health: Math.min(maxHealth, nonNegative(entity.health ?? maxHealth, "Les PV")), lane, command: maxCommandPoints, maxCommandPoints, commandPoints: Math.min(maxCommandPoints, nonNegativeInteger(entity.commandPoints ?? maxCommandPoints, "Les points de commandement")), skillIds: normalizeIds(entity.skillIds ?? entity.abilityIds ?? []), specialPowerIds: normalizeIds(entity.specialPowerIds ?? []) };
+  return { ...base, maxHealth, health: Math.min(maxHealth, nonNegative(entity.health ?? maxHealth, "Les PV")), lane, command: maxCommandPoints, maxCommandPoints, commandPoints: Math.min(maxCommandPoints, nonNegativeInteger(entity.commandPoints ?? maxCommandPoints, "Les points de commandement")), skillIds: normalizeIds(entity.skillIds ?? entity.abilityIds ?? []), specialPowerIds: normalizeIds(entity.specialPowerIds ?? []), aptitudeRanks: createAptitudeRanks(entity.aptitudeRanks ?? {}) };
 }
 
 function createUnit(entity, lane, ids) {
@@ -117,6 +119,8 @@ function createUnit(entity, lane, ids) {
   return {
     ...base,
     typeId: entity.typeId ?? null,
+    heroSourceId: entity.heroSourceId === undefined || entity.heroSourceId === null ? null : requireText(entity.heroSourceId, "Le héros commandant"),
+    heroSourceId: entity.heroSourceId === undefined || entity.heroSourceId === null ? null : requireText(entity.heroSourceId, "Le héros commandant"),
     tags: normalizeIds(entity.tags ?? []),
     maxQuantity,
     quantity: counts.alive,
@@ -177,3 +181,17 @@ function positiveInteger(value, label) { if (!Number.isInteger(value) || value <
 function nonNegativeInteger(value, label) { if (!Number.isInteger(value) || value < 0) throw new RangeError(`${label} doit être un entier positif ou nul.`); return value; }
 function requireText(value, label) { if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label} est requis.`); return value.trim(); }
 function normalizeIds(values) { if (!Array.isArray(values)) throw new TypeError("Les identifiants doivent être une liste."); return [...new Set(values.map((value) => requireText(value, "Un identifiant")))]; }
+function createAptitudeDefinitions(values) {
+  if (!Array.isArray(values)) throw new TypeError("Les définitions d'aptitude doivent être une liste.");
+  const ids = new Set();
+  return values.map((definition) => {
+    if (!definition || typeof definition !== "object") throw new TypeError("Une définition d'aptitude est invalide.");
+    const id = requireText(definition.id, "L'identifiant d'aptitude");
+    if (ids.has(id)) throw new RangeError("Les définitions d'aptitude doivent être uniques.");
+    ids.add(id); return structuredClone(definition);
+  });
+}
+function createAptitudeRanks(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new TypeError("Les rangs d'aptitude sont invalides.");
+  return Object.fromEntries(Object.entries(value).map(([id, rank]) => [requireText(id, "Une aptitude"), requireText(rank, "Un rang d'aptitude")]));
+}

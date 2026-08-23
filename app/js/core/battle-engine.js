@@ -1,8 +1,9 @@
 import { BattleState } from "./battle-state.js";
+import { BattleAptitudeService, matchesFilter } from "./battle-aptitude-service.js";
 
 /** Simulation temps réel indépendante de l'interface. */
 export class BattleEngine {
-  constructor(options) { this.state = options instanceof BattleState ? options : new BattleState(options); }
+  constructor(options) { this.state = options instanceof BattleState ? options : new BattleState(options); this.aptitudes = new BattleAptitudeService(this.state.aptitudeDefinitions); }
   get id() { return this.state.id; } get teams() { return this.state.teams; } get config() { return this.state.config; }
   get status() { return this.state.status; } set status(value) { this.state.status = value; }
   get winnerTeamId() { return this.state.winnerTeamId; } set winnerTeamId(value) { this.state.winnerTeamId = value; }
@@ -10,6 +11,9 @@ export class BattleEngine {
   get eventLog() { return this.state.eventLog; }
   getEntity(id) { return this.state.getEntity(id); }
   getTeamForEntity(id) { return this.state.getTeamForEntity(id); }
+  getSpecialPowerDefinition(powerId) { return this.aptitudes.getDefinition(powerId); }
+  getSpecialPowerTargets({ teamId, userId, powerId }) { return this.aptitudes.getTargetCandidates(this.state, teamId, userId, powerId).map((entity) => entity.id); }
+  getEffectiveStat(entityId, stat) { const entity = this.getEntity(entityId); return entity ? this.#effectiveStat(entity, stat) : null; }
   toJSON() { return this.state.toJSON(); }
 
   start() {
@@ -74,11 +78,19 @@ export class BattleEngine {
     const team = this.teams.find((item) => item.id === teamId); const user = this.getEntity(userId);
     if (!team || !user || this.getTeamForEntity(userId)?.id !== teamId) return { success: false, reason: "invalid_user" };
     if (!user.specialPowerIds?.includes(powerId)) return { success: false, reason: "unknown_power" };
+    const definition = this.aptitudes.getDefinition(powerId); const power = this.aptitudes.getPower(user, powerId);
+    if (definition && !power) return { success: false, reason: "unknown_power" };
+    if (power?.activation.target === "self" && targetId === null) targetId = userId;
+    if (power && !this.aptitudes.isValidTarget(this.state, teamId, userId, powerId, targetId)) return { success: false, reason: "invalid_target" };
     const commander = user.kind === "hero" ? user : this.#commanderFor(team, user.playerId);
     if (!commander) return { success: false, reason: "no_commander" };
-    if (!this.#spendCommand(commander, cost, "special_power", { userId, powerId, targetId })) return { success: false, reason: "insufficient_command_points" };
-    this.#log("special_power_activated", { teamId, commanderId: commander.id, userId, powerId, targetId, cost });
-    return { success: true, commanderId: commander.id, remainingCommandPoints: commander.commandPoints };
+    const commandCost = power?.activation.cost ?? cost;
+    if (!this.#spendCommand(commander, commandCost, "special_power", { userId, powerId, targetId })) return { success: false, reason: "insufficient_command_points" };
+    const appliedEffects = power ? this.#applySpecialPowerEffects({ team, user, targetId, powerId, rank: power.rank, effects: power.effects }) : [];
+    this.#log("special_power_activated", { teamId, commanderId: commander.id, userId, powerId, targetId, cost: commandCost, rank: power?.rank ?? null, appliedEffects });
+    this.#checkEnd();
+    const result = { success: true, commanderId: commander.id, remainingCommandPoints: commander.commandPoints };
+    return power ? { ...result, powerId, targetId, appliedEffects } : result;
   }
 
   tick(deltaMs = this.config.tickMs) {
@@ -90,7 +102,7 @@ export class BattleEngine {
     }
     if (this.status !== "active") return [];
     if (!Number.isFinite(deltaMs) || deltaMs <= 0) throw new RangeError("Le delta du tick doit être positif.");
-    const before = this.eventLog.length; this.state.elapsedMs += deltaMs; this.#arriveReinforcements();
+    const before = this.eventLog.length; this.state.elapsedMs += deltaMs; this.#expireEffects(); this.#arriveReinforcements();
     const intents = [];
     const progressAtTickStart = new Map(this.teams.flatMap((team) => team.units.map((unit) => [unit.id, unit.progress])));
     for (const team of this.teams) {
@@ -105,6 +117,12 @@ export class BattleEngine {
   }
 
   attack(attackerId, targetId) { const attacker = this.getEntity(attackerId); const target = this.getEntity(targetId); if (!attacker || !target || this.getTeamForEntity(attackerId)?.id === this.getTeamForEntity(targetId)?.id) return { success: false, reason: "invalid_target" }; const result = this.#applyDamage(this.#createDamageIntent(attacker, target)); this.#checkEnd(); return result; }
+  resolvePursuitAttack(attackerId, targetId) {
+    if (this.status !== "finished") return { success: false, reason: "battle_not_finished" };
+    const attacker = this.getEntity(attackerId); const target = this.getEntity(targetId);
+    if (attacker?.kind !== "unit" || target?.kind !== "unit" || attacker.state !== "active" || !["active", "fled"].includes(target.state) || this.getTeamForEntity(attackerId)?.id === this.getTeamForEntity(targetId)?.id) return { success: false, reason: "invalid_target" };
+    return this.#applyDamage(this.#createDamageIntent(attacker, target, 1, "flee_pursuit_attack"));
+  }
   markUnitFled(id) { const unit = this.getEntity(id); if (unit?.kind !== "unit" || unit.state !== "active") return false; unit.state = "fled"; this.#log("unit_fled", { unitId: id }); return true; }
   markUnitCaptured(id) { return this.#mark(id, "captured"); } markUnitDeserted(id) { return this.#mark(id, "deserted"); }
 
@@ -124,7 +142,8 @@ export class BattleEngine {
       if (!unit.retreating) return intent;
     }
     if (unit.retreating) {
-      unit.progress = Math.max(0, unit.progress - unit.retreat.speed * deltaMs / 10_000);
+      const retreatSpeed = unit.retreat.speed * (this.#effectiveStat(unit, "speed") / unit.speed);
+      unit.progress = Math.max(0, unit.progress - retreatSpeed * deltaMs / 10_000);
       if (unit.progress === 0) {
         const routed = unit.retreatReason === "rout";
         unit.lane = null; unit.retreating = false; unit.targetId = null; unit.attackCooldownMs = 0; unit.retreatReason = null;
@@ -133,7 +152,7 @@ export class BattleEngine {
       }
       return intent;
     }
-    unit.progress = Math.min(1, unit.progress + unit.speed * deltaMs / this.config.advanceTravelBaseMs);
+    unit.progress = Math.min(1, unit.progress + this.#effectiveStat(unit, "speed") * deltaMs / this.config.advanceTravelBaseMs);
     if (!target && unit.progress >= 1) {
       const hero = this.#breakthroughHero(unit, enemy);
       if (hero) {
@@ -157,8 +176,8 @@ export class BattleEngine {
       .sort((first, second) => Math.abs(first.lane - unit.lane) - Math.abs(second.lane - unit.lane) || first.lane - second.lane)[0] ?? null;
   }
   #createDamageIntent(attacker, target, multiplier = 1, eventType = "attack") {
-    const attack = attacker.kind === "unit" && attacker.retreating ? attacker.retreat.attack : attacker.attack;
-    const defense = target.kind === "unit" && target.retreating ? target.retreat.defense : target.defense;
+    const attack = attacker.kind === "unit" && attacker.retreating ? Math.max(0, attacker.retreat.attack + this.#effectiveStat(attacker, "attack") - attacker.attack) : this.#effectiveStat(attacker, "attack");
+    const defense = target.kind === "unit" && target.retreating ? Math.max(0, target.retreat.defense + this.#effectiveStat(target, "defense") - target.defense) : this.#effectiveStat(target, "defense");
     const combatMultiplier = this.#combatMultiplier(attack, defense);
     const packetCount = attacker.kind === "unit" ? attacker.combatantCount : 1;
     const minimum = attacker.kind === "unit" ? attacker.damageMin : Math.max(1, Math.floor(attacker.attack / 2));
@@ -172,8 +191,11 @@ export class BattleEngine {
     const previousDead = target.kind === "unit" ? target.deadCount : 0;
     const previousWounded = target.kind === "unit" ? target.woundedCount : 0;
     let effectiveDamage = 0;
-    if (target.kind === "hero") effectiveDamage = Math.min(target.health, damage);
-    else effectiveDamage = this.#applyPacketsToUnit(target, packets.length > 0 ? packets : [damage]);
+    const reduction = this.aptitudes.damageReduction(this.state, target);
+    const reducedDamage = Math.max(0, Math.round(damage * (1 - reduction)));
+    const reducedPackets = packets.map((packet) => Math.max(0, Math.round(packet * (1 - reduction))));
+    if (target.kind === "hero") effectiveDamage = Math.min(target.health, reducedDamage);
+    else effectiveDamage = this.#applyPacketsToUnit(target, reducedPackets.length > 0 ? reducedPackets : [reducedDamage]);
     this.#recordContribution(attacker.playerId, "damageDealt", effectiveDamage);
     this.#recordContribution(target.playerId, "damageTaken", effectiveDamage);
     let losses = 0;
@@ -182,13 +204,13 @@ export class BattleEngine {
       losses = Math.max(0, target.deadCount - previousDead);
       const greenRatio = target.combatantCount / Math.max(1, target.initialQuantity);
       if (target.quantity === 0) target.state = "defeated";
-      else if (!target.retreating && (target.combatantCount === 0 || greenRatio <= this.#routThreshold(target.morale))) {
+      else if (!target.retreating && (target.combatantCount === 0 || greenRatio <= this.#routThreshold(this.#effectiveStat(target, "morale")))) {
         target.retreating = true; target.retreatReason = "rout"; target.targetId = null;
-        this.#log("unit_routed", { unitId: target.id, combatants: target.combatantCount, wounded: target.woundedCount, morale: target.morale });
+        this.#log("unit_routed", { unitId: target.id, combatants: target.combatantCount, wounded: target.woundedCount, morale: this.#effectiveStat(target, "morale") });
       }
     }
     const wounded = target.kind === "unit" ? Math.max(0, target.woundedCount - previousWounded) : 0;
-    this.#log(eventType, { attackerId: attacker.id, targetId: target.id, damage: effectiveDamage, rolledDamage: damage, losses, wounded, multiplier, combatMultiplier, targetState: target.state }); return { success: true, damage: effectiveDamage, rolledDamage: damage, losses, wounded, multiplier, targetState: target.state };
+    this.#log(eventType, { attackerId: attacker.id, targetId: target.id, damage: effectiveDamage, rolledDamage: damage, damageReduction: reduction, losses, wounded, multiplier, combatMultiplier, targetState: target.state }); return { success: true, damage: effectiveDamage, rolledDamage: damage, damageReduction: reduction, losses, wounded, multiplier, targetState: target.state };
   }
 
   #applyPacketsToUnit(unit, packets) {
@@ -217,6 +239,48 @@ export class BattleEngine {
     unit.quantity = unit.combatantCount + unit.woundedCount;
   }
 
+  #applySpecialPowerEffects({ team, user, targetId, powerId, rank, effects }) {
+    const applied = [];
+    effects.forEach((effect, effectIndex) => {
+      const recipients = this.#effectRecipients(team, user, targetId, effect);
+      recipients.filter((entity) => matchesFilter(entity, effect.filter)).forEach((recipient) => {
+        if (effect.kind === "direct_damage") {
+          const result = this.#applyDamage({ attackerId: user.id, targetId: recipient.id, packets: [effect.value], damage: effect.value, eventType: "special_power_damage" });
+          applied.push({ kind: effect.kind, targetId: recipient.id, value: result.damage }); return;
+        }
+        if (effect.kind === "retreat") {
+          if (recipient.kind === "unit" && recipient.state === "active") { recipient.retreating = true; recipient.retreatReason = "tactical"; recipient.targetId = null; applied.push({ kind: effect.kind, targetId: recipient.id }); }
+          return;
+        }
+        const activeEffect = {
+          ...structuredClone(effect), id: `${powerId}:${this.eventLog.length}:${effectIndex}:${recipient.id}`,
+          sourceId: user.id, powerId, rank, appliedAtMs: this.state.elapsedMs,
+          expiresAtMs: this.state.elapsedMs + effect.durationMs,
+        };
+        recipient.activeEffects.push(activeEffect);
+        applied.push({ kind: effect.kind, targetId: recipient.id, stat: effect.stat ?? null, value: effect.value, expiresAtMs: activeEffect.expiresAtMs });
+      });
+    });
+    return applied;
+  }
+
+  #effectRecipients(team, user, targetId, effect) {
+    if (effect.recipient === "allied_units") return team.units.filter((entity) => entity.state === "active");
+    if (effect.recipient === "allied_entities") return [...team.heroes, ...team.units].filter((entity) => entity.state === "active");
+    const target = targetId === null ? user : this.getEntity(targetId);
+    return target ? [target] : [];
+  }
+
+  #expireEffects() {
+    this.teams.flatMap((team) => [...team.heroes, ...team.units]).forEach((entity) => {
+      const expired = entity.activeEffects.filter((effect) => effect.expiresAtMs <= this.state.elapsedMs);
+      entity.activeEffects = entity.activeEffects.filter((effect) => effect.expiresAtMs > this.state.elapsedMs);
+      expired.forEach((effect) => this.#log("special_power_expired", { entityId: entity.id, powerId: effect.powerId, effectId: effect.id }));
+    });
+  }
+
+  #effectiveStat(entity, stat) { return this.aptitudes.effectiveStat(this.state, entity, stat); }
+
   #combatMultiplier(attack, defense) {
     const difference = attack - defense;
     return difference >= 0 ? Math.min(3, 1 + difference * 0.05) : Math.max(0.3, 1 - Math.abs(difference) * 0.025);
@@ -224,7 +288,7 @@ export class BattleEngine {
 
   #routThreshold(morale) { return Math.max(0.1, Math.min(0.55, 0.55 - morale * 0.045)); }
   #roll(minimum, maximum) { this.state.randomState = (Math.imul(1_664_525, this.state.randomState) + 1_013_904_223) >>> 0; return Math.floor(this.state.randomState / 4_294_967_296 * (maximum - minimum + 1)) + minimum; }
-  #arriveReinforcements() { for (const team of this.teams) { const due = team.reinforcements.filter((item) => item.arrivalAtMs <= this.state.elapsedMs); team.reinforcements = team.reinforcements.filter((item) => item.arrivalAtMs > this.state.elapsedMs); for (const item of due) { const lane = team.lines.find((line) => line.heroId === null); if (!lane) continue; const hero = { ...item.hero, kind: "hero", lane: lane.index, state: "active", targetId: null, progress: 0, attackCooldownMs: 0 }; lane.heroId = hero.id; team.heroes.push(hero); team.units.push(...item.units.map((unit) => createReinforcementUnit(unit, lane.index))); this.#log("reinforcement_joined", { teamId: team.id, heroId: hero.id, lane: lane.index }); } } }
+  #arriveReinforcements() { for (const team of this.teams) { const due = team.reinforcements.filter((item) => item.arrivalAtMs <= this.state.elapsedMs); team.reinforcements = team.reinforcements.filter((item) => item.arrivalAtMs > this.state.elapsedMs); for (const item of due) { const lane = team.lines.find((line) => line.heroId === null); if (!lane) continue; const hero = { ...item.hero, kind: "hero", lane: lane.index, state: "active", targetId: null, progress: 0, attackCooldownMs: 0, activeEffects: structuredClone(item.hero.activeEffects ?? []), aptitudeRanks: { ...(item.hero.aptitudeRanks ?? {}) } }; lane.heroId = hero.id; team.heroes.push(hero); team.units.push(...item.units.map((unit) => createReinforcementUnit(unit, lane.index))); this.#log("reinforcement_joined", { teamId: team.id, heroId: hero.id, lane: lane.index }); } } }
   #checkEnd() { const alive = this.teams.filter((team) => team.heroes.some((hero) => hero.state === "active")); if (alive.length > 1) return; this.#finish(alive[0]?.id ?? null); }
   #finish(winnerTeamId) { this.state.status = "finished"; this.state.finishedAt = this.state.now(); this.state.winnerTeamId = winnerTeamId; this.#log("battle_finished", { winnerTeamId }); }
   #mark(id, state) { const unit = this.getEntity(id); if (unit?.kind !== "unit" || unit.state !== "active") return false; unit.state = state; this.#log(`unit_${state}`, { unitId: id }); return true; }
@@ -240,5 +304,5 @@ function createReinforcementUnit(unit, lane) {
   const soldierHealth = [...(unit.soldierHealth ?? Array(unit.quantity).fill(healthPerSoldier))];
   const combatantCount = soldierHealth.filter((health) => health > combatHealthThreshold).length;
   const woundedCount = soldierHealth.filter((health) => health > 0 && health <= combatHealthThreshold).length;
-  return { ...unit, kind: "unit", lane, behavior: unit.behavior ?? "advance", symbol: unit.symbol ?? "U", healthPerSoldier, combatHealthThreshold, soldierHealth, initialQuantity: soldierHealth.length, combatantCount, woundedCount, deadCount: soldierHealth.filter((health) => health === 0).length, damageMin: unit.damageMin ?? Math.max(1, Math.floor(unit.attack / 2)), damageMax: unit.damageMax ?? Math.max(1, unit.attack), attackIntervalMs: unit.attackIntervalMs ?? Math.max(350, 1_500 - unit.speed * 100), damageCursor: 0, retreating: false, retreatReason: null, retreat: { speed: unit.retreat?.speed ?? unit.speed, defense: unit.retreat?.defense ?? unit.defense, attack: unit.retreat?.attack ?? unit.attack, range: unit.retreat?.range ?? unit.range }, state: "active", targetId: null, progress: 0, attackCooldownMs: 0 };
+  return { ...unit, kind: "unit", lane, behavior: unit.behavior ?? "advance", symbol: unit.symbol ?? "U", healthPerSoldier, combatHealthThreshold, soldierHealth, initialQuantity: soldierHealth.length, combatantCount, woundedCount, deadCount: soldierHealth.filter((health) => health === 0).length, damageMin: unit.damageMin ?? Math.max(1, Math.floor(unit.attack / 2)), damageMax: unit.damageMax ?? Math.max(1, unit.attack), attackIntervalMs: unit.attackIntervalMs ?? Math.max(350, 1_500 - unit.speed * 100), damageCursor: 0, retreating: false, retreatReason: null, retreat: { speed: unit.retreat?.speed ?? unit.speed, defense: unit.retreat?.defense ?? unit.defense, attack: unit.retreat?.attack ?? unit.attack, range: unit.retreat?.range ?? unit.range }, state: "active", targetId: null, progress: 0, attackCooldownMs: 0, activeEffects: structuredClone(unit.activeEffects ?? []) };
 }

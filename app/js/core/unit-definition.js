@@ -3,11 +3,12 @@
  * Cette classe ne contient aucun état propre à l'armée d'un joueur.
  */
 export class UnitDefinition {
-  constructor({ id, name, faction, maxQuantity, stats, retreat = {}, abilities = [], costs = {}, tags = [] }) {
+  constructor({ id, name, faction, maxQuantity, authorityCost = 1, stats, retreat = {}, abilities = [], costs = {}, tags = [] }) {
     this.id = UnitDefinition.#requireText(id, "L'identifiant du type d'unité");
     this.name = UnitDefinition.#requireText(name, "Le nom du type d'unité");
     this.faction = UnitDefinition.#requireText(faction, "La faction de l'unité");
     this.maxQuantity = UnitDefinition.#requirePositiveInteger(maxQuantity, "L'effectif maximal");
+    this.authorityCost = UnitDefinition.#requirePositiveInteger(authorityCost, "Le cout d'autorite");
     this.stats = UnitDefinition.#createStats(stats);
     this.retreat = UnitDefinition.#createRetreat(retreat, this.stats);
     this.abilities = UnitDefinition.#createTextList(abilities, "Les capacités");
@@ -21,6 +22,7 @@ export class UnitDefinition {
       name: this.name,
       faction: this.faction,
       maxQuantity: this.maxQuantity,
+      authorityCost: this.authorityCost,
       stats: { ...this.stats },
       retreat: { ...this.retreat },
       abilities: [...this.abilities],

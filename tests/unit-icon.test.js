@@ -8,3 +8,8 @@ test("les types d'unites partagent une icone SVG explicite", () => {
   assert.equal(unitIconKind({ typeId: "mounted-archer", tags: ["cavalry", "ranged"], range: 3 }), "cavalry");
   assert.match(renderUnitTypeIcon({ tags: ["ranged"] }), /<svg[^>]+data-unit-icon="ranged"/);
 });
+
+test("les miliciens utilisent leur vignette d'unite illustrée", () => {
+  assert.match(renderUnitTypeIcon({ typeId: "militia" }), /militia-thumbnail\.png/);
+  assert.match(renderUnitTypeIcon({ typeId: "archer" }), /archer-thumbnail\.png/);
+});

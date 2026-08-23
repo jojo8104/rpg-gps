@@ -7,9 +7,13 @@ const ACTION_RELATIONS = Object.freeze({
   heal: new Set(["owned", "allied", "neutral"]),
   collect: new Set(["owned", "allied", "neutral"]),
   deposit: new Set(["owned", "allied", "neutral"]),
+  manageReserves: new Set(["owned"]),
+  trade: new Set(["owned", "allied", "neutral"]),
+  talkChief: new Set(["owned", "allied", "neutral"]),
   garrison: new Set(["owned", "neutral"]),
   withdrawGarrison: new Set(["owned", "allied", "neutral"]),
   attack: new Set(["enemy", "neutral"]),
+  build: new Set(["owned"]),
 });
 
 /** Règle métier unique pour les relations et interactions avec les lieux. */
@@ -36,10 +40,13 @@ export class LocationAccessPolicy {
     const allowedRelations = ACTION_RELATIONS[action];
     if (allowedRelations === undefined) return false;
     if (!allowedRelations.has(this.getRelation(playerId, location))) return false;
+    if ((location.population ?? 1) === 0 && !["inspect", "manageReserves", "attack"].includes(action)) return false;
     if (action === "recruit") return location.features.recruitment === true;
     if (action === "reinforce") return location.features.recruitment === true;
     if (action === "heal") return location.features.healing === true;
     if (action === "collect") return location.features.resourceProduction === true;
+    if (action === "trade") return location.features.trade === true || (location.interactionIds.includes("local-chief-trade") && (location.statistics.chiefTradeRemaining ?? 0) > 0);
+    if (action === "talkChief") return location.chief !== null;
     if (action === "garrison" || action === "withdrawGarrison") return location.features.garrison === true;
     if (action === "attack") return location.features.battle === true || location.features.capturable === true;
     return true;
