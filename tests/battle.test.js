@@ -35,8 +35,8 @@ test("l'avance laisse au joueur le temps d'observer le champ de bataille", () =>
     { id: "blue", heroes: [{ id: "hb", playerId: "blue" }], units: [] },
   ] });
   battle.tick(1_500);
-  assert.equal(battle.config.advanceTravelBaseMs, 15_000);
-  assert.equal(battle.getEntity("ur").progress, 0.2);
+  assert.equal(battle.config.advanceTravelBaseMs, 24_000);
+  assert.equal(battle.getEntity("ur").progress, 0.125);
 });
 
 test("un combat normal attend un compte à rebours de trois secondes", () => {

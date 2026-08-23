@@ -974,6 +974,7 @@ export class Game {
   }
 
   #autonomousGroupSpeed(group) {
+    if (Number.isFinite(group.mission?.speedMetersPerSecond) && group.mission.speedMetersPerSecond > 0) return group.mission.speedMetersPerSecond;
     if (group.type === "messenger") return 5;
     if (group.type === "prospecting") return 1.4;
     if (group.type === "convoy") return Math.max(.8, 2 - group.cargo.length * .1);

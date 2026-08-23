@@ -5,7 +5,7 @@ export class BattleState {
     this.id = id;
     this.config = {
       tickMs: positive(config.tickMs ?? 500, "tickMs"),
-      advanceTravelBaseMs: positive(config.advanceTravelBaseMs ?? 15_000, "advanceTravelBaseMs"),
+      advanceTravelBaseMs: positive(config.advanceTravelBaseMs ?? 24_000, "advanceTravelBaseMs"),
       unitHealthPerSurvivor: positive(config.unitHealthPerSurvivor ?? 10, "unitHealthPerSurvivor"),
       defenseBase: positive(config.defenseBase ?? 5, "defenseBase"),
       reinforcementDelayMs: nonNegative(config.reinforcementDelayMs ?? 3_000, "reinforcementDelayMs"),

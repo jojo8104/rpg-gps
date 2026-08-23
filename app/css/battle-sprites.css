@@ -68,12 +68,17 @@
 .unit-token.field-token.is-attacking .archer-formation i {
   background-image: url("../assets/units/archer-attack.png");
   background-position-x: 33.333%;
-  animation: archer-release .62s ease-out 1 both;
+  animation: archer-release 1.15s ease-out 1 both;
   animation-delay: calc(var(--soldier) * 9ms);
 }
 
 .unit-token.field-token.is-attacking:has(.archer-formation) {
   animation: none;
+}
+
+.unit-token.field-token.is-reloading .archer-formation i {
+  animation-duration: .85s;
+  filter: saturate(.72) brightness(.9) drop-shadow(0 1px 1px #000b);
 }
 
 @keyframes archer-release {
@@ -83,8 +88,8 @@
 
 .arrow-projectile {
   opacity: 0;
-  animation: arrow-projectile-visibility .62s linear both;
-  animation-delay: calc(var(--arrow-index) * 28ms);
+  animation: arrow-projectile-visibility 1.8s linear both;
+  animation-delay: var(--flight-age);
 }
 
 .attack-overlay .arrow-shaft {
@@ -95,7 +100,8 @@
   filter: drop-shadow(0 1px .4px #d7c69b);
   transform-box: fill-box;
   transform-origin: center;
-  animation: arrow-height .62s ease-in-out both;
+  animation: arrow-height 1.8s ease-in-out both;
+  animation-delay: var(--flight-age);
 }
 
 .arrow-ground-shadow {
@@ -103,7 +109,8 @@
   opacity: .48;
   transform-box: fill-box;
   transform-origin: center;
-  animation: arrow-shadow-flight .62s ease-in-out both;
+  animation: arrow-shadow-flight 1.8s ease-in-out both;
+  animation-delay: var(--flight-age);
 }
 
 @keyframes arrow-projectile-visibility {

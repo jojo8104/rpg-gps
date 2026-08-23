@@ -24,7 +24,7 @@ test("le renderer déduit le langage visuel depuis les données métier", () => 
 });
 
 test("chaque type de lieu possède un symbole vectoriel pour le zoom sémantique", () => {
-  ["fort", "village", "mine", "camp", "quest"].forEach((type) => {
+  ["fort", "village", "mine", "camp", "capital", "quarry", "lumber-camp", "quest"].forEach((type) => {
     const marker = locationMarkerSvg(type); assert.match(marker, /^<svg/); assert.match(marker, /<path/);
   });
 });

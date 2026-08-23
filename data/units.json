@@ -17,7 +17,7 @@
     "faction": "kingdom",
     "maxQuantity": 10,
     "authorityCost": 2,
-    "stats": { "attack": 4, "defense": 2, "damageMin": 2, "damageMax": 3, "healthPerSoldier": 8, "combatHealthThreshold": 4, "speed": 3, "range": 3, "attackIntervalMs": 2400, "morale": 5 },
+    "stats": { "attack": 4, "defense": 2, "damageMin": 2, "damageMax": 3, "healthPerSoldier": 8, "combatHealthThreshold": 4, "speed": 3, "range": 3, "attackIntervalMs": 6000, "morale": 5 },
     "retreat": { "attack": 4, "defense": 2, "speed": 4, "range": 3 },
     "abilities": ["ranged_attack"],
     "costs": { "gold": 30, "wood": 10, "stone": 0, "iron": 5 },

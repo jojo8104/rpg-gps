@@ -17,7 +17,15 @@ export class AutonomousGroupTrace {
   }
 
   getScore(at) { return Math.max(0, this.initialDetectionScore - this.decayPerMinute * Math.max(0, at - this.createdAt) / 60_000); }
-  isDetectable({ at, minimumScore }) { return this.getScore(at) > 0 && this.getScore(at) >= minimumScore; }
+  getPerceivedScore({ at, distance = 0, distancePerPoint = 50, detectionBonus = 0 }) {
+    if (!Number.isFinite(distance) || distance < 0) throw new RangeError("La distance de lecture doit être positive ou nulle.");
+    if (!Number.isFinite(distancePerPoint) || distancePerPoint <= 0) throw new RangeError("La portée par point doit être strictement positive.");
+    if (!Number.isFinite(detectionBonus) || detectionBonus < 0) throw new RangeError("Le bonus de détection doit être positif ou nul.");
+    return Math.max(0, this.getScore(at) + detectionBonus - distance / distancePerPoint);
+  }
+  isDetectable({ at, minimumScore, distance = 0, distancePerPoint = 50, detectionBonus = 0 }) {
+    return this.getScore(at) > 0 && this.getPerceivedScore({ at, distance, distancePerPoint, detectionBonus }) >= minimumScore;
+  }
   read({ at, minimumScore = 5, analysisBonus = 0 }) {
     const score = this.getScore(at);
     if (score <= 0 || score < minimumScore) return null;
