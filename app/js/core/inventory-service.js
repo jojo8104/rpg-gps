@@ -8,8 +8,8 @@ export class InventoryService {
   constructor({ idGenerator = (prefix) => `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}` } = {}) { this.idGenerator = idGenerator; }
 
   getHeroBagSlotCount(hero) {
-    const index = Math.max(0, HERO_GRADES.findIndex((grade) => grade.id === hero.commandRank));
-    return HERO_BAG_SLOTS[index] ?? HERO_BAG_SLOTS[0];
+    if (Number.isInteger(hero.bagSlotCount) && hero.bagSlotCount > 0) return hero.bagSlotCount;
+    const index = Math.max(0, HERO_GRADES.findIndex((grade) => grade.id === hero.commandRank)); return HERO_BAG_SLOTS[index] ?? HERO_BAG_SLOTS[0];
   }
 
   getLocationSlotCount(location) { return Math.min(40, Math.max(4, Math.floor((location.population ?? 0) / 2) + Math.floor(location.resources?.infrastructureStorage ?? 0))); }

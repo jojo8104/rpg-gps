@@ -1,4 +1,4 @@
-const CACHE = "rpg-gps-field-v69";
+const CACHE = "rpg-gps-field-v73";
 const local = (path) => new URL(path, self.location).href;
 const APP_SHELL = [local("./"), local("./index.html"), local("./app/"), local("./app/index.html"), local("./app/css/style.css"), local("./app/js/main.js"), local("./app/js/gps.js"), local("./app/js/orientation.js"), local("./app/js/position-adapter.js"), local("./app/js/device-alerts.js"), local("./app/js/field-state-storage.js"), local("./app/js/wake-lock.js"), local("./app/js/ui/game-setup-view.js"), local("./app/js/ui/world-view.js"), local("./app/js/core/gps-accuracy-log.js"), local("./app/js/core/heading.js"), local("./app/js/core/location-intel.js"), local("./app/js/core/location-range-policy.js"), local("./app/js/core/play-area-presence.js"), local("./app/manifest.webmanifest"), local("./app/icon.svg"), local("./data/scenarios/chaos.json"), local("./data/hero-classes.json"), local("./data/units.json"), local("./data/locations.json")];
 APP_SHELL.push(local("./app/js/ui/garrison-sheet.js"), local("./app/js/ui/bottom-sheet.js"), local("./app/js/ui/unit-icon.js"), local("./app/js/ui/map-view.js"), local("./app/js/map/MapRenderer.js"), local("./app/js/map/UnitRenderer.js"));
@@ -16,6 +16,7 @@ APP_SHELL.push(local("./app/js/ui/stock-slots-view.js"));
 APP_SHELL.push(local("./app/js/core/equipment-service.js"), local("./app/js/ui/equipment-view.js"));
 APP_SHELL.push(local("./app/js/core/setup-placement-service.js"));
 APP_SHELL.push(local("./app/js/core/hero-concealment-service.js"));
+APP_SHELL.push(local("./app/js/core/deadline-service.js"), local("./app/js/core/result-evaluation-service.js"), local("./app/js/core/location-dismantling-service.js"));
 self.addEventListener("install", (event) => event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting())));
 self.addEventListener("activate", (event) => event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)))).then(() => self.clients.claim())));
 self.addEventListener("fetch", (event) => {

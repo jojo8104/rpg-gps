@@ -50,6 +50,13 @@ export class QuestRuntime {
       const binding = game.scenarioLocationBindings.find((candidate) => candidate.locationId === event.locationId);
       return binding?.locationSlotId === trigger.locationSlotId;
     }
+    if (trigger.type === "evacuationReady") {
+      if (event.type !== "InteractionCompleted" || event.interactionId !== trigger.interactionId) return false;
+      const source = game.getLocationForScenarioSlot(trigger.locationSlotId);
+      const ready = (source.population ?? 0) === 0 && (source.resources.stock.population ?? 0) === 0 && source.dismantlings.length === 0;
+      if (ready && game.evacuationStates[trigger.evacuationId]) { const state = game.evacuationStates[trigger.evacuationId]; state.departedAt = game.now(); state.resourcesRemaining = structuredClone(source.resources.stock); state.structuresRemaining = Object.values(source.infrastructure).reduce((sum, level) => sum + level, 0); }
+      return ready;
+    }
     return false;
   }
 }

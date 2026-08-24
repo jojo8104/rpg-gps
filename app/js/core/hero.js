@@ -39,6 +39,7 @@ export class Hero {
     travelProgress = {},
     appearanceId = null,
     classFeatureState = {},
+    wagons = [],
   }) {
     this.id = Hero.#requireText(id, "L'identifiant du héros");
     this.playerId = Hero.#requireText(playerId, "L'identifiant du joueur");
@@ -76,6 +77,7 @@ export class Hero {
     this.appearanceId = appearanceId === null ? null : Hero.#requireText(appearanceId, "L'apparence du héros");
     if (classFeatureState === null || Array.isArray(classFeatureState) || typeof classFeatureState !== "object") throw new TypeError("L'état des avantages de classe doit être un objet.");
     this.classFeatureState = structuredClone(classFeatureState);
+    this.wagons = Hero.#createWagons(wagons);
   }
 
   addUnit(unit) {
@@ -84,7 +86,9 @@ export class Hero {
   }
 
   get maxUnitStacks() { return HERO_GRADES.find((grade) => grade.id === this.commandRank)?.capacity ?? HERO_GRADES[0].capacity; }
-  get bagSlotCount() { const index = Math.max(0, HERO_GRADES.findIndex((grade) => grade.id === this.commandRank)); return [8, 10, 12, 14, 16][index] ?? 8; }
+  get baseBagSlotCount() { const index = Math.max(0, HERO_GRADES.findIndex((grade) => grade.id === this.commandRank)); return [8, 10, 12, 14, 16][index] ?? 8; }
+  get wagonSlotCount() { return this.wagons.reduce((sum, wagon) => sum + wagon.slotBonus, 0); }
+  get bagSlotCount() { return this.baseBagSlotCount + this.wagonSlotCount; }
   get finalStats() { return Object.fromEntries(["attack", "defense", "morale", "mobility", "command", "health"].map((stat) => [stat, this.baseStats[stat] + this.statGrowth[stat] + this.equipmentModifiers[stat] + this.temporaryModifiers[stat]])); }
 
   removeUnit(unitId) {
@@ -197,6 +201,7 @@ export class Hero {
       travelProgress: structuredClone(this.travelProgress),
       appearanceId: this.appearanceId,
       classFeatureState: structuredClone(this.classFeatureState),
+      wagons: this.wagons.map((wagon) => ({ ...wagon })),
     };
   }
 
@@ -289,8 +294,10 @@ export class Hero {
 
   static #createCarriedLoot(entries) {
     if (!Array.isArray(entries)) throw new TypeError("Le butin transporté doit être une liste.");
-    return entries.map((entry, index) => ({ id: entry.id === undefined ? `carried-${Hero.#requireText(entry.itemId, "L'objet transporté")}-${index}` : Hero.#requireText(entry.id, "L'identifiant du paquet transporté"), itemId: Hero.#requireText(entry.itemId, "L'objet transporté"), quantity: Hero.#requirePositiveInteger(entry.quantity, "La quantité transportée"), valuePerUnit: Hero.#requirePositiveNumber(entry.valuePerUnit ?? 1, "La valeur transportée") }));
+    return entries.map((entry, index) => ({ id: entry.id === undefined ? `carried-${Hero.#requireText(entry.itemId, "L'objet transporté")}-${index}` : Hero.#requireText(entry.id, "L'identifiant du paquet transporté"), itemId: Hero.#requireText(entry.itemId, "L'objet transporté"), quantity: Hero.#requirePositiveInteger(entry.quantity, "La quantité transportée"), valuePerUnit: Hero.#requirePositiveNumber(entry.valuePerUnit ?? 1, "La valeur transportée"), metadata: structuredClone(entry.metadata ?? {}) }));
   }
+
+  static #createWagons(wagons) { if (!Array.isArray(wagons)) throw new TypeError("Les chariots doivent être une liste."); return wagons.map((wagon) => ({ id: Hero.#requireText(wagon.id, "L'identifiant du chariot"), name: Hero.#requireText(wagon.name ?? "Chariot", "Le nom du chariot"), slotBonus: Hero.#requirePositiveInteger(wagon.slotBonus, "Les slots du chariot") })); }
 
   static #createUniqueIds(ids, label) {
     if (!Array.isArray(ids)) {

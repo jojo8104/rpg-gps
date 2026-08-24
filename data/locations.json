@@ -169,6 +169,27 @@
     "qr": { "enabled": false }
   },
   {
+    "id": "evacuation-camp",
+    "name": "Camp royal de la frontière",
+    "type": "camp",
+    "roles": ["royal", "evacuation", "quest"],
+    "source": "scenario",
+    "position": { "latitude": 48.8600, "longitude": 2.3600 },
+    "interactionRadius": 15,
+    "detectionRadius": 60,
+    "visibility": "hidden",
+    "ownerId": "local",
+    "level": 1,
+    "population": 10,
+    "populationCapacity": 15,
+    "defenseSlots": 1,
+    "infrastructure": { "palisade": 1, "depot": 1 },
+    "features": { "battle": true, "capturable": true, "garrison": true },
+    "resources": { "stock": { "food": 10, "wood": 20, "stone": 10 }, "storageCapacity": 12, "infrastructureStorage": 4 },
+    "garrison": { "units": [] },
+    "qr": { "enabled": false }
+  },
+  {
     "id": "stone-quarry",
     "name": "Carrière de pierre",
     "type": "quarry",

@@ -41,6 +41,7 @@ export class Location {
     progression = {},
     durability = null,
     abandonmentCycles = 0,
+    dismantlings = [],
   }) {
     this.id = Location.#requireText(id, "L'identifiant du lieu");
     this.name = Location.#requireText(name, "Le nom du lieu");
@@ -78,6 +79,7 @@ export class Location {
     this.progression = { experience: Location.#requireNonNegativeNumber(progression.experience ?? 0, "L'expérience du lieu") };
     this.durability = durability === null ? null : Location.#createDurability(durability);
     this.abandonmentCycles = Location.#requireNonNegativeNumber(abandonmentCycles, "La durée d'abandon");
+    this.dismantlings = Array.isArray(dismantlings) ? structuredClone(dismantlings) : [];
     if (this.population === 0 && this.state === "active") this.state = "abandoned";
   }
 
@@ -219,6 +221,7 @@ export class Location {
       features: { ...this.features }, resources: Location.#copyResources(this.resources), storedItems: this.storedItems.map((item) => ({ ...item })), contentment: this.contentment, capture: { ...this.capture },
       storageSlotCapacity: this.storageSlotCapacity,
       infrastructure: { ...this.infrastructure }, heroIds: [...this.heroIds], garrison: this.garrison.toJSON(),
+      dismantlings: structuredClone(this.dismantlings),
       recruitment: Location.#copyRecruitment(this.recruitment),
       questIds: [...this.questIds], eventIds: [...this.eventIds], interactionIds: [...this.interactionIds], chief: this.chief === null ? null : structuredClone(this.chief),
       qr: { ...this.qr }, statistics: { ...this.statistics }, progression: { ...this.progression }, durability: this.durability === null ? null : { ...this.durability }, abandonmentCycles: this.abandonmentCycles,
