@@ -23,4 +23,16 @@ export class DeviceAlerts {
     oscillator.start(); oscillator.stop(this.audio.currentTime + .3);
     return true;
   }
+
+  reward({ kilometer = false } = {}) {
+    if (!this.audio || this.audio.state !== "running") return false;
+    const start = this.audio.currentTime; const frequencies = kilometer ? [523.25, 659.25, 783.99] : [523.25, 659.25];
+    frequencies.forEach((frequency, index) => {
+      const oscillator = this.audio.createOscillator(); const gain = this.audio.createGain(); const noteStart = start + index * .1;
+      oscillator.type = "sine"; oscillator.frequency.setValueAtTime(frequency, noteStart);
+      gain.gain.setValueAtTime(.0001, noteStart); gain.gain.exponentialRampToValueAtTime(.11, noteStart + .018); gain.gain.exponentialRampToValueAtTime(.0001, noteStart + .24);
+      oscillator.connect(gain).connect(this.audio.destination); oscillator.start(noteStart); oscillator.stop(noteStart + .25);
+    });
+    return true;
+  }
 }

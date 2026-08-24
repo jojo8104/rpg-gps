@@ -1,3 +1,6 @@
+import { AutonomousGroup } from "./autonomous-group.js";
+import { SetupPlacementService } from "./setup-placement-service.js";
+
 /** Applique les effets déclaratifs d'événements sans dépendre de l'interface. */
 export class ScenarioEffectResolver {
   apply(event, game) {
@@ -49,6 +52,34 @@ export class ScenarioEffectResolver {
         const hero = ScenarioEffectResolver.#heroFor(effect, game); const resource = ScenarioEffectResolver.#requireText(effect.resource, "La ressource"); const amount = ScenarioEffectResolver.#positiveInteger(effect.amount, "La récompense");
         hero.addResource(resource, amount); const entry = { type: "hero_resource_granted", heroId: hero.id, resource, amount, eventId: game.activeScenarioEventId };
         game.eventLog.push(entry); return entry;
+      }
+      case "startEvacuation": {
+        const source = game.getLocationForScenarioSlot(effect.sourceLocationSlotId); const hero = ScenarioEffectResolver.#heroFor(effect, game); const durationMs = ScenarioEffectResolver.#positiveInteger(effect.durationMinutes, "La durée d'évacuation") * 60_000;
+        const id = ScenarioEffectResolver.#requireText(effect.evacuationId, "L'évacuation"); const startedAt = game.now();
+        game.evacuationStates[id] = { id, sourceLocationId: source.id, startedAt, expiresAt: startedAt + durationMs, initialPopulation: source.population ?? 0, initialResources: structuredClone(source.resources.stock), initialHeroResources: structuredClone(hero.resources), initialStructures: Object.values(source.infrastructure).reduce((sum, level) => sum + level, 0), departedAt: null };
+        const entry = { type: "evacuation_started", evacuationId: id, sourceLocationId: source.id, expiresAt: startedAt + durationMs, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
+      }
+      case "spawnAttackGroup": {
+        const target = game.getLocationForScenarioSlot(effect.targetLocationSlotId); const distance = Number(effect.originDistanceMeters ?? 100);
+        const origin = new SetupPlacementService().findPosition({ playArea: game.setup.playArea, origin: target.position, preferredDistance: distance, preferredDirectionDegrees: Number(effect.directionDegrees ?? 180), occupied: game.locations.map((location) => location.position), minimumSpacing: Math.min(30, distance / 3) });
+        const group = new AutonomousGroup({ id: ScenarioEffectResolver.#requireText(effect.groupId, "Le groupe autonome"), type: "army", owner: { kind: "faction", id: effect.factionId ?? "chaos" }, factionId: effect.factionId ?? "chaos", position: origin, behavior: "aggressive", mission: { kind: "attack_location", targetId: target.id, speedMetersPerSecond: Number(effect.speedMetersPerSecond ?? .15) }, army: { units: [{ id: `${effect.groupId}-unit`, ownerPlayerId: effect.factionId ?? "chaos", typeId: effect.unitTypeId ?? "militia", quantity: Number(effect.quantity ?? 5), rank: "soldier" }] } });
+        game.addAutonomousGroup(group); const entry = { type: "attack_group_spawned", groupId: group.id, targetLocationId: target.id, origin, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
+      }
+      case "assignWagons": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game); const result = game.assignWagons({ playerId: hero.playerId, heroId: hero.id, wagons: effect.wagons });
+        return { type: "wagons_assigned", heroId: hero.id, success: result.success, addedSlots: result.success ? result.slotCapacity - hero.baseBagSlotCount : 0, eventId: game.activeScenarioEventId };
+      }
+      case "completeEvacuation": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game); const destination = game.getLocationForScenarioSlot(effect.destinationLocationSlotId); const state = game.evacuationStates[effect.evacuationId];
+        if (!state) throw new RangeError("L'évacuation n'existe pas.");
+        const packages = hero.carriedLoot.filter((item) => item.itemId === "population" && item.metadata?.originLocationId === state.sourceLocationId); const people = packages.reduce((sum, item) => sum + item.quantity, 0);
+        hero.carriedLoot = hero.carriedLoot.filter((item) => !packages.includes(item)); if (people > 0) destination.addPopulation(people);
+        const unloadedResources = {}; Object.entries(hero.resources).forEach(([resource, amount]) => { const evacuated = Math.max(0, Math.floor(amount - (state.initialHeroResources?.[resource] ?? 0))); if (evacuated <= 0) return; const deposited = destination.depositResource(resource, evacuated); if (deposited > 0) { hero.spendResource(resource, deposited); unloadedResources[resource] = deposited; } });
+        const initialResourceTotal = Object.entries(state.initialResources).filter(([id]) => id !== "population").reduce((sum, [, amount]) => sum + amount, 0); const remainingResourceTotal = Object.entries(state.resourcesRemaining ?? {}).filter(([id]) => id !== "population").reduce((sum, [, amount]) => sum + amount, 0);
+        const structuresSaved = Math.max(0, state.initialStructures - (state.structuresRemaining ?? state.initialStructures)); const onTime = game.now() <= state.expiresAt ? 1 : 0;
+        const result = game.resultEvaluationService.evaluate({ metrics: [{ id: "population", value: people, target: Math.max(1, state.initialPopulation), weight: 4 }, { id: "resources", value: Math.max(0, initialResourceTotal - remainingResourceTotal), target: Math.max(1, initialResourceTotal), weight: 2 }, { id: "structures", value: structuresSaved, target: Math.max(1, state.initialStructures), weight: 2 }, { id: "deadline", value: onTime, target: 1, weight: 2 }] });
+        state.completedAt = game.now(); state.result = result; state.peopleDelivered = people;
+        const entry = { type: "evacuation_completed", evacuationId: state.id, destinationLocationId: destination.id, people, unloadedResources, result, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
       }
       default:
         throw new RangeError(`Le type d'effet "${effect.type}" n'est pas encore pris en charge.`);

@@ -5,13 +5,14 @@ import { HeroClassFeatureService } from "../app/js/core/hero-class-feature-servi
 import { Game } from "../app/js/core/game.js";
 
 const classes = [
-  { id: "ranger", features: { detectionMultiplier: 1.5, informationLevelBonus: 1, ignoresAmbushPenalty: true } },
+  { id: "ranger", features: { detectionMultiplier: 1.5, concealmentMultiplier: .65, informationLevelBonus: 1, ignoresAmbushPenalty: true } },
   { id: "mage", features: { divinationRadius: 500, astralReachBonus: 100, astralDurationMs: 300000, healingAuraRadius: 100, healingAuraPerCycle: 1 } },
 ];
 
 test("l'éclaireur détecte plus loin, lit mieux et ignore le délai d'embuscade", () => {
   const service = new HeroClassFeatureService({ classDefinitions: classes }); const hero = new Hero({ id: "r", playerId: "p", name: "R", classId: "ranger" });
-  assert.equal(service.detectionRadius(hero, 100), 150); assert.equal(service.informationLevel(hero, 2), 3); assert.equal(service.ambushRevealDelay(hero, 1500), 0);
+  assert.equal(service.detectionRadius(hero, 100), 150); assert.equal(service.detectionMultiplier(hero), 1.5); assert.equal(service.signatureMultiplier(hero), .65); assert.equal(service.informationLevel(hero, 2), 3); assert.equal(service.ambushRevealDelay(hero, 1500), 0);
+  hero.classFeatureState.gpsConcealmentMultiplier = .6; assert.equal(service.signatureMultiplier(hero), .39);
 });
 
 test("le voyage astral est ciblé, temporaire et sérialisable", () => {

@@ -6,6 +6,8 @@ export class HeroClassFeatureService {
   }
 
   featuresFor(hero) { return structuredClone(this.classes.get(hero?.classId)?.features ?? {}); }
+  detectionMultiplier(hero) { return this.featuresFor(hero).detectionMultiplier ?? 1; }
+  signatureMultiplier(hero) { return (this.featuresFor(hero).concealmentMultiplier ?? 1) * (hero?.classFeatureState?.gpsConcealmentMultiplier ?? 1); }
   detectionRadius(hero, baseRadius) { return baseRadius * (this.featuresFor(hero).detectionMultiplier ?? 1); }
   informationLevel(hero, knownLevel) { return Math.min(3, Math.max(0, knownLevel + (this.featuresFor(hero).informationLevelBonus ?? 0))); }
   ambushRevealDelay(hero, baseDelay) { return this.featuresFor(hero).ignoresAmbushPenalty === true ? 0 : baseDelay; }

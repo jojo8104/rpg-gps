@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formationProjectileOffsets, militiaFormationRows } from "../app/js/ui/battle-view.js";
+import { formationProjectileOffsets, livingSoldierHealth, militiaFormationRows } from "../app/js/ui/battle-view.js";
+
+test("le rendu conserve chaque soldat vivant et retire uniquement les morts", () => {
+  assert.deepEqual(livingSoldierHealth({ soldierHealth: [10, 6, 0, 2, 0] }), [10, 6, 2]);
+});
 
 test("la formation des miliciens respecte les onze premières répartitions", () => {
   const expected = [[1], [2], [3], [2, 2], [1, 2, 2], [3, 3], [1, 3, 3], [4, 4], [3, 3, 3], [1, 3, 3, 3], [1, 5, 5]];

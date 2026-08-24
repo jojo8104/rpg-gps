@@ -35,6 +35,8 @@ import { ScenarioRuntimeBuilder } from "./scenario-runtime-builder.js";
 import { HeroClassFeatureService } from "./hero-class-feature-service.js";
 import { distanceMeters } from "./geo.js";
 import { HeroTravelExperienceService } from "./hero-travel-experience-service.js";
+import { LocationDismantlingService } from "./location-dismantling-service.js";
+import { ResultEvaluationService } from "./result-evaluation-service.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
 export class Game {
@@ -59,6 +61,9 @@ export class Game {
     this.locationChiefService = new LocationChiefService();
     this.chiefTradeService = new ChiefTradeService();
     this.marketService = new MarketService();
+    this.locationDismantlingService = new LocationDismantlingService();
+    this.resultEvaluationService = new ResultEvaluationService();
+    this.evacuationStates = {};
     this.engagementService = new EngagementService({ engagementRadiusMeters: this.setup.rules.engagementRadiusMeters, fleeConfirmations: this.setup.rules.fleeConfirmations });
     this.scenario = scenario === null ? null : (scenario instanceof Scenario ? scenario : new Scenario(scenario));
     if (this.scenario !== null && this.scenario.id !== this.setup.scenarioId) throw new RangeError("Le scénario ne correspond pas au GameSetup.");
@@ -184,11 +189,12 @@ export class Game {
   update() {
     if (this.status === "started" && this.getRemainingTimeMilliseconds() === 0) this.finish("time_limit");
     if (this.status === "started") this.advanceAutonomousGroups(this.now());
+    if (this.status === "started") this.locations.forEach((location) => this.locationDismantlingService.completeReady(location, this.now()).forEach((result) => this.eventLog.push({ type: "location_structure_dismantled", locationId: location.id, ...result, at: this.now() })));
     this.cleanupDynamicSites();
   }
 
   advanceAutonomousGroups(now = this.now()) {
-    const targets = this.heroes.filter((hero) => hero.state === "active" && hero.position !== null).map((hero) => ({ id: hero.id, kind: "hero", playerId: hero.playerId, position: hero.position, hostile: true, concealmentMultiplier: (this.heroClassFeatureService.featuresFor(hero).concealmentMultiplier ?? 1) * (hero.classFeatureState.gpsConcealmentMultiplier ?? 1) }));
+    const targets = this.heroes.filter((hero) => hero.state === "active" && hero.position !== null).map((hero) => ({ id: hero.id, kind: "hero", playerId: hero.playerId, position: hero.position, hostile: true, concealmentMultiplier: this.heroClassFeatureService.signatureMultiplier(hero) }));
     const result = this.autonomousGroupService.advance({ groups: this.autonomousGroups, locations: this.locations, targets, playArea: this.setup.playArea, now, speedFor: (group) => this.#autonomousGroupSpeed(group) });
     this.autonomousGroupTraces.push(...result.traces);
     this.autonomousGroupTraces = this.autonomousGroupTraces.filter((trace) => trace.getScore(now) > 0);
@@ -527,8 +533,25 @@ export class Game {
     if (!this.locationAccessPolicy.can(player.id, location, "manageReserves")) return { success: false, reason: "location_not_owned" };
     const amount = Math.min(5, Number(people), location.resources.stock.population ?? 0); if (amount <= 0) return { success: false, reason: "empty_stock" };
     const freeSlots = hero.bagSlotCount - this.inventoryService.getUsedHeroBagSlots(hero); if (freeSlots < 1) return { success: false, reason: "insufficient_slots" };
-    location.resources.stock.population -= amount; hero.addCarriedLoot([{ id: this.idGenerator("population"), itemId: "population", quantity: amount, valuePerUnit: 1 }]);
+    location.resources.stock.population -= amount; hero.addCarriedLoot([{ id: this.idGenerator("population"), itemId: "population", quantity: amount, valuePerUnit: 1, metadata: { originLocationId: location.id } }]);
     return { success: true, people: amount };
+  }
+
+  assignWagons({ playerId, heroId, wagons }) {
+    const hero = this.getHero(heroId); if (hero === null || hero.playerId !== playerId || !Array.isArray(wagons)) return { success: false, reason: "invalid_request" };
+    const ids = new Set(hero.wagons.map((wagon) => wagon.id));
+    for (const wagon of wagons) { if (!wagon?.id || ids.has(wagon.id) || !Number.isInteger(wagon.slotBonus) || wagon.slotBonus <= 0) return { success: false, reason: "invalid_wagon" }; ids.add(wagon.id); hero.wagons.push({ id: wagon.id, name: wagon.name ?? "Chariot", slotBonus: wagon.slotBonus }); }
+    this.eventLog.push({ type: "hero_wagons_assigned", playerId, heroId, wagonIds: wagons.map((wagon) => wagon.id), addedSlots: wagons.reduce((sum, wagon) => sum + wagon.slotBonus, 0), at: this.now() });
+    return { success: true, wagons: hero.wagons.map((wagon) => ({ ...wagon })), slotCapacity: hero.bagSlotCount };
+  }
+
+  startLocationDismantling({ playerId, heroId, locationId, structureId }) {
+    const hero = this.getHero(heroId); const location = this.getLocation(locationId);
+    if (hero === null || location === null || hero.playerId !== playerId || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
+    if (!this.locationAccessPolicy.can(playerId, location, "manageReserves")) return { success: false, reason: "location_not_owned" };
+    const result = this.locationDismantlingService.start(location, structureId, this.now());
+    if (result.success) this.eventLog.push({ type: "location_dismantling_started", locationId, heroId, structureId, completesAt: result.task.deadline.expiresAt, at: this.now() });
+    return result;
   }
 
   settlePopulationPackage({ playerId, heroId, locationId, packageId }) {
@@ -1050,7 +1073,7 @@ export class Game {
     }
     const hero = this.getHero(event.target?.id);
     if (hero === null || hero.state !== "active" || this.#isHeroBusy(hero.id)) return null;
-    return this.createBattle({ teamParticipants: [{ id: "heroes", heroIds: [hero.id] }, { id: autonomousTeamId, heroIds: [], autonomousGroupId: group.id }], position: group.position, config: event.type === "autonomous_group_ambush_attack_requested" ? { ambushTeamId: autonomousTeamId } : {} });
+    return this.createBattle({ teamParticipants: [{ id: "heroes", heroIds: [hero.id] }, { id: autonomousTeamId, heroIds: [], autonomousGroupId: group.id }], position: group.position, sourceLocationId: group.mission?.kind === "attack_location" ? group.mission.targetId : null, config: event.type === "autonomous_group_ambush_attack_requested" ? { ambushTeamId: autonomousTeamId } : {} });
   }
 
   #settleAutonomousBattleParticipants(battle) {
