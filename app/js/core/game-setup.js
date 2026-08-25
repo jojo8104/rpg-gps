@@ -115,6 +115,7 @@ export class GameSetup {
       autonomousReactionMinimumSeconds: GameSetup.#positiveIntegerOrDefault(rules.autonomousReactionMinimumSeconds, 15, "Le délai minimal de réaction aux groupes autonomes"),
       fleeConfirmations: GameSetup.#positiveIntegerOrDefault(rules.fleeConfirmations, 2, "Les confirmations de fuite"),
       pursuitCooldownMinutes: GameSetup.#positiveIntegerOrDefault(rules.pursuitCooldownMinutes, 10, "Le cooldown de poursuite"),
+      travelPaceMode: GameSetup.#travelPaceMode(rules.travelPaceMode ?? "calm"),
     };
   }
 
@@ -230,4 +231,5 @@ export class GameSetup {
   static #positiveIntegerOrDefault(value, fallback, label) { const result = value ?? fallback; if (!Number.isInteger(result) || result <= 0) throw new RangeError(`${label} doit être un entier positif.`); return result; }
   static #optionalPositiveInteger(value, label) { if (value === undefined || value === null) return null; return GameSetup.#positiveIntegerOrDefault(value, 1, label); }
   static #moraleMode(value) { if (!["casual", "expert"].includes(value)) throw new RangeError("Le mode de moral est invalide."); return value; }
+  static #travelPaceMode(value) { if (!["calm", "sport"].includes(value)) throw new RangeError("Le rythme de déplacement doit être calm ou sport."); return value; }
 }

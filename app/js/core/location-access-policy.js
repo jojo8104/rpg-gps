@@ -8,6 +8,7 @@ const ACTION_RELATIONS = Object.freeze({
   collect: new Set(["owned", "allied", "neutral"]),
   deposit: new Set(["owned", "allied", "neutral"]),
   manageReserves: new Set(["owned"]),
+  dismantle: new Set(["owned"]),
   trade: new Set(["owned", "allied", "neutral"]),
   talkChief: new Set(["owned", "allied", "neutral"]),
   garrison: new Set(["owned", "neutral"]),
@@ -18,14 +19,16 @@ const ACTION_RELATIONS = Object.freeze({
 
 /** Règle métier unique pour les relations et interactions avec les lieux. */
 export class LocationAccessPolicy {
-  constructor({ participants = [] } = {}) {
+  constructor({ participants = [], alliedControllerIds = ["kingdom"] } = {}) {
     this.teamByPlayerId = new Map(participants.map(({ playerId, teamId = null }) => [playerId, teamId]));
+    this.alliedControllerIds = new Set(alliedControllerIds);
   }
 
   getRelation(playerId, location) {
     const controllerId = location.controllerId ?? location.ownerId;
     if (controllerId === null) return LOCATION_RELATIONS.NEUTRAL;
     if (controllerId === playerId) return LOCATION_RELATIONS.OWNED;
+    if (this.alliedControllerIds.has(controllerId)) return LOCATION_RELATIONS.ALLIED;
     const playerTeam = this.teamByPlayerId.get(playerId) ?? null;
     const controllerTeam = this.teamByPlayerId.get(controllerId) ?? null;
     return playerTeam !== null && playerTeam === controllerTeam ? LOCATION_RELATIONS.ALLIED : LOCATION_RELATIONS.ENEMY;
@@ -40,7 +43,7 @@ export class LocationAccessPolicy {
     const allowedRelations = ACTION_RELATIONS[action];
     if (allowedRelations === undefined) return false;
     if (!allowedRelations.has(this.getRelation(playerId, location))) return false;
-    if ((location.population ?? 1) === 0 && !["inspect", "manageReserves", "attack"].includes(action)) return false;
+    if ((location.population ?? 1) === 0 && !["inspect", "manageReserves", "dismantle", "attack"].includes(action)) return false;
     if (action === "recruit") return location.features.recruitment === true;
     if (action === "reinforce") return location.features.recruitment === true;
     if (action === "heal") return location.features.healing === true;

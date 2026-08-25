@@ -13,6 +13,7 @@ test("la relation au lieu distingue possession, alliance, neutralité et ennemi"
   assert.equal(policy.getRelation("p1", location("p2")), LOCATION_RELATIONS.ALLIED);
   assert.equal(policy.getRelation("p1", location(null)), LOCATION_RELATIONS.NEUTRAL);
   assert.equal(policy.getRelation("p1", location("p3")), LOCATION_RELATIONS.ENEMY);
+  assert.equal(policy.getRelation("p1", location("kingdom")), LOCATION_RELATIONS.ALLIED);
 });
 
 test("seuls le propriétaire et ses alliés défendent une localisation", () => {
@@ -49,6 +50,22 @@ test("les réserves sont gérées uniquement par le propriétaire et le commerce
   const chief = location(null); chief.interactionIds.push("local-chief-trade"); chief.statistics.chiefTradeRemaining = 2;
   assert.equal(policy.can("p1", chief, "trade"), true); chief.statistics.chiefTradeRemaining = 0;
   assert.equal(policy.can("p1", chief, "trade"), false);
+});
+
+test("le démantèlement ordinaire est réservé au propriétaire", () => {
+  assert.equal(policy.can("p1", location("p1"), "dismantle"), true);
+  assert.equal(policy.can("p1", location("p2"), "dismantle"), false);
+  assert.equal(policy.can("p1", location(null), "dismantle"), false);
+  assert.equal(policy.can("p1", location("p3"), "dismantle"), false);
+  const emptyAllied = location("p2"); emptyAllied.population = 0;
+  assert.equal(policy.can("p1", emptyAllied, "dismantle"), false);
+});
+
+test("un lieu royal est allié mais ne peut être ni attaqué ni administré", () => {
+  const royal = location("kingdom", { battle: true, capturable: true });
+  assert.equal(policy.can("p1", royal, "attack"), false);
+  assert.equal(policy.can("p1", royal, "manageReserves"), false);
+  assert.equal(policy.can("p1", royal, "dismantle"), false);
 });
 
 test("un lieu dépeuplé reste attaquable ou capturable", () => {

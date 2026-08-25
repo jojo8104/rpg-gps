@@ -145,8 +145,8 @@ export class MapView {
     const maximum = Math.max(1, ...cells.map((cell) => cell.activity));
     cells.forEach((cell) => {
       const intensity = cell.activity / maximum;
-      const color = intensity === 0 ? "#5b7560" : intensity < .34 ? "#59b9ff" : intensity < .67 ? "#f6d971" : "#ff635e";
-      L.rectangle(cell.bounds.map(asLatLng), { color, weight: 1, opacity: .7, fillColor: color, fillOpacity: intensity === 0 ? .035 : .15 + intensity * .45, interactive: false }).addTo(this.heatmap);
+      const signal = cell.questSignal ?? 0; const color = signal > 0 ? (signal >= .99 ? "#d06cff" : "#7159d9") : intensity === 0 ? "#5b7560" : intensity < .34 ? "#59b9ff" : intensity < .67 ? "#f6d971" : "#ff635e";
+      L.rectangle(cell.bounds.map(asLatLng), { color, weight: signal > 0 ? 2 : 1, opacity: .7, fillColor: color, fillOpacity: signal > 0 ? .18 + signal * .42 : intensity === 0 ? .035 : .15 + intensity * .45, interactive: false }).addTo(this.heatmap);
       if (cell.visits > 0) L.marker(asLatLng(cell.center), { interactive: false, icon: L.divIcon({ className: "heatmap-count", html: String(cell.visits), iconSize: [22, 18], iconAnchor: [11, 9] }) }).addTo(this.heatmap);
     });
   }

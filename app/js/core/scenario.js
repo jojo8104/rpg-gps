@@ -45,7 +45,8 @@ export class Scenario {
       const objectives = Scenario.#createObjectives(phase.objectives ?? []);
       const eventIds = Scenario.#createTextList(phase.eventIds ?? [], "Les événements de phase");
       const transitions = Scenario.#createTransitions(phase.transitions ?? []);
-      return { id, title: Scenario.#requireText(phase.title, "Le titre de phase"), description: Scenario.#requireText(phase.description, "La description de phase"), type: Scenario.#requireText(phase.type ?? "main", "Le type de phase"), objectives, eventIds, transitions };
+      const failure = Scenario.#createFailure(phase.failure);
+      return { id, title: Scenario.#requireText(phase.title, "Le titre de phase"), description: Scenario.#requireText(phase.description, "La description de phase"), type: Scenario.#requireText(phase.type ?? "main", "Le type de phase"), objectives, eventIds, transitions, failure };
     });
   }
 
@@ -95,6 +96,16 @@ export class Scenario {
       if (transition.condition !== undefined) result.condition = Scenario.#requireText(transition.condition, "La condition de transition");
       return result;
     });
+  }
+
+  static #createFailure(failure) {
+    if (failure === undefined) return { policy: "stop", nextPhase: null, eventId: null };
+    Scenario.#requireObject(failure, "La règle d'échec");
+    const policy = Scenario.#requireText(failure.policy ?? "stop", "La politique d'échec");
+    if (!["stop", "continue", "branch"].includes(policy)) throw new RangeError("La politique d'échec est invalide.");
+    const nextPhase = failure.nextPhase === undefined ? null : Scenario.#requireText(failure.nextPhase, "La phase après échec");
+    if (policy === "branch" && nextPhase === null) throw new RangeError("Un embranchement d'échec exige une phase cible.");
+    return { policy, nextPhase, eventId: failure.eventId === undefined ? null : Scenario.#requireText(failure.eventId, "L'événement d'échec") };
   }
 
   static #createEvents(events) {
@@ -150,6 +161,18 @@ export class ScenarioState {
     const objective = this.getObjective(objectiveId);
     if (objective === null || objective.state !== "active") return false;
     objective.state = "completed";
+    return true;
+  }
+
+  failCurrentPhase(scenario, { reason, nextPhaseId = null, at = Date.now() }) {
+    const state = this.getCurrentPhaseState();
+    if (state.status !== "active") return false;
+    state.status = "failed"; state.failureReason = reason; state.failedAt = at;
+    state.objectives.forEach((objective) => { if (objective.state === "active") objective.state = "failed"; });
+    if (nextPhaseId === null) return true;
+    const next = this.phaseStates[nextPhaseId];
+    if (scenario.getPhase(nextPhaseId) === null || next?.status !== "locked") return false;
+    next.status = "active"; next.objectives.forEach((objective) => { objective.state = "active"; }); this.currentPhaseId = nextPhaseId;
     return true;
   }
 

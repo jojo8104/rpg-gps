@@ -31,7 +31,7 @@ export function buildLocationIntel({ location, snapshot, knowledgeLevel, owner =
     stock,
     storageCapacity: known(3, location.resources.storageCapacity),
     presences,
-    defense: { slots: known(2, location.defenseSlots), occupiedSlots: known(2, occupiedSlots), units: knowledgeLevel >= 2 ? units : [], reinforcements: knowledgeLevel >= 2 ? (snapshot.defense?.reinforcements ?? []) : [], defenders: knowledgeLevel >= 2 ? [...units, ...(snapshot.defense?.reinforcements ?? [])] : [], structures: knowledgeLevel >= 2 ? Object.entries(location.infrastructure).map(([type, level]) => ({ type, level: known(3, level) })) : [] },
+    defense: { slots: known(2, location.defenseSlots), occupiedSlots: known(2, occupiedSlots), units: knowledgeLevel >= 2 ? units : [], reinforcements: knowledgeLevel >= 2 ? (snapshot.defense?.reinforcements ?? []) : [], defenders: knowledgeLevel >= 2 ? [...units, ...(snapshot.defense?.reinforcements ?? [])] : [], structures: knowledgeLevel >= 2 ? Object.entries(location.infrastructure).map(([type, level]) => { const task = location.dismantlings.find((entry) => entry.structureId === type); return { id: type, type, level: known(3, level), dismantling: task ? { completesAt: task.deadline.expiresAt } : null, canDismantle: snapshot.canDismantle === true && !task }; }) : [] },
     dismantlings: knowledgeLevel >= 2 ? structuredClone(location.dismantlings) : [],
     description,
   };

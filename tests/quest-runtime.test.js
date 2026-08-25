@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { Game } from "../app/js/core/game.js";
+import { Scenario, ScenarioState } from "../app/js/core/scenario.js";
 
 const playArea = { id: "area", name: "Zone", polygon: [{ latitude: 0, longitude: 0 }, { latitude: 0, longitude: 1 }, { latitude: 1, longitude: 0 }] };
 const setup = {
@@ -105,4 +106,10 @@ test("les déclencheurs de trace et de victoire restent indépendants de l'inter
   assert.equal(game.dispatchQuestEvent({ type: "TraceInspected", traceId: "une-autre-trace" }), null);
   assert.equal(game.dispatchQuestEvent({ type: "TraceInspected", traceId: "trace-royale" }).nextPhaseId, "battle");
   assert.equal(game.dispatchQuestEvent({ type: "BattleWon", locationId: "camp-real" }).completedObjectiveIds[0], "victory");
+});
+
+test("une quête abandonnée peut échouer puis suivre un embranchement déclaré", () => {
+  const definition = new Scenario({ id: "failure", name: "Échec", intro: "Test", initialPhaseId: "mission", phases: [{ id: "mission", title: "Mission", description: "Agir", objectives: [{ id: "act", text: "Agir" }], transitions: [], failure: { policy: "branch", nextPhase: "aftermath" } }, { id: "aftermath", title: "Conséquences", description: "Sans récompense", objectives: [], transitions: [] }] });
+  const state = new ScenarioState(definition); assert.equal(state.failCurrentPhase(definition, { reason: "abandoned", nextPhaseId: "aftermath", at: 10 }), true);
+  assert.equal(state.phaseStates.mission.status, "failed"); assert.equal(state.phaseStates.mission.objectives[0].state, "failed"); assert.equal(state.currentPhaseId, "aftermath");
 });

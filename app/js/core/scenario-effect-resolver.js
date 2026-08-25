@@ -1,5 +1,6 @@
 import { AutonomousGroup } from "./autonomous-group.js";
 import { SetupPlacementService } from "./setup-placement-service.js";
+import { QuestDeadlineService } from "./quest-deadline-service.js";
 
 /** Applique les effets déclaratifs d'événements sans dépendre de l'interface. */
 export class ScenarioEffectResolver {
@@ -48,21 +49,30 @@ export class ScenarioEffectResolver {
         const entry = { type: "quest_item_removed", heroId: hero.id, itemId, eventId: game.activeScenarioEventId };
         game.eventLog.push(entry); return entry;
       }
+      case "depositCarriedItem": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game); const destination = game.getLocationForScenarioSlot(effect.destinationLocationSlotId); const itemId = ScenarioEffectResolver.#requireText(effect.itemId, "L'objet déposé");
+        const index = hero.carriedLoot.findIndex((entry) => entry.itemId === itemId); const item = index < 0 ? null : hero.carriedLoot.splice(index, 1)[0];
+        if (item !== null) destination.depositItem(item);
+        const entry = { type: "quest_item_deposited", heroId: hero.id, itemId, destinationLocationId: destination.id, deposited: item !== null, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
+      }
       case "grantHeroResource": {
         const hero = ScenarioEffectResolver.#heroFor(effect, game); const resource = ScenarioEffectResolver.#requireText(effect.resource, "La ressource"); const amount = ScenarioEffectResolver.#positiveInteger(effect.amount, "La récompense");
         hero.addResource(resource, amount); const entry = { type: "hero_resource_granted", heroId: hero.id, resource, amount, eventId: game.activeScenarioEventId };
         game.eventLog.push(entry); return entry;
       }
       case "startEvacuation": {
-        const source = game.getLocationForScenarioSlot(effect.sourceLocationSlotId); const hero = ScenarioEffectResolver.#heroFor(effect, game); const durationMs = ScenarioEffectResolver.#positiveInteger(effect.durationMinutes, "La durée d'évacuation") * 60_000;
+        const source = game.getLocationForScenarioSlot(effect.sourceLocationSlotId); const hero = ScenarioEffectResolver.#heroFor(effect, game);
+        const timing = effect.timing ? new QuestDeadlineService().calculateMinutes({ origin: game.getLocationForScenarioSlot(effect.timing.originLocationSlotId).position, destination: source.position, paceMode: game.setup.rules.travelPaceMode, baseMinutes: effect.timing.baseMinutes ?? 1, calmMetersPerMinute: effect.timing.calmMetersPerMinute ?? 60, sportMetersPerMinute: effect.timing.sportMetersPerMinute ?? 100, minimumMinutes: effect.timing.minimumMinutes ?? 1 }) : { minutes: ScenarioEffectResolver.#positiveInteger(effect.durationMinutes, "La durée d'évacuation"), distanceMeters: null, paceMode: game.setup.rules.travelPaceMode };
+        const durationMs = timing.minutes * 60_000;
         const id = ScenarioEffectResolver.#requireText(effect.evacuationId, "L'évacuation"); const startedAt = game.now();
-        game.evacuationStates[id] = { id, sourceLocationId: source.id, startedAt, expiresAt: startedAt + durationMs, initialPopulation: source.population ?? 0, initialResources: structuredClone(source.resources.stock), initialHeroResources: structuredClone(hero.resources), initialStructures: Object.values(source.infrastructure).reduce((sum, level) => sum + level, 0), departedAt: null };
-        const entry = { type: "evacuation_started", evacuationId: id, sourceLocationId: source.id, expiresAt: startedAt + durationMs, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
+        game.evacuationStates[id] = { id, playerId: hero.playerId, sourceLocationId: source.id, startedAt, expiresAt: startedAt + durationMs, initialPopulation: source.population ?? 0, initialResources: structuredClone(source.resources.stock), initialHeroResources: structuredClone(hero.resources), initialStructures: Object.values(source.infrastructure).reduce((sum, level) => sum + level, 0), departedAt: null };
+        const entry = { type: "evacuation_started", evacuationId: id, sourceLocationId: source.id, expiresAt: startedAt + durationMs, durationMinutes: timing.minutes, distanceMeters: timing.distanceMeters, paceMode: timing.paceMode, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
       }
       case "spawnAttackGroup": {
         const target = game.getLocationForScenarioSlot(effect.targetLocationSlotId); const distance = Number(effect.originDistanceMeters ?? 100);
         const origin = new SetupPlacementService().findPosition({ playArea: game.setup.playArea, origin: target.position, preferredDistance: distance, preferredDirectionDegrees: Number(effect.directionDegrees ?? 180), occupied: game.locations.map((location) => location.position), minimumSpacing: Math.min(30, distance / 3) });
-        const group = new AutonomousGroup({ id: ScenarioEffectResolver.#requireText(effect.groupId, "Le groupe autonome"), type: "army", owner: { kind: "faction", id: effect.factionId ?? "chaos" }, factionId: effect.factionId ?? "chaos", position: origin, behavior: "aggressive", mission: { kind: "attack_location", targetId: target.id, speedMetersPerSecond: Number(effect.speedMetersPerSecond ?? .15) }, army: { units: [{ id: `${effect.groupId}-unit`, ownerPlayerId: effect.factionId ?? "chaos", typeId: effect.unitTypeId ?? "militia", quantity: Number(effect.quantity ?? 5), rank: "soldier" }] } });
+        const mission = effect.stationary === true ? null : { kind: "attack_location", targetId: target.id, speedMetersPerSecond: Number(effect.speedMetersPerSecond ?? .15) };
+        const group = new AutonomousGroup({ id: ScenarioEffectResolver.#requireText(effect.groupId, "Le groupe autonome"), type: "army", owner: { kind: "faction", id: effect.factionId ?? "chaos" }, factionId: effect.factionId ?? "chaos", position: origin, behavior: "aggressive", mission, army: { units: [{ id: `${effect.groupId}-unit`, ownerPlayerId: effect.factionId ?? "chaos", typeId: effect.unitTypeId ?? "militia", quantity: Number(effect.quantity ?? 5), rank: "soldier" }] } });
         game.addAutonomousGroup(group); const entry = { type: "attack_group_spawned", groupId: group.id, targetLocationId: target.id, origin, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
       }
       case "assignWagons": {

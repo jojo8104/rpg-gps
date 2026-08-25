@@ -190,6 +190,7 @@ export class Game {
     if (this.status === "started" && this.getRemainingTimeMilliseconds() === 0) this.finish("time_limit");
     if (this.status === "started") this.advanceAutonomousGroups(this.now());
     if (this.status === "started") this.locations.forEach((location) => this.locationDismantlingService.completeReady(location, this.now()).forEach((result) => this.eventLog.push({ type: "location_structure_dismantled", locationId: location.id, ...result, at: this.now() })));
+    if (this.status === "started") this.#failExpiredQuestDeadline();
     this.cleanupDynamicSites();
   }
 
@@ -304,7 +305,19 @@ export class Game {
   getActiveQuest() {
     if (this.scenario === null || this.scenarioState === null) return null;
     const phase = this.scenario.getPhase(this.scenarioState.currentPhaseId);
-    return { ...phase, objectives: this.scenarioState.getCurrentPhaseState().objectives.map((objective) => ({ ...objective })) };
+    const state = this.scenarioState.getCurrentPhaseState();
+    return { ...phase, status: state.status, failureReason: state.failureReason ?? null, objectives: state.objectives.map((objective) => ({ ...objective })) };
+  }
+
+  abandonCurrentQuest() { return this.failCurrentQuest({ reason: "abandoned" }); }
+
+  failCurrentQuest({ reason = "failed" } = {}) {
+    if (this.scenario === null || this.scenarioState === null || this.scenarioState.getCurrentPhaseState().status !== "active") return null;
+    const phase = this.scenario.getPhase(this.scenarioState.currentPhaseId); const failure = phase.failure;
+    const nextPhaseId = failure.policy === "branch" ? failure.nextPhase : failure.policy === "continue" ? (failure.nextPhase ?? phase.transitions[0]?.nextPhase ?? null) : null;
+    const appliedEvent = failure.eventId ? this.triggerScenarioEvent(failure.eventId) : null;
+    if (!this.scenarioState.failCurrentPhase(this.scenario, { reason, nextPhaseId, at: this.now() })) return null;
+    const result = { type: "quest_failed", phaseId: phase.id, reason, policy: failure.policy, nextPhaseId, appliedEvent, at: this.now() }; this.eventLog.push(result); return result;
   }
 
   getQuestInteractionsForLocation(locationId) {
@@ -369,7 +382,9 @@ export class Game {
 
   canPerformLocationAction({ playerId, locationId, action }) {
     const location = this.getLocation(locationId);
-    if (location === null || !this.locationAccessPolicy.can(playerId, location, action)) return false;
+    if (location === null) return false;
+    const temporarilyAuthorized = ["manageReserves", "dismantle"].includes(action) && this.#canOperateEvacuationSource(playerId, locationId);
+    if (!temporarilyAuthorized && !this.locationAccessPolicy.can(playerId, location, action)) return false;
     if (action === "attack" && location.features.capturable === true) return ["battle_required", "can_capture"].includes(this.getLocationCaptureRequirement({ playerId, locationId }).state);
     return true;
   }
@@ -479,7 +494,7 @@ export class Game {
   transferLocationResource({ playerId, heroId, locationId, resourceName, amount, direction }) {
     const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
     if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
-    if (!this.locationAccessPolicy.can(player.id, location, "manageReserves")) return { success: false, reason: "location_not_owned" };
+    if (!this.#canManageLocationReserves(player.id, location.id)) return { success: false, reason: "location_not_owned" };
     const requested = Number(amount);
     if (!Number.isFinite(requested) || requested <= 0) return { success: false, reason: "invalid_amount" };
     let transferred = 0;
@@ -503,7 +518,7 @@ export class Game {
   transferLocationProduction({ playerId, heroId, locationId, resourceName, amount, destination }) {
     const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
     if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
-    if (!this.locationAccessPolicy.can(player.id, location, "manageReserves")) return { success: false, reason: "location_not_owned" };
+    if (!this.#canManageLocationReserves(player.id, location.id)) return { success: false, reason: "location_not_owned" };
     if (!["hero", "universal"].includes(destination)) return { success: false, reason: "invalid_destination" };
     const requested = Number(amount);
     const portable = destination === "hero" ? this.#heroResourceCapacity(hero, resourceName, requested) : requested;
@@ -518,7 +533,7 @@ export class Game {
   preparePopulationPackages({ playerId, heroId, locationId, people }) {
     const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId); const amount = Number(people);
     if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
-    if (!this.locationAccessPolicy.can(player.id, location, "manageReserves")) return { success: false, reason: "location_not_owned" };
+    if (!this.#canManageLocationReserves(player.id, location.id)) return { success: false, reason: "location_not_owned" };
     if (!Number.isInteger(amount) || amount <= 0 || (location.population ?? 0) <= 0) return { success: false, reason: "invalid_population_amount" };
     const requested = Math.min(5, amount, location.population); const stored = location.depositResource("population", requested);
     if (stored <= 0) return { success: false, reason: "universal_storage_full" };
@@ -530,7 +545,7 @@ export class Game {
   takeLocationPopulationPackage({ playerId, heroId, locationId, people = 5 }) {
     const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
     if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
-    if (!this.locationAccessPolicy.can(player.id, location, "manageReserves")) return { success: false, reason: "location_not_owned" };
+    if (!this.#canManageLocationReserves(player.id, location.id)) return { success: false, reason: "location_not_owned" };
     const amount = Math.min(5, Number(people), location.resources.stock.population ?? 0); if (amount <= 0) return { success: false, reason: "empty_stock" };
     const freeSlots = hero.bagSlotCount - this.inventoryService.getUsedHeroBagSlots(hero); if (freeSlots < 1) return { success: false, reason: "insufficient_slots" };
     location.resources.stock.population -= amount; hero.addCarriedLoot([{ id: this.idGenerator("population"), itemId: "population", quantity: amount, valuePerUnit: 1, metadata: { originLocationId: location.id } }]);
@@ -548,7 +563,7 @@ export class Game {
   startLocationDismantling({ playerId, heroId, locationId, structureId }) {
     const hero = this.getHero(heroId); const location = this.getLocation(locationId);
     if (hero === null || location === null || hero.playerId !== playerId || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
-    if (!this.locationAccessPolicy.can(playerId, location, "manageReserves")) return { success: false, reason: "location_not_owned" };
+    if (!this.locationAccessPolicy.can(playerId, location, "dismantle") && !this.#canOperateEvacuationSource(playerId, locationId)) return { success: false, reason: "location_not_owned" };
     const result = this.locationDismantlingService.start(location, structureId, this.now());
     if (result.success) this.eventLog.push({ type: "location_dismantling_started", locationId, heroId, structureId, completesAt: result.task.deadline.expiresAt, at: this.now() });
     return result;
@@ -563,6 +578,23 @@ export class Game {
     const [entry] = hero.carriedLoot.splice(index, 1); location.addPopulation(entry.quantity);
     this.eventLog.push({ type: "population_settled", playerId, heroId, locationId, people: entry.quantity, packageId, at: this.now() });
     return { success: true, people: entry.quantity, population: location.population, storageSlotCapacity: location.storageSlotCapacity };
+  }
+
+  #canManageLocationReserves(playerId, locationId) {
+    const location = this.getLocation(locationId);
+    return location !== null && (this.locationAccessPolicy.can(playerId, location, "manageReserves") || this.#canOperateEvacuationSource(playerId, locationId));
+  }
+
+  #canOperateEvacuationSource(playerId, locationId) {
+    if (this.getPlayer(playerId) === null || this.scenarioState?.currentPhaseId !== "prepare-evacuation") return false;
+    return Object.values(this.evacuationStates).some((state) => state.playerId === playerId && state.sourceLocationId === locationId && state.departedAt === null && state.completedAt === undefined);
+  }
+
+  #failExpiredQuestDeadline() {
+    const expired = Object.values(this.evacuationStates).find((state) => state.completedAt === undefined && state.failedAt === undefined && this.now() >= state.expiresAt);
+    if (!expired) return null;
+    expired.failedAt = this.now();
+    return this.failCurrentQuest({ reason: "deadline_expired" });
   }
 
   equipHeroItem({ playerId, heroId, packageId, slot = null }) {
