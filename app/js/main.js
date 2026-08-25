@@ -161,9 +161,10 @@ function rangesFor(location) { const base = baseRangesFor(location); return { in
 function resolveLocationEnemy({ location }) { return location.features.battle && game.getLocationRelation("local", location.id) === "enemy" ? { name: location.ownerId === "chaos" ? "Créatures du Chaos" : "Brigands", danger: 2, aggressive: false } : null; }
 function radiusFor(location) { return rangesFor(location).interactionRadius; }
 function isLocationEnabled(location) {
+  if (location.id === "evacuation-camp" && !game?.getPlayer("local")?.knowsLocation(location.id)) return false;
   if (location.id === "prospector-battlefield") {
     const phaseId = game?.scenarioState?.currentPhaseId;
-    if (!["prospectors-battlefield", "free-gold-mine", "return-to-capital", "prologue-complete"].includes(phaseId)) return false;
+    if (!["prospectors-battlefield", "free-gold-mine", "rescue-mine-geologist", "return-geologist-to-camp", "return-to-capital", "prologue-complete"].includes(phaseId)) return false;
   }
   const binding = game?.scenarioLocationBindings.find((candidate) => candidate.locationId === location.id);
   const placement = binding ? game.scenarioRuntime?.placements[binding.locationSlotId] : null;
@@ -202,7 +203,6 @@ function mappedLocations({ knownOnly = true } = {}) {
       if ((location.resources.stock.population ?? 0) > 0) actions.push({ id: "stored-population", label: "Population en réserve", details: { quantity: location.resources.stock.population } });
       hero.carriedLoot.filter((entry) => entry.itemId === "population").forEach((entry) => actions.push({ id: `settle-population:${entry.id}`, label: `Installer ${entry.quantity} habitant(s)`, details: { packageId: entry.id, quantity: entry.quantity } }));
     }
-    if (nearby && relation !== "enemy" && can("manageReserves")) Object.entries(location.infrastructure).forEach(([structureId, level]) => { const task = location.dismantlings.find((entry) => entry.structureId === structureId); actions.push({ id: task ? `dismantling:${structureId}` : `dismantle:${structureId}`, label: task ? `Démontage de ${structureId} en cours` : `Détruire ${structureId} ×${level}`, details: task ? { completesAt: task.deadline.expiresAt } : { level } }); });
     if (can("attack")) { const captureRequirement = game.getLocationCaptureRequirement({ playerId: player.id, locationId: location.id }); actions.push({ id: "battle", label: captureRequirement.state === "can_capture" ? "Capturer" : "Attaquer" }); }
     const questInteractions = game.getQuestInteractionsForLocation(location.id);
     const chiefConversation = can("talkChief") ? game.getLocationChiefConversation({ playerId: player.id, locationId: location.id }) : null;
@@ -218,7 +218,8 @@ function mappedLocations({ knownOnly = true } = {}) {
       if (campDevelopment.levelUp.eligible) actions.push({ id: "level-up-camp", label: `Élever au Camp ${location.level + 1}` });
     }
     const defense = locationDefenseSnapshot(location);
-    return { id: location.id, name: location.name, type: location.type, position, radius: ranges.interactionRadius, interactionRadius: ranges.interactionRadius, detectionRadius: ranges.detectionRadius, distance: d, nearby, relation, state: "DISCOVERED", description: descriptions[location.id] ?? "Lieu créé pendant le test terrain.", defense, campDevelopment, actions };
+    const structures = Object.entries(location.infrastructure).map(([id, level]) => { const task = location.dismantlings.find((entry) => entry.structureId === id); return { id, level, dismantling: task ? { completesAt: task.deadline.expiresAt } : null, canDismantle: nearby && can("dismantle") && !task }; });
+    return { id: location.id, name: location.name, type: location.type, position, radius: ranges.interactionRadius, interactionRadius: ranges.interactionRadius, detectionRadius: ranges.detectionRadius, distance: d, nearby, relation, state: "DISCOVERED", description: descriptions[location.id] ?? "Lieu créé pendant le test terrain.", defense, structures, canDismantle: nearby && can("dismantle"), campDevelopment, actions };
   });
 }
 
@@ -336,6 +337,7 @@ function applyPosition(position) {
     if (lastReadyQuestActionId !== alertId) { lastReadyQuestActionId = alertId; deviceAlerts.notify("notice"); logTest("Objectif atteint : une nouvelle action est disponible."); }
   }
   if (playAreaGrid) { const cell = playAreaGrid.getCellAt(asGps(heroPosition)); if (!cell) lastVisitedCellId = null; else if (cell.id !== lastVisitedCellId) { const passage = playAreaGrid.recordVisit(asGps(heroPosition)); lastVisitedCellId = cell.id; persistFieldState(); logTest(`Passage ${passage.visits} dans ${cell.id}.`); } }
+  syncEvacuationCampSearch();
   updatePresence(); locationEngine.update({ actorId: hero.id, position: heroPosition }).forEach(handleLocationEvent);
   updateDynamicSitePresence();
   if (activeBattle?.status === "active" && activeBattle.engagementContext) game.updateBattleHeroPosition({ battleId: activeBattle.id, heroId: hero.id, position: asGps(heroPosition) });
@@ -386,7 +388,19 @@ function applyQuestFeedback(progress) {
   if (progress.nextPhaseId) game.startCurrentScenarioPlacements(asGps(heroPosition));
   syncQuestTrace();
   syncQuestBattlefield();
+  syncEvacuationCampSearch();
   if (revealed) mapView.focus(positionFor(revealed.id));
+}
+
+function syncEvacuationCampSearch() {
+  if (game?.scenarioState?.currentPhaseId !== "reach-evacuation-camp") return false;
+  const location = game.getLocation("evacuation-camp"); const player = game.getPlayer("local"); if (!location || player.knowsLocation(location.id)) return false;
+  const position = asGps(positionFor(location.id) ?? location.position); const evacuation = game.evacuationStates["royal-camp-evacuation"];
+  if (playAreaGrid && evacuation && !evacuation.searchTargetCellId) { const signal = playAreaGrid.setQuestSignal(position, { radiusCells: 1 }); evacuation.searchTargetCellId = signal?.targetCellId ?? null; heatmapVisible = true; const toggle = $("#toggle-heatmap"); toggle.disabled = false; toggle.textContent = "Masquer la heatmap"; persistFieldState(); }
+  const currentCell = playAreaGrid?.getCellAt(asGps(heroPosition)); const foundByCell = currentCell && currentCell.id === evacuation?.searchTargetCellId;
+  const target = mode === "simulation" ? [position.latitude, position.longitude] : position; const foundByProximity = distance(heroPosition, target) <= (mode === "simulation" ? 8 : 12);
+  if (!foundByCell && !foundByProximity) return false;
+  player.discoverLocation(location.id, 2); if (enabledGpsLocationIds !== null) enabledGpsLocationIds.add(location.id); playAreaGrid?.clearQuestSignal(); if (evacuation) evacuation.campDiscoveredAt = Date.now(); rebuildLocationEngine(); persistFieldState(); deviceAlerts.notify("notice"); logTest("Camp royal localisé : approchez-vous pour entrer dans le camp."); return true;
 }
 
 function syncQuestTrace() {
@@ -734,7 +748,7 @@ function restoreFieldTestState() {
   renderGpsAccuracySummary();
 }
 function renderGpsAccuracySummary() { const summary = gpsAccuracyLog.getSummary(); gpsAccuracyStatus.textContent = summary.count ? `Journal GPS · ${summary.count} relevé(s) · moyenne ±${Math.round(summary.average)} m · min ${Math.round(summary.minimum)} m · max ${Math.round(summary.maximum)} m` : "Journal GPS : aucun relevé."; }
-function directoryLocations() { const player = game.getPlayer("local"); return mappedLocations().map((snapshot) => { const location = game.getLocation(snapshot.id); const ownerPlayer = location.ownerId ? game.getPlayer(location.ownerId) : null; const owner = location.ownerId ? { id: location.ownerId, name: ownerPlayer?.name ?? location.ownerId, color: location.ownerId === "local" ? "#62a8ff" : location.ownerId === "bandits" ? "#d86868" : "#d8b862" } : null; const heroes = location.heroIds.map((id) => game.getHero(id)).filter((item) => item && item.playerId !== player.id).map((item) => ({ ...item, className: data.heroClasses.find((heroClass) => heroClass.id === item.classId)?.name ?? item.classId })); return { ...buildLocationIntel({ location, snapshot, knowledgeLevel: game.heroClassFeatureService.informationLevel(hero, player.getLocationKnowledge(location.id)), owner, heroes, description: descriptions[location.id] ?? "Un lieu dont l'histoire reste à découvrir." }), campDevelopment: snapshot.campDevelopment }; }); }
+function directoryLocations() { const player = game.getPlayer("local"); return mappedLocations().map((snapshot) => { const location = game.getLocation(snapshot.id); const ownerPlayer = location.ownerId ? game.getPlayer(location.ownerId) : null; const ownerName = location.ownerId === "kingdom" ? "Royaume" : ownerPlayer?.name ?? location.ownerId; const owner = location.ownerId ? { id: location.ownerId, name: ownerName, color: location.ownerId === "local" ? "#62a8ff" : location.ownerId === "bandits" ? "#d86868" : "#d8b862" } : null; const heroes = location.heroIds.map((id) => game.getHero(id)).filter((item) => item && item.playerId !== player.id).map((item) => ({ ...item, className: data.heroClasses.find((heroClass) => heroClass.id === item.classId)?.name ?? item.classId })); return { ...buildLocationIntel({ location, snapshot, knowledgeLevel: game.heroClassFeatureService.informationLevel(hero, player.getLocationKnowledge(location.id)), owner, heroes, description: descriptions[location.id] ?? "Un lieu dont l'histoire reste à découvrir." }), campDevelopment: snapshot.campDevelopment }; }); }
 function useDivination() {
   const radius = mode === "gps" ? (game.heroClasses.get(hero.classId)?.features.divinationRadius ?? 0) : 30;
   const locations = game.locations.filter(isLocationEnabled).map((location) => ({ id: location.id, position: asGps(positionFor(location.id)) }));
@@ -855,12 +869,15 @@ function render() {
   const placement = activeQuest ? Object.values(game.scenarioRuntime?.placements ?? {}).find((candidate) => candidate.status === "walking" || candidate.status === "ready") : null;
   const questHudModel = buildQuestHudModel({ quest: activeQuest, placement, actionSlotId: pendingScenarioPlacementSlotId });
   renderQuestHud({ element: questHud, model: questHudModel, expanded: questHudExpanded, onToggle: () => { questHudExpanded = !questHudExpanded; render(); }, onAction: confirmScenarioPlacement });
-  const objectives = activeQuest?.objectives.map((objective) => `<li class="${objective.state === "completed" ? "is-completed" : ""}">${objective.state === "completed" ? "✓" : "○"} ${objective.text}</li>`).join("") ?? "";
+  const objectives = activeQuest?.objectives.map((objective) => `<li class="${objective.state === "completed" ? "is-completed" : objective.state === "failed" ? "is-failed" : ""}">${objective.state === "completed" ? "✓" : objective.state === "failed" ? "✕" : "○"} ${objective.text}</li>`).join("") ?? "";
   const distanceProgress = placement ? `<p>${Math.round(placement.distanceMeters)} / ${placement.minimumDistanceMeters} m d'éloignement</p>` : "";
   const placementAction = questHudModel?.ready ? `<button type="button" id="confirm-scenario-placement">${questHudModel.actionLabel}</button>` : "";
   const evacuation = game.evacuationStates["royal-camp-evacuation"]; const evacuationClock = evacuation && !evacuation.completedAt ? `<p class="quest-deadline">Évacuation : ${Math.max(0, Math.ceil((evacuation.expiresAt - Date.now()) / 60_000))} min restantes</p>` : "";
-  ui.quests.innerHTML = activeQuest ? `<article class="quest-card"><small>Quête principale</small><strong>${activeQuest.title}</strong><p>${activeQuest.description}</p>${evacuationClock}${distanceProgress}<ul>${objectives}</ul>${placementAction}</article>` : '<p class="text-muted">Aucune quête active.</p>';
+  const abandonAction = activeQuest?.status === "active" && activeQuest.objectives.length ? '<button type="button" class="secondary-button" id="abandon-current-quest">Abandonner la quête</button>' : "";
+  const failureNotice = activeQuest?.status === "failed" ? '<p class="quest-deadline">Quête échouée</p>' : "";
+  ui.quests.innerHTML = activeQuest ? `<article class="quest-card"><small>Quête principale</small><strong>${activeQuest.title}</strong><p>${activeQuest.description}</p>${failureNotice}${evacuationClock}${distanceProgress}<ul>${objectives}</ul>${placementAction}${abandonAction}</article>` : '<p class="text-muted">Aucune quête active.</p>';
   ui.quests.querySelector("#confirm-scenario-placement")?.addEventListener("click", confirmScenarioPlacement);
+  ui.quests.querySelector("#abandon-current-quest")?.addEventListener("click", () => { if (!window.confirm("Abandonner cette quête ? Ses objectifs seront marqués comme échoués.")) return; const result = game.abandonCurrentQuest(); if (!result) return; game.startCurrentScenarioPlacements(asGps(heroPosition)); const narration = result.appliedEvent?.appliedEffects?.find((effect) => effect.type === "narration"); locationMessage = narration?.text ?? "Quête abandonnée."; render(); });
   ui.sitesStatus.textContent = `${game.battleSites.length} champ(s) de bataille · ${game.lootSites.length} site(s) de butin · ${sites.length} visible(s)`;
   $("#grid-status").textContent = playAreaGrid ? `${playAreaGrid.cells.length} cellule(s) · ${playAreaGrid.cells.filter((cell) => cell.visits > 0).length} visitée(s) · ${playAreaGrid.cells.reduce((sum, cell) => sum + cell.visits, 0)} passage(s)` : "Aucune grille.";
   if ($("#world-view").classList.contains("is-active")) renderWorld();

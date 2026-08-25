@@ -8,6 +8,7 @@ import { LocationDismantlingService } from "../app/js/core/location-dismantling-
 import { ResultEvaluationService } from "../app/js/core/result-evaluation-service.js";
 import { readFileSync } from "node:fs";
 import { Scenario } from "../app/js/core/scenario.js";
+import { QuestDeadlineService } from "../app/js/core/quest-deadline-service.js";
 
 test("les chariots ajoutent uniquement des slots sérialisables au héros", () => {
   const hero = new Hero({ id: "h", playerId: "p", name: "Officier", commandRank: "captain", wagons: [{ id: "w1", name: "Chariot royal", slotBonus: 4 }] });
@@ -36,5 +37,22 @@ test("l'évaluation générique produit un score pondéré lisible par le scéna
 test("la deuxième quête du prologue déclare toute la chaîne d'évacuation", () => {
   const definition = JSON.parse(readFileSync(new URL("../data/scenarios/chaos.json", import.meta.url), "utf8")); const scenario = new Scenario(definition);
   assert.deepEqual(["reach-evacuation-camp", "defend-evacuation-camp", "prepare-evacuation", "return-evacuees-to-capital"].map((id) => scenario.getPhase(id)?.id), ["reach-evacuation-camp", "defend-evacuation-camp", "prepare-evacuation", "return-evacuees-to-capital"]);
-  const order = scenario.getEvent("evacuation-ordered"); assert.ok(order.effects.some((effect) => effect.type === "assignWagons")); assert.ok(order.effects.some((effect) => effect.type === "spawnAttackGroup"));
+  const order = scenario.getEvent("evacuation-ordered"); assert.ok(order.effects.some((effect) => effect.type === "assignWagons")); assert.ok(order.effects.some((effect) => effect.type === "revealLocation" && effect.locationSlotId === "evacuation-camp")); assert.equal(order.effects.find((effect) => effect.type === "startEvacuation")?.timing.minimumMinutes, 1); assert.equal(order.effects.filter((effect) => effect.type === "spawnAttackGroup" && effect.stationary).length, 3); assert.equal(scenario.getEvent("evacuation-camp-located").effects.filter((effect) => effect.type === "spawnAttackGroup").length, 2);
+  assert.ok(scenario.getEvent("mine-report-delivered").effects.some((effect) => effect.type === "depositCarriedItem" && effect.itemId === "royal_geologist" && effect.destinationLocationSlotId === "capital"));
+});
+
+test("le délai sportif est plus court que le délai calme et reste d'au moins une minute", () => {
+  const service = new QuestDeadlineService(); const input = { origin: { latitude: 48.85, longitude: 2.35 }, destination: { latitude: 48.855, longitude: 2.35 }, baseMinutes: 1, minimumMinutes: 1 };
+  const calm = service.calculateMinutes({ ...input, paceMode: "calm" }); const sport = service.calculateMinutes({ ...input, paceMode: "sport" });
+  assert.ok(calm.minutes > sport.minutes); assert.ok(sport.minutes >= 1);
+});
+
+test("la capitale et les camps du prologue restent la propriété du royaume", () => {
+  const locations = JSON.parse(readFileSync(new URL("../data/locations.json", import.meta.url), "utf8"));
+  for (const id of ["royal-capital", "village-vert", "evacuation-camp"]) {
+    const location = locations.find((entry) => entry.id === id);
+    assert.equal(location?.ownerId, "kingdom");
+    assert.notEqual(location?.features?.capturable, true);
+  }
+  assert.equal(locations.find((entry) => entry.id === "camp-local")?.ownerId, "local");
 });

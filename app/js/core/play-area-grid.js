@@ -33,6 +33,14 @@ export class PlayAreaGrid {
     return { ...cell, bounds: cell.bounds.map((point) => ({ ...point })) };
   }
 
+  setQuestSignal(position, { radiusCells = 1 } = {}) {
+    const target = this.getCellAt(position); if (target === null) return null;
+    this.cells.forEach((cell) => { const distance = Math.max(Math.abs(cell.row - target.row), Math.abs(cell.column - target.column)); cell.questSignal = distance <= radiusCells ? 1 - distance / (radiusCells + 1) : 0; });
+    return { targetCellId: target.id, signaledCellIds: this.cells.filter((cell) => cell.questSignal > 0).map((cell) => cell.id) };
+  }
+
+  clearQuestSignal() { this.cells.forEach((cell) => { cell.questSignal = 0; }); }
+
   getMaximumActivity() { return this.cells.reduce((maximum, cell) => Math.max(maximum, cell.activity), 0); }
   toJSON() { return { playArea: this.playArea.toJSON(), cellSizeMeters: this.cellSizeMeters, cells: this.cells.map((cell) => ({ ...cell, bounds: cell.bounds.map((point) => ({ ...point })) })) }; }
 
@@ -48,7 +56,7 @@ export class PlayAreaGrid {
       const east = west + this.longitudeStep;
       const center = { latitude: (south + north) / 2, longitude: (west + east) / 2 };
       if (!this.playArea.contains(center)) continue;
-      cells.push({ id: `cell-${row}-${column}`, row, column, center, bounds: [{ latitude: south, longitude: west }, { latitude: north, longitude: east }], visits: 0, activity: 0, lastVisitedAt: null });
+      cells.push({ id: `cell-${row}-${column}`, row, column, center, bounds: [{ latitude: south, longitude: west }, { latitude: north, longitude: east }], visits: 0, activity: 0, questSignal: 0, lastVisitedAt: null });
     }
     return cells;
   }
@@ -56,5 +64,5 @@ export class PlayAreaGrid {
 
 function normalizeCell(cell) {
   if (cell === null || typeof cell !== "object" || !Number.isInteger(cell.row) || !Number.isInteger(cell.column) || !Array.isArray(cell.bounds)) throw new TypeError("Une cellule est invalide.");
-  return { id: String(cell.id), row: cell.row, column: cell.column, center: { ...cell.center }, bounds: cell.bounds.map((point) => ({ ...point })), visits: cell.visits ?? 0, activity: cell.activity ?? 0, lastVisitedAt: cell.lastVisitedAt ?? null };
+  return { id: String(cell.id), row: cell.row, column: cell.column, center: { ...cell.center }, bounds: cell.bounds.map((point) => ({ ...point })), visits: cell.visits ?? 0, activity: cell.activity ?? 0, questSignal: cell.questSignal ?? 0, lastVisitedAt: cell.lastVisitedAt ?? null };
 }

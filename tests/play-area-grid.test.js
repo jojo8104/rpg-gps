@@ -22,3 +22,9 @@ test("la heatmap enregistre visites et activité dans la cellule traversée", ()
   assert.equal(second.lastVisitedAt, 20);
   assert.equal(grid.toJSON().cells.find((cell) => cell.id === first.id).activity, 5);
 });
+
+test("un signal de quête colore une zone sans modifier l'activité réelle", () => {
+  const grid = new PlayAreaGrid({ playArea: area, cellSizeMeters: 100 }); const position = { latitude: 48.001, longitude: 2.001 };
+  const signal = grid.setQuestSignal(position, { radiusCells: 1 }); assert.ok(signal.targetCellId); assert.equal(grid.getCellAt(position).questSignal, 1); assert.equal(grid.getCellAt(position).activity, 0);
+  grid.clearQuestSignal(); assert.equal(grid.cells.some((cell) => cell.questSignal > 0), false);
+});
