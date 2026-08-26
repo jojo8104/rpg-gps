@@ -143,13 +143,14 @@ export class Scenario {
 
 /** Progression sérialisable d'un scénario dans une partie donnée. */
 export class ScenarioState {
-  constructor(scenario) {
+  constructor(scenario, { startsActive = true } = {}) {
     if (!(scenario instanceof Scenario)) throw new TypeError("L'état doit être créé à partir d'un scénario.");
+    if (typeof startsActive !== "boolean") throw new TypeError("L'activation initiale du scénario doit être booléenne.");
     this.scenarioId = scenario.id;
     this.currentPhaseId = scenario.initialPhaseId;
     this.phaseStates = Object.fromEntries(scenario.phases.map((phase) => [phase.id, {
-      status: phase.id === scenario.initialPhaseId ? "active" : "locked",
-      objectives: phase.objectives.map((objective) => ({ ...objective, state: phase.id === scenario.initialPhaseId ? "active" : "locked" })),
+      status: startsActive && phase.id === scenario.initialPhaseId ? "active" : "locked",
+      objectives: phase.objectives.map((objective) => ({ ...objective, state: startsActive && phase.id === scenario.initialPhaseId ? "active" : "locked" })),
     }]));
     this.triggeredEventIds = [];
   }
@@ -162,6 +163,19 @@ export class ScenarioState {
     if (objective === null || objective.state !== "active") return false;
     objective.state = "completed";
     return true;
+  }
+
+  completeCurrentPhase() {
+    const state = this.getCurrentPhaseState();
+    if (state.status !== "active" || !state.objectives.every((objective) => objective.state === "completed")) return false;
+    state.status = "completed"; return true;
+  }
+
+  activateOfferedPhase(scenario, phaseId) {
+    if (this.getCurrentPhaseState().status === "active") return false;
+    const phase = scenario.getPhase(phaseId); const state = this.phaseStates[phaseId];
+    if (phase === null || state?.status !== "locked") return false;
+    state.status = "active"; state.objectives.forEach((objective) => { objective.state = "active"; }); this.currentPhaseId = phaseId; return true;
   }
 
   failCurrentPhase(scenario, { reason, nextPhaseId = null, at = Date.now() }) {

@@ -24,6 +24,20 @@ function createGame() {
   return new Game({ setup, scenario, locations, scenarioLocationBindings: [{ locationSlotId: "camp", locationId: "camp-real" }] });
 }
 
+test("une quête différée reste absente jusqu'à la réception de son ordre", () => {
+  const game = new Game({ setup, scenario, locations, scenarioLocationBindings: [{ locationSlotId: "camp", locationId: "camp-real" }], scenarioStartsActive: false });
+  assert.equal(game.getActiveQuest(), null);
+  assert.equal(game.scenarioState.getCurrentPhaseState().status, "locked");
+  assert.equal(game.scenarioRuntime.placements.camp.status, "waiting");
+
+  game.startScenarioRuntime({ latitude: 0, longitude: 0 });
+
+  assert.equal(game.getActiveQuest().id, "reach");
+  assert.equal(game.scenarioState.getCurrentPhaseState().status, "active");
+  assert.equal(game.scenarioRuntime.placements.camp.status, "walking");
+  assert.equal(game.eventLog.some((entry) => entry.type === "scenario_started"), true);
+});
+
 test("le setup remplace la distance par défaut et exige les confirmations", () => {
   const game = createGame();
   game.startScenarioRuntime({ latitude: 0, longitude: 0 });

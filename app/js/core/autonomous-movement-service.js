@@ -7,10 +7,11 @@ export class AutonomousMovementService {
     if (!Number.isFinite(speedMetersPerSecond) || speedMetersPerSecond <= 0) throw new RangeError("La vitesse du groupe doit être strictement positive.");
     if (!Number.isFinite(now)) throw new TypeError("L'heure de départ est invalide.");
     const origin = { ...group.position };
-    const distance = distanceMeters(origin, destination);
+    const coordinateMode = group.mission?.coordinateMode ?? "gps";
+    const distance = coordinateMode === "simulation" ? Math.hypot(destination.latitude - origin.latitude, destination.longitude - origin.longitude) : distanceMeters(origin, destination);
     const durationMs = distance === 0 ? 0 : Math.ceil(distance / speedMetersPerSecond * 1000);
     group.movement = {
-      origin, destination: { ...destination }, speedMetersPerSecond, distanceMeters: distance,
+      origin, destination: { ...destination }, speedMetersPerSecond, distanceMeters: distance, coordinateMode,
       startedAt: now, arrivesAt: now + durationMs, lastProcessedAt: now,
     };
     group.status = distance === 0 ? "arrived" : "traveling";

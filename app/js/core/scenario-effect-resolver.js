@@ -16,6 +16,11 @@ export class ScenarioEffectResolver {
         game.eventLog.push(entry);
         return entry;
       }
+      case "offerQuest": {
+        const id = ScenarioEffectResolver.#requireText(effect.questId, "La quête proposée"); const startPhaseId = ScenarioEffectResolver.#requireText(effect.startPhaseId, "La première phase de quête");
+        const offered = game.offerQuest({ id, startPhaseId, title: ScenarioEffectResolver.#requireText(effect.title, "Le titre de quête"), description: ScenarioEffectResolver.#requireText(effect.description, "La description de quête"), briefingLines: effect.briefingLines ?? [] });
+        return { type: "quest_offered", questId: id, startPhaseId, offered, eventId: game.activeScenarioEventId };
+      }
       case "revealLocation": {
         const location = game.getLocationForScenarioSlot(effect.locationSlotId);
         location.visibility = "discovered";
@@ -62,17 +67,23 @@ export class ScenarioEffectResolver {
       }
       case "startEvacuation": {
         const source = game.getLocationForScenarioSlot(effect.sourceLocationSlotId); const hero = ScenarioEffectResolver.#heroFor(effect, game);
-        const timing = effect.timing ? new QuestDeadlineService().calculateMinutes({ origin: game.getLocationForScenarioSlot(effect.timing.originLocationSlotId).position, destination: source.position, paceMode: game.setup.rules.travelPaceMode, baseMinutes: effect.timing.baseMinutes ?? 1, calmMetersPerMinute: effect.timing.calmMetersPerMinute ?? 60, sportMetersPerMinute: effect.timing.sportMetersPerMinute ?? 100, minimumMinutes: effect.timing.minimumMinutes ?? 1 }) : { minutes: ScenarioEffectResolver.#positiveInteger(effect.durationMinutes, "La durée d'évacuation"), distanceMeters: null, paceMode: game.setup.rules.travelPaceMode };
+        const timing = effect.timing ? new QuestDeadlineService().calculateMinutes({ origin: game.getLocationForScenarioSlot(effect.timing.originLocationSlotId).position, destination: source.position, paceMode: game.setup.rules.travelPaceMode, baseMinutes: effect.timing.baseMinutes ?? 1, calmMetersPerMinute: effect.timing.calmMetersPerMinute ?? 60, sportMetersPerMinute: effect.timing.sportMetersPerMinute ?? 100, minimumMinutes: effect.timing.minimumMinutes ?? 1, maximumMinutes: effect.timing.maximumMinutes ?? 3 }) : { minutes: ScenarioEffectResolver.#positiveInteger(effect.durationMinutes, "La durée d'évacuation"), distanceMeters: null, paceMode: game.setup.rules.travelPaceMode };
         const durationMs = timing.minutes * 60_000;
         const id = ScenarioEffectResolver.#requireText(effect.evacuationId, "L'évacuation"); const startedAt = game.now();
         game.evacuationStates[id] = { id, playerId: hero.playerId, sourceLocationId: source.id, startedAt, expiresAt: startedAt + durationMs, initialPopulation: source.population ?? 0, initialResources: structuredClone(source.resources.stock), initialHeroResources: structuredClone(hero.resources), initialStructures: Object.values(source.infrastructure).reduce((sum, level) => sum + level, 0), departedAt: null };
         const entry = { type: "evacuation_started", evacuationId: id, sourceLocationId: source.id, expiresAt: startedAt + durationMs, durationMinutes: timing.minutes, distanceMeters: timing.distanceMeters, paceMode: timing.paceMode, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
       }
       case "spawnAttackGroup": {
-        const target = game.getLocationForScenarioSlot(effect.targetLocationSlotId); const distance = Number(effect.originDistanceMeters ?? 100);
-        const origin = new SetupPlacementService().findPosition({ playArea: game.setup.playArea, origin: target.position, preferredDistance: distance, preferredDirectionDegrees: Number(effect.directionDegrees ?? 180), occupied: game.locations.map((location) => location.position), minimumSpacing: Math.min(30, distance / 3) });
-        const mission = effect.stationary === true ? null : { kind: "attack_location", targetId: target.id, speedMetersPerSecond: Number(effect.speedMetersPerSecond ?? .15) };
-        const group = new AutonomousGroup({ id: ScenarioEffectResolver.#requireText(effect.groupId, "Le groupe autonome"), type: "army", owner: { kind: "faction", id: effect.factionId ?? "chaos" }, factionId: effect.factionId ?? "chaos", position: origin, behavior: "aggressive", mission, army: { units: [{ id: `${effect.groupId}-unit`, ownerPlayerId: effect.factionId ?? "chaos", typeId: effect.unitTypeId ?? "militia", quantity: Number(effect.quantity ?? 5), rank: "soldier" }] } });
+        const target = game.getLocationForScenarioSlot(effect.targetLocationSlotId);
+        const distance = Number(game.coordinateMode === "simulation" ? effect.simulationDistanceUnits ?? effect.originDistanceMeters ?? 100 : effect.originDistanceMeters ?? 100);
+        const directionDegrees = Number(effect.directionDegrees ?? 180);
+        const preferred = ScenarioEffectResolver.#radialPosition(target.position, distance, directionDegrees, game.coordinateMode);
+        const origin = new SetupPlacementService().resolveInside({ playArea: game.setup.playArea, preferred });
+        const engagementRadius = Number(game.coordinateMode === "simulation" ? effect.simulationEngagementRadiusUnits ?? 8 : effect.engagementRadiusMeters ?? game.setup.rules.engagementRadiusMeters);
+        const mission = effect.stationary === true
+          ? { kind: "guard", center: { ...origin }, engagementRadiusMeters: engagementRadius, coordinateMode: game.coordinateMode }
+          : { kind: "attack_location", targetId: target.id, coordinateMode: game.coordinateMode, speedMetersPerSecond: Number(game.coordinateMode === "simulation" ? (effect.simulationSpeedUnitsPerSecond ?? (effect.simulationSpeedMetersPerSecond ?? 12_000) / 40_000) : effect.speedMetersPerSecond ?? .15) };
+        const group = new AutonomousGroup({ id: ScenarioEffectResolver.#requireText(effect.groupId, "Le groupe autonome"), type: "army", owner: { kind: "faction", id: effect.factionId ?? "chaos" }, factionId: effect.factionId ?? "chaos", position: origin, behavior: "aggressive", mission, army: { units: [{ id: `${effect.groupId}-unit`, ownerPlayerId: effect.factionId ?? "chaos", typeId: effect.unitTypeId ?? "militia", quantity: Number(effect.quantity ?? 5), rank: effect.rank ?? (Number(effect.quantity ?? 5) > 6 ? "corporal" : "soldier") }] } });
         game.addAutonomousGroup(group); const entry = { type: "attack_group_spawned", groupId: group.id, targetLocationId: target.id, origin, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
       }
       case "assignWagons": {
@@ -102,6 +113,14 @@ export class ScenarioEffectResolver {
   }
 
   static #positiveInteger(value, label) { if (!Number.isInteger(value) || value <= 0) throw new RangeError(`${label} doit être un entier positif.`); return value; }
+  static #radialPosition(origin, distance, directionDegrees, coordinateMode) {
+    const radians = directionDegrees * Math.PI / 180;
+    if (coordinateMode === "simulation") return { latitude: origin.latitude + Math.cos(radians) * distance, longitude: origin.longitude + Math.sin(radians) * distance };
+    return {
+      latitude: origin.latitude + Math.cos(radians) * distance / 111_320,
+      longitude: origin.longitude + Math.sin(radians) * distance / (111_320 * Math.max(.01, Math.cos(origin.latitude * Math.PI / 180))),
+    };
+  }
   static #heroFor(effect, game) {
     const playerId = ScenarioEffectResolver.#requireText(effect.playerId ?? "local", "Le joueur récompensé"); const player = game.getPlayer(playerId); const hero = player?.heroIds.map((id) => game.getHero(id)).find((candidate) => candidate !== null) ?? null;
     if (hero === null) throw new RangeError("Le héros récompensé n'existe pas."); return hero;

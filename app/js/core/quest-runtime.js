@@ -25,6 +25,7 @@ export class QuestRuntime {
       nextPhaseId = phase.transitions[0].nextPhase;
       if (!game.advanceScenario(nextPhaseId)) nextPhaseId = null;
     }
+    else if (phaseCompleted && phase.transitions.length === 0) game.completeCurrentScenarioPhase();
     const result = { type: "quest_progressed", phaseId: phase.id, completedObjectiveIds, phaseCompleted, nextPhaseId, appliedEvents };
     game.eventLog.push({ ...result, at: game.now() });
     return result;

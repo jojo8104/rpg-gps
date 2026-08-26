@@ -36,7 +36,7 @@
     "infrastructure": { "palissade": 1 },
     "resources": { "stock": { "food": 10, "iron": 2 }, "storageCapacity": 80 },
     "features": { "capturable": false, "recruitment": true, "healing": true },
-    "chief": { "name": "Armand de Valgrise", "title": "Chef du camp et ancien explorateur", "portrait": "assets/characters/armand-valgrise.png", "greeting": "Vous voilà enfin.", "openingLines": ["Vous voilà enfin. Entrez, nous avons peu de temps.", "Mon équipe de prospection devait rentrer hier soir. Personne n’est revenu."], "trade": false, "tradeLimitPerCycle": 3, "tradeOffers": [], "secondaryQuestIds": [], "dialogues": [] },
+    "chief": { "name": "Armand de Valgrise", "title": "Chef du camp et ancien explorateur", "portrait": "assets/characters/armand-valgrise.png", "greeting": "Bienvenue à Valgrise.", "openingLines": ["Bienvenue à Valgrise, officier.", "Les sentinelles surveillent la frontière."], "contexts": [{ "id": "quest-failed", "phaseStatuses": ["failed"], "openingLines": ["Vous revenez sans avoir accompli votre mission.", "Je dois maintenant annoncer aux familles que nous n’aurons peut-être jamais de réponse."] }, { "id": "quest-completed", "completedObjectiveId": "deliver-mine-report", "openingLines": ["Votre rapport est arrivé à la capitale et le géologue est en sécurité.", "Valgrise n’oubliera pas ce que vous avez fait pour les prospecteurs."] }, { "id": "geologist-returned", "phaseIds": ["return-geologist-to-camp"], "openingLines": ["Vous avez retrouvé le géologue vivant ! Faites-le entrer.", "Son témoignage et vos découvertes permettront d’établir un rapport incontestable."] }, { "id": "investigation", "phaseIds": ["follow-first-trace", "follow-second-trace", "prospectors-battlefield", "free-gold-mine", "rescue-mine-geologist"], "openingLines": ["Chaque minute réduit les chances de retrouver un survivant.", "Continuez à suivre leur piste et revenez dès que vous saurez ce qui leur est arrivé."] }, { "id": "briefing", "phaseIds": ["speak-to-camp-chief"], "openingLines": ["Vous voilà enfin. Entrez, nous avons peu de temps.", "Mon équipe de prospection devait rentrer hier soir. Personne n’est revenu."] }, { "id": "before-briefing", "phaseIds": ["reach-royal-camp"], "openingLines": ["J’attends un officier envoyé par la capitale.", "Si c’est bien vous, rejoignez d’abord officiellement le camp avant que nous parlions de l’affaire."] }], "trade": false, "tradeLimitPerCycle": 3, "tradeOffers": [], "secondaryQuestIds": [], "dialogues": [] },
     "recruitment": { "availableUnitTypeIds": ["militia"], "weights": { "militia": 1 }, "production": { "militia": 3 }, "stock": { "militia": 12 }, "variance": 0.3 },
     "qr": { "enabled": false }
   },
@@ -55,6 +55,7 @@
     "defenseSlots": 3,
     "infrastructure": { "walls": 3, "palace": 1 },
     "features": { "healing": true },
+    "chief": { "name": "Maréchal Aldren", "title": "Commandant des armées royales", "greeting": "Le royaume compte sur vous.", "openingLines": ["Le maréchal étudie la carte du royaume.", "Il vous salue brièvement et attend votre rapport."], "trade": false, "tradeLimitPerCycle": 0, "tradeOffers": [], "secondaryQuestIds": [], "dialogues": [] },
     "qr": { "enabled": false }
   },
   {

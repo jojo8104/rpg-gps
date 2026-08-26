@@ -283,6 +283,7 @@ export class Location {
     if (chief === null) return null;
     if (Array.isArray(chief) || typeof chief !== "object") throw new TypeError("Le chef local doit être un objet.");
     const dialogues = chief.dialogues ?? []; if (!Array.isArray(dialogues)) throw new TypeError("Les dialogues du chef doivent être une liste.");
+    const contexts = chief.contexts ?? []; if (!Array.isArray(contexts)) throw new TypeError("Les contextes du chef doivent être une liste.");
     const tradeOffers = chief.tradeOffers ?? []; if (!Array.isArray(tradeOffers)) throw new TypeError("Les offres du chef doivent être une liste.");
     return {
       name: Location.#requireText(chief.name ?? "Chef local", "Le nom du chef"),
@@ -294,6 +295,7 @@ export class Location {
       tradeLimitPerCycle: Location.#requireNonNegativeInteger(chief.tradeLimitPerCycle ?? (tradeOffers.length > 0 ? 2 : 0), "Le quota de commerce du chef"),
       tradeOffers: tradeOffers.map((offer, index) => ({ id: Location.#requireText(offer.id ?? `offer-${index + 1}`, "L'identifiant de l'offre"), give: Location.#createTradeResource(offer.give, "La ressource donnée"), receive: Location.#createTradeResource(offer.receive, "La ressource reçue") })),
       secondaryQuestIds: Location.#createTextList(chief.secondaryQuestIds ?? [], "Les quêtes secondaires du chef"),
+      contexts: contexts.map((context, index) => ({ id: Location.#requireText(context.id ?? `context-${index + 1}`, "Le contexte de dialogue"), phaseIds: Location.#createTextList(context.phaseIds ?? [], "Les phases du contexte"), phaseStatuses: Location.#createTextList(context.phaseStatuses ?? [], "Les états du contexte"), completedObjectiveId: context.completedObjectiveId == null ? null : Location.#requireText(context.completedObjectiveId, "L'objectif du contexte"), openingLines: Location.#createTextList(context.openingLines, "Les répliques contextuelles") })),
       dialogues: dialogues.map((dialogue) => ({ id: Location.#requireText(dialogue.id, "L'identifiant du dialogue"), label: Location.#requireText(dialogue.label ?? "Discuter", "Le libellé du dialogue"), text: Location.#requireText(dialogue.text, "Le texte du dialogue"), lines: Location.#createTextList(dialogue.lines ?? [dialogue.text], "Les répliques du dialogue"), objectiveId: dialogue.objectiveId == null ? null : Location.#requireText(dialogue.objectiveId, "L'objectif du dialogue"), when: ["always", "active", "completed"].includes(dialogue.when ?? "always") ? dialogue.when ?? "always" : "always" })),
     };
   }
