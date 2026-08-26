@@ -151,7 +151,9 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
     const commander = user.kind === "hero" ? user : commanders.find((hero) => hero.playerId === user.playerId);
     const definition = battle.getSpecialPowerDefinition(powerId); const actualCost = definition?.activation?.cost ?? cost; const rank = user.aptitudeRanks?.[powerId];
     const disabled = battle.status !== "active" || !commander || commander.commandPoints < actualCost;
-    return `<button type="button" class="${selectedPower?.userId === user.id && selectedPower.powerId === powerId ? "is-selected" : ""}" data-power-user="${user.id}" data-power-id="${powerId}" data-power-cost="${actualCost}" title="${definition?.description ?? powerId}" ${disabled ? "disabled" : ""}>${definition?.name ?? powerId}${rank ? `<small>${rank}</small>` : ""}<small>◆ ${actualCost}</small></button>`;
+    const name = definition?.name ?? powerId;
+    const rankLabel = rank ? `, rang ${rank}` : "";
+    return `<button type="button" class="${selectedPower?.userId === user.id && selectedPower.powerId === powerId ? "is-selected" : ""}" data-power-user="${user.id}" data-power-id="${powerId}" data-power-cost="${actualCost}" title="${definition?.description ?? powerId} · Coût : ${actualCost}" aria-label="${name}${rankLabel}, coût ${actualCost} point${actualCost > 1 ? "s" : ""} de commandement" ${disabled ? "disabled" : ""}>${name}</button>`;
   }
 }
 

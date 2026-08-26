@@ -40,8 +40,10 @@ import { ResultEvaluationService } from "./result-evaluation-service.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
 export class Game {
-  constructor({ setup, scenario = null, scenarioLocationBindings = [], heroClasses = [], heroAptitudes = [], unitDefinitions = [], locations = [], autonomousGroups = [], autonomousGroupTraces = [], now = () => Date.now(), idGenerator = Game.#defaultIdGenerator }) {
+  constructor({ setup, scenario = null, scenarioLocationBindings = [], heroClasses = [], heroAptitudes = [], unitDefinitions = [], locations = [], autonomousGroups = [], autonomousGroupTraces = [], coordinateMode = "gps", scenarioStartsActive = true, now = () => Date.now(), idGenerator = Game.#defaultIdGenerator }) {
     this.setup = setup instanceof GameSetup ? setup : new GameSetup(setup);
+    if (!["gps", "simulation"].includes(coordinateMode)) throw new RangeError("Le mode de coordonnées doit être gps ou simulation.");
+    this.coordinateMode = coordinateMode;
     this.heroClasses = Game.#createHeroClassMap(heroClasses);
     this.heroClassFeatureService = new HeroClassFeatureService({ classDefinitions: this.heroClasses, now });
     this.heroProgressionService = new HeroProgressionService({ aptitudeDefinitions: heroAptitudes, now });
@@ -64,10 +66,11 @@ export class Game {
     this.locationDismantlingService = new LocationDismantlingService();
     this.resultEvaluationService = new ResultEvaluationService();
     this.evacuationStates = {};
+    this.availableQuests = [];
     this.engagementService = new EngagementService({ engagementRadiusMeters: this.setup.rules.engagementRadiusMeters, fleeConfirmations: this.setup.rules.fleeConfirmations });
     this.scenario = scenario === null ? null : (scenario instanceof Scenario ? scenario : new Scenario(scenario));
     if (this.scenario !== null && this.scenario.id !== this.setup.scenarioId) throw new RangeError("Le scénario ne correspond pas au GameSetup.");
-    this.scenarioState = this.scenario === null ? null : new ScenarioState(this.scenario);
+    this.scenarioState = this.scenario === null ? null : new ScenarioState(this.scenario, { startsActive: scenarioStartsActive });
     this.locations = Game.#createLocations(locations, this.unitDefinitions);
     this.locations.forEach((location) => { this.locationProgressionService.initialize(location); this.campImprovementService.applyEffects(location); });
     this.scenarioLocationBindings = this.scenario === null
@@ -261,6 +264,11 @@ export class Game {
   }
 
   startScenarioRuntime(position) {
+    if (this.scenario !== null && this.scenarioState?.getCurrentPhaseState().status === "locked") {
+      this.scenarioState.activateOfferedPhase(this.scenario, this.scenario.initialPhaseId);
+      this.eventLog.push({ type: "scenario_started", phaseId: this.scenario.initialPhaseId, at: this.now() });
+    }
+    if (this.scenarioState?.getCurrentPhaseState().status !== "active") return [];
     const slotIds = this.scenarioRuntimeBuilder.start(this.scenarioRuntime, position, this.scenarioState?.currentPhaseId ?? null);
     if (slotIds.length > 0) this.eventLog.push({ type: "scenario_placement_started", slotIds, position: { ...position }, at: this.now() });
     return slotIds;
@@ -306,7 +314,23 @@ export class Game {
     if (this.scenario === null || this.scenarioState === null) return null;
     const phase = this.scenario.getPhase(this.scenarioState.currentPhaseId);
     const state = this.scenarioState.getCurrentPhaseState();
+    if (state.status !== "active" && state.status !== "failed") return null;
     return { ...phase, status: state.status, failureReason: state.failureReason ?? null, objectives: state.objectives.map((objective) => ({ ...objective })) };
+  }
+
+  completeCurrentScenarioPhase() { return this.scenarioState?.completeCurrentPhase() ?? false; }
+
+  offerQuest({ id, title, description, startPhaseId, briefingLines = [] }) {
+    if (this.scenario?.getPhase(startPhaseId) === null || this.availableQuests.some((quest) => quest.id === id)) return false;
+    this.availableQuests.push({ id, title, description, startPhaseId, briefingLines: Array.isArray(briefingLines) ? [...briefingLines] : [] }); this.eventLog.push({ type: "quest_available", questId: id, startPhaseId, at: this.now() }); return true;
+  }
+
+  getAvailableQuests() { return this.availableQuests.map((quest) => ({ ...quest, briefingLines: [...quest.briefingLines] })); }
+
+  acceptAvailableQuest(questId) {
+    const index = this.availableQuests.findIndex((quest) => quest.id === questId); if (index < 0) return { success: false, reason: "quest_not_available" };
+    const quest = this.availableQuests[index]; if (!this.scenarioState.activateOfferedPhase(this.scenario, quest.startPhaseId)) return { success: false, reason: "another_quest_active" };
+    this.availableQuests.splice(index, 1); this.eventLog.push({ type: "quest_accepted", questId, phaseId: quest.startPhaseId, at: this.now() }); return { success: true, quest: { ...quest } };
   }
 
   abandonCurrentQuest() { return this.failCurrentQuest({ reason: "abandoned" }); }
@@ -391,13 +415,13 @@ export class Game {
 
   getLocationChiefConversation({ playerId, locationId }) {
     const location = this.getLocation(locationId); if (location === null || !this.locationAccessPolicy.can(playerId, location, "talkChief")) return null;
-    return this.locationChiefService.getConversation({ location, canTrade: this.locationAccessPolicy.can(playerId, location, "trade"), isObjectiveCompleted: (id) => this.isObjectiveCompleted(id) });
+    return this.locationChiefService.getConversation({ location, canTrade: this.locationAccessPolicy.can(playerId, location, "trade"), currentPhaseId: this.scenarioState?.currentPhaseId ?? null, currentPhaseStatus: this.scenarioState?.getCurrentPhaseState().status ?? null, isObjectiveCompleted: (id) => this.isObjectiveCompleted(id) });
   }
 
   selectLocationChiefOption({ playerId, heroId, locationId, optionId }) {
     const hero = this.getHero(heroId); const location = this.getLocation(locationId);
     if (hero === null || location === null || hero.playerId !== playerId || !location.heroIds.includes(hero.id) || !this.locationAccessPolicy.can(playerId, location, "talkChief")) return { success: false, reason: "chief_unavailable" };
-    const result = optionId.startsWith("trade-offer:") ? this.chiefTradeService.execute({ hero, location, offerId: optionId.slice("trade-offer:".length) }) : this.locationChiefService.select({ location, optionId, canTrade: this.locationAccessPolicy.can(playerId, location, "trade"), isObjectiveCompleted: (id) => this.isObjectiveCompleted(id) });
+    const result = optionId.startsWith("trade-offer:") ? this.chiefTradeService.execute({ hero, location, offerId: optionId.slice("trade-offer:".length) }) : this.locationChiefService.select({ location, optionId, canTrade: this.locationAccessPolicy.can(playerId, location, "trade"), currentPhaseId: this.scenarioState?.currentPhaseId ?? null, currentPhaseStatus: this.scenarioState?.getCurrentPhaseState().status ?? null, isObjectiveCompleted: (id) => this.isObjectiveCompleted(id) });
     if (result.success && optionId.startsWith("trade-offer:")) { result.kind = "trade_offer"; result.message = `Échange conclu. Il reste ${result.remaining} troc(s).`; result.lines = [result.message]; }
     if (result.success) this.eventLog.push({ type: "location_chief_interaction", playerId, heroId, locationId, optionId, kind: result.kind, at: this.now() });
     return result;
@@ -999,6 +1023,7 @@ export class Game {
       locations: this.locations.map((location) => location.toJSON()), status: this.status,
       scenario: this.scenario?.toJSON() ?? null, scenarioState: this.scenarioState?.toJSON() ?? null,
       scenarioRuntime: this.scenarioRuntime === null ? null : structuredClone(this.scenarioRuntime),
+      availableQuests: this.availableQuests.map((quest) => ({ ...quest })),
       scenarioLocationBindings: this.scenarioLocationBindings.map((binding) => binding.toJSON()), eventLog: this.eventLog.map((entry) => ({ ...entry })),
       startedAt: this.startedAt, finishedAt: this.finishedAt, finishReason: this.finishReason,
       battles: this.battles.map((battle) => battle.toJSON()),

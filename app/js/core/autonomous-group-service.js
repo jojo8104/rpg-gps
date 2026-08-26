@@ -38,6 +38,19 @@ export class AutonomousGroupService {
         if (this.interceptionService.letEscape(group, { now, movementService: this.movementService })) events.push({ type: "autonomous_group_resumed", groupId: group.id, at: now });
         continue;
       }
+      if (group.mission?.kind === "guard" && ["idle", "arrived"].includes(group.status)) {
+        const distanceTo = group.mission.coordinateMode === "simulation"
+          ? (position) => Math.hypot(group.position.latitude - position.latitude, group.position.longitude - position.longitude)
+          : (position) => distanceMeters(group.position, position);
+        const target = targets.filter((candidate) => candidate.position && isHostile(group, candidate) && distanceTo(candidate.position) <= group.mission.engagementRadiusMeters * (candidate.concealmentMultiplier ?? 1))
+          .sort((first, second) => distanceTo(first.position) - distanceTo(second.position))[0];
+        if (target) {
+          group.status = "interrupted";
+          group.interruption = { id: this.idGenerator("interception"), reason: "guard_proximity", target: { kind: target.kind ?? "hero", id: target.id }, position: { ...group.position }, startedAt: now, reactionDeadlineAt: now, mode: "immediate_attack", status: "attacking", resume: null };
+          events.push({ type: "autonomous_group_attack_requested", groupId: group.id, target: structuredClone(group.interruption.target), interruptionId: group.interruption.id, reactionDeadlineAt: now, at: now });
+        }
+        continue;
+      }
       if (["idle", "arrived"].includes(group.status)) this.#prepareMission(group, { locations, playArea, now, speedFor, events });
       const result = this.movementService.advance(group, now);
       if (!result.changed) continue;
@@ -104,15 +117,17 @@ export class AutonomousGroupService {
 
   #spacedTraces(group, segment) {
     const traces = []; let anchor = group.traceAnchor ?? segment.from;
-    let remaining = distanceMeters(anchor, segment.to);
-    while (remaining >= this.traceSpacingMeters) {
-      const ratio = this.traceSpacingMeters / remaining;
+    const simulation = group.mission?.coordinateMode === "simulation"; const spacing = simulation ? 3 : this.traceSpacingMeters;
+    const distanceBetween = simulation ? (first, second) => Math.hypot(first.latitude - second.latitude, first.longitude - second.longitude) : distanceMeters;
+    let remaining = distanceBetween(anchor, segment.to);
+    while (remaining >= spacing) {
+      const ratio = spacing / remaining;
       const position = { latitude: anchor.latitude + (segment.to.latitude - anchor.latitude) * ratio, longitude: anchor.longitude + (segment.to.longitude - anchor.longitude) * ratio };
-      const segmentLength = Math.max(.001, distanceMeters(segment.from, segment.to));
-      const traveled = distanceMeters(segment.from, position);
+      const segmentLength = Math.max(.001, distanceBetween(segment.from, segment.to));
+      const traveled = distanceBetween(segment.from, position);
       const createdAt = segment.fromAt + Math.max(0, Math.min(1, traveled / segmentLength)) * (segment.toAt - segment.fromAt);
       traces.push(this.#trace(group, "passage", position, createdAt, { directionDegrees: bearingDegrees(anchor, segment.to) }));
-      anchor = position; remaining = distanceMeters(anchor, segment.to);
+      anchor = position; remaining = distanceBetween(anchor, segment.to);
     }
     group.traceAnchor = { ...anchor };
     return traces;

@@ -46,14 +46,20 @@ import { buildQuestHudModel, createQuestHud, renderQuestHud } from "./ui/quest-h
 const $ = (selector) => document.querySelector(selector);
 const questHud = createQuestHud($("#map-view"));
 const adventureActions = document.createElement("aside"); adventureActions.id = "adventure-actions"; adventureActions.className = "adventure-actions"; adventureActions.setAttribute("aria-label", "Actions d’aventure"); $("#game-screen").append(adventureActions);
+const royalMessengerNotice = document.createElement("aside"); royalMessengerNotice.id = "royal-messenger-notice"; royalMessengerNotice.className = "royal-messenger-notice"; royalMessengerNotice.hidden = true; $("#game-screen").append(royalMessengerNotice);
+const mapChrome = document.createElement("div");
+mapChrome.className = "map-chrome";
+mapChrome.innerHTML = `<button id="toggle-game-menu" class="portrait-menu-toggle" type="button" aria-expanded="false" aria-controls="landscape-tools">☰ <span>Menu</span></button><aside id="landscape-tools" class="landscape-tools" aria-label="Outils système et développement"><strong>Outils</strong><button id="open-field-tools" type="button"><span aria-hidden="true">⚙</span><small>Terrain</small></button><button id="open-cheat-tools" type="button"><span aria-hidden="true">✦</span><small>Triche</small></button><button id="close-game-menu" class="landscape-tools__close" type="button">Fermer</button></aside><aside class="map-power-nav" aria-label="Pouvoirs utilisables sur la carte"><strong>Pouvoirs</strong><button type="button" disabled title="Pouvoir à débloquer"><span aria-hidden="true">✧</span><small>Magie</small></button><button type="button" disabled title="Pouvoir à débloquer"><span aria-hidden="true">◈</span><small>Talent</small></button></aside>`;
+$("#map-view").append(mapChrome);
 const battleOrientationPrompt = document.createElement("aside"); battleOrientationPrompt.className = "battle-orientation-prompt"; battleOrientationPrompt.innerHTML = '<span aria-hidden="true">↻</span><strong>Tournez votre téléphone</strong><p>La bataille se joue en paysage. Le combat est suspendu.</p>'; $("#battle-view").append(battleOrientationPrompt);
-const travelRewardLayer = document.createElement("div"); travelRewardLayer.className = "travel-reward-layer"; travelRewardLayer.setAttribute("aria-live", "polite"); travelRewardLayer.setAttribute("aria-atomic", "true"); $("#map-view").append(travelRewardLayer);
+const travelRewardLayer = document.createElement("div"); travelRewardLayer.className = "travel-reward-layer"; travelRewardLayer.setAttribute("aria-live", "polite"); travelRewardLayer.setAttribute("aria-atomic", "true"); $("#game-screen").append(travelRewardLayer);
 document.addEventListener("contextmenu", (event) => {
   if (!event.target.closest("input,textarea,[contenteditable='true']")) event.preventDefault();
 });
 const rankLabel = (ranks, id) => ranks.find((rank) => rank.id === id)?.label ?? id;
 const unitHealthBar = (unit) => renderUnitHealthBar(unit);
 const ui = { setup: $("#setup-screen"), game: $("#game-screen"), create: $("#create-game"), status: $("#setup-status"), worldContent: $("#world-content"), heroContent: $("#hero-content"), armyContent: $("#army-content"), inventory: $("#inventory-content"), quests: $("#quests-content"), battle: $("#battle-content"), sheet: $("#bottom-sheet"), recenter: $("#recenter-map"), tools: $("#field-tools"), gpsStatus: $("#gps-status"), questStatus: $("#distance-quest-status"), questPlace: $("#place-quest-location"), sitesStatus: $("#dynamic-sites-status"), log: $("#field-log"), gpsSetup: $("#gps-setup-panel"), gpsAreaStatus: $("#gps-area-status"), gpsLocationButtons: $("#gps-location-buttons"), locationTypeOptions: $("#location-type-options"), autonomousTypeOptions: $("#autonomous-type-options"), finishGpsSetup: $("#finish-gps-setup") };
+document.querySelectorAll("#army-view > h2, #inventory-view > h2, #quests-view > h2").forEach((title) => title.remove());
 const setupView = new GameSetupView(ui.setup);
 const simulationPositions = { "fort-nord": [22, 22], "royal-capital": [50, 30], "village-vert": [60, 50], "prospector-battlefield": [74, 65], "camp-local": [50, 32], "lumber-camp-test": [58, 36], "stone-quarry": [27, 72], "iron-mine": [66, 74], "bandit-camp": [78, 78], "enemy-fort": [72, 35], "gold-mine": [42, 70], "evacuation-camp": [68, 42] };
 const simulationRadii = { "fort-nord": 12, "village-vert": 10, "camp-local": 9, "bandit-camp": 9, "enemy-fort": 12, "gold-mine": 8 };
@@ -75,6 +81,9 @@ let activeDialogue = null;
 let lastReadyQuestActionId = null;
 let questHudExpanded = false;
 let preparedHeroAmbush = null;
+let pendingRoyalMessage = null;
+let firstRoyalMessengerTimer = null;
+let pendingRevealedLocationId = null;
 let worldMessage = "";
 let worldSelectedLocationId = null;
 let selectedHeroTrait = null;
@@ -88,7 +97,7 @@ const cheatService = new CheatService();
 const autonomousGroupDetectionService = new AutonomousGroupDetectionService({ distanceFn: (first, second) => mode === "gps" ? distanceMeters(first, second) : Math.hypot((first.latitude ?? first[0]) - (second.latitude ?? second[0]), (first.longitude ?? first[1]) - (second.longitude ?? second[1])) });
 const heroConcealmentService = new HeroConcealmentService();
 const ambushService = new AmbushService({ preparationDurationMs: heroConcealmentService.stationaryDurationMs });
-const concealButton = document.createElement("button"); concealButton.id = "ambush-action"; concealButton.className = "adventure-action conceal-control"; concealButton.type = "button"; concealButton.textContent = "Embuscade"; concealButton.hidden = true; adventureActions.append(concealButton);
+const concealButton = document.createElement("button"); concealButton.id = "ambush-action"; concealButton.className = "map-power-action conceal-control"; concealButton.type = "button"; concealButton.innerHTML = '<span aria-hidden="true">♟</span><small>Embuscade</small>'; concealButton.hidden = true; $(".map-power-nav").append(concealButton);
 concealButton.onclick = launchPreparedAmbush;
 const setupPlacementService = new SetupPlacementService({ distanceFn: (first, second) => mode === "gps" ? distanceMeters(first, second) : Math.hypot(first.latitude - second.latitude, first.longitude - second.longitude) });
 const savedFieldState = loadFieldState();
@@ -109,7 +118,7 @@ function start() {
   mode = setupView.readPositionMode();
   dynamicSitePresence = new DynamicSitePresence({ distanceFn: dynamicSiteDistance, exitMargin: mode === "gps" ? 10 : 1 });
   const bindings = [{ locationSlotId: "refuge", locationId: "fort-nord" }, { locationSlotId: "capital", locationId: "royal-capital" }, { locationSlotId: "royal-camp", locationId: "village-vert" }, { locationSlotId: "prospectors-battlefield", locationId: "prospector-battlefield" }, { locationSlotId: "gold-mine", locationId: "gold-mine" }, { locationSlotId: "bandit-camp", locationId: "bandit-camp" }, { locationSlotId: "evacuation-camp", locationId: "evacuation-camp" }];
-  game = new Game({ setup, scenario: data.scenario, heroClasses: data.heroClasses, heroAptitudes: data.heroAptitudes, unitDefinitions: data.unitDefinitions, locations: data.locations, scenarioLocationBindings: bindings });
+  game = new Game({ setup, scenario: data.scenario, heroClasses: data.heroClasses, heroAptitudes: data.heroAptitudes, unitDefinitions: data.unitDefinitions, locations: data.locations, scenarioLocationBindings: bindings, coordinateMode: mode, scenarioStartsActive: false });
   rangePolicy = new LocationRangePolicy(game.setup.locationSetup.rangePolicy);
   hero = game.chooseHero("local", createAutomaticHeroChoice());
   enemyHero = game.chooseHero("bandits", { name: "Rask le brigand", classId: "warrior" }); game.getLocation("bandit-camp").addHero(enemyHero.id);
@@ -136,7 +145,6 @@ function finishGameStart() {
   if (!capitalPlaced || manualSetupPlacements.size > 0) return;
   const capitalPosition = positionFor("royal-capital"); heroPosition = Array.isArray(capitalPosition) ? [...capitalPosition] : { ...capitalPosition }; hero.updatePosition(asGps(heroPosition)); mapView.focus(heroPosition);
   if (game.status === "preparing") game.start();
-  game.startScenarioRuntime(asGps(heroPosition));
   gpsSetupActive = false; ui.game.classList.remove("is-gps-setup"); ui.gpsSetup.hidden = true; interactionMode = null;
   deviceAlerts.enable().then((enabled) => logTest(enabled ? "Alertes sonores activées." : "Son d'alerte indisponible."));
   screenAwake.start();
@@ -144,7 +152,14 @@ function finishGameStart() {
   if (mode === "gps") { orientationTracker.start().then((enabled) => logTest(enabled ? "Boussole activée : le pion indique le nord." : "Boussole refusée ou indisponible : utilisation du cap GPS.")); applyPosition(heroPosition); }
   else { ui.gpsStatus.textContent = "Simulation : clique sur la carte ou fais glisser le pion."; applyPosition(heroPosition); }
   setTimeout(() => mapView.map.invalidateSize(), 0);
-  render(); logTest(`Mode ${mode === "gps" ? "GPS réel" : "simulation"} démarré.`);
+  render();
+  clearTimeout(firstRoyalMessengerTimer);
+  firstRoyalMessengerTimer = setTimeout(() => {
+    firstRoyalMessengerTimer = null;
+    game.offerQuest({ id: "missing-prospectors", title: "Les prospecteurs disparus", description: "Le maréchal souhaite vous confier la recherche d’une équipe royale disparue près de Valgrise.", startPhaseId: "reach-royal-camp", briefingLines: ["Le maréchal vous reçoit dans la salle des cartes.", "Une équipe de six prospecteurs et un jeune géologue n’est pas revenue de Valgrise.", "Rejoignez le camp royal, interrogez son chef et retrouvez les disparus."] });
+    announceMarshalConvocation(game.getAvailableQuests().find((quest) => quest.id === "missing-prospectors"));
+  }, 10_000);
+  logTest(`Mode ${mode === "gps" ? "GPS réel" : "simulation"} démarré. Le maréchal préparera ses ordres dans 10 secondes.`);
 }
 
 function startGps() {
@@ -208,7 +223,8 @@ function mappedLocations({ knownOnly = true } = {}) {
     const chiefConversation = can("talkChief") ? game.getLocationChiefConversation({ playerId: player.id, locationId: location.id }) : null;
     if (chiefConversation) {
       chiefConversation.options.unshift(...questInteractions.map((interaction) => ({ id: `quest-interaction:${interaction.interactionId}`, kind: "quest_interaction", label: interaction.label, responseLines: interaction.responseLines })));
-      actions.push({ id: "talk-chief", label: "Parler", details: chiefConversation });
+      const marshalHasQuest = location.id === "royal-capital" && game.getAvailableQuests().length > 0;
+      actions.push({ id: "talk-chief", label: marshalHasQuest ? "Se rendre chez le maréchal (quête)" : location.id === "royal-capital" ? "Parler au maréchal" : "Parler", details: chiefConversation });
     }
     else if (can("trade")) actions.push({ id: "trade", label: "Commercer" });
     if (!chiefConversation) questInteractions.forEach((interaction) => actions.push({ id: `quest-interaction:${interaction.interactionId}`, label: interaction.label }));
@@ -304,6 +320,10 @@ function applyAmbushEffects(battle, effects) {
 function selectAutonomousGroup(groupId) {
   const group = game.getAutonomousGroup(groupId); if (!group) return;
   const snapshot = visibleAutonomousGroups().find((item) => item.id === groupId); if (!snapshot) return;
+  if (group.type === "messenger" && group.message?.id === pendingRoyalMessage?.id) {
+    ui.sheet.hidden = false; ui.sheet.innerHTML = `<button class="sheet-close" type="button">Fermer</button><span class="sheet-state">Messager du royaume</span><h2>${group.message.title}</h2><p>${group.message.text}</p><div class="sheet-actions"><button data-read-royal-order>Recevoir l’ordre</button></div>`;
+    ui.sheet.querySelector(".sheet-close").onclick = () => closeSheet(ui.sheet); ui.sheet.querySelector("[data-read-royal-order]").onclick = () => { closeSheet(ui.sheet); receiveRoyalQuestMessage(); }; return;
+  }
   const attackRange = 8; const canAttack = snapshot.distance <= attackRange;
   ui.sheet.hidden = false; ui.sheet.innerHTML = `<button class="sheet-close" type="button">Fermer</button><span class="sheet-state">Groupe autonome détecté</span><h2>Armée du Chaos</h2><p>${snapshot.soldiers} soldats · distance ${Math.round(snapshot.distance)}${mode === "gps" ? " m" : ""}</p><div class="sheet-actions"><button data-autonomous-attack ${canAttack ? "" : "disabled"}>Attaquer</button></div>${canAttack ? "" : `<p class="sheet-feedback">Approchez-vous à moins de ${attackRange}${mode === "gps" ? " m" : " unités"}.</p>`}`;
   ui.sheet.querySelector(".sheet-close").onclick = () => closeSheet(ui.sheet); ui.sheet.querySelector("[data-autonomous-attack]").onclick = () => beginAutonomousBattle(group);
@@ -345,10 +365,39 @@ function applyPosition(position) {
 }
 function showTravelReward(travel) {
   deviceAlerts.reward({ kilometer: travel.completedKilometers > 0 });
-  const reward = document.createElement("div"); reward.className = `travel-reward${travel.completedKilometers > 0 ? " is-kilometer" : ""}`;
-  const distance = document.createElement("span"); distance.className = "travel-reward__distance"; distance.textContent = travel.completedKilometers > 0 ? `${travel.completed100MeterSteps * 100} m · bonus 1 km` : `${travel.completed100MeterSteps * 100} m`;
-  const experience = document.createElement("strong"); experience.className = "travel-reward__xp"; experience.textContent = `+${travel.experienceGained} XP`;
-  reward.append(distance, experience); travelRewardLayer.append(reward); reward.addEventListener("animationend", () => reward.remove(), { once: true });
+  showProgressReward({ caption: travel.completedKilometers > 0 ? `${travel.completed100MeterSteps * 100} m · bonus 1 km` : `${travel.completed100MeterSteps * 100} m`, title: `+${travel.experienceGained} XP`, className: travel.completedKilometers > 0 ? "is-kilometer" : "" });
+}
+function showProgressReward({ caption, title, className = "" }) {
+  const reward = document.createElement("div"); reward.className = `travel-reward ${className}`.trim();
+  const captionElement = document.createElement("span"); captionElement.className = "travel-reward__distance"; captionElement.textContent = caption;
+  const titleElement = document.createElement("strong"); titleElement.className = "travel-reward__xp"; titleElement.textContent = title;
+  reward.append(captionElement, titleElement); travelRewardLayer.append(reward); reward.addEventListener("animationend", () => reward.remove(), { once: true });
+}
+function summonRoyalQuestMessenger({ id, title, text, focusLocationId = null }) {
+  if (pendingRoyalMessage?.id === id || game.getAutonomousGroup(`royal-messenger-${id}`)) return false;
+  const origin = asGps(heroPosition); const position = mode === "simulation"
+    ? { latitude: origin.latitude + 3, longitude: origin.longitude + 2 }
+    : { latitude: origin.latitude, longitude: origin.longitude + 12 / (111_320 * Math.max(.01, Math.cos(origin.latitude * Math.PI / 180))) };
+  const groupId = `royal-messenger-${id}`;
+  game.addAutonomousGroup(new AutonomousGroup({ id: groupId, type: "messenger", owner: { kind: "faction", id: "kingdom" }, factionId: "kingdom", position, behavior: "passive", message: { id, title, text, focusLocationId }, history: [{ type: "royal_quest_notification", at: Date.now() }] }));
+  pendingRoyalMessage = { id, groupId, title, text, focusLocationId };
+  royalMessengerNotice.hidden = false;
+  royalMessengerNotice.innerHTML = `<span aria-hidden="true">➤</span><div><small>Un messager royal vous rejoint</small><strong>${title}</strong></div><button type="button">Lire l’ordre</button>`;
+  royalMessengerNotice.querySelector("button").onclick = receiveRoyalQuestMessage;
+  deviceAlerts.notify("notice"); logTest(`Messager royal : ${title}.`); render(); return true;
+}
+function receiveRoyalQuestMessage() {
+  if (!pendingRoyalMessage) return false;
+  const message = pendingRoyalMessage; pendingRoyalMessage = null; royalMessengerNotice.hidden = true; game.removeAutonomousGroup(message.groupId);
+  locationMessage = `${message.title}\n\n${message.text}`; logTest(locationMessage);
+  if (message.focusLocationId) { const position = positionFor(message.focusLocationId); if (position) mapView.focus(position); }
+  render(); return true;
+}
+function isHeroAtCapital() { const capital = game.getLocation("royal-capital"); const position = positionFor("royal-capital"); return Boolean(capital && position && distance(heroPosition, position) <= rangesFor(capital).interactionRadius); }
+function announceMarshalConvocation(offer) {
+  if (!offer) return false;
+  if (isHeroAtCapital()) { locationMessage = `Le maréchal est prêt à vous recevoir pour la mission « ${offer.title} ».`; deviceAlerts.notify("notice"); logTest(locationMessage); render(); if (currentLocationId === "royal-capital") selectLocation("royal-capital"); return true; }
+  return summonRoyalQuestMessenger({ id: `marshal-convocation-${offer.id}`, title: "Convocation du maréchal", text: `Le maréchal vous convoque à la capitale pour vous confier une nouvelle mission : « ${offer.title} ».`, focusLocationId: "royal-capital" });
 }
 function updatePresence() { if (!game) return; const player = game.getPlayer("local"); mappedLocations({ knownOnly: false }).forEach((item) => { const location = game.getLocation(item.id); if (item.distance <= item.detectionRadius) player.discoverLocation(item.id, item.nearby ? 3 : 1); if (item.nearby) { location.addHero(hero.id); const revival = game.reviveHeroAtBase({ heroId: hero.id, locationId: location.id }); if (revival.success) { locationMessage = `Le héros reprend forme avec ${revival.health}/${revival.maximumHealth} PV.`; logTest(`Retour à la base : héros actif avec ${revival.health} PV.`); } } else location.removeHero(hero.id); }); }
 function handleLocationEvent(event) {
@@ -378,18 +427,23 @@ function handleLocationEvent(event) {
 function applyQuestFeedback(progress) {
   const narration = progress.appliedEvents.flatMap((entry) => entry.appliedEffects).find((effect) => effect.type === "narration");
   const evacuationResult = progress.appliedEvents.flatMap((entry) => entry.appliedEffects).find((effect) => effect.type === "evacuation_completed");
+  const offeredQuest = progress.appliedEvents.flatMap((entry) => entry.appliedEffects).find((effect) => effect.type === "quest_offered" && effect.offered);
   const revealedLocations = progress.appliedEvents.flatMap((entry) => entry.appliedEffects).filter((effect) => effect.type === "location_revealed");
   revealedLocations.forEach((effect) => { ensureRevealedLocationInsidePlayArea(effect.locationId); game.getPlayer("local").discoverLocation(effect.locationId, 2); if (enabledGpsLocationIds !== null) enabledGpsLocationIds.add(effect.locationId); });
   if (revealedLocations.length > 0) rebuildLocationEngine();
   const revealed = revealedLocations[0] ? game.getLocation(revealedLocations[0].locationId) : null;
-  locationMessage = `${narration?.text ?? "Objectif accompli."}${revealed ? `\n\n${revealed.name} révélée sur la carte.` : ""}${evacuationResult ? `\n\nBilan : ${evacuationResult.result.score}/100 · ${evacuationResult.result.grade} · ${evacuationResult.people} habitant(s) sauvés.` : ""}`;
+  const nextQuest = progress.nextPhaseId ? game.getActiveQuest() : null;
+  const nextObjective = nextQuest?.objectives.find((objective) => objective.state === "active") ?? null;
+  const nextObjectiveMessage = nextObjective ? `\n\nNouvel objectif — ${nextQuest.title} : ${nextObjective.text}.` : "";
+  locationMessage = `${narration?.text ?? "Objectif accompli."}${revealed ? `\n\n${revealed.name} révélée sur la carte.` : ""}${nextObjectiveMessage}${evacuationResult ? `\n\nBilan : ${evacuationResult.result.score}/100 · ${evacuationResult.result.grade} · ${evacuationResult.people} habitant(s) sauvés.` : ""}`;
   deviceAlerts.notify("notice");
   logTest(locationMessage);
   if (progress.nextPhaseId) game.startCurrentScenarioPlacements(asGps(heroPosition));
   syncQuestTrace();
   syncQuestBattlefield();
   syncEvacuationCampSearch();
-  if (revealed) mapView.focus(positionFor(revealed.id));
+  if (offeredQuest) announceMarshalConvocation(game.getAvailableQuests().find((quest) => quest.id === offeredQuest.questId));
+  if (revealed) { pendingRevealedLocationId = revealed.id; mapView.focus(positionFor(revealed.id)); }
 }
 
 function syncEvacuationCampSearch() {
@@ -570,6 +624,11 @@ function selectDynamicSite(id, { approached = false } = {}) {
   ui.sheet.querySelector(".sheet-close").onclick = () => { currentDynamicSiteId = null; closeSheet(ui.sheet); };
   ui.sheet.querySelectorAll("[data-site-search]").forEach((button) => button.onclick = () => { const stockOpened = searchBattlefield(button.dataset.siteSearch, site.id); currentDynamicSiteId = null; if (!stockOpened) closeSheet(ui.sheet); });
 }
+function prepareQuestInteraction(interactionId) {
+  if (interactionId !== "receive-evacuation-order" || mode !== "simulation") return;
+  const campPosition = positionFor("evacuation-camp");
+  if (campPosition) game.updateLocationPosition({ locationId: "evacuation-camp", position: asGps(campPosition) });
+}
 function runAction(action, { returnToWorld = false } = {}) {
   const location = game.getLocation(currentLocationId);
   if (action === "astral-travel") {
@@ -581,7 +640,8 @@ function runAction(action, { returnToWorld = false } = {}) {
     openChiefDialogue(location.id);
     return;
   } else if (action.startsWith("quest-interaction:")) {
-    const result = game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId: action.slice("quest-interaction:".length), locationId: location.id });
+    const interactionId = action.slice("quest-interaction:".length); prepareQuestInteraction(interactionId);
+    const result = game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId, locationId: location.id });
     locationMessage = result ? "Objectif accompli." : action === "quest-interaction:depart-evacuation-camp" ? "Départ impossible : tous les habitants doivent être chargés et les démantèlements terminés." : "Cette interaction n'a aucun effet.";
     if (result) applyQuestFeedback(result);
   } else if (action.startsWith("dismantle:")) {
@@ -640,7 +700,12 @@ function runAction(action, { returnToWorld = false } = {}) {
     else openBattle();
   }
   render();
-  if (action !== "battle") { if (returnToWorld) { worldMessage = locationMessage; renderWorld(); } else selectLocation(currentLocationId); }
+  if (action !== "battle") {
+    if (pendingRevealedLocationId) {
+      const revealedLocationId = pendingRevealedLocationId; pendingRevealedLocationId = null; currentLocationId = revealedLocationId;
+      const revealedPosition = positionFor(revealedLocationId); if (revealedPosition) mapView.focus(revealedPosition); selectLocation(revealedLocationId);
+    } else if (returnToWorld) { worldMessage = locationMessage; renderWorld(); } else selectLocation(currentLocationId);
+  }
 }
 
 function openChiefDialogue(locationId) {
@@ -656,6 +721,7 @@ function conversationFor(locationId) {
   if (!conversation) return null;
   const questInteractions = game.getQuestInteractionsForLocation(locationId);
   conversation.options.unshift(...questInteractions.map((interaction) => ({ id: `quest-interaction:${interaction.interactionId}`, kind: "quest_interaction", label: interaction.label, responseLines: interaction.responseLines })));
+  if (locationId === "royal-capital") conversation.options.unshift(...game.getAvailableQuests().map((quest) => ({ id: `accept-marshal-quest:${quest.id}`, kind: "quest_offer", label: `Recevoir les ordres : ${quest.title}` })));
   return conversation;
 }
 
@@ -677,12 +743,22 @@ function renderActiveDialogue() {
 function chooseDialogueOption(optionId) {
   if (!activeDialogue) return;
   let lines, nextOptions = null;
-  if (optionId.startsWith("quest-interaction:")) {
+  if (optionId.startsWith("accept-marshal-quest:")) {
+    const questId = optionId.slice("accept-marshal-quest:".length); const offer = game.getAvailableQuests().find((quest) => quest.id === questId);
+    const accepted = offer ? game.acceptAvailableQuest(questId) : { success: false };
+    if (accepted.success) { game.startCurrentScenarioPlacements(asGps(heroPosition)); lines = offer.briefingLines.length ? [...offer.briefingLines, `Nouvelle quête — ${offer.title} : ${offer.description}`] : [offer.description, `Nouvelle quête — ${offer.title}.`]; locationMessage = `Nouvelle quête reçue du maréchal : ${offer.title}.`; logTest(locationMessage); }
+    else lines = ["Le maréchal n’a aucun nouvel ordre à vous confier."];
+  } else if (optionId.startsWith("quest-interaction:")) {
     const selectedOption = activeDialogue.conversation.options.find((option) => option.id === optionId);
-    const progress = game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId: optionId.slice("quest-interaction:".length), locationId: activeDialogue.locationId });
+    const interactionId = optionId.slice("quest-interaction:".length);
+    prepareQuestInteraction(interactionId);
+    const progress = game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId, locationId: activeDialogue.locationId });
     const narration = progress?.appliedEvents.flatMap((entry) => entry.appliedEffects).find((effect) => effect.type === "narration");
     lines = selectedOption?.responseLines?.length ? [...selectedOption.responseLines] : [narration?.text ?? (progress ? "Votre mission est mise à jour." : "Nous avons déjà parlé de cela.")];
-    if (progress) { applyQuestFeedback(progress); lines = [locationMessage]; }
+    if (progress) {
+      applyQuestFeedback(progress);
+      lines = selectedOption?.responseLines?.length ? [...selectedOption.responseLines, locationMessage] : [locationMessage];
+    }
   } else {
     const result = game.selectLocationChiefOption({ playerId: "local", heroId: hero.id, locationId: activeDialogue.locationId, optionId });
     lines = result.success ? result.lines ?? [result.message] : [`Conversation impossible : ${result.reason}.`];
@@ -700,6 +776,11 @@ function chooseDialogueOption(optionId) {
 function closeActiveDialogue() {
   activeDialogue = null;
   closeDialogueView($("#dialogue-layer"));
+  if (pendingRevealedLocationId) {
+    const locationId = pendingRevealedLocationId; pendingRevealedLocationId = null;
+    const position = positionFor(locationId); if (position) mapView.focus(position);
+    selectLocation(locationId);
+  }
   render();
 }
 
@@ -829,11 +910,13 @@ function render() {
   ui.heroContent.querySelector('[data-class-action="astral-travel"]')?.addEventListener("click", useAstralTravel);
   ui.heroContent.querySelectorAll("[data-level-up]").forEach((button) => button.addEventListener("click", () => { if (!window.confirm(`Choisir définitivement ${button.querySelector("strong").textContent} ?`)) return; game.selectHeroLevelUp({ heroId: hero.id, pendingId: button.dataset.levelUp, upgradeId: button.dataset.upgrade }); render(); }));
   bindEquipmentView(ui.heroContent, { onEquip: (packageId) => { const result = game.equipHeroItem({ playerId: hero.playerId, heroId: hero.id, packageId }); logTest(result.success ? `${result.itemId} équipé sur ${result.slot}.` : `Équipement impossible : ${result.reason}.`); render(); }, onUnequip: (slot) => { const result = game.unequipHeroItem({ playerId: hero.playerId, heroId: hero.id, slot }); logTest(result.success ? `${result.itemId} replacé dans les bagages.` : `Retrait impossible : ${result.reason}.`); render(); } });
-  ui.heroContent.querySelector("[data-hero-level-up]")?.addEventListener("click", () => { const result = game.levelUpHero({ heroId: hero.id }); if (!result.success) logTest(`Evolution impossible : ${result.reason}.`); render(); });
+  ui.heroContent.querySelector("[data-hero-level-up]")?.addEventListener("click", () => { const result = game.levelUpHero({ heroId: hero.id }); if (!result.success) logTest(`Evolution impossible : ${result.reason}.`); else { deviceAlerts.reward({ kind: "hero" }); showProgressReward({ caption: "Niveau supérieur", title: `Niveau ${result.pending.level}`, className: "is-hero-level" }); } render(); });
   ui.heroContent.onclick = (event) => { let changed = false; if (selectedHeroTrait && !event.target.closest("[data-trait-id], .trait-detail")) { selectedHeroTrait = null; changed = true; } if (selectedHeroStat && !event.target.closest("[data-hero-stat], .stat-detail")) { selectedHeroStat = null; changed = true; } if (changed) render(); };
   ui.armyContent.innerHTML = `<div class="army-list">${hero.army.units.map((unit) => { const definition = game.unitDefinitions.get(unit.typeId); const unitName = unit.name ?? definition?.name ?? unit.typeId; const stats = definition?.stats; const illustration = renderUnitTypeIcon({ typeId: unit.typeId, tags: definition?.tags ?? [], range: stats?.range ?? 1 }); const expanded = expandedArmyUnitId === unit.id; const currentHealth = unit.soldierHealth.reduce((total, health) => total + health, 0); const maximumHealth = unit.maxQuantity * unit.healthPerSoldier; return `<article class="army-card${expanded ? " is-expanded" : ""}" data-army-unit="${unit.id}" role="button" tabindex="0" aria-expanded="${expanded}" aria-label="${expanded ? "Réduire" : "Afficher les détails de"} ${unitName}"><div class="army-illustration" aria-hidden="true">${illustration}</div><div class="army-card__content"><p class="eyebrow">${rankLabel(UNIT_RANKS, unit.rank)} · niveau ${unit.level}</p><div class="army-card__heading"><h3>${unitName}</h3><span class="army-card__chevron" aria-hidden="true">⌄</span></div>${unitHealthBar(unit)}<div class="army-card__summary"><strong>${unit.combatantCount}/${unit.maxQuantity} aptes</strong><span>${currentHealth}/${maximumHealth} PV</span></div><div class="army-card__details" ${expanded ? "" : "hidden"}><div class="army-card__stats"><div><strong>${unit.quantity}/${unit.maxQuantity}</strong><span>Effectif</span></div><div><strong>${unit.combatantCount}</strong><span>Apte(s)</span></div><div><strong>${unit.woundedCount}</strong><span>Blessé(s)</span></div><div><strong>${unit.experience}</strong><span>Expérience</span></div>${stats ? `<div><strong>${stats.attack}</strong><span>Attaque</span></div><div><strong>${stats.defense}</strong><span>Défense</span></div><div><strong>${stats.speed}</strong><span>Vitesse</span></div>` : ""}</div><div class="army-card__meta"></div><div class="army-card__actions"><button type="button" class="disband-unit-button" data-disband-unit="${unit.id}" aria-label="Dissoudre ${unitName}">Dissoudre</button></div></div></div></article>`; }).join("") || '<p class="text-muted">Aucune unité.</p>'}</div>`; renderInventoryView({ element: ui.inventory, hero, slotCount: hero.bagSlotCount });
+  ui.armyContent.querySelector(".army-card.is-expanded .army-card__details")?.insertAdjacentHTML("afterbegin", '<button type="button" class="army-detail-back secondary-button" data-army-back>← Retour aux armées</button>');
   if (hero.classId === "ranger") ui.armyContent.querySelectorAll(".army-card__actions").forEach((actions) => actions.insertAdjacentHTML("afterbegin", `<button type="button" class="secondary-button" data-prepare-ambush="${actions.closest("[data-army-unit]").dataset.armyUnit}">Cacher en embuscade</button>`));
   const toggleArmyCard = (card) => { expandedArmyUnitId = card.getAttribute("aria-expanded") === "true" ? null : card.dataset.armyUnit; render(); };
+  ui.armyContent.querySelector("[data-army-back]")?.addEventListener("click", () => { expandedArmyUnitId = null; render(); });
   ui.armyContent.querySelectorAll("[data-army-unit]").forEach((card) => {
     card.addEventListener("click", (event) => { if (!event.target.closest("button")) toggleArmyCard(card); });
     card.addEventListener("keydown", (event) => { if ((event.key === "Enter" || event.key === " ") && event.target === card) { event.preventDefault(); toggleArmyCard(card); } });
@@ -861,11 +944,12 @@ function render() {
     const allowed = authority.used - currentCost + nextCost <= authority.maximum;
     card.querySelector(".army-card__actions")?.insertAdjacentHTML("afterbegin", `<button type="button" class="promote-unit-button" data-promote-unit="${unit.id}" ${allowed ? "" : "disabled"}>Promouvoir ${rankLabel(UNIT_RANKS, unit.nextRank.id)} · Autorité ${currentCost} → ${nextCost}${allowed ? "" : " · insuffisante"}</button>`);
   });
-  ui.armyContent.querySelectorAll("[data-promote-unit]").forEach((button) => button.addEventListener("click", () => { const result = game.promoteUnit({ heroId: hero.id, unitId: button.dataset.promoteUnit }); if (!result.success) logTest(`Promotion impossible : ${result.reason}.`); render(); }));
+  ui.armyContent.querySelectorAll("[data-promote-unit]").forEach((button) => button.addEventListener("click", () => { const unit = hero.army.getUnit(button.dataset.promoteUnit); const result = game.promoteUnit({ heroId: hero.id, unitId: button.dataset.promoteUnit }); if (!result.success) logTest(`Promotion impossible : ${result.reason}.`); else { const name = unit?.name ?? game.unitDefinitions.get(unit?.typeId)?.name ?? "Unité"; deviceAlerts.reward({ kind: "unit" }); showProgressReward({ caption: `${name} · ${rankLabel(UNIT_RANKS, result.rank)}`, title: `Niveau ${result.level}`, className: "is-unit-level" }); } render(); }));
   const heroNotices = progress.availableLevelUps + hero.pendingLevelUps.length;
   const unitNotices = hero.army.units.filter((unit) => unit.canPromote).length;
   [["hero", heroNotices], ["army", unitNotices]].forEach(([view, count]) => { const button = document.querySelector(`[data-view="${view}"]`); button?.classList.toggle("has-notice", count > 0); if (button) button.dataset.notice = count > 9 ? "9+" : String(count); });
   const activeQuest = game.getActiveQuest();
+  const availableQuests = game.getAvailableQuests();
   const placement = activeQuest ? Object.values(game.scenarioRuntime?.placements ?? {}).find((candidate) => candidate.status === "walking" || candidate.status === "ready") : null;
   const questHudModel = buildQuestHudModel({ quest: activeQuest, placement, actionSlotId: pendingScenarioPlacementSlotId });
   renderQuestHud({ element: questHud, model: questHudModel, expanded: questHudExpanded, onToggle: () => { questHudExpanded = !questHudExpanded; render(); }, onAction: confirmScenarioPlacement });
@@ -875,7 +959,8 @@ function render() {
   const evacuation = game.evacuationStates["royal-camp-evacuation"]; const evacuationClock = evacuation && !evacuation.completedAt ? `<p class="quest-deadline">Évacuation : ${Math.max(0, Math.ceil((evacuation.expiresAt - Date.now()) / 60_000))} min restantes</p>` : "";
   const abandonAction = activeQuest?.status === "active" && activeQuest.objectives.length ? '<button type="button" class="secondary-button" id="abandon-current-quest">Abandonner la quête</button>' : "";
   const failureNotice = activeQuest?.status === "failed" ? '<p class="quest-deadline">Quête échouée</p>' : "";
-  ui.quests.innerHTML = activeQuest ? `<article class="quest-card"><small>Quête principale</small><strong>${activeQuest.title}</strong><p>${activeQuest.description}</p>${failureNotice}${evacuationClock}${distanceProgress}<ul>${objectives}</ul>${placementAction}${abandonAction}</article>` : '<p class="text-muted">Aucune quête active.</p>';
+  const availableAction = availableQuests.length ? `<p class="text-muted">Convocation du maréchal : ${availableQuests[0].title}. Rejoignez la capitale pour recevoir ses ordres.</p>` : "";
+  ui.quests.innerHTML = activeQuest ? `<article class="quest-card"><small>Quête principale</small><strong>${activeQuest.title}</strong><p>${activeQuest.description}</p>${failureNotice}${evacuationClock}${distanceProgress}<ul>${objectives}</ul>${placementAction}${abandonAction}</article>${availableAction}` : availableAction || '<p class="text-muted">Aucune quête active.</p>';
   ui.quests.querySelector("#confirm-scenario-placement")?.addEventListener("click", confirmScenarioPlacement);
   ui.quests.querySelector("#abandon-current-quest")?.addEventListener("click", () => { if (!window.confirm("Abandonner cette quête ? Ses objectifs seront marqués comme échoués.")) return; const result = game.abandonCurrentQuest(); if (!result) return; game.startCurrentScenarioPlacements(asGps(heroPosition)); const narration = result.appliedEvent?.appliedEffects?.find((effect) => effect.type === "narration"); locationMessage = narration?.text ?? "Quête abandonnée."; render(); });
   ui.sitesStatus.textContent = `${game.battleSites.length} champ(s) de bataille · ${game.lootSites.length} site(s) de butin · ${sites.length} visible(s)`;
@@ -888,6 +973,11 @@ function setBattleNavigationLocked(locked) { $(".bottom-nav").classList.toggle("
 function switchView(name) { if (activeBattle?.status === "active" && name !== "battle") return false; document.querySelectorAll(".view").forEach((view) => view.classList.toggle("is-active", view.id === `${name}-view`)); document.querySelectorAll("[data-view]").forEach((button) => button.classList.toggle("is-active", button.dataset.view === name)); if (name === "map") setTimeout(() => mapView.map.invalidateSize(), 0); else closeSheet(ui.sheet); if (name === "world") renderWorld(); return true; }
 
 ui.create.onclick = start; ui.recenter.onclick = () => { if (mapFollowMode === "free") { mapFollowMode = mapView.bearingEnabled ? "bearing" : "centered"; } else if (mapFollowMode === "centered" && mode === "gps") { mapView.setBearingEnabled(true); mapFollowMode = "bearing"; } else { mapView.setBearingEnabled(false); mapFollowMode = "centered"; } mapView.focus(heroPosition); updateMapFollowButton(); }; $("#toggle-field-tools").onclick = () => { ui.tools.hidden = false; }; $("#close-field-tools").onclick = () => { ui.tools.hidden = true; };
+const closeGameMenu = () => { $("#landscape-tools").classList.remove("is-open"); $("#toggle-game-menu").setAttribute("aria-expanded", "false"); };
+$("#toggle-game-menu").onclick = () => { const open = $("#landscape-tools").classList.toggle("is-open"); $("#toggle-game-menu").setAttribute("aria-expanded", String(open)); };
+$("#close-game-menu").onclick = closeGameMenu;
+$("#open-field-tools").onclick = () => { closeGameMenu(); ui.tools.hidden = false; };
+$("#open-cheat-tools").onclick = () => { closeGameMenu(); openCheats(); };
 $("#draw-area").onclick = () => { interactionMode = interactionMode === "draw-area" ? null : "draw-area"; logTest(interactionMode ? "Tracé actif : touchez la carte." : "Tracé suspendu."); };
 $("#clear-area").onclick = () => { field.clearPlayArea(); validatedPlayArea = null; playAreaGrid = null; playAreaPresence.setPlayArea(null); lastVisitedCellId = null; persistFieldState(); $("#toggle-heatmap").disabled = true; mapView.setPlayArea([]); render(); logTest("Zone et grille effacées."); };
 $("#validate-area").onclick = () => { try { validatePlayArea(); } catch (error) { logTest(error.message); } };

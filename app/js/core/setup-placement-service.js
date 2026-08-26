@@ -1,6 +1,8 @@
+import { distanceMeters } from "./geo.js";
+
 /** Génère des positions espacées dans une PlayArea, sans dépendance au DOM. */
 export class SetupPlacementService {
-  constructor({ distanceFn }) { this.distanceFn = distanceFn; }
+  constructor({ distanceFn = distanceMeters } = {}) { this.distanceFn = distanceFn; }
 
   generate({ playArea, count, occupied = [], minimumDistance = 0 }) {
     if (!Number.isInteger(count) || count < 0) throw new RangeError("Le nombre de placements doit être un entier positif ou nul.");

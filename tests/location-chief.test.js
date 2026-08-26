@@ -26,3 +26,11 @@ test("une conversation expose son illustration et ses répliques d'accueil", () 
   assert.equal(conversation.portrait, "assets/armand.png");
   assert.deepEqual(conversation.openingLines, ["Entrez.", "Nous avons peu de temps."]);
 });
+
+test("les répliques d'accueil changent selon la phase et l'issue de la quête", () => {
+  const contextual = new Location({ id: "camp", name: "Camp", type: "camp", source: "test", position: { latitude: 0, longitude: 0 }, population: 4, chief: { name: "Armand", openingLines: ["Accueil ordinaire."], contexts: [{ id: "failed", phaseStatuses: ["failed"], openingLines: ["La mission a échoué."] }, { id: "return", phaseIds: ["return-geologist"], openingLines: ["Le géologue est vivant !"] }] } });
+  const service = new LocationChiefService();
+  assert.deepEqual(service.getConversation({ location: contextual, currentPhaseId: "return-geologist", currentPhaseStatus: "active" }).openingLines, ["Le géologue est vivant !"]);
+  assert.deepEqual(service.getConversation({ location: contextual, currentPhaseId: "search", currentPhaseStatus: "failed" }).openingLines, ["La mission a échoué."]);
+  assert.deepEqual(service.getConversation({ location: contextual, currentPhaseId: "unrelated", currentPhaseStatus: "active" }).openingLines, ["Accueil ordinaire."]);
+});

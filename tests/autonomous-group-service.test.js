@@ -15,6 +15,15 @@ test("attack_location produit une demande d'attaque à l'arrivée et une trace",
   assert.equal(result.events[0].type, "autonomous_group_location_attack_requested"); assert.equal(result.traces.length, 7); assert.ok(result.traces.every((trace) => trace.kind === "passage")); assert.equal(group.status, "interrupted");
 });
 
+test("une colonne en simulation parcourt les unités de carte sans conversion GPS", () => {
+  const service = new AutonomousGroupService();
+  const group = new AutonomousGroup({ id: "sim-column", type: "army", owner: { kind: "faction", id: "chaos" }, position: { latitude: 0, longitude: 0 }, behavior: "aggressive", mission: { kind: "attack_location", targetId: "camp", coordinateMode: "simulation", speedMetersPerSecond: 1 } });
+  service.advance({ groups: [group], locations: [{ id: "camp", position: { latitude: 0, longitude: 10 } }], now: 0, speedFor: () => 1 });
+  assert.equal(group.movement.arrivesAt, 10_000);
+  service.advance({ groups: [group], locations: [{ id: "camp", position: { latitude: 0, longitude: 10 } }], now: 5_000, speedFor: () => 1 });
+  assert.deepEqual(group.position, { latitude: 0, longitude: 5 });
+});
+
 test("un groupe autonome refuse une destination hors PlayArea", () => {
   const service = new AutonomousGroupService();
   const group = new AutonomousGroup({ id: "outside-army", type: "army", owner: { kind: "faction", id: "chaos" }, position: { latitude: 0, longitude: 0 }, mission: { kind: "attack_location", targetId: "outside-fort" } });
@@ -29,6 +38,15 @@ test("une embuscade attaque immédiatement une cible entrée dans son rayon", ()
   service.startAmbush(group, { now: 0, durationMs: 60_000, radiusMeters: 50 });
   const result = service.advance({ groups: [group], targets: [{ id: "hero", kind: "hero", hostile: true, position: { latitude: 0, longitude: .0001 } }], playArea: area, now: 10_000 });
   assert.equal(result.events[0].type, "autonomous_group_ambush_attack_requested"); assert.equal(group.status, "interrupted"); assert.equal(group.interruption.mode, "immediate_attack"); assert.equal(result.traces[0].kind, "ambush");
+});
+
+test("une garde agressive reste immobile et attaque seulement une cible trop proche", () => {
+  let id = 0; const service = new AutonomousGroupService({ idGenerator: (prefix) => `${prefix}-${++id}` });
+  const group = new AutonomousGroup({ id: "guard", type: "army", owner: { kind: "faction", id: "chaos" }, position: { latitude: 0, longitude: 0 }, behavior: "aggressive", mission: { kind: "guard", center: { latitude: 0, longitude: 0 }, engagementRadiusMeters: 8, coordinateMode: "gps" } });
+  const far = service.advance({ groups: [group], targets: [{ id: "hero", kind: "hero", hostile: true, position: { latitude: 0, longitude: .0001 } }], playArea: area, now: 0 });
+  assert.equal(far.events.length, 0); assert.equal(group.status, "idle"); assert.equal(group.movement, null);
+  const near = service.advance({ groups: [group], targets: [{ id: "hero", kind: "hero", hostile: true, position: { latitude: 0, longitude: .00005 } }], playArea: area, now: 1_000 });
+  assert.equal(near.events[0].type, "autonomous_group_attack_requested"); assert.equal(group.status, "interrupted"); assert.equal(group.movement, null);
 });
 
 test("la résolution d'un convoi pillé produit une trace de destruction", () => {
