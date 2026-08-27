@@ -4,6 +4,7 @@ let activeActionMenu = null;
 let activeLocationId = null;
 
 export function renderLocationSheet({ element, location, onClose, onAction, onOpenWorld = null, onOpenReserves = null, onOpenGarrison = null }) {
+  element.classList.remove("location-tab");
   if (activeLocationId !== location.id) { activeLocationId = location.id; activeActionMenu = null; }
   const recruitActions = location.actions.filter((action) => action.id.startsWith("recruit:"));
   const reserveActions = location.actions.filter((action) => action.id.startsWith("reserve-balance:") || action.id.startsWith("production-stock:") || action.id === "prepare-population" || action.id === "stored-population" || action.id.startsWith("settle-population:"));
@@ -47,10 +48,27 @@ export function renderLocationSheet({ element, location, onClose, onAction, onOp
   ["click", "pointerdown", "pointerup", "touchstart", "touchmove", "touchend"].forEach((type) => element.addEventListener(type, (event) => event.stopPropagation()));
 }
 
+export function renderLocationTab({ element, location, onOpen }) {
+  element.hidden = false;
+  element.innerHTML = "";
+  element.classList.remove("garrison-sheet");
+  element.classList.add("location-tab");
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "location-tab__button";
+  button.setAttribute("aria-label", `Ouvrir la fiche de ${location.name}`);
+  const type = document.createElement("small"); type.textContent = location.type;
+  const name = document.createElement("strong"); name.textContent = location.name;
+  const chevron = document.createElement("span"); chevron.setAttribute("aria-hidden", "true"); chevron.textContent = "‹";
+  button.append(type, name, chevron);
+  button.addEventListener("click", onOpen);
+  element.append(button);
+}
+
 function improvementCard(action) { const details = action.details ?? {}; const costs = Object.entries(details.costs ?? {}).map(([id, amount]) => `${amount} ${id}`).join(" · "); return `<article class="recruit-option"><div><strong>${action.label}</strong><span>${details.slotType === "fundamental" ? "Fondation" : "Développement"}</span></div><p>${details.description ?? ""}</p><footer><span>${costs}</span><button data-action="${action.id}" type="button">Construire</button></footer></article>`; }
 function structureList(structures = []) { if (!structures.length) return ""; return `<section class="location-structures"><h3>Bâtiments</h3><ul>${structures.map((structure) => `<li><span>${structure.id} <small>Niv. ${structure.level}</small></span>${structure.dismantling ? '<small class="structure-dismantling">Démontage en cours</small>' : structure.canDismantle ? `<button class="structure-remove" data-action="dismantle:${structure.id}" type="button" aria-label="Démanteler ${structure.id}" title="Démanteler">×</button>` : ""}</li>`).join("")}</ul></section>`; }
 function reserveBalanceForm(action) { const details = action.details ?? {}; return `<form class="reserve-balance" data-reserve-action="${action.id}" data-total="${details.total}"><strong>${details.resourceName}</strong><div class="reserve-balance__amounts"><span>Lieu <output data-location-amount>${details.locationAmount}</output></span><span>Héros <output data-hero-amount>${details.heroAmount}</output></span></div><input aria-label="Répartition de ${details.resourceName}" type="range" min="0" max="${details.total}" value="${details.heroAmount}" step="1" /><button type="submit">Appliquer</button></form>`; }
 function updateReserveBalance(input) { const form = input.closest("[data-reserve-action]"); const heroAmount = Number(input.value); form.querySelector("[data-hero-amount]").value = heroAmount; form.querySelector("[data-location-amount]").value = Number(form.dataset.total) - heroAmount; }
 function campProgress(development) { if (!development) return ""; const blockers = development.levelUp.blockers ?? []; return `<section class="camp-progress"><strong>Camp ${development.experience}/${development.experienceRequired} XP</strong><span>${development.slots.used}/${development.slots.maximum} emplacements de développement</span>${blockers.length ? `<small>${blockers.join(" · ")}</small>` : development.levelUp.eligible ? "<small>Prêt à évoluer</small>" : ""}</section>`; }
 
-export function closeSheet(element) { element.hidden = true; element.innerHTML = ""; element.classList.remove("garrison-sheet"); activeActionMenu = null; activeLocationId = null; }
+export function closeSheet(element) { element.hidden = true; element.innerHTML = ""; element.classList.remove("garrison-sheet", "location-tab"); activeActionMenu = null; activeLocationId = null; }

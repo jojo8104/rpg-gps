@@ -1,14 +1,30 @@
 /** Définition immuable d'un scénario, indépendante de la partie et de la géographie réelle. */
+import { Trail } from "./trail.js";
+
 export class Scenario {
-  constructor({ id, name, intro, initialPhaseId, playerStart = {}, locationSlots = [], factions = [], phases, events = [], victoryConditions = [], defeatConditions = [] }) {
+  constructor({ id, name, intro, initialPhaseId, playerStart = {}, locationSlots = [], factions = [], trails = [], worldState = {}, phases, events = [], victoryConditions = [], defeatConditions = [] }) {
     this.id = Scenario.#requireText(id, "L'identifiant du scénario");
     this.name = Scenario.#requireText(name, "Le nom du scénario");
     this.intro = Scenario.#requireText(intro, "Le contexte initial");
     this.playerStart = Scenario.#createPlayerStart(playerStart);
     this.locationSlots = Scenario.#createRecords(locationSlots, "Les lieux", ["id", "type"]);
     this.factions = Scenario.#createRecords(factions, "Les factions", ["id", "name"]);
+    Scenario.#requireObject(worldState, "L'état mondial initial");
+    this.worldState = structuredClone(worldState);
+    if (!Array.isArray(trails)) throw new TypeError("Les pistes doivent être une liste.");
+    this.trails = trails.map((trail) => trail instanceof Trail ? trail : new Trail(trail));
+    if (new Set(this.trails.map((trail) => trail.id)).size !== this.trails.length) throw new RangeError("Les identifiants de piste doivent être uniques.");
+    const slotIds = new Set(this.locationSlots.map((slot) => slot.id));
+    if (this.trails.some((trail) => !slotIds.has(trail.destinationLocationSlotId))) throw new RangeError("La destination d'une piste doit être un lieu du scénario.");
     this.events = Scenario.#createEvents(events);
     this.phases = Scenario.#createPhases(phases);
+    const trailById = new Map(this.trails.map((trail) => [trail.id, trail]));
+    this.phases.flatMap((phase) => phase.objectives).forEach((objective) => {
+      if (objective.trigger?.type !== "trailPointInspected") return;
+      const trail = trailById.get(objective.trigger.trailId);
+      if (trail === undefined) throw new RangeError("Un objectif référence une piste inexistante.");
+      if (!trail.points.some((point) => point.traceId === objective.trigger.traceId)) throw new RangeError("Un objectif référence un point absent de sa piste.");
+    });
     this.initialPhaseId = Scenario.#requireText(initialPhaseId, "La phase initiale");
     if (!this.phases.some((phase) => phase.id === this.initialPhaseId)) throw new RangeError("La phase initiale n'existe pas.");
     this.victoryConditions = Scenario.#createTextList(victoryConditions, "Les conditions de victoire");
@@ -22,12 +38,14 @@ export class Scenario {
     return {
       id: this.id, name: this.name, intro: this.intro, initialPhaseId: this.initialPhaseId, playerStart: { resources: { ...this.playerStart.resources }, unitStacks: this.playerStart.unitStacks.map((stack) => ({ ...stack })) },
       locationSlots: this.locationSlots.map((location) => structuredClone(location)),
-      factions: this.factions.map((faction) => ({ ...faction })),
+      factions: this.factions.map((faction) => ({ ...faction })), trails: this.trails.map((trail) => trail.toJSON()), worldState: structuredClone(this.worldState),
       phases: this.phases.map((phase) => ({
         ...phase,
         objectives: phase.objectives.map((objective) => structuredClone(objective)),
         eventIds: [...phase.eventIds],
         transitions: phase.transitions.map((transition) => ({ ...transition })),
+        choices: phase.choices.map((choice) => structuredClone(choice)),
+        listeners: phase.listeners.map((listener) => structuredClone(listener)),
       })),
       events: this.events.map((event) => ({ ...event, effects: event.effects.map((effect) => ({ ...effect })) })),
       victoryConditions: [...this.victoryConditions], defeatConditions: [...this.defeatConditions],
@@ -46,7 +64,9 @@ export class Scenario {
       const eventIds = Scenario.#createTextList(phase.eventIds ?? [], "Les événements de phase");
       const transitions = Scenario.#createTransitions(phase.transitions ?? []);
       const failure = Scenario.#createFailure(phase.failure);
-      return { id, title: Scenario.#requireText(phase.title, "Le titre de phase"), description: Scenario.#requireText(phase.description, "La description de phase"), type: Scenario.#requireText(phase.type ?? "main", "Le type de phase"), objectives, eventIds, transitions, failure };
+      const choices = Scenario.#createChoices(phase.choices ?? []);
+      const listeners = Scenario.#createListeners(phase.listeners ?? []);
+      return { id, title: Scenario.#requireText(phase.title, "Le titre de phase"), description: Scenario.#requireText(phase.description, "La description de phase"), type: Scenario.#requireText(phase.type ?? "main", "Le type de phase"), objectives, eventIds, transitions, choices, listeners, failure };
     });
   }
 
@@ -98,14 +118,32 @@ export class Scenario {
     });
   }
 
+  static #createChoices(choices) {
+    if (!Array.isArray(choices)) throw new TypeError("Les choix doivent être une liste.");
+    const ids = new Set();
+    return choices.map((choice) => {
+      Scenario.#requireObject(choice, "Un choix"); const id = Scenario.#requireText(choice.id, "L'identifiant de choix");
+      if (ids.has(id)) throw new RangeError("Les identifiants de choix doivent être uniques dans une phase."); ids.add(id);
+      const result = { id, label: Scenario.#requireText(choice.label, "Le libellé du choix"), nextPhase: Scenario.#requireText(choice.nextPhase, "La phase cible du choix") };
+      if (choice.eventId !== undefined) result.eventId = Scenario.#requireText(choice.eventId, "L'événement du choix");
+      if (choice.condition !== undefined) { Scenario.#requireObject(choice.condition, "La condition du choix"); result.condition = structuredClone(choice.condition); }
+      return result;
+    });
+  }
+
+  static #createListeners(listeners) {
+    if (!Array.isArray(listeners)) throw new TypeError("Les écouteurs de phase doivent être une liste.");
+    return listeners.map((listener) => { Scenario.#requireObject(listener, "Un écouteur de phase"); Scenario.#requireObject(listener.trigger, "Le déclencheur d'écoute"); return { trigger: structuredClone(listener.trigger), eventId: Scenario.#requireText(listener.eventId, "L'événement écouté") }; });
+  }
+
   static #createFailure(failure) {
     if (failure === undefined) return { policy: "stop", nextPhase: null, eventId: null };
     Scenario.#requireObject(failure, "La règle d'échec");
     const policy = Scenario.#requireText(failure.policy ?? "stop", "La politique d'échec");
     if (!["stop", "continue", "branch"].includes(policy)) throw new RangeError("La politique d'échec est invalide.");
-    const nextPhase = failure.nextPhase === undefined ? null : Scenario.#requireText(failure.nextPhase, "La phase après échec");
+    const nextPhase = failure.nextPhase == null ? null : Scenario.#requireText(failure.nextPhase, "La phase après échec");
     if (policy === "branch" && nextPhase === null) throw new RangeError("Un embranchement d'échec exige une phase cible.");
-    return { policy, nextPhase, eventId: failure.eventId === undefined ? null : Scenario.#requireText(failure.eventId, "L'événement d'échec") };
+    return { policy, nextPhase, eventId: failure.eventId == null ? null : Scenario.#requireText(failure.eventId, "L'événement d'échec") };
   }
 
   static #createEvents(events) {
@@ -143,7 +181,7 @@ export class Scenario {
 
 /** Progression sérialisable d'un scénario dans une partie donnée. */
 export class ScenarioState {
-  constructor(scenario, { startsActive = true } = {}) {
+  constructor(scenario, { startsActive = true, state = null } = {}) {
     if (!(scenario instanceof Scenario)) throw new TypeError("L'état doit être créé à partir d'un scénario.");
     if (typeof startsActive !== "boolean") throw new TypeError("L'activation initiale du scénario doit être booléenne.");
     this.scenarioId = scenario.id;
@@ -153,6 +191,10 @@ export class ScenarioState {
       objectives: phase.objectives.map((objective) => ({ ...objective, state: startsActive && phase.id === scenario.initialPhaseId ? "active" : "locked" })),
     }]));
     this.triggeredEventIds = [];
+    if (state !== null) {
+      if (state.scenarioId !== scenario.id || scenario.getPhase(state.currentPhaseId) === null) throw new RangeError("L'instantané de scénario est incompatible.");
+      this.currentPhaseId = state.currentPhaseId; this.phaseStates = structuredClone(state.phaseStates); this.triggeredEventIds = [...(state.triggeredEventIds ?? [])];
+    }
   }
 
   getCurrentPhaseState() { return this.phaseStates[this.currentPhaseId]; }
@@ -229,6 +271,14 @@ export class ScenarioState {
     nextState.status = "active";
     nextState.objectives.forEach((objective) => { objective.state = "active"; });
     this.currentPhaseId = nextPhaseId;
+    return true;
+  }
+
+  redirectToPhase(scenario, nextPhaseId) {
+    const current = this.getCurrentPhaseState(); const next = this.phaseStates[nextPhaseId];
+    if (current.status !== "active" || scenario.getPhase(nextPhaseId) === null || next?.status !== "locked") return false;
+    current.status = "completed"; current.objectives.forEach((objective) => { if (objective.state === "active") objective.state = "completed"; });
+    next.status = "active"; next.objectives.forEach((objective) => { objective.state = "active"; }); this.currentPhaseId = nextPhaseId;
     return true;
   }
 

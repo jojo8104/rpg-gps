@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { PlayArea } from "../app/js/core/play-area.js";
-import { SetupPlacementService } from "../app/js/core/setup-placement-service.js";
+import { SetupPlacementService, bearingDegrees } from "../app/js/core/setup-placement-service.js";
 
 const area = new PlayArea({ id: "setup-area", name: "Zone", polygon: [{ latitude: -89, longitude: -179 }, { latitude: -89, longitude: 179 }, { latitude: 89, longitude: 179 }, { latitude: 89, longitude: -179 }] });
 const distance = (first, second) => Math.hypot(first.latitude - second.latitude, first.longitude - second.longitude);
@@ -38,6 +38,16 @@ test("une quête choisit directement un candidat valide selon distance et direct
   assert.equal(area.contains(position), true);
   assert.ok(position.longitude > 0);
   assert.ok(Math.abs(distance(origin, position) - 80) < 35);
+});
+
+test("l'axe de deux indices conserve leur direction pour le lieu suivant", () => {
+  const firstTrace = { latitude: 45, longitude: 5 };
+  const secondTrace = { latitude: 45.001, longitude: 5 };
+  const direction = bearingDegrees(firstTrace, secondTrace);
+  const service = new SetupPlacementService({ distanceFn: distance });
+  const position = service.findPosition({ playArea: area, origin: secondTrace, preferredDistance: 40, preferredDirectionDegrees: direction });
+  assert.ok(direction < 1 || direction > 359);
+  assert.ok(position.latitude > secondTrace.latitude);
 });
 
 test("les zones interdites sont exclues avant le choix d'un objectif", () => {

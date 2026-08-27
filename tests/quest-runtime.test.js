@@ -129,6 +129,43 @@ test("les déclencheurs de trace et de victoire restent indépendants de l'inter
   assert.equal(game.dispatchQuestEvent({ type: "BattleWon", locationId: "camp-real" }).completedObjectiveIds[0], "victory");
 });
 
+test("une piste de scénario refuse le second point avant le premier et progresse avec la quête", () => {
+  const trailScenario = {
+    id: "test-quest", name: "Piste structurée", intro: "Suivez.", initialPhaseId: "first",
+    locationSlots: [{ id: "destination", type: "quest" }],
+    trails: [{ id: "search-trail", points: ["trace-1", "trace-2"], destinationLocationSlotId: "destination" }],
+    phases: [
+      { id: "first", title: "Première trace", description: "Cherchez.", objectives: [{ id: "first", text: "Première", trigger: { type: "trailPointInspected", trailId: "search-trail", traceId: "trace-1" } }], transitions: [{ nextPhase: "second" }] },
+      { id: "second", title: "Seconde trace", description: "Continuez.", objectives: [{ id: "second", text: "Seconde", trigger: { type: "trailPointInspected", trailId: "search-trail", traceId: "trace-2" } }], transitions: [] },
+    ], events: [],
+  };
+  const game = new Game({ setup, scenario: trailScenario, locations: [{ id: "destination-real", name: "Destination", type: "quest", source: "test", position: { latitude: 0, longitude: 0 } }], scenarioLocationBindings: [{ locationSlotId: "destination", locationId: "destination-real" }] });
+  assert.equal(game.dispatchQuestEvent({ type: "TraceInspected", traceId: "trace-2" }), null);
+  assert.equal(game.getTrailState("search-trail").status, "not_started");
+  assert.equal(game.dispatchQuestEvent({ type: "TraceInspected", traceId: "trace-1" }).nextPhaseId, "second");
+  const result = game.dispatchQuestEvent({ type: "TraceInspected", traceId: "trace-2" });
+  assert.equal(result.completedObjectiveIds[0], "second");
+  assert.deepEqual(game.getTrailState("search-trail").toJSON(), { trailId: "search-trail", status: "completed", inspectedTraceIds: ["trace-1", "trace-2"] });
+  assert.equal(game.toJSON().trailStates["search-trail"].status, "completed");
+});
+
+test("un événement de trace reçu avant son objectif actif ne consomme pas la piste", () => {
+  const guardedScenario = {
+    id: "test-quest", name: "Piste gardée", intro: "Attendez.", initialPhaseId: "briefing",
+    locationSlots: [{ id: "destination", type: "quest" }],
+    trails: [{ id: "guarded-trail", points: ["guarded-trace"], destinationLocationSlotId: "destination" }],
+    phases: [
+      { id: "briefing", title: "Briefing", description: "Parlez.", objectives: [{ id: "briefing", text: "Parler", trigger: { type: "interactionCompleted", interactionId: "briefing" } }], transitions: [{ nextPhase: "trail" }] },
+      { id: "trail", title: "Piste", description: "Suivez.", objectives: [{ id: "trail", text: "Inspecter", trigger: { type: "trailPointInspected", trailId: "guarded-trail", traceId: "guarded-trace" } }], transitions: [] },
+    ], events: [],
+  };
+  const game = new Game({ setup, scenario: guardedScenario, locations: [{ id: "destination-real", name: "Destination", type: "quest", source: "test", position: { latitude: 0, longitude: 0 } }], scenarioLocationBindings: [{ locationSlotId: "destination", locationId: "destination-real" }] });
+  assert.equal(game.dispatchQuestEvent({ type: "TraceInspected", traceId: "guarded-trace" }), null);
+  assert.equal(game.getTrailState("guarded-trail").status, "not_started");
+  game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId: "briefing" });
+  assert.equal(game.dispatchQuestEvent({ type: "TraceInspected", traceId: "guarded-trace" }).completedObjectiveIds[0], "trail");
+});
+
 test("une quête abandonnée peut échouer puis suivre un embranchement déclaré", () => {
   const definition = new Scenario({ id: "failure", name: "Échec", intro: "Test", initialPhaseId: "mission", phases: [{ id: "mission", title: "Mission", description: "Agir", objectives: [{ id: "act", text: "Agir" }], transitions: [], failure: { policy: "branch", nextPhase: "aftermath" } }, { id: "aftermath", title: "Conséquences", description: "Sans récompense", objectives: [], transitions: [] }] });
   const state = new ScenarioState(definition); assert.equal(state.failCurrentPhase(definition, { reason: "abandoned", nextPhaseId: "aftermath", at: 10 }), true);
@@ -160,6 +197,7 @@ test("les quêtes s'enchaînent avec accord sans revenir à la première", () =>
 
   const failure = game.failCurrentQuest({ reason: "battle_lost" });
   assert.equal(failure.nextQuestId, "three"); assert.equal(game.getActiveQuest(), null);
+  assert.equal(game.getAvailableQuests().some((quest) => quest.id === "three"), true);
   assert.equal(game.acceptAvailableQuest("three").success, true);
   assert.equal(game.scenarioState.currentPhaseId, "quest-three");
 

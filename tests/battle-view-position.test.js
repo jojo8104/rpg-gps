@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { battleEntityPosition } from "../app/js/ui/battle-view.js";
+import { battleEntityPosition, battleEntityVisualPosition } from "../app/js/ui/battle-view.js";
 
 const playerTeam = { id: "heroes" };
 const enemyTeam = { id: "enemies" };
@@ -18,4 +18,15 @@ test("les unites conservent leur progression normale avant le contact", () => {
   const enemy = { id: "enemy-unit", kind: "unit", lane: 0, state: "active", progress: 0.2 };
   assert.equal(battleEntityPosition(player, playerTeam, "heroes", [enemy]).x, 24.8);
   assert.equal(battleEntityPosition(enemy, enemyTeam, "heroes", [player]).x, 75.2);
+});
+
+test("la perspective comprime seulement le rendu des lignes du fond", () => {
+  const background = { id: "background", kind: "unit", lane: 0, state: "active", progress: 0.2 };
+  const foreground = { id: "foreground", kind: "unit", lane: 2, state: "active", progress: 0.2 };
+  assert.equal(battleEntityPosition(background, playerTeam, "heroes").x, battleEntityPosition(foreground, playerTeam, "heroes").x);
+  const backgroundVisual = battleEntityVisualPosition(background, playerTeam, "heroes");
+  const foregroundVisual = battleEntityVisualPosition(foreground, playerTeam, "heroes");
+  assert.equal(backgroundVisual.scale, .68);
+  assert.equal(foregroundVisual.scale, 1);
+  assert.ok(Math.abs(backgroundVisual.x - 50) < Math.abs(foregroundVisual.x - 50));
 });

@@ -1,6 +1,7 @@
 import { renderUnitTypeIcon } from "./unit-icon.js";
 
 const previousPositions = new Map();
+const LANE_PERSPECTIVE = Object.freeze([.68, .84, 1]);
 
 export function battleEntityPosition(entity, team, playerTeamId, opposingUnits = [], index = 0) {
   const allied = team.id === playerTeamId;
@@ -15,6 +16,12 @@ export function battleEntityPosition(entity, team, playerTeamId, opposingUnits =
   if (!crossed) return { x: Math.max(6, Math.min(94, rawX)), y: 50 };
   const meetingX = (rawX + opponentRawX) / 2;
   return { x: Math.max(6, Math.min(94, meetingX + (allied ? -4 : 4))), y: 50 };
+}
+
+export function battleEntityVisualPosition(entity, team, playerTeamId, opposingUnits = [], index = 0) {
+  const logical = battleEntityPosition(entity, team, playerTeamId, opposingUnits, index);
+  const depth = LANE_PERSPECTIVE[entity.lane] ?? 1;
+  return { x: 50 + (logical.x - 50) * depth, y: logical.y, scale: depth };
 }
 
 function militiaFormation(allied, count) {
@@ -85,7 +92,7 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
 
   const positionFor = (entity, team, index = 0) => {
     const opposingUnits = battle.teams.find((item) => item.id !== team.id)?.units ?? [];
-    return battleEntityPosition(entity, team, playerTeamId, opposingUnits, index);
+    return battleEntityVisualPosition(entity, team, playerTeamId, opposingUnits, index);
   };
 
   const fieldToken = (entity, team, index) => {
@@ -94,16 +101,17 @@ export function renderBattleView({ element, battle, playerTeamId, message, selec
     const reloading = String(entity.typeId).toLowerCase() === "archer" && entity.attackCooldownMs > 0 && !attacking;
     const targeted = latestAttack?.targetId === entity.id;
     const powerTarget = powerTargetIds.has(entity.id); const activeEffects = entity.activeEffects?.length ?? 0;
-    return `<article class="unit-token field-token ${allied ? "is-ally" : "is-enemy"} ${entity.kind === "hero" ? "is-hero" : ""} ${entity.range > 1 ? "is-ranged" : "is-melee"} ${attacking ? "is-attacking" : ""} ${reloading ? "is-reloading" : ""} ${targeted ? "is-targeted" : ""} ${powerTarget ? "is-power-target" : ""} ${activeEffects > 0 ? "has-active-effect" : ""}" style="left:${position.x}%;top:${position.y}%" data-field-entity="${entity.id}" ${powerTarget ? `data-power-target="${entity.id}"` : ""} data-x="${position.x}" data-y="${position.y}" title="${entity.kind === "hero" ? "Héros immobile" : `${entity.name ?? entity.typeName ?? "Unité"} · ${entity.combatantCount} combattants · ${entity.woundedCount} blessés · ${Math.max(0, entity.maxQuantity - entity.combatantCount - entity.woundedCount)} morts ou places libres`}${activeEffects ? ` · ${activeEffects} effet(s) actif(s)` : ""}">${entityIcon(entity)}<small>${entity.kind === "hero" ? entity.health : entity.combatantCount}</small>${activeEffects ? `<mark class="effect-marker">✦${activeEffects}</mark>` : ""}${entity.kind === "unit" ? healthBar(entity) : ""}</article>`;
+    return `<article class="unit-token field-token ${allied ? "is-ally" : "is-enemy"} ${entity.kind === "hero" ? "is-hero" : ""} ${entity.range > 1 ? "is-ranged" : "is-melee"} ${attacking ? "is-attacking" : ""} ${reloading ? "is-reloading" : ""} ${targeted ? "is-targeted" : ""} ${powerTarget ? "is-power-target" : ""} ${activeEffects > 0 ? "has-active-effect" : ""}" style="left:${position.x}%;top:${position.y}%;--perspective-scale:${position.scale}" data-field-entity="${entity.id}" ${powerTarget ? `data-power-target="${entity.id}"` : ""} data-x="${position.x}" data-y="${position.y}" title="${entity.kind === "hero" ? "Héros immobile" : `${entity.name ?? entity.typeName ?? "Unité"} · ${entity.combatantCount} combattants · ${entity.woundedCount} blessés · ${Math.max(0, entity.maxQuantity - entity.combatantCount - entity.woundedCount)} morts ou places libres`}${activeEffects ? ` · ${activeEffects} effet(s) actif(s)` : ""}">${entityIcon(entity)}<small>${entity.kind === "hero" ? entity.health : entity.combatantCount}</small>${activeEffects ? `<mark class="effect-marker">✦${activeEffects}</mark>` : ""}${entity.kind === "unit" ? healthBar(entity) : ""}</article>`;
   };
 
   const lane = (index) => {
+    const laneScale = LANE_PERSPECTIVE[index] ?? 1; const laneInset = (1 - laneScale) * 50;
     const enemyHero = enemy.heroes.find((hero) => hero.lane === index && hero.state === "active");
     const playerHero = player.heroes.find((hero) => hero.lane === index && hero.state === "active");
     const enemyUnits = enemy.units.filter((unit) => unit.lane === index && unit.state === "active");
     const playerUnits = player.units.filter((unit) => unit.lane === index && unit.state === "active");
     const canRetreat = playerUnits.some((unit) => !unit.retreating) && battle.status === "active" && totalCommand >= retreatCost;
-    return `<section class="vertical-lane" style="--lane-row:${index + 1}" data-line="${index}" aria-label="Ligne ${index + 1}"><div class="lane-centerline"></div>${enemyUnits.map((unit, unitIndex) => fieldToken(unit, enemy, unitIndex)).join("")}${playerUnits.map((unit, unitIndex) => fieldToken(unit, player, unitIndex)).join("")}<button type="button" class="lane-retreat" data-retreat-line="${index}" aria-label="Faire retraiter l'unité la plus avancée de la ligne ${index + 1}" title="Retraite ligne ${index + 1} · ◆ ${retreatCost}" ${canRetreat ? "" : "disabled"}><span aria-hidden="true">⚑</span><small>◆${retreatCost}</small></button></section>`;
+    return `<section class="vertical-lane" style="--lane-row:${index + 1};--lane-scale:${laneScale};--lane-inset:${laneInset}%" data-line="${index}" aria-label="Ligne ${index + 1}"><div class="lane-centerline"></div>${enemyUnits.map((unit, unitIndex) => fieldToken(unit, enemy, unitIndex)).join("")}${playerUnits.map((unit, unitIndex) => fieldToken(unit, player, unitIndex)).join("")}<button type="button" class="lane-retreat" data-retreat-line="${index}" aria-label="Faire retraiter l'unité la plus avancée de la ligne ${index + 1}" title="Retraite ligne ${index + 1} · ◆ ${retreatCost}" ${canRetreat ? "" : "disabled"}><span aria-hidden="true">⚑</span><small>◆${retreatCost}</small></button></section>`;
   };
 
   const hand = player.units.filter((unit) => unit.lane === null && unit.state === "active");

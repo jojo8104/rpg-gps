@@ -1,0 +1,4 @@
+[
+  { "id": "requisition-convoy", "name": "Convoi des réserves", "type": "event_location", "roles": ["quest", "clue", "convoy"], "source": "scenario", "position": { "latitude": 48.863, "longitude": 2.356 }, "interactionRadius": 15, "detectionRadius": 45, "visibility": "hidden", "features": {}, "qr": { "enabled": false } },
+  { "id": "counsellor-guard-depot", "name": "Dépôt de la Garde du conseiller", "type": "depot", "roles": ["quest", "clue", "resource", "military"], "source": "scenario", "position": { "latitude": 48.866, "longitude": 2.36 }, "interactionRadius": 18, "detectionRadius": 50, "visibility": "hidden", "ownerId": "counsellor_guard", "controllerId": "counsellor_guard", "features": { "resourceStorage": true }, "resources": { "production": {}, "stock": { "food": 0 }, "storageCapacity": 100 }, "qr": { "enabled": false } }
+]

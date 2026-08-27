@@ -54,6 +54,45 @@ test("les indices à distance ne s'activent que pendant leur phase", () => {
   assert.deepEqual(runtime.placements["trace-2"].origin, { latitude: 0, longitude: 0.001 });
 });
 
+test("le placement cumule le trajet tout en exigeant un éloignement minimal du départ", () => {
+  const builder = new ScenarioRuntimeBuilder();
+  const runtime = builder.build({
+    scenario: { locationSlots: [{ id: "camp", defaultPlacement: { strategy: "distance", minimumDistanceMeters: 200, minimumDistanceFromOriginMeters: 100, confirmations: 1 } }] },
+    setup: { locationSetup: { placements: {} } },
+    bindings: [{ locationSlotId: "camp", locationId: "camp-real" }],
+    locations: [{ id: "camp-real", position: { latitude: 0, longitude: 0 } }],
+  });
+
+  builder.start(runtime, { latitude: 0, longitude: 0 });
+  builder.update(runtime, { position: { latitude: 0, longitude: 0.0009 }, accuracy: 5 });
+  builder.update(runtime, { position: { latitude: 0, longitude: 0 }, accuracy: 5 });
+  let placement = runtime.placements.camp;
+  assert.ok(placement.distanceMeters >= 199);
+  assert.equal(placement.distanceFromOriginMeters, 0);
+  assert.equal(placement.status, "walking");
+
+  builder.update(runtime, { position: { latitude: 0.001, longitude: 0 }, accuracy: 5 });
+  placement = runtime.placements.camp;
+  assert.ok(placement.distanceMeters >= 310);
+  assert.ok(placement.distanceFromOriginMeters >= 110);
+  assert.equal(placement.status, "ready");
+});
+
+test("un relevé GPS imprécis n'ajoute pas de distance au trajet", () => {
+  const builder = new ScenarioRuntimeBuilder();
+  const runtime = builder.build({
+    scenario: { locationSlots: [{ id: "camp", defaultPlacement: { strategy: "distance", minimumDistanceMeters: 100, maximumAccuracyMeters: 20, confirmations: 1 } }] },
+    setup: { locationSetup: { placements: {} } },
+    bindings: [{ locationSlotId: "camp", locationId: "camp-real" }],
+    locations: [{ id: "camp-real", position: { latitude: 0, longitude: 0 } }],
+  });
+  builder.start(runtime, { latitude: 0, longitude: 0 });
+  builder.update(runtime, { position: { latitude: 0, longitude: 0.01 }, accuracy: 100 });
+  builder.update(runtime, { position: { latitude: 0, longitude: 0.02 }, accuracy: 5 });
+  assert.equal(runtime.placements.camp.distanceMeters, 0);
+  assert.equal(runtime.placements.camp.status, "walking");
+});
+
 test("une récompense de quête attribue réellement XP, personnage et rapport", () => {
   const hero = { id: "hero-1", carriedLoot: [], addCarriedLoot(entries) { this.carriedLoot.push(...entries); }, addResource() {} };
   const game = { activeScenarioEventId: "geologist-rescued", eventLog: [], getPlayer: () => ({ heroIds: [hero.id] }), getHero: () => hero, gainHeroExperience: ({ amount }) => { hero.experience = (hero.experience ?? 0) + amount; } };
@@ -61,4 +100,11 @@ test("une récompense de quête attribue réellement XP, personnage et rapport",
   assert.deepEqual(hero.carriedLoot.map((entry) => entry.itemId), ["royal_geologist", "abandoned_mine_report"]);
   assert.equal(hero.experience, 100);
   assert.deepEqual(effects.map((effect) => effect.type), ["quest_item_granted", "quest_item_granted", "hero_experience_awarded"]);
+});
+
+test("les lieux narratifs des prospecteurs restent cachés jusqu'à leur révélation", async () => {
+  const { readFileSync } = await import("node:fs");
+  const locations = JSON.parse(readFileSync(new URL("../data/locations.json", import.meta.url), "utf8"));
+  assert.equal(locations.find((location) => location.id === "prospector-battlefield").visibility, "hidden");
+  assert.equal(locations.find((location) => location.id === "gold-mine").visibility, "hidden");
 });

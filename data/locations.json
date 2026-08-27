@@ -90,6 +90,7 @@
   { "id": "supply-village-south", "name": "Valbois", "type": "village", "roles": ["royal", "food", "quest"], "source": "scenario", "position": { "latitude": 48.852, "longitude": 2.3522 }, "interactionRadius": 18, "detectionRadius": 70, "visibility": "hidden", "ownerId": "kingdom", "controllerId": "kingdom", "level": 1, "population": 30, "infrastructure": { "field": 2 }, "resources": { "production": { "food": 2 }, "stock": { "food": 10 }, "storageCapacity": 40 }, "features": { "resourceProduction": true, "capturable": false }, "qr": { "enabled": false } },
   { "id": "supply-village-west", "name": "Les Chasses-Royales", "type": "village", "roles": ["royal", "food", "quest"], "source": "scenario", "position": { "latitude": 48.8566, "longitude": 2.346 }, "interactionRadius": 18, "detectionRadius": 70, "visibility": "hidden", "ownerId": "kingdom", "controllerId": "kingdom", "level": 1, "population": 24, "infrastructure": { "hunting_lodge": 1 }, "resources": { "production": { "food": 1 }, "stock": { "food": 10 }, "storageCapacity": 40 }, "features": { "resourceProduction": true, "capturable": false }, "qr": { "enabled": false } },
   { "id": "royal-gold-mine", "name": "Mine royale d’Aurifère", "type": "mine", "roles": ["royal", "resource", "gold", "quest"], "source": "scenario", "position": { "latitude": 48.8525, "longitude": 2.347 }, "interactionRadius": 18, "detectionRadius": 80, "visibility": "hidden", "ownerId": "kingdom", "controllerId": "kingdom", "level": 2, "population": 18, "infrastructure": { "shaft": 2, "depot": 1 }, "resources": { "production": { "gold": 5 }, "stock": { "gold": 30 }, "storageCapacity": 80 }, "features": { "resourceProduction": true, "capturable": false }, "qr": { "enabled": false } },
+  { "id": "opposite-fort", "name": "Fortin de Fort-Serein", "type": "fort", "roles": ["royal", "military", "strategic", "quest"], "source": "scenario", "position": { "latitude": 48.854, "longitude": 2.348 }, "interactionRadius": 20, "detectionRadius": 100, "visibility": "hidden", "ownerId": "kingdom", "controllerId": "kingdom", "level": 2, "population": 26, "defenseSlots": 3, "infrastructure": { "walls": 2, "watchtower": 1 }, "resources": { "stock": { "food": 8 }, "storageCapacity": 100 }, "features": { "battle": true, "capturable": false, "garrison": true, "healing": true }, "chief": { "name": "Dame Alix de Fort-Serein", "title": "Commandante du fortin", "greeting": "Fort-Serein veille sur la route du sud-ouest.", "openingLines": ["Dame Alix surveille la route depuis la tour de guet.", "La garnison attend les prochains ordres de Rochegarde."], "trade": false, "tradeLimitPerCycle": 0, "tradeOffers": [], "secondaryQuestIds": [], "dialogues": [] }, "qr": { "enabled": false } },
   {
     "id": "prospector-battlefield",
     "name": "Champ de bataille abandonné",
@@ -191,6 +192,7 @@
     "position": { "latitude": 48.8520, "longitude": 2.3450 },
     "interactionRadius": 12,
     "detectionRadius": 70,
+    "visibility": "hidden",
     "level": 1,
     "defenseSlots": 0,
     "infrastructure": { "puits": 1 },

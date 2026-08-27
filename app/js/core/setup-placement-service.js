@@ -63,7 +63,7 @@ function clampGeographicPosition(position) {
   };
 }
 
-function bearingDegrees(origin, target) {
+export function bearingDegrees(origin, target) {
   const averageLatitude = (origin.latitude + target.latitude) / 2 * Math.PI / 180;
   const east = (target.longitude - origin.longitude) * Math.cos(averageLatitude);
   const north = target.latitude - origin.latitude;

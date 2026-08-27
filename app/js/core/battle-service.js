@@ -66,7 +66,7 @@ export class BattleService {
 
   #createLocationCommanderSnapshot(location) {
     const playerId = location.controllerId ?? location.ownerId ?? `neutral-${location.id}`;
-    return { id: `battle-location-${location.id}`, sourceId: `location-${location.id}`, playerId, maxHealth: 20 + location.level * 5, health: 20 + location.level * 5, attack: 8 + location.level * 2, defense: 5 + location.level, speed: 1, command: 2 + location.level };
+    return { id: `battle-location-${location.id}`, sourceId: `location-${location.id}`, playerId, maxHealth: 20 + location.level * 5, health: 20 + location.level * 5, attack: 8 + location.level * 2, defense: 5 + location.level + (location.defenseBonus ?? 0), speed: 1, command: 2 + location.level };
   }
 
   #createAutonomousCommanderSnapshot(group) {

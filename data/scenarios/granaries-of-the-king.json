@@ -1,0 +1,80 @@
+{
+  "id": "granaries_of_the_king",
+  "name": "Les greniers du roi",
+  "intro": "La Garde du conseiller bloque Haut-Pré après le refus d'une réquisition exceptionnelle.",
+  "initialPhaseId": "granaries-arrival",
+  "questTemplate": "local_authority_conflict",
+  "locationId": "supply-village-north",
+  "authorityNpc": "counsellor_guard_officer",
+  "localNpc": "haut_pre_village_chief",
+  "conflictResource": "food",
+  "worldState": {
+    "flags": {
+      "granaries": {
+        "phase": "arrival",
+        "resolution": null,
+        "chiefStatus": "alive",
+        "villageStatus": "blockaded",
+        "reservesSeized": 0,
+        "storageDamaged": false,
+        "officerDefeated": false,
+        "convoyDiscovered": false,
+        "convoyFollowed": false,
+        "convoyInvestigated": false,
+        "secretDepotDiscovered": false,
+        "chiefRelation": 0,
+        "returnToCapitalEnabled": false,
+        "questCompleted": false
+      }
+    },
+    "npcs": [
+      { "id": "haut_pre_village_chief", "role": "village_chief", "status": "alive", "grade": 1, "relation": 0 },
+      { "id": "counsellor_guard_officer", "role": "counsellor_guard_officer", "status": "active", "grade": 1, "relation": 0, "authority": 1 }
+    ]
+  },
+  "locationSlots": [
+    { "id": "capital", "type": "capital", "defaultPlacement": { "strategy": "fixed" } },
+    { "id": "supply-village-north", "type": "village", "roles": ["royal", "food", "quest"], "defaultPlacement": { "strategy": "fixed" } },
+    { "id": "requisition-convoy", "type": "event_location", "defaultPlacement": { "strategy": "distance", "activationPhaseId": "granaries-return-journey", "minimumDistanceMeters": 350, "minimumDistanceMetersByPace": { "calm": 350, "sport": 700 }, "confirmations": 2 } },
+    { "id": "counsellor-guard-depot", "type": "depot", "defaultPlacement": { "strategy": "fixed" } }
+  ],
+  "phases": [
+    { "id": "granaries-arrival", "title": "Haut-Pré sous blocus", "description": "La Garde exige les réserves de Haut-Pré. Le chef refuse une quantité qui condamnerait le village et l'officier vous somme de faire appliquer l'ordre.", "objectives": [], "eventIds": ["granaries-choose-enforce", "granaries-choose-negotiate"], "transitions": [{ "nextPhase": "granaries-guard-assault" }, { "nextPhase": "granaries-negotiation" }], "choices": [
+      { "id": "ENFORCE_REQUISITION", "label": "Faire appliquer la réquisition", "nextPhase": "granaries-guard-assault", "eventId": "granaries-choose-enforce" },
+      { "id": "NEGOTIATE_WITH_CHIEF", "label": "Négocier avec le chef du village", "nextPhase": "granaries-negotiation", "eventId": "granaries-choose-negotiate" }
+    ] },
+    { "id": "granaries-negotiation", "title": "La part raisonnable", "description": "Le chef reconnaît l'autorité royale et offre une part des réserves. Une bousculade près du grenier donne à l'officier le prétexte attendu pour rompre les discussions.", "objectives": [], "eventIds": ["granaries-help-guard", "granaries-defend-village", "granaries-stand-aside"], "transitions": [{ "nextPhase": "granaries-guard-assault" }, { "nextPhase": "granaries-village-defense" }, { "nextPhase": "granaries-village-fall" }], "choices": [
+      { "id": "HELP_COUNSELLOR_GUARD", "label": "Aider la Garde", "nextPhase": "granaries-guard-assault", "eventId": "granaries-help-guard" },
+      { "id": "DEFEND_GRANARY_VILLAGE", "label": "Défendre le village", "nextPhase": "granaries-village-defense", "eventId": "granaries-defend-village" },
+      { "id": "LET_GUARD_ACT", "label": "Laisser faire", "nextPhase": "granaries-village-fall", "eventId": "granaries-stand-aside" }
+    ] },
+    { "id": "granaries-guard-assault", "title": "La saisie des greniers", "description": "Combattez avec la Garde du conseiller contre le chef de Haut-Pré et ses miliciens.", "battle": { "allies": ["player", "counsellor_guard"], "enemies": ["haut_pre_village_chief", "haut_pre_militia"], "locationSlotId": "supply-village-north" }, "objectives": [{ "id": "granaries-win-guard-assault", "text": "Soumettre les défenseurs de Haut-Pré", "trigger": { "type": "battleWon", "locationSlotId": "supply-village-north" }, "eventId": "granaries-guard-victory" }], "eventIds": ["granaries-guard-victory"], "transitions": [{ "nextPhase": "granaries-return-journey" }], "choices": [] },
+    { "id": "granaries-village-defense", "title": "Défendre Haut-Pré", "description": "Combattez aux côtés du chef et des miliciens contre la Garde du conseiller.", "battle": { "allies": ["player", "haut_pre_village_chief", "haut_pre_militia"], "enemies": ["counsellor_guard"], "locationSlotId": "supply-village-north" }, "objectives": [{ "id": "granaries-win-village-defense", "text": "Repousser la Garde du conseiller", "trigger": { "type": "battleWon", "locationSlotId": "supply-village-north" }, "eventId": "granaries-village-defended" }], "eventIds": ["granaries-village-defended"], "transitions": [{ "nextPhase": "granaries-return-journey" }], "choices": [] },
+    { "id": "granaries-village-fall", "title": "La chute de Haut-Pré", "description": "Sans votre intervention, la Garde attaque et prend le village. Le chef profite du chaos pour fuir.", "objectives": [], "eventIds": ["granaries-village-fell"], "transitions": [{ "nextPhase": "granaries-return-journey" }], "choices": [{ "id": "LEAVE_FALLEN_VILLAGE", "label": "Retourner à la capitale", "nextPhase": "granaries-return-journey", "eventId": "granaries-village-fell" }] },
+    { "id": "granaries-return-journey", "title": "Retourner à la capitale", "description": "Quittez Haut-Pré et présentez votre rapport à la capitale.", "objectives": [{ "id": "granaries-return-capital", "text": "Atteindre la capitale", "trigger": { "type": "enterLocation", "locationSlotId": "capital" }, "eventId": "granaries-final-report" }], "listeners": [{ "trigger": { "type": "locationPlaced", "locationSlotId": "requisition-convoy" }, "eventId": "granaries-convoy-discovered" }], "eventIds": ["granaries-convoy-discovered", "granaries-follow-convoy", "granaries-final-report"], "transitions": [{ "nextPhase": "granaries-secret-route" }], "choices": [{ "id": "FOLLOW_REQUISITION_CONVOY", "label": "Suivre et enquêter sur le convoi", "nextPhase": "granaries-secret-route", "eventId": "granaries-follow-convoy", "condition": { "path": "granaries.convoyDiscovered", "equals": true } }] },
+    { "id": "granaries-secret-route", "title": "Une destination inattendue", "description": "Le convoi évite la route du front, de la capitale et du dépôt annoncé. Suivez-le jusqu'à sa destination réelle.", "objectives": [{ "id": "granaries-reach-secret-depot", "text": "Atteindre la destination secrète du convoi", "trigger": { "type": "enterLocation", "locationSlotId": "counsellor-guard-depot" }, "eventId": "granaries-depot-discovered" }], "eventIds": ["granaries-depot-discovered"], "transitions": [{ "nextPhase": "granaries-return-after-investigation" }], "choices": [] },
+    { "id": "granaries-return-after-investigation", "title": "Retourner à la capitale", "description": "Vous avez constaté que la Garde concentre les réserves sous son contrôle direct, sans connaître ses intentions.", "objectives": [{ "id": "granaries-return-capital-after-investigation", "text": "Atteindre la capitale", "trigger": { "type": "enterLocation", "locationSlotId": "capital" }, "eventId": "granaries-final-report" }], "eventIds": ["granaries-final-report"], "transitions": [], "choices": [] }
+  ],
+  "events": [
+    { "id": "granaries-choose-enforce", "effects": [{ "type": "setFlag", "path": "granaries.resolution", "value": "guard_assault" }, { "type": "setLocationState", "locationSlotId": "supply-village-north", "state": "blockaded" }, { "type": "revealLocation", "locationSlotId": "supply-village-north" }] },
+    { "id": "granaries-choose-negotiate", "effects": [{ "type": "setFlag", "path": "granaries.negotiated", "value": true }, { "type": "adjustNpcRelation", "npcId": "counsellor_guard_officer", "amount": -1 }, { "type": "setLocationState", "locationSlotId": "supply-village-north", "state": "blockaded" }, { "type": "revealLocation", "locationSlotId": "supply-village-north" }] },
+    { "id": "granaries-help-guard", "effects": [{ "type": "setFlag", "path": "granaries.resolution", "value": "supported_guard" }] },
+    { "id": "granaries-defend-village", "effects": [{ "type": "setFlag", "path": "granaries.resolution", "value": "defended_village" }] },
+    { "id": "granaries-stand-aside", "effects": [{ "type": "setFlag", "path": "granaries.resolution", "value": "stood_aside" }] },
+    { "id": "granaries-guard-victory", "effects": [{ "type": "setNpcStatus", "npcId": "haut_pre_village_chief", "status": "captured" }, { "type": "setLocationState", "locationSlotId": "supply-village-north", "state": "guard_control" }, { "type": "setLocationOwner", "locationSlotId": "supply-village-north", "ownerId": "counsellor_guard" }, { "type": "transferLocationResource", "sourceLocationSlotId": "supply-village-north", "destinationLocationSlotId": "counsellor-guard-depot", "resource": "food", "amount": 8, "resultFlagPath": "granaries.reservesSeized" }, { "type": "setFlag", "path": "granaries.chiefStatus", "value": "captured" }, { "type": "setFlag", "path": "granaries.villageStatus", "value": "guard_control" }, { "type": "setFlag", "path": "granaries.returnToCapitalEnabled", "value": true }] },
+    { "id": "granaries-village-defended", "effects": [{ "type": "setNpcStatus", "npcId": "haut_pre_village_chief", "status": "ally" }, { "type": "adjustNpcRelation", "npcId": "haut_pre_village_chief", "amount": 2 }, { "type": "setNpcStatus", "npcId": "counsellor_guard_officer", "status": "defeated" }, { "type": "setLocationState", "locationSlotId": "supply-village-north", "state": "preserved" }, { "type": "setFlag", "path": "granaries.chiefStatus", "value": "ally" }, { "type": "setFlag", "path": "granaries.officerDefeated", "value": true }, { "type": "setFlag", "path": "granaries.villageStatus", "value": "preserved" }, { "type": "setFlag", "path": "granaries.chiefRelation", "value": 2 }, { "type": "setFlag", "path": "granaries.returnToCapitalEnabled", "value": true }] },
+    { "id": "granaries-village-fell", "effects": [{ "type": "setNpcStatus", "npcId": "haut_pre_village_chief", "status": "fugitive" }, { "type": "setLocationState", "locationSlotId": "supply-village-north", "state": "occupied" }, { "type": "setLocationOwner", "locationSlotId": "supply-village-north", "ownerId": "counsellor_guard" }, { "type": "transferLocationResource", "sourceLocationSlotId": "supply-village-north", "destinationLocationSlotId": "counsellor-guard-depot", "resource": "food", "amount": 8, "resultFlagPath": "granaries.reservesSeized" }, { "type": "setFlag", "path": "granaries.chiefStatus", "value": "fugitive" }, { "type": "setFlag", "path": "granaries.villageStatus", "value": "occupied" }, { "type": "setFlag", "path": "granaries.returnToCapitalEnabled", "value": true }] },
+    { "id": "granaries-convoy-discovered", "effects": [{ "type": "setFlag", "path": "granaries.convoyDiscovered", "value": true }, { "type": "revealLocation", "locationSlotId": "requisition-convoy" }, { "type": "showNarration", "text": "Au détour de la route, vous reconnaissez les chariots chargés à Haut-Pré sous escorte de la Garde du conseiller. Il s'agit des réserves saisies au village. Vous pouvez reprendre la route de la capitale ou suivre discrètement le convoi pour vérifier sa destination." }] },
+    { "id": "granaries-follow-convoy", "effects": [{ "type": "setFlag", "path": "granaries.convoyFollowed", "value": true }, { "type": "setFlag", "path": "granaries.convoyInvestigated", "value": true }, { "type": "revealLocation", "locationSlotId": "counsellor-guard-depot" }, { "type": "showNarration", "text": "Le convoi ne prend aucune route officielle. Il se dirige vers une installation contrôlée par la Garde du conseiller." }] },
+    { "id": "granaries-depot-discovered", "effects": [{ "type": "setFlag", "path": "granaries.secretDepotDiscovered", "value": true }, { "type": "showNarration", "text": "Les réserves prétendument destinées au royaume sont accumulées dans un dépôt placé sous le contrôle direct de la Garde. Cette anomalie ne révèle pas encore leur intention." }] },
+    { "id": "granaries-final-report", "effects": [{ "type": "setFlag", "path": "granaries.questCompleted", "value": true }, { "type": "copyNpcFieldToFlag", "npcId": "haut_pre_village_chief", "field": "status", "path": "granaries.chiefStatus" }, { "type": "copyNpcFieldToFlag", "npcId": "haut_pre_village_chief", "field": "relation", "path": "granaries.chiefRelation" }, { "type": "showReport", "reportId": "granaries-final", "fragments": [
+      { "text": "La crise de Haut-Pré est résolue." },
+      { "text": "Le chef du village a été capturé.", "condition": { "npcId": "haut_pre_village_chief", "field": "status", "equals": "captured" } },
+      { "text": "Le chef de Haut-Pré est désormais un allié utile.", "condition": { "npcId": "haut_pre_village_chief", "field": "status", "equals": "ally" } },
+      { "text": "Le chef a survécu et pris la fuite.", "condition": { "npcId": "haut_pre_village_chief", "field": "status", "equals": "fugitive" } },
+      { "text": "Le convoi détourné a été suivi jusqu'au dépôt de la Garde.", "condition": { "path": "granaries.secretDepotDiscovered", "equals": true } }
+    ] }] }
+  ],
+  "victoryConditions": [],
+  "defeatConditions": []
+}

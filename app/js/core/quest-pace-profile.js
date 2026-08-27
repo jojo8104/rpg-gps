@@ -1,6 +1,6 @@
 const PROFILES = Object.freeze({
-  calm: Object.freeze({ royalCampMeters: 150, firstTraceMeters: 60, secondTraceMeters: 80, battlefieldMeters: 100 }),
-  sport: Object.freeze({ royalCampMeters: 300, firstTraceMeters: 120, secondTraceMeters: 150, battlefieldMeters: 200 }),
+  calm: Object.freeze({ royalCampMeters: 150, firstTraceMeters: 60, secondTraceMeters: 80, battlefieldMeters: 100, mineMeters: 120 }),
+  sport: Object.freeze({ royalCampMeters: 300, firstTraceMeters: 120, secondTraceMeters: 150, battlefieldMeters: 200, mineMeters: 220 }),
 });
 
 /** Distances IRL des quêtes selon le rythme choisi au setup. */
