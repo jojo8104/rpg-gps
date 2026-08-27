@@ -18,5 +18,5 @@ test("se rendre garde le héros vivant mais lui retire armée et bagages", () =>
   assert.equal(surrendered.state, "active"); assert.ok(surrendered.health > 0);
   assert.equal(surrendered.army.units.length, 0); assert.equal(result.consequences.prisoners.length, 1);
   assert.equal(surrendered.carriedLoot.length, 0); assert.equal(surrendered.resources.gold, 0); assert.equal(surrendered.resources.wood, 0);
-  assert.equal(surrendered.equipment.mainHand, undefined); assert.ok(result.lootSite.entries.some((entry) => entry.itemId === "iron_sword"));
+  assert.equal(surrendered.equipment.mainHand, undefined); assert.ok(result.battleLoot.entries.some((entry) => entry.itemId === "iron_sword"));
 });

@@ -59,3 +59,15 @@ test("une interception agressive crée automatiquement Battle", () => {
   const event = result.events.find((entry) => entry.type === "autonomous_group_attack_requested");
   assert.ok(event.battleId); assert.equal(game.battles.length, 1); assert.equal(game.battles[0].teams[1].units[0].sourceId, "chaos-moving-unit");
 });
+
+test("une armée attaquant un camp engage les héros alliés présents", () => {
+  let nextId = 1;
+  const game = new Game({ setup, heroClasses, unitDefinitions: [definition], locations: [{ id: "royal-camp", name: "Camp royal", type: "camp", source: "scenario", position: { latitude: .1, longitude: .102 }, ownerId: "kingdom", features: { garrison: true } }], idGenerator: (prefix) => `${prefix}-${nextId++}` });
+  const hero = game.chooseHero("p1", { name: "A", classId: "fighter" }); game.chooseHero("p2", { name: "B", classId: "fighter" });
+  game.getLocation("royal-camp").addHero(hero.id);
+  const group = new AutonomousGroup({ id: "chaos-column", type: "army", owner: { kind: "faction", id: "chaos" }, position: { latitude: .1, longitude: .1 }, behavior: "aggressive", mission: { kind: "attack_location", targetId: "royal-camp", speedMetersPerSecond: 10 }, army: { units: [{ id: "chaos-column-unit", ownerPlayerId: "chaos", typeId: "militia", quantity: 5, healthPerSoldier: 8, combatHealthThreshold: 3 }] } });
+  game.addAutonomousGroup(group); game.start(); game.advanceAutonomousGroups(0);
+  const result = game.advanceAutonomousGroups(group.movement.arrivesAt);
+  const event = result.events.find((entry) => entry.type === "autonomous_group_location_attack_requested"); const battle = game.battles.find((candidate) => candidate.id === event?.battleId);
+  assert.ok(battle); assert.equal(battle.teams[0].heroes[0].sourceId, hero.id); assert.equal(battle.teams[1].units[0].sourceId, "chaos-column-unit");
+});

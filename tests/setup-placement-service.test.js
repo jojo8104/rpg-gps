@@ -26,6 +26,12 @@ test("un objectif proposé hors zone est ramené à l'intérieur de la PlayArea"
   assert.equal(area.contains(position), true);
 });
 
+test("un objectif dont la latitude calculée dépasse les limites GPS est ramené dans la PlayArea", () => {
+  const service = new SetupPlacementService({ distanceFn: distance });
+  const position = service.resolveInside({ playArea: area, preferred: { latitude: 124, longitude: 220 } });
+  assert.equal(area.contains(position), true);
+});
+
 test("une quête choisit directement un candidat valide selon distance et direction", () => {
   const service = new SetupPlacementService({ distanceFn: distance }); const origin = { latitude: 0, longitude: 0 };
   const position = service.findPosition({ playArea: area, origin, preferredDistance: 80, preferredDirectionDegrees: 90 });

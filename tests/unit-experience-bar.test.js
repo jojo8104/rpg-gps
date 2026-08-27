@@ -6,7 +6,9 @@ test("la progression XP d'une unité utilise l'intervalle entre son grade et le 
   const progress = unitExperienceProgress({ rank: "corporal", experience: 175 });
   assert.equal(progress.nextRank.id, "sergeant");
   assert.equal(progress.value, 50);
-  assert.match(renderUnitExperienceBar({ rank: "corporal", experience: 175 }, { detailed: true }), /175\/250 XP/);
+  const html = renderUnitExperienceBar({ rank: "corporal", experience: 175 }, { detailed: true });
+  assert.match(html, />175\/250 XP</);
+  assert.doesNotMatch(html, /Prochain grade/);
 });
 
 test("la barre XP reste complète au grade maximal", () => {

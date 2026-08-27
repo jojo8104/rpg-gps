@@ -10,7 +10,6 @@ import { readFileSync } from "node:fs";
 import { Scenario } from "../app/js/core/scenario.js";
 import { QuestDeadlineService } from "../app/js/core/quest-deadline-service.js";
 import { Game } from "../app/js/core/game.js";
-import { ScenarioEffectResolver } from "../app/js/core/scenario-effect-resolver.js";
 
 test("les chariots ajoutent uniquement des slots sérialisables au héros", () => {
   const hero = new Hero({ id: "h", playerId: "p", name: "Officier", commandRank: "captain", wagons: [{ id: "w1", name: "Chariot royal", slotBonus: 4 }] });
@@ -44,8 +43,9 @@ test("la deuxième quête du prologue déclare toute la chaîne d'évacuation", 
   assert.match(briefing.responseLines.join(" "), /invasion.*rejoindre.*évacuation/i);
   assert.match(scenario.getPhase("reach-evacuation-camp").objectives[0].text, /signalé sur la carte/i);
   const order = scenario.getEvent("evacuation-ordered"); const attackGroups = order.effects.filter((effect) => effect.type === "spawnAttackGroup");
-  assert.ok(order.effects.some((effect) => effect.type === "assignWagons")); assert.ok(order.effects.some((effect) => effect.type === "revealLocation" && effect.locationSlotId === "evacuation-camp")); assert.equal(order.effects.find((effect) => effect.type === "startEvacuation")?.timing.maximumMinutes, 3);
-  assert.equal(attackGroups.filter((effect) => effect.stationary).length, 5); assert.deepEqual(attackGroups.filter((effect) => !effect.stationary).map((effect) => effect.quantity), [4, 10]);
+  assert.ok(order.effects.some((effect) => effect.type === "assignWagons")); assert.ok(order.effects.some((effect) => effect.type === "revealLocation" && effect.locationSlotId === "evacuation-camp"));
+  const evacuationTiming = order.effects.find((effect) => effect.type === "startEvacuation"); assert.equal(evacuationTiming?.simulationDurationMinutes, 3); assert.equal(evacuationTiming?.timing.baseMinutes, 2); assert.equal(evacuationTiming?.timing.maximumMinutes, 12);
+  assert.equal(attackGroups.filter((effect) => effect.stationary).length, 5); assert.deepEqual(attackGroups.filter((effect) => !effect.stationary).map((effect) => effect.quantity), [5, 10]);
   assert.equal(scenario.getEvent("evacuation-camp-located").effects.filter((effect) => effect.type === "spawnAttackGroup").length, 0);
   assert.ok(scenario.getEvent("mine-report-delivered").effects.some((effect) => effect.type === "depositCarriedItem" && effect.itemId === "royal_geologist" && effect.destinationLocationSlotId === "capital"));
   assert.equal(scenario.getPhase("return-to-capital").transitions.length, 0);
@@ -66,18 +66,63 @@ test("le délai d'évacuation reste jouable lorsque les coordonnées sont très 
   assert.equal(result.minutes, 30);
 });
 
-test("l'ordre royal déploie réellement le cordon et les deux colonnes en simulation", () => {
+test("l’ordre royal déploie réellement le cordon et les deux colonnes en simulation", () => {
   const definition = JSON.parse(readFileSync(new URL("../data/scenarios/chaos.json", import.meta.url), "utf8"));
   const locations = JSON.parse(readFileSync(new URL("../data/locations.json", import.meta.url), "utf8"));
   const heroClasses = JSON.parse(readFileSync(new URL("../data/hero-classes.json", import.meta.url), "utf8"));
   const unitDefinitions = JSON.parse(readFileSync(new URL("../data/units.json", import.meta.url), "utf8"));
-  const bindings = [{ locationSlotId: "refuge", locationId: "fort-nord" }, { locationSlotId: "capital", locationId: "royal-capital" }, { locationSlotId: "royal-camp", locationId: "village-vert" }, { locationSlotId: "prospectors-battlefield", locationId: "prospector-battlefield" }, { locationSlotId: "gold-mine", locationId: "gold-mine" }, { locationSlotId: "bandit-camp", locationId: "bandit-camp" }, { locationSlotId: "evacuation-camp", locationId: "evacuation-camp" }];
-  const game = new Game({ setup: { id: "evacuation-sim", name: "Simulation", mode: "quick", scenarioId: "chaos", playerCount: 1, playArea: { id: "sim", name: "Maison", polygon: [{ latitude: -89, longitude: -179 }, { latitude: -89, longitude: 179 }, { latitude: 89, longitude: 179 }, { latitude: 89, longitude: -179 }] }, participants: [{ playerId: "local", name: "Joueur" }] }, scenario: definition, locations, heroClasses, unitDefinitions, scenarioLocationBindings: bindings, coordinateMode: "simulation", now: () => 1_000 });
+  const bindings = [{ locationSlotId: "refuge", locationId: "fort-nord" }, { locationSlotId: "capital", locationId: "royal-capital" }, { locationSlotId: "royal-camp", locationId: "village-vert" }, { locationSlotId: "prospectors-battlefield", locationId: "prospector-battlefield" }, { locationSlotId: "gold-mine", locationId: "gold-mine" }, { locationSlotId: "bandit-camp", locationId: "bandit-camp" }, { locationSlotId: "evacuation-camp", locationId: "evacuation-camp" }, { locationSlotId: "supply-fort", locationId: "supply-fort" }, { locationSlotId: "royal-gold-mine", locationId: "royal-gold-mine" }, ...["north", "east", "south", "west"].map((direction) => ({ locationSlotId: `supply-village-${direction}`, locationId: `supply-village-${direction}` }))];
+  const game = new Game({ setup: { id: "evacuation-sim", name: "Simulation", mode: "quick", scenarioId: "chaos", playerCount: 1, playArea: { id: "sim", name: "Maison", polygon: [{ latitude: -89, longitude: -179 }, { latitude: -89, longitude: 179 }, { latitude: 89, longitude: 179 }, { latitude: 89, longitude: -179 }] }, participants: [{ playerId: "local", name: "Joueur" }] }, scenario: definition, locations, heroClasses, unitDefinitions, scenarioLocationBindings: bindings, coordinateMode: "simulation", scenarioStartsActive: false, now: () => 1_000 });
   game.chooseHero("local", { name: "Officier", classId: "warrior" }); game.updateLocationPosition({ locationId: "royal-capital", position: { latitude: 50, longitude: 30 } }); game.updateLocationPosition({ locationId: "evacuation-camp", position: { latitude: 68, longitude: 42 } });
-  game.activeScenarioEventId = "evacuation-ordered"; new ScenarioEffectResolver().apply(game.scenario.getEvent("evacuation-ordered"), game); game.activeScenarioEventId = null;
+  game.offerQuest({ id: "royal-camp-evacuation", title: "Le camp menacé", description: "Évacuer le camp.", startPhaseId: "prologue-complete" });
+  assert.equal(game.acceptAvailableQuest("royal-camp-evacuation").success, true);
+  const progress = game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId: "receive-evacuation-order", locationId: "royal-capital" });
+  assert.equal(progress?.nextPhaseId, "reach-evacuation-camp");
+  assert.equal(game.getPlayer("local").knowsLocation("evacuation-camp"), true);
   assert.equal(game.evacuationStates["royal-camp-evacuation"].expiresAt, 181_000);
   assert.equal(game.autonomousGroups.filter((group) => group.mission.kind === "guard").length, 5);
-  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => group.army.units[0].quantity), [4, 10]);
+  assert.ok(game.autonomousGroups.filter((group) => group.mission.kind === "guard").every((group) => group.mission.engagementRadiusMeters === 10));
+  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => group.army.units[0].quantity), [5, 10]);
+  game.advanceAutonomousGroups(11_000);
+  assert.ok(game.getAutonomousGroup("chaos-column-vanguard").movement.arrivesAt < game.getAutonomousGroup("chaos-column-main").movement.arrivesAt);
+  game.advanceAutonomousGroups(31_000);
+  const passageGroups = new Set(game.autonomousGroupTraces.filter((trace) => trace.kind === "passage").map((trace) => trace.groupId));
+  assert.equal(passageGroups.has("chaos-column-vanguard"), true);
+  assert.equal(passageGroups.has("chaos-column-main"), true);
+  assert.equal([...passageGroups].some((id) => id.startsWith("chaos-cordon-")), false);
+});
+
+test("l’ordre royal autorise l’évacuation et le démontage d’un camp appartenant au royaume", () => {
+  const definition = JSON.parse(readFileSync(new URL("../data/scenarios/chaos.json", import.meta.url), "utf8"));
+  const locations = JSON.parse(readFileSync(new URL("../data/locations.json", import.meta.url), "utf8"));
+  const heroClasses = JSON.parse(readFileSync(new URL("../data/hero-classes.json", import.meta.url), "utf8"));
+  const unitDefinitions = JSON.parse(readFileSync(new URL("../data/units.json", import.meta.url), "utf8"));
+  const bindings = [{ locationSlotId: "refuge", locationId: "fort-nord" }, { locationSlotId: "capital", locationId: "royal-capital" }, { locationSlotId: "royal-camp", locationId: "village-vert" }, { locationSlotId: "prospectors-battlefield", locationId: "prospector-battlefield" }, { locationSlotId: "gold-mine", locationId: "gold-mine" }, { locationSlotId: "bandit-camp", locationId: "bandit-camp" }, { locationSlotId: "evacuation-camp", locationId: "evacuation-camp" }, { locationSlotId: "supply-fort", locationId: "supply-fort" }, { locationSlotId: "royal-gold-mine", locationId: "royal-gold-mine" }, ...["north", "east", "south", "west"].map((direction) => ({ locationSlotId: `supply-village-${direction}`, locationId: `supply-village-${direction}` }))];
+  const game = new Game({ setup: { id: "evacuation-action", name: "Simulation", mode: "quick", scenarioId: "chaos", playerCount: 1, playArea: { id: "sim", name: "Maison", polygon: [{ latitude: -89, longitude: -179 }, { latitude: -89, longitude: 179 }, { latitude: 89, longitude: 179 }, { latitude: 89, longitude: -179 }] }, participants: [{ playerId: "local", name: "Joueur" }] }, scenario: definition, locations, heroClasses, unitDefinitions, scenarioLocationBindings: bindings, coordinateMode: "simulation", scenarioStartsActive: false, now: () => 1_000 });
+  const hero = game.chooseHero("local", { name: "Officier", classId: "warrior" }); const camp = game.getLocation("evacuation-camp");
+  game.offerQuest({ id: "royal-camp-evacuation", title: "Le camp menacé", description: "Évacuer le camp.", startPhaseId: "prologue-complete" }); game.acceptAvailableQuest("royal-camp-evacuation");
+  game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId: "receive-evacuation-order", locationId: "royal-capital" });
+  game.dispatchQuestEvent({ type: "LocationEntered", locationId: camp.id }); camp.addHero(hero.id);
+  const result = game.organizeLocationEvacuation({ playerId: "local", heroId: hero.id, locationId: camp.id });
+  assert.equal(result.success, true); assert.equal(result.people, 10); assert.equal(camp.population, 0); assert.equal(result.dismantlings.length, 2);
+  assert.equal(hero.carriedLoot.filter((entry) => entry.itemId === "population").reduce((sum, entry) => sum + entry.quantity, 0), 10);
+});
+
+test("l’ordre royal déploie encore les deux colonnes lorsque le camp est près de la limite nord", () => {
+  const definition = JSON.parse(readFileSync(new URL("../data/scenarios/chaos.json", import.meta.url), "utf8"));
+  const locations = JSON.parse(readFileSync(new URL("../data/locations.json", import.meta.url), "utf8"));
+  const heroClasses = JSON.parse(readFileSync(new URL("../data/hero-classes.json", import.meta.url), "utf8"));
+  const unitDefinitions = JSON.parse(readFileSync(new URL("../data/units.json", import.meta.url), "utf8"));
+  const bindings = [{ locationSlotId: "refuge", locationId: "fort-nord" }, { locationSlotId: "capital", locationId: "royal-capital" }, { locationSlotId: "royal-camp", locationId: "village-vert" }, { locationSlotId: "prospectors-battlefield", locationId: "prospector-battlefield" }, { locationSlotId: "gold-mine", locationId: "gold-mine" }, { locationSlotId: "bandit-camp", locationId: "bandit-camp" }, { locationSlotId: "evacuation-camp", locationId: "evacuation-camp" }, { locationSlotId: "supply-fort", locationId: "supply-fort" }, { locationSlotId: "royal-gold-mine", locationId: "royal-gold-mine" }, ...["north", "east", "south", "west"].map((direction) => ({ locationSlotId: `supply-village-${direction}`, locationId: `supply-village-${direction}` }))];
+  const game = new Game({ setup: { id: "evacuation-edge", name: "Simulation", mode: "quick", scenarioId: "chaos", playerCount: 1, playArea: { id: "sim", name: "Maison", polygon: [{ latitude: -89, longitude: -179 }, { latitude: -89, longitude: 179 }, { latitude: 89, longitude: 179 }, { latitude: 89, longitude: -179 }] }, participants: [{ playerId: "local", name: "Joueur" }] }, scenario: definition, locations, heroClasses, unitDefinitions, scenarioLocationBindings: bindings, coordinateMode: "simulation", scenarioStartsActive: false, now: () => 1_000 });
+  game.chooseHero("local", { name: "Officier", classId: "warrior" });
+  game.updateLocationPosition({ locationId: "royal-capital", position: { latitude: 50, longitude: 30 } });
+  game.updateLocationPosition({ locationId: "evacuation-camp", position: { latitude: 88, longitude: 42 } });
+  game.offerQuest({ id: "royal-camp-evacuation", title: "Le camp menacé", description: "Évacuer le camp.", startPhaseId: "prologue-complete" });
+  assert.equal(game.acceptAvailableQuest("royal-camp-evacuation").success, true);
+  assert.doesNotThrow(() => game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId: "receive-evacuation-order", locationId: "royal-capital" }));
+  assert.equal(game.autonomousGroups.filter((group) => group.mission.kind === "guard").length, 5);
+  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => group.army.units[0].quantity), [5, 10]);
 });
 
 test("la capitale et les camps du prologue restent la propriété du royaume", () => {

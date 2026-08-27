@@ -291,6 +291,7 @@ export class Location {
       greeting: Location.#requireText(chief.greeting ?? "Que puis-je faire pour vous ?", "L'accueil du chef"),
       openingLines: Location.#createTextList(chief.openingLines ?? [chief.greeting ?? "Que puis-je faire pour vous ?"], "Les répliques d'accueil"),
       portrait: chief.portrait == null ? null : Location.#requireText(chief.portrait, "L'illustration du chef"),
+      isHero: chief.isHero === true,
       trade: chief.trade === true,
       tradeLimitPerCycle: Location.#requireNonNegativeInteger(chief.tradeLimitPerCycle ?? (tradeOffers.length > 0 ? 2 : 0), "Le quota de commerce du chef"),
       tradeOffers: tradeOffers.map((offer, index) => ({ id: Location.#requireText(offer.id ?? `offer-${index + 1}`, "L'identifiant de l'offre"), give: Location.#createTradeResource(offer.give, "La ressource donnée"), receive: Location.#createTradeResource(offer.receive, "La ressource reçue") })),

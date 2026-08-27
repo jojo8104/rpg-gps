@@ -18,10 +18,11 @@ export class SetupPlacementService {
   }
 
   resolveInside({ playArea, preferred, origin = null, minimumDistance = 0 }) {
-    if (playArea.contains(preferred) && (origin === null || this.distanceFn(origin, preferred) >= minimumDistance)) return { ...preferred };
+    const safePreferred = clampGeographicPosition(preferred);
+    if (playArea.contains(safePreferred) && (origin === null || this.distanceFn(origin, safePreferred) >= minimumDistance)) return { ...safePreferred };
     const ranked = this.#candidates(playArea)
       .filter((candidate) => origin === null || this.distanceFn(origin, candidate) >= minimumDistance)
-      .map((candidate) => ({ candidate, distance: this.distanceFn(preferred, candidate) }))
+      .map((candidate) => ({ candidate, distance: this.distanceFn(safePreferred, candidate) }))
       .sort((first, second) => first.distance - second.distance);
     if (ranked.length === 0) throw new RangeError("La zone de jeu est trop petite pour placer cet objectif à la distance demandée.");
     return { ...ranked[0].candidate };
@@ -50,6 +51,16 @@ export class SetupPlacementService {
     for (let row = 1; row < 12; row += 1) for (let column = 1; column < 12; column += 1) { const position = { latitude: minLat + (maxLat - minLat) * row / 12, longitude: minLon + (maxLon - minLon) * column / 12 }; if (playArea.contains(position)) candidates.push(position); }
     return candidates;
   }
+}
+
+function clampGeographicPosition(position) {
+  if (position === null || Array.isArray(position) || typeof position !== "object" || !Number.isFinite(position.latitude) || !Number.isFinite(position.longitude)) {
+    throw new TypeError("La position préférée doit contenir une latitude et une longitude finies.");
+  }
+  return {
+    latitude: Math.max(-90, Math.min(90, position.latitude)),
+    longitude: Math.max(-180, Math.min(180, position.longitude)),
+  };
 }
 
 function bearingDegrees(origin, target) {

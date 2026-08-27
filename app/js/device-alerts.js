@@ -25,8 +25,10 @@ export class DeviceAlerts {
   }
 
   reward({ kilometer = false, kind = "travel" } = {}) {
+    const vibrations = { questStep: [70, 45, 110], quest: [100, 55, 100, 55, 220] };
+    if (vibrations[kind] && typeof navigator.vibrate === "function") navigator.vibrate(vibrations[kind]);
     if (!this.audio || this.audio.state !== "running") return false;
-    const melodies = { travel: kilometer ? [523.25, 659.25, 783.99] : [523.25, 659.25], hero: [523.25, 659.25, 783.99, 1046.5], unit: [392, 523.25, 659.25] };
+    const melodies = { travel: kilometer ? [523.25, 659.25, 783.99] : [523.25, 659.25], hero: [523.25, 659.25, 783.99, 1046.5], unit: [392, 523.25, 659.25], questStep: [659.25, 783.99], quest: [523.25, 659.25, 783.99, 1046.5] };
     const start = this.audio.currentTime; const frequencies = melodies[kind] ?? melodies.travel;
     frequencies.forEach((frequency, index) => {
       const oscillator = this.audio.createOscillator(); const gain = this.audio.createGain(); const noteStart = start + index * .1;

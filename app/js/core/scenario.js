@@ -190,6 +190,26 @@ export class ScenarioState {
     return true;
   }
 
+  restartPhases(scenario, { phaseIds, startPhaseId }, { activate = true } = {}) {
+    if (!Array.isArray(phaseIds) || !phaseIds.includes(startPhaseId) || scenario.getPhase(startPhaseId) === null) return false;
+    const phases = phaseIds.map((phaseId) => scenario.getPhase(phaseId));
+    if (phases.some((phase) => phase === null)) return false;
+    phases.forEach((phase) => {
+      const state = this.phaseStates[phase.id];
+      state.status = "locked";
+      delete state.failureReason; delete state.failedAt;
+      state.objectives = phase.objectives.map((objective) => ({ ...objective, state: "locked" }));
+    });
+    const eventIds = new Set(phases.flatMap((phase) => phase.eventIds));
+    this.triggeredEventIds = this.triggeredEventIds.filter((eventId) => !eventIds.has(eventId));
+    if (activate) {
+      const start = this.phaseStates[startPhaseId];
+      start.status = "active"; start.objectives.forEach((objective) => { objective.state = "active"; });
+      this.currentPhaseId = startPhaseId;
+    }
+    return true;
+  }
+
   triggerEvent(scenario, eventId) {
     const phase = scenario.getPhase(this.currentPhaseId);
     if (phase === null || !phase.eventIds.includes(eventId) || this.triggeredEventIds.includes(eventId)) return null;

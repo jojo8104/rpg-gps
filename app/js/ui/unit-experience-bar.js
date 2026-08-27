@@ -13,6 +13,5 @@ export function unitExperienceProgress(unit) {
 
 export function renderUnitExperienceBar(unit, { detailed = false } = {}) {
   const progress = unitExperienceProgress(unit);
-  const detail = progress.nextRank ? `Prochain grade : ${progress.nextRank.label}` : "Grade maximal atteint";
-  return `<div class="unit-xp${detailed ? " unit-xp--detailed" : " unit-xp--compact"}"><div class="unit-xp__label"><strong>${detailed ? "Expérience" : "XP"}</strong><span>${progress.label}</span></div><div class="unit-xp__bar" role="progressbar" aria-label="${progress.label}${progress.nextRank ? ` vers ${progress.nextRank.label}` : ""}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress.value)}"><i style="width:${progress.value}%"></i></div>${detailed ? `<small>${detail}</small>` : ""}</div>`;
+  return `<div class="unit-xp${detailed ? " unit-xp--detailed" : " unit-xp--compact"}"><div class="unit-xp__bar" role="progressbar" aria-label="${progress.label}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress.value)}"><i style="width:${progress.value}%"></i><small>${progress.label}</small></div></div>`;
 }

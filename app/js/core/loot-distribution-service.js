@@ -1,9 +1,7 @@
-import { LootSite } from "./loot-site.js";
-
-export const LOOT_SITE_TTL_MS = 5 * 60_000;
+import { BattleLoot } from "./battle-loot.js";
 
 export class LootDistributionService {
-  createSite({ id, battle, position, extraLoot = [], ttlMs = LOOT_SITE_TTL_MS, now = () => Date.now() }) {
+  createReward({ id, battle, extraLoot = [], now = () => Date.now() }) {
     if (battle.status !== "finished" || battle.winnerTeamId === null) return null;
     const winners = battle.teams.find((team) => team.id === battle.winnerTeamId)?.heroes.filter((hero) => hero.state === "active") ?? [];
     if (winners.length === 0) return null;
@@ -13,7 +11,7 @@ export class LootDistributionService {
     const entries = [...battle.state.loot, ...extraLoot].filter((entry) => entry.protected !== true && !isBarricade(entry)).map((entry) => ({ ...structuredClone(entry), allocations: {} }));
     if (entries.length === 0) return null;
     entries.filter((entry) => entry.portable).forEach((entry) => allocate(entry, shares));
-    return new LootSite({ id, battleId: battle.id, position, entries, shares, expiresAt: now() + ttlMs, now });
+    return new BattleLoot({ id, battleId: battle.id, entries, shares, now });
   }
 }
 

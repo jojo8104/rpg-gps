@@ -9,12 +9,12 @@ export class AutonomousInterceptionService {
     this.minimumReactionMs = minimumReactionMs;
   }
 
-  detect(segment, targets) {
+  detect(segment, targets, { observerDetectionMultiplier = 1 } = {}) {
     if (segment === null || !Array.isArray(targets)) return null;
     const candidates = targets.filter((target) => target?.position).map((target) => {
       const closest = closestPoint(segment.from, segment.to, target.position);
       return { target, ...closest, distance: distanceMeters(closest.position, target.position) };
-    }).filter((candidate) => candidate.distance <= this.engagementRadiusMeters * (candidate.target.concealmentMultiplier ?? 1))
+    }).filter((candidate) => candidate.distance <= this.engagementRadiusMeters * positiveMultiplier(observerDetectionMultiplier) * positiveMultiplier(candidate.target.concealmentMultiplier))
       .sort((first, second) => first.fraction - second.fraction || String(first.target.id).localeCompare(String(second.target.id)));
     const match = candidates[0];
     if (!match) return null;
@@ -70,6 +70,8 @@ export class AutonomousInterceptionService {
     return { success: true, outcome, groupId: group.id, target: structuredClone(interruption.target), information, cargo, at: now };
   }
 }
+
+function positiveMultiplier(value) { return Number.isFinite(value) && value > 0 ? value : 1; }
 
 function closestPoint(start, end, point) {
   const latitudeScale = 111_320;

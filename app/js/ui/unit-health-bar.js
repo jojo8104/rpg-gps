@@ -8,5 +8,5 @@ export function renderUnitHealthBar(unit, { tag = "div" } = {}) {
   const woundedHealth = soldierHealth.filter((health) => health > 0 && health <= threshold).reduce((total, health) => total + health, 0);
   const missingHealth = Math.max(0, maximumHealth - combatantHealth - woundedHealth);
   const currentHealth = combatantHealth + woundedHealth;
-  return `<${tag} class="army-health-bar" role="img" aria-label="${currentHealth} PV sur ${maximumHealth} ; ${unit.combatantCount ?? 0} combattants, ${unit.woundedCount ?? 0} blessés"><i class="is-combatant" style="flex:${combatantHealth}"></i><i class="is-wounded" style="flex:${woundedHealth}"></i><i class="is-dead" style="flex:${missingHealth}"></i></${tag}>`;
+  return `<${tag} class="army-health-bar" role="img" aria-label="${currentHealth} PV sur ${maximumHealth} ; ${unit.combatantCount ?? 0} combattants, ${unit.woundedCount ?? 0} blessés"><i class="is-combatant" style="flex:${combatantHealth}"></i><i class="is-wounded" style="flex:${woundedHealth}"></i><i class="is-dead" style="flex:${missingHealth}"></i><small>PV ${currentHealth}/${maximumHealth}</small></${tag}>`;
 }

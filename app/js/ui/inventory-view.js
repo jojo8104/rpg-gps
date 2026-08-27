@@ -10,7 +10,7 @@ export function renderInventoryView({ element, hero, slotCount }) {
   hero.carriedLoot.forEach((entry, index) => stacks.push({ id: `loot-${index}`, itemId: entry.itemId, quantity: entry.quantity }));
   const visibleCount = Math.max(slotCount, stacks.length);
   const slots = Array.from({ length: visibleCount }, (_, index) => slot(stacks[index] ?? null, index, index >= slotCount));
-  element.innerHTML = `<section class="inventory-panel"><header><div><p class="eyebrow">Train de l'armée</p><h3>Bagages</h3></div><strong>${stacks.length}/${slotCount} slots</strong></header><p class="text-muted">Chaque paquet occupe un slot. Sa quantité maximale dépend de son contenu.</p><div class="inventory-slots" role="list" aria-label="Bagages du héros">${slots.join("")}</div>${stacks.length > slotCount ? '<p class="inventory-warning">Capacité dépassée : libérez des slots avant tout nouveau dépôt.</p>' : ""}<footer><span>Grade : ${hero.commandRank}</span><span>Chariots : 0/5</span></footer></section>`;
+  element.innerHTML = `<section class="inventory-panel"><header><h3>Bagages</h3><strong>${stacks.length}/${slotCount} slots</strong></header><div class="inventory-slots" role="list" aria-label="Bagages du héros">${slots.join("")}</div>${stacks.length > slotCount ? '<p class="inventory-warning">Capacité dépassée : libérez des slots avant tout nouveau dépôt.</p>' : ""}</section>`;
 }
 
 function slot(stack, index, overflow) {

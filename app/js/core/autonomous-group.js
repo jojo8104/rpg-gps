@@ -10,6 +10,7 @@ export class AutonomousGroup {
     status = "idle", behavior = "passive", mission = null, army = {},
     cargo = [], message = null, morale = null, movement = null,
     interruption = null, ambush = null, history = [], traceAnchor = null,
+    detectionMultiplier = 1, concealmentMultiplier = 1,
   }) {
     this.id = AutonomousGroup.#text(id, "L'identifiant du groupe autonome");
     this.type = AutonomousGroup.#choice(type, AUTONOMOUS_GROUP_TYPES, "Le type du groupe autonome");
@@ -30,6 +31,8 @@ export class AutonomousGroup {
     this.ambush = AutonomousGroup.#optionalRecord(ambush, "L'embuscade");
     this.history = AutonomousGroup.#records(history, "L'historique");
     this.traceAnchor = traceAnchor === null ? { ...this.position } : AutonomousGroup.#position(traceAnchor);
+    this.detectionMultiplier = AutonomousGroup.#positiveNumber(detectionMultiplier, "Le multiplicateur de détection");
+    this.concealmentMultiplier = AutonomousGroup.#positiveNumber(concealmentMultiplier, "Le multiplicateur de discrétion");
   }
 
   toJSON() {
@@ -52,6 +55,8 @@ export class AutonomousGroup {
       ambush: this.ambush === null ? null : structuredClone(this.ambush),
       history: this.history.map((entry) => structuredClone(entry)),
       traceAnchor: { ...this.traceAnchor },
+      detectionMultiplier: this.detectionMultiplier,
+      concealmentMultiplier: this.concealmentMultiplier,
     };
   }
 
@@ -89,5 +94,6 @@ export class AutonomousGroup {
   }
 
   static #optionalText(value, label) { return value === null ? null : AutonomousGroup.#text(value, label); }
+  static #positiveNumber(value, label) { if (!Number.isFinite(value) || value <= 0) throw new RangeError(`${label} doit être strictement positif.`); return value; }
   static #text(value, label) { if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label} doit être un texte non vide.`); return value.trim(); }
 }

@@ -57,5 +57,5 @@ test("à zéro PV le héros perd toutes ses troupes et tous ses bagages", () => 
   const result = game.resolveBattle(battle.id);
   assert.equal(victim.state, "ghost"); assert.equal(victim.health, 0); assert.equal(victim.army.units.length, 0); assert.equal(victim.carriedLoot.length, 0); assert.equal(victim.resources.gold, 0);
   assert.ok(result.consequences.losses.some((loss) => loss.reason === "hero_became_ghost" && loss.heroId === victim.id));
-  assert.ok(result.lootSite.entries.some((entry) => entry.itemId === "gold" && entry.quantity === 7));
+  assert.ok(result.battleLoot.entries.some((entry) => entry.itemId === "gold" && entry.quantity === 7));
 });

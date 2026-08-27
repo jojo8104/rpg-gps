@@ -26,6 +26,8 @@
   box-shadow: inset 0 0 0 1px #d2a85f55;
 }
 
+.location-overview-body { min-width:0; }
+
 .location-detail-art img {
   width: 96%;
   height: 96%;

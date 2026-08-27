@@ -1,0 +1,16 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { equipmentSlotState, renderEquipmentView } from "../app/js/ui/equipment-view.js";
+
+test("un slot vide compatible signale un équipement disponible", () => {
+  const hero = { equipment: {}, carriedLoot: [{ id: "sword", itemId: "iron_sword", quantity: 1 }] };
+  const state = equipmentSlotState(hero, { id: "mainHand", name: "Main droite" });
+  assert.equal(state.className, "has-available");
+  assert.match(renderEquipmentView({ hero }), /data-equipment-slot="mainHand"/);
+});
+
+test("un équipement sans meilleur choix est signalé en or", () => {
+  const hero = { equipment: { mainHand: "iron_sword" }, carriedLoot: [] };
+  const state = equipmentSlotState(hero, { id: "mainHand", name: "Main droite" });
+  assert.equal(state.className, "is-equipped is-best");
+});

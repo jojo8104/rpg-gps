@@ -5,6 +5,7 @@ import { zoomLevel } from "../app/js/map/MapRenderer.js";
 import { locationMarkerSvg, locationPresentation } from "../app/js/map/LocationRenderer.js";
 import { dynamicSitePresentation } from "../app/js/ui/map-view.js";
 import { headingDirection } from "../app/js/map/UnitRenderer.js";
+import { compactLocationDescription } from "../app/js/ui/world-view.js";
 
 test("les panes cartographiques ont un ordre explicite et strict", () => {
   const values = MAP_LAYER_ORDER.map((name) => MAP_LAYER_Z_INDEX[name]);
@@ -30,9 +31,9 @@ test("chaque type de lieu possède un symbole vectoriel pour le zoom sémantique
   });
 });
 
-test("un champ de bataille réserve une grande cible tactile au-dessus du héros", () => {
+test("une trace de bataille n'expose aucun rayon d'interaction", () => {
   const site = dynamicSitePresentation({ kind: "battlefield", interactionRadius: 100 });
-  assert.equal(site.iconSize, 64); assert.equal(site.interactionRadius, 100);
+  assert.equal(site.iconSize, 52); assert.equal(site.interactionRadius, 0);
   assert.equal(site.pane, "effects"); assert.ok(site.zIndexOffset > 1000);
 });
 
@@ -42,4 +43,10 @@ test("le sprite du héros choisit une des huit directions de boussole", () => {
   assert.equal(headingDirection(91).id, "e");
   assert.equal(headingDirection(181).id, "s");
   assert.equal(headingDirection(359).id, "n");
+});
+
+test("la fiche détaillée raccourcit uniquement les descriptions trop longues", () => {
+  assert.equal(compactLocationDescription("Description courte."), "Description courte.");
+  const result = compactLocationDescription("Un très ancien village entouré de collines et traversé par une route marchande utilisée depuis plusieurs générations.", 55);
+  assert.ok(result.length <= 55); assert.match(result, /…$/);
 });
