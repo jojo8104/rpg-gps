@@ -11,8 +11,9 @@ test("la carte ne reçoit que les groupes détectés par le héros", () => {
   assert.deepEqual(detected.map((group) => group.id), ["near"]); assert.equal(detected[0].soldiers, 6);
 });
 
-test("l'éclaireur détecte plus loin mais une embuscade réduit la visibilité", () => {
+test("la statistique de détection porte plus loin mais la discrétion et l'embuscade réduisent la visibilité", () => {
   const service = new AutonomousGroupDetectionService({ distanceFn: (first, second) => Math.abs(first.latitude - second.latitude) });
-  assert.equal(service.detect({ observer: { position: { latitude: 0, longitude: 0 }, classId: "ranger" }, groups: [groupAt("scouted", 35)], baseRadius: 20 }).length, 1);
-  assert.equal(service.detect({ observer: { position: { latitude: 0, longitude: 0 }, classId: "ranger" }, groups: [groupAt("hidden", 26, "ambushing")], baseRadius: 20 }).length, 0);
+  assert.equal(service.detect({ observer: { position: { latitude: 0, longitude: 0 }, detectionMultiplier: 1.5 }, groups: [groupAt("scouted", 35)], baseRadius: 20 }).length, 1);
+  const hidden = groupAt("hidden", 20, "ambushing"); hidden.concealmentMultiplier = .65;
+  assert.equal(service.detect({ observer: { position: { latitude: 0, longitude: 0 }, detectionMultiplier: 1.5 }, groups: [hidden], baseRadius: 20 }).length, 0);
 });

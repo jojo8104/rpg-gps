@@ -45,6 +45,6 @@ test("une victoire ennemie équipe le héros, convertit le reste en XP et ne lai
   const battle = game.createBattle({ teamParticipants: [{ id: "heroes", heroIds: [playerHero.id] }, { id: "bandits", heroIds: [enemyHero.id] }], loot: [{ id: "battle-gold", itemId: "gold", quantity: 5, portable: true }], position: { latitude: 0, longitude: 0 }, sourceLocationId: "enemy-camp", sourceEnemyTeamId: "bandits" });
   battle.teams[0].heroes[0].state = "ghost"; battle.teams[0].heroes[0].health = 0; battle.status = "finished"; battle.winnerTeamId = "bandits";
   const result = game.resolveBattle(battle.id);
-  assert.equal(enemyHero.equipment.mainHand, "iron_sword"); assert.equal(result.enemySalvage.convertedExperience, 9); assert.equal(result.lootSite, null); assert.equal(game.lootSites.length, 0); assert.equal(game.battleSites.length, 0);
+  assert.equal(enemyHero.equipment.mainHand, "iron_sword"); assert.equal(result.enemySalvage.convertedExperience, 9); assert.equal(result.battleLoot, null); assert.equal(game.battleLoot.length, 0); assert.equal(game.battleSites.length, 0);
   assert.equal(result.enemySalvage.experience.reduce((sum, entry) => sum + entry.amount, 0), 9);
 });

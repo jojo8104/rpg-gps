@@ -1,6 +1,8 @@
 import { distanceMeters, validatePosition } from "./geo.js";
+import { distanceForPace } from "./quest-pace-profile.js";
+import { SetupPlacementService } from "./setup-placement-service.js";
 
-const STRATEGIES = new Set(["fixed", "distance"]);
+const STRATEGIES = new Set(["fixed", "distance", "area-relative"]);
 
 /** Matérialise les emplacements abstraits du scénario à partir du setup de partie. */
 export class ScenarioRuntimeBuilder {
@@ -26,7 +28,27 @@ export class ScenarioRuntimeBuilder {
         continue;
       }
 
-      const minimumDistanceMeters = positive(config.minimumDistanceMeters ?? 300, "La distance de placement");
+      if (config.strategy === "area-relative") {
+        const originSlotId = requiredText(config.originLocationSlotId, "Le lieu d'origine du placement relatif");
+        const originPlacement = placements[originSlotId];
+        if (originPlacement?.status !== "placed") throw new RangeError(`Le lieu d'origine ${originSlotId} doit être placé avant ${slot.id}.`);
+        const areaRatio = ratio(config.areaRadiusRatio ?? 0.25, "Le ratio de distance dans la PlayArea");
+        const equivalentRadius = Math.sqrt(setup.playArea.getAreaSquareMeters() / Math.PI);
+        const minimumDistance = nonNegative(config.minimumDistanceMeters ?? 0, "La distance minimale");
+        const maximumDistance = positive(config.maximumDistanceMeters ?? Number.MAX_SAFE_INTEGER, "La distance maximale");
+        if (maximumDistance < minimumDistance) throw new RangeError("La distance maximale doit être supérieure à la distance minimale.");
+        const preferredDistance = Math.max(minimumDistance, Math.min(maximumDistance, equivalentRadius * areaRatio));
+        const position = new SetupPlacementService().findPosition({
+          playArea: setup.playArea,
+          origin: originPlacement.position,
+          preferredDistance,
+          preferredDirectionDegrees: config.directionDegrees ?? 0,
+        });
+        placements[slot.id] = { strategy: "area-relative", status: "placed", locationId: location.id, position, originLocationSlotId: originSlotId, preferredDistanceMeters: preferredDistance, areaRadiusRatio: areaRatio };
+        continue;
+      }
+
+      const minimumDistanceMeters = positive(distanceForPace(config.minimumDistanceMetersByPace, setup.rules?.travelPaceMode ?? "calm", config.minimumDistanceMeters ?? 300), "La distance de placement");
       const maximumAccuracyMeters = positive(config.maximumAccuracyMeters ?? 50, "La précision GPS maximale");
       const confirmations = positiveInteger(config.confirmations ?? 2, "Le nombre de confirmations");
       placements[slot.id] = {
@@ -84,4 +106,7 @@ export class ScenarioRuntimeBuilder {
 }
 
 function positive(value, label) { if (!Number.isFinite(value) || value <= 0) throw new RangeError(`${label} doit être positive.`); return value; }
+function nonNegative(value, label) { if (!Number.isFinite(value) || value < 0) throw new RangeError(`${label} doit être positive ou nulle.`); return value; }
+function ratio(value, label) { if (!Number.isFinite(value) || value <= 0 || value > 1) throw new RangeError(`${label} doit être compris entre zéro et un.`); return value; }
+function requiredText(value, label) { if (typeof value !== "string" || value.trim() === "") throw new TypeError(`${label} doit être un texte non vide.`); return value.trim(); }
 function positiveInteger(value, label) { if (!Number.isInteger(value) || value <= 0) throw new RangeError(`${label} doit être un entier positif.`); return value; }

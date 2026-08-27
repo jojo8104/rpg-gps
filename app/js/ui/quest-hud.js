@@ -1,10 +1,10 @@
-export function buildQuestHudModel({ quest, placement = null, actionSlotId = null } = {}) {
+export function buildQuestHudModel({ quest, placement = null, actionSlotId = null, locations = [] } = {}) {
   if (!quest) return null;
   const activeObjective = quest.objectives.find((objective) => objective.state === "active") ?? null;
   const current = placement ? Math.max(0, Math.round(placement.distanceMeters ?? 0)) : null;
   const target = placement ? Math.max(1, Math.round(placement.minimumDistanceMeters ?? 0)) : null;
   const ready = Boolean(actionSlotId && placement?.status === "ready");
-  return { id: quest.id, title: quest.title, summary: quest.description, objective: activeObjective?.text ?? "Quête terminée", objectives: quest.objectives.map(({ id, text, state }) => ({ id, text, state })), current, target, progressPercent: placement ? Math.min(100, current / target * 100) : null, ready, actionLabel: ready ? actionLabel(activeObjective, actionSlotId) : null };
+  return { id: quest.id, title: quest.title, summary: quest.description, objective: activeObjective?.text ?? "Quête terminée", objectives: quest.objectives.map(({ id, text, state }) => ({ id, text, state })), locations: locations.map(({ id, name }) => ({ id, name })), current, target, progressPercent: placement ? Math.min(100, current / target * 100) : null, ready, actionLabel: ready ? actionLabel(activeObjective, actionSlotId) : null };
 }
 
 export function createQuestHud(mapViewElement) {
@@ -17,12 +17,13 @@ export function createQuestHud(mapViewElement) {
   return element;
 }
 
-export function renderQuestHud({ element, model, expanded = false, onToggle, onAction }) {
+export function renderQuestHud({ element, model, expanded = false, onToggle, onAction, onShowLocation }) {
   if (!element) return;
   element.hidden = !model;
   if (!model) { element.replaceChildren(); return; }
   const progress = model.progressPercent === null ? "" : `<div class="quest-hud__progress" role="progressbar" aria-label="Progression : ${model.current} sur ${model.target} mètres" aria-valuemin="0" aria-valuemax="${model.target}" aria-valuenow="${model.current}"><span style="width:${model.progressPercent}%"></span><small>${model.current} / ${model.target} m</small></div>`;
-  const details = expanded ? `<div class="quest-hud__details"><strong>${escapeHtml(model.title)}</strong><p class="quest-hud__summary">${escapeHtml(model.summary)}</p><ul>${model.objectives.map((objective) => `<li class="${objective.state === "completed" ? "is-completed" : ""}">${objective.state === "completed" ? "✓" : "○"} ${escapeHtml(objective.text)}</li>`).join("")}</ul></div>` : "";
+  const locationButtons = model.locations?.map((location) => `<button type="button" class="quest-location-button secondary-button" data-quest-location="${escapeHtml(location.id)}" aria-label="Afficher ${escapeHtml(location.name)} sur la carte">⌖ ${escapeHtml(location.name)}</button>`).join("") ?? "";
+  const details = expanded ? `<div class="quest-hud__details"><strong>${escapeHtml(model.title)}</strong><p class="quest-hud__summary">${escapeHtml(model.summary)}</p><ul>${model.objectives.map((objective) => `<li class="${objective.state === "completed" ? "is-completed" : ""}">${objective.state === "completed" ? "✓" : "○"} ${escapeHtml(objective.text)}</li>`).join("")}</ul>${locationButtons ? `<div class="quest-location-actions">${locationButtons}</div>` : ""}</div>` : "";
   element.classList.toggle("is-ready", model.ready);
   element.classList.toggle("is-expanded", expanded);
   element.setAttribute("role", "button"); element.tabIndex = 0; element.setAttribute("aria-expanded", String(expanded));
@@ -30,6 +31,7 @@ export function renderQuestHud({ element, model, expanded = false, onToggle, onA
   element.onclick = (event) => { if (!event.target.closest("button")) onToggle?.(); };
   element.onkeydown = (event) => { if ((event.key === "Enter" || event.key === " ") && event.target === element) { event.preventDefault(); onToggle?.(); } };
   element.querySelector("[data-quest-action]")?.addEventListener("click", onAction);
+  element.querySelectorAll("[data-quest-location]").forEach((button) => button.addEventListener("click", () => onShowLocation?.(button.dataset.questLocation)));
 }
 
 function actionLabel(objective, slotId) {

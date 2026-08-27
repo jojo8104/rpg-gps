@@ -67,6 +67,8 @@ export class Game {
     this.resultEvaluationService = new ResultEvaluationService();
     this.evacuationStates = {};
     this.availableQuests = [];
+    this.questSequence = [];
+    this.lastQuestResult = null;
     this.engagementService = new EngagementService({ engagementRadiusMeters: this.setup.rules.engagementRadiusMeters, fleeConfirmations: this.setup.rules.fleeConfirmations });
     this.scenario = scenario === null ? null : (scenario instanceof Scenario ? scenario : new Scenario(scenario));
     if (this.scenario !== null && this.scenario.id !== this.setup.scenarioId) throw new RangeError("Le scénario ne correspond pas au GameSetup.");
@@ -104,7 +106,7 @@ export class Game {
     autonomousGroups.forEach((group) => this.addAutonomousGroup(group));
     if (!Array.isArray(autonomousGroupTraces)) throw new TypeError("Les traces de groupes autonomes doivent être une liste.");
     this.autonomousGroupTraces = autonomousGroupTraces.map((trace) => trace instanceof AutonomousGroupTrace ? trace : new AutonomousGroupTrace(trace));
-    this.lootSites = [];
+    this.battleLoot = [];
     this.battleSites = [];
   }
 
@@ -245,7 +247,7 @@ export class Game {
     const now = this.now(); const ambushRadius = radius ?? features.ambushRadius ?? 75; const ambushDuration = durationMs ?? features.ambushDurationMs ?? 1_800_000;
     if (!Number.isFinite(ambushRadius) || ambushRadius <= 0 || !Number.isFinite(ambushDuration) || ambushDuration <= 0) return { success: false, reason: "invalid_ambush_configuration" };
     hero.removeUnit(unit.id);
-    const group = new AutonomousGroup({ id: this.idGenerator("hero-ambush"), type: "army", owner: { kind: "player", id: player.id }, position: ambushPosition, status: "ambushing", behavior: "aggressive", army: { units: [unit] }, ambush: { radiusMeters: ambushRadius, startedAt: now, expiresAt: now + ambushDuration }, history: [{ type: "hero_ambush_prepared", heroId: hero.id, at: now }] });
+    const group = new AutonomousGroup({ id: this.idGenerator("hero-ambush"), type: "army", owner: { kind: "player", id: player.id }, position: ambushPosition, status: "ambushing", behavior: "aggressive", army: { units: [unit] }, detectionMultiplier: this.heroClassFeatureService.detectionMultiplier(hero), concealmentMultiplier: this.heroClassFeatureService.signatureMultiplier(hero), ambush: { radiusMeters: ambushRadius, startedAt: now, expiresAt: now + ambushDuration }, history: [{ type: "hero_ambush_prepared", heroId: hero.id, at: now }] });
     this.autonomousGroups.push(group); this.eventLog.push({ type: "hero_ambush_prepared", heroId: hero.id, unitId: unit.id, groupId: group.id, at: now });
     return { success: true, groupId: group.id, unitId: unit.id, expiresAt: now + ambushDuration };
   }
@@ -280,6 +282,7 @@ export class Game {
 
   updateScenarioPosition({ position, accuracy = null }) {
     if (!this.setup.playArea.contains(position)) return [];
+    this.scenarioRuntimeBuilder.start(this.scenarioRuntime, position, this.scenarioState?.currentPhaseId ?? null);
     return this.scenarioRuntimeBuilder.update(this.scenarioRuntime, { position, accuracy });
   }
 
@@ -314,11 +317,43 @@ export class Game {
     if (this.scenario === null || this.scenarioState === null) return null;
     const phase = this.scenario.getPhase(this.scenarioState.currentPhaseId);
     const state = this.scenarioState.getCurrentPhaseState();
-    if (state.status !== "active" && state.status !== "failed") return null;
+    if (state.status !== "active") return null;
     return { ...phase, status: state.status, failureReason: state.failureReason ?? null, objectives: state.objectives.map((objective) => ({ ...objective })) };
   }
 
   completeCurrentScenarioPhase() { return this.scenarioState?.completeCurrentPhase() ?? false; }
+
+  configureQuestSequence(quests) {
+    if (this.scenario === null || !Array.isArray(quests) || quests.length < 1) throw new RangeError("La séquence exige au moins une quête.");
+    const usedPhaseIds = new Set();
+    this.questSequence = quests.map((quest) => {
+      if (!quest?.id || !quest?.startPhaseId || !Array.isArray(quest.phaseIds) || !quest.phaseIds.includes(quest.startPhaseId)) throw new TypeError("Une quête de la séquence est invalide.");
+      quest.phaseIds.forEach((phaseId) => {
+        if (this.scenario.getPhase(phaseId) === null || usedPhaseIds.has(phaseId)) throw new RangeError("Les phases du cycle doivent exister et appartenir à une seule quête.");
+        usedPhaseIds.add(phaseId);
+      });
+      return { id: quest.id, title: quest.title ?? quest.id, description: quest.description ?? "Nouvelle quête disponible.", briefingLines: Array.isArray(quest.briefingLines) ? [...quest.briefingLines] : [], startPhaseId: quest.startPhaseId, phaseIds: [...quest.phaseIds] };
+    });
+    return this.questSequence.map((quest) => ({ ...quest, phaseIds: [...quest.phaseIds] }));
+  }
+
+  advanceQuestSequence({ outcome = "completed" } = {}) {
+    if (this.questSequence.length < 1 || this.scenario === null || this.scenarioState === null) return null;
+    const currentIndex = this.questSequence.findIndex((quest) => quest.phaseIds.includes(this.scenarioState.currentPhaseId));
+    if (currentIndex < 0) return null;
+    const current = this.questSequence[currentIndex]; const next = this.questSequence[currentIndex + 1] ?? null;
+    if (next) this.offerQuest(next);
+    this.lastQuestResult = { questId: current.id, title: current.title, outcome, nextQuestId: next?.id ?? null, at: this.now() };
+    const result = { type: "quest_sequence_advanced", questId: current.id, nextQuestId: next?.id ?? null, nextPhaseId: null, outcome, at: this.now() };
+    this.eventLog.push(result); return result;
+  }
+
+  settleQuestSequenceTerminalPhase() {
+    const phase = this.scenario?.getPhase(this.scenarioState?.currentPhaseId);
+    if (!phase || phase.objectives.length > 0 || phase.transitions.length > 0 || this.scenarioState.getCurrentPhaseState().status !== "active") return null;
+    if (!this.completeCurrentScenarioPhase()) return null;
+    return this.advanceQuestSequence({ outcome: "completed" });
+  }
 
   offerQuest({ id, title, description, startPhaseId, briefingLines = [] }) {
     if (this.scenario?.getPhase(startPhaseId) === null || this.availableQuests.some((quest) => quest.id === id)) return false;
@@ -327,9 +362,19 @@ export class Game {
 
   getAvailableQuests() { return this.availableQuests.map((quest) => ({ ...quest, briefingLines: [...quest.briefingLines] })); }
 
+  getLastQuestResult() { return this.lastQuestResult === null ? null : { ...this.lastQuestResult }; }
+
   acceptAvailableQuest(questId) {
     const index = this.availableQuests.findIndex((quest) => quest.id === questId); if (index < 0) return { success: false, reason: "quest_not_available" };
-    const quest = this.availableQuests[index]; if (!this.scenarioState.activateOfferedPhase(this.scenario, quest.startPhaseId)) return { success: false, reason: "another_quest_active" };
+    const quest = this.availableQuests[index]; const sequenceQuest = this.questSequence.find((candidate) => candidate.id === questId);
+    if (this.scenarioState.getCurrentPhaseState().status === "active") return { success: false, reason: "another_quest_active" };
+    const activated = sequenceQuest ? this.scenarioState.restartPhases(this.scenario, sequenceQuest) : this.scenarioState.activateOfferedPhase(this.scenario, quest.startPhaseId);
+    if (!activated) return { success: false, reason: "another_quest_active" };
+    if (sequenceQuest) {
+      const placementSlotIds = new Set(sequenceQuest.phaseIds.flatMap((phaseId) => this.scenario.getPhase(phaseId).objectives).filter((objective) => objective.trigger?.type === "locationPlaced").map((objective) => objective.trigger.locationSlotId));
+      placementSlotIds.forEach((slotId) => { const placement = this.scenarioRuntime?.placements[slotId]; if (placement?.strategy === "distance") { placement.status = "waiting"; placement.origin = null; placement.position = null; placement.distanceMeters = 0; placement.confirmationCount = 0; } });
+    }
+    this.lastQuestResult = null;
     this.availableQuests.splice(index, 1); this.eventLog.push({ type: "quest_accepted", questId, phaseId: quest.startPhaseId, at: this.now() }); return { success: true, quest: { ...quest } };
   }
 
@@ -338,10 +383,13 @@ export class Game {
   failCurrentQuest({ reason = "failed" } = {}) {
     if (this.scenario === null || this.scenarioState === null || this.scenarioState.getCurrentPhaseState().status !== "active") return null;
     const phase = this.scenario.getPhase(this.scenarioState.currentPhaseId); const failure = phase.failure;
-    const nextPhaseId = failure.policy === "branch" ? failure.nextPhase : failure.policy === "continue" ? (failure.nextPhase ?? phase.transitions[0]?.nextPhase ?? null) : null;
+    const isSequencedQuest = this.questSequence.some((quest) => quest.phaseIds.includes(phase.id));
+    let nextPhaseId = isSequencedQuest ? null : failure.policy === "branch" ? failure.nextPhase : failure.policy === "continue" ? (failure.nextPhase ?? phase.transitions[0]?.nextPhase ?? null) : null;
     const appliedEvent = failure.eventId ? this.triggerScenarioEvent(failure.eventId) : null;
     if (!this.scenarioState.failCurrentPhase(this.scenario, { reason, nextPhaseId, at: this.now() })) return null;
-    const result = { type: "quest_failed", phaseId: phase.id, reason, policy: failure.policy, nextPhaseId, appliedEvent, at: this.now() }; this.eventLog.push(result); return result;
+    const sequence = isSequencedQuest ? this.advanceQuestSequence({ outcome: reason }) : null;
+    if (sequence) nextPhaseId = sequence.nextPhaseId;
+    const result = { type: "quest_failed", phaseId: phase.id, reason, policy: failure.policy, nextPhaseId, nextQuestId: sequence?.nextQuestId ?? null, appliedEvent, at: this.now() }; this.eventLog.push(result); return result;
   }
 
   getQuestInteractionsForLocation(locationId) {
@@ -349,7 +397,7 @@ export class Game {
     if (active === null) return [];
     const binding = this.scenarioLocationBindings.find((candidate) => candidate.locationId === locationId);
     if (binding === undefined) return [];
-    return active.objectives.filter((objective) => objective.state === "active" && objective.trigger?.type === "interactionCompleted" && objective.trigger.locationSlotId === binding.locationSlotId).map((objective) => ({ interactionId: objective.trigger.interactionId, label: objective.trigger.label ?? objective.text, responseLines: Array.isArray(objective.trigger.responseLines) ? [...objective.trigger.responseLines] : [] }));
+    return active.objectives.filter((objective) => objective.state === "active" && ["interactionCompleted", "resourceDelivery", "resourceCollection"].includes(objective.trigger?.type) && objective.trigger.locationSlotId === binding.locationSlotId).map((objective) => ({ interactionId: objective.trigger.interactionId, label: objective.trigger.label ?? objective.text, responseLines: Array.isArray(objective.trigger.responseLines) ? [...objective.trigger.responseLines] : [] }));
   }
 
   triggerScenarioEvent(eventId) {
@@ -593,6 +641,28 @@ export class Game {
     return result;
   }
 
+  organizeLocationEvacuation({ playerId, heroId, locationId }) {
+    const hero = this.getHero(heroId); const location = this.getLocation(locationId);
+    if (hero === null || location === null || hero.playerId !== playerId || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
+    if (!this.#canOperateEvacuationSource(playerId, locationId)) return { success: false, reason: "evacuation_not_authorized" };
+    const people = (location.population ?? 0) + (location.resources.stock.population ?? 0);
+    const requiredSlots = Math.ceil(people / 5); const freeSlots = hero.bagSlotCount - this.inventoryService.getUsedHeroBagSlots(hero);
+    if (freeSlots < requiredSlots) return { success: false, reason: "insufficient_slots", requiredSlots, freeSlots };
+    while ((location.population ?? 0) > 0) {
+      const prepared = this.preparePopulationPackages({ playerId, heroId, locationId, people: Math.min(5, location.population) });
+      if (!prepared.success) return { success: false, reason: prepared.reason };
+    }
+    let evacuatedPeople = 0;
+    while ((location.resources.stock.population ?? 0) > 0) {
+      const taken = this.takeLocationPopulationPackage({ playerId, heroId, locationId, people: 5 });
+      if (!taken.success) return { success: false, reason: taken.reason, evacuatedPeople };
+      evacuatedPeople += taken.people;
+    }
+    const dismantlings = Object.keys(location.infrastructure).filter((structureId) => !location.dismantlings.some((task) => task.structureId === structureId)).map((structureId) => this.startLocationDismantling({ playerId, heroId, locationId, structureId })).filter((result) => result.success).map((result) => result.task);
+    this.eventLog.push({ type: "location_evacuation_organized", playerId, heroId, locationId, people: evacuatedPeople, structures: dismantlings.map((task) => task.structureId), at: this.now() });
+    return { success: true, people: evacuatedPeople, dismantlings };
+  }
+
   settlePopulationPackage({ playerId, heroId, locationId, packageId }) {
     const player = this.getPlayer(playerId); const hero = this.getHero(heroId); const location = this.getLocation(locationId);
     if (player === null || hero === null || location === null || hero.playerId !== player.id || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
@@ -610,7 +680,7 @@ export class Game {
   }
 
   #canOperateEvacuationSource(playerId, locationId) {
-    if (this.getPlayer(playerId) === null || this.scenarioState?.currentPhaseId !== "prepare-evacuation") return false;
+    if (this.getPlayer(playerId) === null || !["defend-evacuation-camp", "prepare-evacuation"].includes(this.scenarioState?.currentPhaseId)) return false;
     return Object.values(this.evacuationStates).some((state) => state.playerId === playerId && state.sourceLocationId === locationId && state.departedAt === null && state.completedAt === undefined);
   }
 
@@ -794,54 +864,30 @@ export class Game {
       const experienceGained = team.id === battle.winnerTeamId ? 50 : 20; const progression = this.gainHeroExperience({ heroId: participant.id, amount: experienceGained, source: `battle:${battle.id}` });
       heroProgression.push({ heroId: participant.id, playerId: participant.playerId, name: participant.name, experienceGained, previousExperience, experience: participant.experience, previousRank, rank: participant.commandRank, state: participant.state, availableLevelUps: progression.availableLevelUps });
     }));
-    const position = battle.engagementContext?.center ?? battle.lootPosition;
-    const lootSite = enemyVictory || position === null || position === undefined ? null : this.lootDistributionService.createSite({ id: this.idGenerator("loot-site"), battle, position, extraLoot: droppedLoot, now: this.now });
-    if (lootSite !== null) this.lootSites.push(lootSite);
+    const battleLoot = enemyVictory ? null : this.lootDistributionService.createReward({ id: this.idGenerator("battle-loot"), battle, extraLoot: droppedLoot, now: this.now });
+    if (battleLoot !== null) this.battleLoot.push(battleLoot);
     if (enemyVictory) this.battleSites = this.battleSites.filter((site) => site.battleId !== battle.id);
     else this.battleSites.find((site) => site.battleId === battle.id)?.finish();
     const capturedLocation = this.#captureDefeatedLocation(battle);
     const destroyedLocationId = capturedLocation === null ? this.#destroyDefeatedEnemySource(battle) : null;
-    return { ...outcome, consequences, heroProgression, enemySalvage, lootSite: lootSite?.toJSON() ?? null, destroyedLocationId, capturedLocationId: capturedLocation?.locationId ?? null };
+    return { ...outcome, consequences, heroProgression, enemySalvage, battleLoot: battleLoot?.toJSON() ?? null, destroyedLocationId, capturedLocationId: capturedLocation?.locationId ?? null };
   }
-
-  searchBattlefield({ battleSiteId, playerId, heroId, position, searchType = "loot" }) {
-    this.cleanupDynamicSites();
-    const battleSite = this.battleSites.find((site) => site.id === battleSiteId); const hero = this.getHero(heroId);
-    if (battleSite === undefined || hero === null || hero.playerId !== playerId || hero.state !== "active") return { success: false, reason: "invalid_search", discoveredLootSiteIds: [] };
-    const searched = battleSite.search({ type: searchType, playerId, position });
-    if (!searched.success) return { ...searched, discoveredLootSiteIds: [] };
-    const battle = this.battles.find((item) => item.id === battleSite.battleId);
-    if (searchType === "loot") {
-      const discoveredLootSiteIds = this.lootSites.filter((site) => site.battleId === battleSite.battleId && site.discover(playerId)).map((site) => site.id);
-      return { success: true, searchType, discoveredLootSiteIds };
-    }
-    if (searchType === "information") return { success: true, searchType, discoveredLootSiteIds: [], information: { battleId: battleSite.battleId, winnerTeamId: battle?.winnerTeamId ?? null, destroyedLocationId: battle?.sourceLocationId ?? null } };
-    const survivors = battle?.teams.flatMap((team) => team.units.filter((unit) => unit.quantity > 0 && unit.state !== "defeated").map((unit) => ({ teamId: team.id, unitId: unit.sourceId, quantity: unit.quantity, state: unit.state }))) ?? [];
-    return { success: true, searchType, discoveredLootSiteIds: [], survivors };
-  }
-
-  visitBattlefield({ battleSiteId, playerId }) { const site = this.battleSites.find((item) => item.id === battleSiteId); return site?.visit(playerId) ?? false; }
 
   getVisibleDynamicSites({ playerId, position }) {
     this.cleanupDynamicSites();
-    return [
-      ...this.battleSites.filter((site) => site.isVisibleTo({ playerId, position })).map((site) => ({ kind: "battlefield", ...site.toJSON(), visited: site.isVisitedBy(playerId) })),
-      ...this.lootSites.filter((site) => site.isKnownBy(playerId)).map((site) => ({ kind: "loot", ...site.toJSON() })),
-    ];
+    return this.battleSites.filter((site) => site.isVisibleTo({ playerId, position })).map((site) => ({ kind: "battlefield", ...site.toJSON() }));
   }
 
   cleanupDynamicSites() {
     this.battleSites = this.battleSites.filter((site) => !site.isExpired());
-    this.lootSites = this.lootSites.filter((site) => !site.isExpired() && site.status !== "DEPLETED");
   }
 
-  collectLoot({ lootSiteId, playerId, heroId, position, selection }) {
-    const site = this.lootSites.find((item) => item.id === lootSiteId); const hero = this.getHero(heroId);
-    if (site === undefined || hero === null || hero.playerId !== playerId || hero.state !== "active") return { success: false, reason: "invalid_loot_request", collected: [] };
-    const result = site.collect({ playerId, position, bag: this.inventoryService.getHeroBagState(hero), selection });
+  collectBattleLoot({ battleId, playerId, heroId, selection }) {
+    const reward = this.battleLoot.find((item) => item.battleId === battleId); const hero = this.getHero(heroId);
+    if (reward === undefined || hero === null || hero.playerId !== playerId || hero.state !== "active") return { success: false, reason: "invalid_loot_request", collected: [] };
+    const result = reward.collect({ playerId, bag: this.inventoryService.getHeroBagState(hero), selection });
     if (result.success) this.#storeCollectedLoot(hero, result.collected);
-    const depleted = site.status === "DEPLETED"; if (depleted) this.cleanupDynamicSites();
-    return { ...result, lootSiteId, depleted };
+    return { ...result, battleId, depleted: reward.status === "COLLECTED", battleLoot: reward.toJSON() };
   }
 
   surrenderBattle({ battleId, teamId }) {
@@ -1024,12 +1070,13 @@ export class Game {
       scenario: this.scenario?.toJSON() ?? null, scenarioState: this.scenarioState?.toJSON() ?? null,
       scenarioRuntime: this.scenarioRuntime === null ? null : structuredClone(this.scenarioRuntime),
       availableQuests: this.availableQuests.map((quest) => ({ ...quest })),
+      questSequence: this.questSequence.map((quest) => ({ ...quest, phaseIds: [...quest.phaseIds] })), lastQuestResult: this.lastQuestResult === null ? null : { ...this.lastQuestResult },
       scenarioLocationBindings: this.scenarioLocationBindings.map((binding) => binding.toJSON()), eventLog: this.eventLog.map((entry) => ({ ...entry })),
       startedAt: this.startedAt, finishedAt: this.finishedAt, finishReason: this.finishReason,
       battles: this.battles.map((battle) => battle.toJSON()),
       battleReports: this.battleReports.map((report) => structuredClone(report)), autonomousGroups: this.autonomousGroups.map((group) => group.toJSON()),
       autonomousGroupTraces: this.autonomousGroupTraces.map((trace) => trace.toJSON()),
-      lootSites: this.lootSites.map((site) => site.toJSON()),
+      battleLoot: this.battleLoot.map((reward) => reward.toJSON()),
       battleSites: this.battleSites.map((site) => site.toJSON()),
     };
   }
@@ -1126,7 +1173,8 @@ export class Game {
     if (event.type === "autonomous_group_location_attack_requested") {
       const location = this.getLocation(event.locationId);
       if (location === null) return null;
-      return this.createBattle({ teamParticipants: [{ id: autonomousTeamId, heroIds: [], autonomousGroupId: group.id }, { id: `location-${location.id}`, heroIds: [], locationId: location.id }], position: group.position, sourceLocationId: location.id, sourceEnemyTeamId: `location-${location.id}` });
+      const defenderHeroIds = location.heroIds.filter((heroId) => { const hero = this.getHero(heroId); return hero?.state === "active" && this.locationAccessPolicy.isDefender(hero.playerId, location); });
+      return this.createBattle({ teamParticipants: [{ id: "heroes", heroIds: defenderHeroIds, locationId: location.id }, { id: autonomousTeamId, heroIds: [], autonomousGroupId: group.id }], position: group.position, sourceLocationId: location.id, sourceEnemyTeamId: autonomousTeamId });
     }
     const hero = this.getHero(event.target?.id);
     if (hero === null || hero.state !== "active" || this.#isHeroBusy(hero.id)) return null;

@@ -22,3 +22,10 @@ test("une trace sort de la perception avec la distance sans être supprimée du 
   assert.ok(value.getScore(at) > 0);
   assert.equal(value.isDetectable({ at, minimumScore: 1, distance: 400, distancePerPoint: 50, detectionBonus: 6 }), true);
 });
+
+test("détection de l'observateur et discrétion du groupe modifient la perception de sa trace", () => {
+  const discreet = new AutonomousGroupTrace({ ...trace().toJSON(), concealmentMultiplier: .5 });
+  assert.equal(discreet.initialDetectionScore, 4);
+  assert.equal(discreet.isDetectable({ at: 0, minimumScore: 1, distance: 250, distancePerPoint: 50 }), false);
+  assert.equal(discreet.isDetectable({ at: 0, minimumScore: 1, distance: 250, distancePerPoint: 50, detectionMultiplier: 2 }), true);
+});

@@ -22,6 +22,7 @@ test("un événement de scénario agit sur le lieu réellement associé", () => 
   const result = game.triggerScenarioEvent("refuge-reached");
   assert.equal(result.appliedEffects.length, 3);
   assert.equal(game.getLocation("fort-1").visibility, "discovered");
+  assert.equal(game.getPlayer("player-1").knowsLocation("fort-1"), true);
   assert.equal(game.getLocation("fort-1").state, "secured");
   assert.deepEqual(game.eventLog[0], { type: "narration", text: "Le refuge est atteint.", eventId: "refuge-reached" });
 });

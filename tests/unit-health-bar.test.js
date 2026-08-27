@@ -7,4 +7,5 @@ test("la barre de vie représente les PV réels même quand le soldat reste apte
   assert.match(html, /aria-label="8 PV sur 10/);
   assert.match(html, /class="is-combatant" style="flex:8"/);
   assert.match(html, /class="is-dead" style="flex:2"/);
+  assert.match(html, />PV 8\/10</);
 });

@@ -4,11 +4,10 @@ import { MapLayers, createMapPanes } from "../map/MapLayers.js";
 const SIMULATION_BOUNDS = [[-89, -179], [89, 179]];
 
 export class MapView {
-  constructor({ element, mode = "simulation", initialPosition = null, onHeroMove, onLocationSelect, onDynamicSiteSelect = () => {}, onTraceSelect = () => {}, onAutonomousGroupSelect = () => {}, onMapClick = () => {} }) {
+  constructor({ element, mode = "simulation", initialPosition = null, onHeroMove, onLocationSelect, onTraceSelect = () => {}, onAutonomousGroupSelect = () => {}, onMapClick = () => {} }) {
     this.mode = mode;
     this.onHeroMove = onHeroMove;
     this.onLocationSelect = onLocationSelect;
-    this.onDynamicSiteSelect = onDynamicSiteSelect;
     this.onTraceSelect = onTraceSelect;
     this.onAutonomousGroupSelect = onAutonomousGroupSelect;
     this.onMapClick = onMapClick;
@@ -130,13 +129,11 @@ export class MapView {
 
   #site(site) {
     const entry = this.dynamicSites.get(site.id); const center = asLatLng(site.position); const presentation = dynamicSitePresentation(site); const iconSize = presentation.iconSize;
-    const icon = L.divIcon({ className: `dynamic-marker is-${site.kind}${site.visited ? " is-visited" : ""}`, html: `<span>${site.kind === "loot" ? "💰" : "⚔"}</span>`, iconSize: [iconSize, iconSize], iconAnchor: [iconSize / 2, iconSize / 2] });
+    const icon = L.divIcon({ className: "dynamic-marker is-battlefield", html: "<span>⚔</span>", iconSize: [iconSize, iconSize], iconAnchor: [iconSize / 2, iconSize / 2] });
     if (!entry) {
-      const radius = L.circle(center, { pane: presentation.pane, radius: presentation.interactionRadius, className: `dynamic-site-radius is-${site.kind}`, interactive: false }).addTo(this.map);
-      const marker = L.marker(center, { pane: presentation.pane, zIndexOffset: presentation.zIndexOffset, icon, bubblingMouseEvents: false, keyboard: true, title: site.kind === "loot" ? "Butin" : "Champ de bataille" }).addTo(this.map).bindTooltip(site.kind === "loot" ? "Butin" : "Champ de bataille");
-      marker.on("click", (event) => { if (event.originalEvent) L.DomEvent.stopPropagation(event.originalEvent); this.onDynamicSiteSelect(site.id); });
-      this.dynamicSites.set(site.id, { marker, radius });
-    } else { entry.marker.setLatLng(center).setIcon(icon); entry.radius.setLatLng(center).setRadius(site.interactionRadius); }
+      const marker = L.marker(center, { pane: presentation.pane, zIndexOffset: presentation.zIndexOffset, icon, interactive: false, keyboard: false, title: "Trace d’un champ de bataille" }).addTo(this.map).bindTooltip("Trace d’un champ de bataille");
+      this.dynamicSites.set(site.id, { marker });
+    } else entry.marker.setLatLng(center).setIcon(icon);
   }
 
   #heatmap(cells, visible) {
@@ -154,7 +151,7 @@ export class MapView {
   #removeMissing(collection, ids) { for (const [id, layer] of collection) if (!ids.has(id)) { if (layer.marker) { layer.marker.remove(); layer.radius?.remove(); } else layer.remove(); collection.delete(id); } }
 }
 
-export function dynamicSitePresentation(site) { return { iconSize: site.kind === "battlefield" ? 64 : 52, interactionRadius: site.interactionRadius, pane: MapLayers.EFFECTS, zIndexOffset: 2500 }; }
+export function dynamicSitePresentation() { return { iconSize: 52, interactionRadius: 0, pane: MapLayers.EFFECTS, zIndexOffset: 2500 }; }
 
 function asLatLng(position) { return Array.isArray(position) ? position : [position.latitude, position.longitude]; }
 function toPosition(point) { return { latitude: point.lat, longitude: point.lng }; }

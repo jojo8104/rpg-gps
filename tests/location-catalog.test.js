@@ -24,7 +24,11 @@ test("la mine de fer est une ressource neutre non gardée", () => {
 test("la mine d'or de la quête est occupée par une garnison du Chaos", () => {
   const mine = location("gold-mine");
   assert.equal(mine.ownerId, null);
+  assert.equal(mine.population, null);
+  assert.equal(mine.state, "active");
   assert.equal(mine.features.capturable, true);
   assert.equal(mine.garrison.units.length, 1);
   assert.equal(mine.garrison.units[0].ownerPlayerId, "chaos");
+  for (let cycle = 0; cycle < 10; cycle += 1) mine.advanceAbandonment();
+  assert.equal(mine.state, "active");
 });

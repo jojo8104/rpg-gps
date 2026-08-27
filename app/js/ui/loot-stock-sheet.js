@@ -1,11 +1,11 @@
 import { getItemDefinition } from "../core/item-catalog.js";
 
-export function renderLootStockSheet({ element, site, playerId, bag, message = "", onCollect, onClose }) {
+export function renderLootStockSheet({ element, site, playerId, bag, message = "", onCollect, onClose = () => {}, embedded = false }) {
   const entries = site.entries.map((entry) => ({ ...entry, available: Math.min(entry.quantity, entry.allocations[playerId] ?? 0) })).filter((entry) => entry.available > 0 || entry.portable === false);
   const fieldSlots = entries.flatMap(entrySlots); const movedSlotIds = new Set();
   element.hidden = false;
-  element.innerHTML = `<button class="sheet-close" type="button">Fermer</button><span class="sheet-state">Gestion des ressources · butin</span><h2>Champ de bataille</h2><p>Touchez un groupe pour le transvaser. Les transferts ne sont appliqués qu’après validation.</p>${message ? `<p class="sheet-feedback" role="status">${message}</p>` : ""}<div data-loot-manager></div>`;
-  element.querySelector(".sheet-close").onclick = onClose;
+  element.innerHTML = `${embedded ? "" : '<button class="sheet-close" type="button">Fermer</button><span class="sheet-state">Gestion des ressources · butin</span><h2>Butin du combat</h2>'}<p>Touchez un groupe pour le placer dans les bagages. Les transferts ne sont appliqués qu’après validation.</p>${message ? `<p class="sheet-feedback" role="status">${message}</p>` : ""}<div data-loot-manager></div>`;
+  element.querySelector(".sheet-close")?.addEventListener("click", onClose);
 
   const renderManager = (feedback = "") => {
     const selection = selectionFrom(fieldSlots, movedSlotIds); const estimate = estimateSelection({ bag, entries, selection });

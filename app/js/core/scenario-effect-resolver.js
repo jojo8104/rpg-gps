@@ -24,6 +24,7 @@ export class ScenarioEffectResolver {
       case "revealLocation": {
         const location = game.getLocationForScenarioSlot(effect.locationSlotId);
         location.visibility = "discovered";
+        game.players.forEach((player) => player.discoverLocation(location.id, 2));
         const entry = { type: "location_revealed", locationId: location.id, eventId: game.activeScenarioEventId };
         game.eventLog.push(entry);
         return entry;
@@ -65,9 +66,29 @@ export class ScenarioEffectResolver {
         hero.addResource(resource, amount); const entry = { type: "hero_resource_granted", heroId: hero.id, resource, amount, eventId: game.activeScenarioEventId };
         game.eventLog.push(entry); return entry;
       }
+      case "depositHeroResource": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game); const destination = game.getLocationForScenarioSlot(effect.destinationLocationSlotId);
+        const resource = ScenarioEffectResolver.#requireText(effect.resource, "La ressource livrée"); const amount = ScenarioEffectResolver.#positiveInteger(effect.amount, "La quantité livrée");
+        if (hero.getResourceAmount(resource) < amount) throw new RangeError("Le héros ne transporte pas assez de ressources pour cette livraison.");
+        const deposited = destination.depositResource(resource, amount);
+        if (deposited !== amount) throw new RangeError("Le lieu ne peut pas recevoir toute la livraison.");
+        hero.spendResource(resource, amount);
+        const entry = { type: "hero_resource_deposited", heroId: hero.id, destinationLocationId: destination.id, resource, amount, eventId: game.activeScenarioEventId };
+        game.eventLog.push(entry); return entry;
+      }
+      case "collectLocationResource": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game); const source = game.getLocationForScenarioSlot(effect.sourceLocationSlotId);
+        const resource = ScenarioEffectResolver.#requireText(effect.resource, "La ressource collectée"); const amount = ScenarioEffectResolver.#positiveInteger(effect.amount, "La quantité collectée");
+        if ((source.resources.stock[resource] ?? 0) < amount) throw new RangeError("Le lieu ne possède pas assez de ressources pour cette collecte.");
+        source.resources.stock[resource] -= amount; hero.addResource(resource, amount);
+        const entry = { type: "location_resource_collected", heroId: hero.id, sourceLocationId: source.id, resource, amount, eventId: game.activeScenarioEventId };
+        game.eventLog.push(entry); return entry;
+      }
       case "startEvacuation": {
         const source = game.getLocationForScenarioSlot(effect.sourceLocationSlotId); const hero = ScenarioEffectResolver.#heroFor(effect, game);
-        const timing = effect.timing ? new QuestDeadlineService().calculateMinutes({ origin: game.getLocationForScenarioSlot(effect.timing.originLocationSlotId).position, destination: source.position, paceMode: game.setup.rules.travelPaceMode, baseMinutes: effect.timing.baseMinutes ?? 1, calmMetersPerMinute: effect.timing.calmMetersPerMinute ?? 60, sportMetersPerMinute: effect.timing.sportMetersPerMinute ?? 100, minimumMinutes: effect.timing.minimumMinutes ?? 1, maximumMinutes: effect.timing.maximumMinutes ?? 3 }) : { minutes: ScenarioEffectResolver.#positiveInteger(effect.durationMinutes, "La durée d'évacuation"), distanceMeters: null, paceMode: game.setup.rules.travelPaceMode };
+        const timing = game.coordinateMode === "simulation" && effect.simulationDurationMinutes
+          ? { minutes: ScenarioEffectResolver.#positiveInteger(effect.simulationDurationMinutes, "La durée d'évacuation simulée"), distanceMeters: null, paceMode: game.setup.rules.travelPaceMode }
+          : effect.timing ? new QuestDeadlineService().calculateMinutes({ origin: game.getLocationForScenarioSlot(effect.timing.originLocationSlotId).position, destination: source.position, paceMode: game.setup.rules.travelPaceMode, baseMinutes: effect.timing.baseMinutes ?? 1, calmMetersPerMinute: effect.timing.calmMetersPerMinute ?? 60, sportMetersPerMinute: effect.timing.sportMetersPerMinute ?? 100, minimumMinutes: effect.timing.minimumMinutes ?? 1, maximumMinutes: effect.timing.maximumMinutes ?? 12 }) : { minutes: ScenarioEffectResolver.#positiveInteger(effect.durationMinutes, "La durée d'évacuation"), distanceMeters: null, paceMode: game.setup.rules.travelPaceMode };
         const durationMs = timing.minutes * 60_000;
         const id = ScenarioEffectResolver.#requireText(effect.evacuationId, "L'évacuation"); const startedAt = game.now();
         game.evacuationStates[id] = { id, playerId: hero.playerId, sourceLocationId: source.id, startedAt, expiresAt: startedAt + durationMs, initialPopulation: source.population ?? 0, initialResources: structuredClone(source.resources.stock), initialHeroResources: structuredClone(hero.resources), initialStructures: Object.values(source.infrastructure).reduce((sum, level) => sum + level, 0), departedAt: null };
@@ -85,6 +106,28 @@ export class ScenarioEffectResolver {
           : { kind: "attack_location", targetId: target.id, coordinateMode: game.coordinateMode, speedMetersPerSecond: Number(game.coordinateMode === "simulation" ? (effect.simulationSpeedUnitsPerSecond ?? (effect.simulationSpeedMetersPerSecond ?? 12_000) / 40_000) : effect.speedMetersPerSecond ?? .15) };
         const group = new AutonomousGroup({ id: ScenarioEffectResolver.#requireText(effect.groupId, "Le groupe autonome"), type: "army", owner: { kind: "faction", id: effect.factionId ?? "chaos" }, factionId: effect.factionId ?? "chaos", position: origin, behavior: "aggressive", mission, army: { units: [{ id: `${effect.groupId}-unit`, ownerPlayerId: effect.factionId ?? "chaos", typeId: effect.unitTypeId ?? "militia", quantity: Number(effect.quantity ?? 5), rank: effect.rank ?? (Number(effect.quantity ?? 5) > 6 ? "corporal" : "soldier") }] } });
         game.addAutonomousGroup(group); const entry = { type: "attack_group_spawned", groupId: group.id, targetLocationId: target.id, origin, eventId: game.activeScenarioEventId }; game.eventLog.push(entry); return entry;
+      }
+      case "spawnPursuitGroup": {
+        const hero = ScenarioEffectResolver.#heroFor(effect, game);
+        const source = game.getLocationForScenarioSlot(effect.sourceLocationSlotId);
+        const destination = game.getLocationForScenarioSlot(effect.destinationLocationSlotId);
+        const ratio = Number(effect.corridorRatio);
+        if (!Number.isFinite(ratio) || ratio < 0 || ratio > 1) throw new RangeError("La position sur l'axe de poursuite doit être comprise entre zéro et un.");
+        const preferred = {
+          latitude: source.position.latitude + (destination.position.latitude - source.position.latitude) * ratio,
+          longitude: source.position.longitude + (destination.position.longitude - source.position.longitude) * ratio,
+        };
+        const origin = new SetupPlacementService().resolveInside({ playArea: game.setup.playArea, preferred });
+        const groupId = ScenarioEffectResolver.#requireText(effect.groupId, "Le groupe de poursuivants");
+        const group = new AutonomousGroup({
+          id: groupId, type: "army", owner: { kind: "faction", id: effect.factionId ?? "bandits" }, factionId: effect.factionId ?? "bandits",
+          position: origin, behavior: "aggressive",
+          mission: { kind: "pursue", targetId: hero.id, coordinateMode: game.coordinateMode, speedMetersPerSecond: Number(effect.speedMetersPerSecond ?? 2.4), role: effect.role ?? "harrier" },
+          army: { units: [{ id: `${groupId}-unit`, ownerPlayerId: effect.factionId ?? "bandits", typeId: effect.unitTypeId ?? "militia", quantity: Number(effect.quantity ?? 3), rank: effect.rank ?? "soldier" }] },
+        });
+        game.addAutonomousGroup(group);
+        const entry = { type: "pursuit_group_spawned", groupId, targetHeroId: hero.id, origin, corridorRatio: ratio, role: group.mission.role, eventId: game.activeScenarioEventId };
+        game.eventLog.push(entry); return entry;
       }
       case "assignWagons": {
         const hero = ScenarioEffectResolver.#heroFor(effect, game); const result = game.assignWagons({ playerId: hero.playerId, heroId: hero.id, wagons: effect.wagons });
