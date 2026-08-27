@@ -18,6 +18,17 @@ test("les chariots ajoutent uniquement des slots sérialisables au héros", () =
   assert.deepEqual(new Hero(hero.toJSON()).wagons, hero.wagons);
 });
 
+test("les chariots royaux peuvent être rendus sans retirer les autres véhicules", () => {
+  const definition = JSON.parse(readFileSync(new URL("../data/scenarios/chaos.json", import.meta.url), "utf8"));
+  const locations = JSON.parse(readFileSync(new URL("../data/locations.json", import.meta.url), "utf8")); const heroClasses = JSON.parse(readFileSync(new URL("../data/hero-classes.json", import.meta.url), "utf8")); const unitDefinitions = JSON.parse(readFileSync(new URL("../data/units.json", import.meta.url), "utf8"));
+  const bindings = [{ locationSlotId: "refuge", locationId: "fort-nord" }, { locationSlotId: "capital", locationId: "royal-capital" }, { locationSlotId: "royal-camp", locationId: "village-vert" }, { locationSlotId: "prospectors-battlefield", locationId: "prospector-battlefield" }, { locationSlotId: "gold-mine", locationId: "gold-mine" }, { locationSlotId: "bandit-camp", locationId: "bandit-camp" }, { locationSlotId: "evacuation-camp", locationId: "evacuation-camp" }, { locationSlotId: "supply-fort", locationId: "supply-fort" }, { locationSlotId: "royal-gold-mine", locationId: "royal-gold-mine" }, ...["north", "east", "south", "west"].map((direction) => ({ locationSlotId: `supply-village-${direction}`, locationId: `supply-village-${direction}` }))];
+  const game = new Game({ setup: { id: "wagon-return", name: "Test", mode: "quick", scenarioId: "chaos", playerCount: 1, playArea: { id: "sim", name: "Zone", polygon: [{ latitude: -89, longitude: -179 }, { latitude: -89, longitude: 179 }, { latitude: 89, longitude: 179 }, { latitude: 89, longitude: -179 }] }, participants: [{ playerId: "local", name: "Joueur" }] }, scenario: definition, locations, heroClasses, unitDefinitions, scenarioLocationBindings: bindings, coordinateMode: "simulation", scenarioStartsActive: false });
+  const hero = game.chooseHero("local", { name: "Officier", classId: "warrior" }); hero.wagons.push({ id: "personal-wagon", name: "Chariot personnel", slotBonus: 2 });
+  game.assignWagons({ playerId: "local", heroId: hero.id, wagons: [{ id: "royal-wagon-1", name: "Chariot royal I", slotBonus: 4 }, { id: "royal-wagon-2", name: "Chariot royal II", slotBonus: 4 }] });
+  const result = game.returnWagons({ playerId: "local", heroId: hero.id, wagonIds: ["royal-wagon-1", "royal-wagon-2"] });
+  assert.equal(result.removedSlots, 8); assert.deepEqual(hero.wagons.map((wagon) => wagon.id), ["personal-wagon"]);
+});
+
 test("une échéance absolue continue même sans mises à jour intermédiaires", () => {
   const service = new DeadlineService(); const deadline = service.create({ id: "evacuation", durationMs: 60_000, startedAt: 1_000 });
   assert.equal(service.evaluate(deadline, 30_000).expired, false); assert.equal(service.evaluate(deadline, 61_000).expired, true);
@@ -41,17 +52,18 @@ test("la deuxième quête du prologue déclare toute la chaîne d'évacuation", 
   const briefing = scenario.getPhase("prologue-complete").objectives[0].trigger;
   assert.ok(briefing.responseLines.length >= 4);
   assert.match(briefing.responseLines.join(" "), /invasion.*rejoindre.*évacuation/i);
-  assert.match(scenario.getPhase("reach-evacuation-camp").objectives[0].text, /signalé sur la carte/i);
+  assert.match(scenario.getPhase("reach-evacuation-camp").objectives[0].text, /armée principale/i);
   const order = scenario.getEvent("evacuation-ordered"); const attackGroups = order.effects.filter((effect) => effect.type === "spawnAttackGroup");
   assert.ok(order.effects.some((effect) => effect.type === "assignWagons")); assert.ok(order.effects.some((effect) => effect.type === "revealLocation" && effect.locationSlotId === "evacuation-camp"));
-  const evacuationTiming = order.effects.find((effect) => effect.type === "startEvacuation"); assert.equal(evacuationTiming?.simulationDurationMinutes, 3); assert.equal(evacuationTiming?.timing.baseMinutes, 2); assert.equal(evacuationTiming?.timing.maximumMinutes, 12);
-  assert.equal(attackGroups.filter((effect) => effect.stationary).length, 5); assert.deepEqual(attackGroups.filter((effect) => !effect.stationary).map((effect) => effect.quantity), [5, 10]);
+  const evacuationTiming = order.effects.find((effect) => effect.type === "startEvacuation"); assert.equal(evacuationTiming?.simulationDurationMinutes, 3); assert.equal(evacuationTiming?.deadlineCausesFailure, false);
+  assert.equal(attackGroups.filter((effect) => effect.stationary).length, 5); assert.deepEqual(attackGroups.filter((effect) => !effect.stationary).map((effect) => effect.quantity), [1, 4]);
   assert.equal(scenario.getEvent("evacuation-camp-located").effects.filter((effect) => effect.type === "spawnAttackGroup").length, 0);
   assert.ok(scenario.getEvent("mine-report-delivered").effects.some((effect) => effect.type === "depositCarriedItem" && effect.itemId === "royal_geologist" && effect.destinationLocationSlotId === "capital"));
   assert.equal(scenario.getPhase("return-to-capital").transitions.length, 0);
   const secondQuestOffer = scenario.getEvent("mine-report-delivered").effects.find((effect) => effect.type === "offerQuest");
   assert.equal(secondQuestOffer?.startPhaseId, "prologue-complete");
   assert.ok(secondQuestOffer?.briefingLines.length >= 4);
+  for (const eventId of ["evacuation-failed", "evacuation-completed"]) assert.ok(scenario.getEvent(eventId).effects.some((effect) => effect.type === "returnWagons" && effect.wagonIds.length === 2));
 });
 
 test("le délai sportif est plus court que le délai calme et reste d'au moins une minute", () => {
@@ -66,30 +78,32 @@ test("le délai d'évacuation reste jouable lorsque les coordonnées sont très 
   assert.equal(result.minutes, 30);
 });
 
-test("l’ordre royal déploie réellement le cordon et les deux colonnes en simulation", () => {
+test("l’ordre royal déploie le cordon, l’avant-garde et l’armée principale en simulation", () => {
   const definition = JSON.parse(readFileSync(new URL("../data/scenarios/chaos.json", import.meta.url), "utf8"));
   const locations = JSON.parse(readFileSync(new URL("../data/locations.json", import.meta.url), "utf8"));
   const heroClasses = JSON.parse(readFileSync(new URL("../data/hero-classes.json", import.meta.url), "utf8"));
   const unitDefinitions = JSON.parse(readFileSync(new URL("../data/units.json", import.meta.url), "utf8"));
   const bindings = [{ locationSlotId: "refuge", locationId: "fort-nord" }, { locationSlotId: "capital", locationId: "royal-capital" }, { locationSlotId: "royal-camp", locationId: "village-vert" }, { locationSlotId: "prospectors-battlefield", locationId: "prospector-battlefield" }, { locationSlotId: "gold-mine", locationId: "gold-mine" }, { locationSlotId: "bandit-camp", locationId: "bandit-camp" }, { locationSlotId: "evacuation-camp", locationId: "evacuation-camp" }, { locationSlotId: "supply-fort", locationId: "supply-fort" }, { locationSlotId: "royal-gold-mine", locationId: "royal-gold-mine" }, ...["north", "east", "south", "west"].map((direction) => ({ locationSlotId: `supply-village-${direction}`, locationId: `supply-village-${direction}` }))];
   const game = new Game({ setup: { id: "evacuation-sim", name: "Simulation", mode: "quick", scenarioId: "chaos", playerCount: 1, playArea: { id: "sim", name: "Maison", polygon: [{ latitude: -89, longitude: -179 }, { latitude: -89, longitude: 179 }, { latitude: 89, longitude: 179 }, { latitude: 89, longitude: -179 }] }, participants: [{ playerId: "local", name: "Joueur" }] }, scenario: definition, locations, heroClasses, unitDefinitions, scenarioLocationBindings: bindings, coordinateMode: "simulation", scenarioStartsActive: false, now: () => 1_000 });
-  game.chooseHero("local", { name: "Officier", classId: "warrior" }); game.updateLocationPosition({ locationId: "royal-capital", position: { latitude: 50, longitude: 30 } }); game.updateLocationPosition({ locationId: "evacuation-camp", position: { latitude: 68, longitude: 42 } });
+  const hero = game.chooseHero("local", { name: "Officier", classId: "warrior" }); game.updateLocationPosition({ locationId: "royal-capital", position: { latitude: 50, longitude: 30 } }); game.updateLocationPosition({ locationId: "evacuation-camp", position: { latitude: 68, longitude: 42 } });
   game.offerQuest({ id: "royal-camp-evacuation", title: "Le camp menacé", description: "Évacuer le camp.", startPhaseId: "prologue-complete" });
   assert.equal(game.acceptAvailableQuest("royal-camp-evacuation").success, true);
   const progress = game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId: "receive-evacuation-order", locationId: "royal-capital" });
   assert.equal(progress?.nextPhaseId, "reach-evacuation-camp");
   assert.equal(game.getPlayer("local").knowsLocation("evacuation-camp"), true);
-  assert.equal(game.evacuationStates["royal-camp-evacuation"].expiresAt, 181_000);
+  assert.ok(game.evacuationStates["royal-camp-evacuation"].expiresAt > 61_000);
   assert.equal(game.autonomousGroups.filter((group) => group.mission.kind === "guard").length, 5);
   assert.ok(game.autonomousGroups.filter((group) => group.mission.kind === "guard").every((group) => group.mission.engagementRadiusMeters === 10));
-  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => group.army.units[0].quantity), [5, 10]);
+  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => group.army.units[0].quantity), [1, 4]);
   game.advanceAutonomousGroups(11_000);
-  assert.ok(game.getAutonomousGroup("chaos-column-vanguard").movement.arrivesAt < game.getAutonomousGroup("chaos-column-main").movement.arrivesAt);
+  assert.equal(game.getAutonomousGroup("chaos-column-vanguard").movement.arrivesAt - game.getAutonomousGroup("chaos-column-vanguard").movement.startedAt, 60_000);
+  assert.ok(Math.abs((game.getAutonomousGroup("chaos-column-main").movement.arrivesAt - game.getAutonomousGroup("chaos-column-main").movement.startedAt) - (game.evacuationStates["royal-camp-evacuation"].expiresAt - game.evacuationStates["royal-camp-evacuation"].startedAt)) < 1);
   game.advanceAutonomousGroups(31_000);
   const passageGroups = new Set(game.autonomousGroupTraces.filter((trace) => trace.kind === "passage").map((trace) => trace.groupId));
   assert.equal(passageGroups.has("chaos-column-vanguard"), true);
   assert.equal(passageGroups.has("chaos-column-main"), true);
   assert.equal([...passageGroups].some((id) => id.startsWith("chaos-cordon-")), false);
+  assert.equal(hero.wagons.length, 2); game.failCurrentQuest({ reason: "test_failure" }); assert.equal(hero.wagons.length, 0);
 });
 
 test("l’ordre royal autorise l’évacuation et le démontage d’un camp appartenant au royaume", () => {
@@ -108,7 +122,7 @@ test("l’ordre royal autorise l’évacuation et le démontage d’un camp appa
   assert.equal(hero.carriedLoot.filter((entry) => entry.itemId === "population").reduce((sum, entry) => sum + entry.quantity, 0), 10);
 });
 
-test("l’ordre royal déploie encore les deux colonnes lorsque le camp est près de la limite nord", () => {
+test("l’avant-garde reste dans la zone lorsque le camp est près de la limite nord", () => {
   const definition = JSON.parse(readFileSync(new URL("../data/scenarios/chaos.json", import.meta.url), "utf8"));
   const locations = JSON.parse(readFileSync(new URL("../data/locations.json", import.meta.url), "utf8"));
   const heroClasses = JSON.parse(readFileSync(new URL("../data/hero-classes.json", import.meta.url), "utf8"));
@@ -122,7 +136,7 @@ test("l’ordre royal déploie encore les deux colonnes lorsque le camp est prè
   assert.equal(game.acceptAvailableQuest("royal-camp-evacuation").success, true);
   assert.doesNotThrow(() => game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId: "receive-evacuation-order", locationId: "royal-capital" }));
   assert.equal(game.autonomousGroups.filter((group) => group.mission.kind === "guard").length, 5);
-  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => group.army.units[0].quantity), [5, 10]);
+  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => group.army.units[0].quantity), [1, 4]);
 });
 
 test("la capitale et les camps du prologue restent la propriété du royaume", () => {

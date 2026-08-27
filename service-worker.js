@@ -1,4 +1,4 @@
-const CACHE = "rpg-gps-field-v96";
+const CACHE = "rpg-gps-field-v105";
 const local = (path) => new URL(path, self.location).href;
 const APP_SHELL = [local("./"), local("./index.html"), local("./app/"), local("./app/index.html"), local("./app/css/style.css"), local("./app/js/main.js"), local("./app/js/gps.js"), local("./app/js/orientation.js"), local("./app/js/position-adapter.js"), local("./app/js/device-alerts.js"), local("./app/js/field-state-storage.js"), local("./app/js/wake-lock.js"), local("./app/js/ui/game-setup-view.js"), local("./app/js/ui/world-view.js"), local("./app/js/core/gps-accuracy-log.js"), local("./app/js/core/heading.js"), local("./app/js/core/location-intel.js"), local("./app/js/core/location-range-policy.js"), local("./app/js/core/play-area-presence.js"), local("./app/manifest.webmanifest"), local("./app/icon.svg"), local("./data/scenarios/chaos.json"), local("./data/hero-classes.json"), local("./data/units.json"), local("./data/locations.json")];
 APP_SHELL.push(local("./app/js/ui/garrison-sheet.js"), local("./app/js/ui/bottom-sheet.js"), local("./app/js/ui/unit-icon.js"), local("./app/js/ui/map-view.js"), local("./app/js/map/MapRenderer.js"), local("./app/js/map/UnitRenderer.js"));
@@ -10,6 +10,8 @@ APP_SHELL.push(local("./app/js/core/hero-recovery-service.js"));
 APP_SHELL.push(local("./app/js/core/quest-pace-profile.js"));
 APP_SHELL.push(local("./app/js/core/hero-class-feature-service.js"));
 APP_SHELL.push(local("./app/js/core/quest-runtime.js"), local("./app/js/core/scenario-runtime-builder.js"), local("./app/js/ui/quest-hud.js"));
+APP_SHELL.push(local("./app/js/core/scenario-composer.js"), local("./app/js/core/trail.js"), local("./app/js/core/world-state.js"), local("./data/scenarios/repression.json"), local("./data/repression-locations.json"));
+APP_SHELL.push(local("./data/scenarios/granaries-of-the-king.json"), local("./data/granaries-locations.json"));
 APP_SHELL.push(local("./app/js/ui/dialogue-view.js"), local("./app/assets/characters/armand-valgrise.png"));
 APP_SHELL.push(local("./app/js/core/item-catalog.js"), local("./app/js/core/item-stack.js"), local("./app/js/core/slot-container.js"), local("./app/js/core/inventory-service.js"), local("./app/js/ui/inventory-view.js"));
 APP_SHELL.push(local("./app/js/ui/loot-stock-sheet.js"));

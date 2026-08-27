@@ -1,0 +1,83 @@
+{
+  "id": "repression",
+  "name": "La Répression",
+  "intro": "Un village séditieux refuse l'accès au prévôt royal.",
+  "initialPhaseId": "locate-village",
+  "worldState": {
+    "flags": {
+      "repression": {
+        "phase": "arrival", "resolution": null, "villageStatus": "besieged", "manorDestroyed": false,
+        "provostDefeated": false, "convoyInvestigated": false, "brigandCampCleared": false,
+        "brigandTruthKnown": false, "treasureRecovered": false, "treasureChoice": null,
+        "returnToCapitalEnabled": false, "questCompleted": false
+      }
+    },
+    "npcs": [
+      { "id": "ruined_knight", "role": "village_lord", "status": "alive", "grade": 1, "relation": 0 },
+      { "id": "royal_provost", "role": "royal_officer", "status": "active", "grade": 1, "relation": 0, "defeated": false, "authority": 1 }
+    ]
+  },
+  "locationSlots": [
+    { "id": "capital", "type": "capital", "defaultPlacement": { "strategy": "fixed" } },
+    { "id": "seditious-village", "type": "village", "defaultPlacement": { "strategy": "distance", "activationPhaseId": "locate-village", "minimumDistanceMeters": 150, "minimumDistanceMetersByPace": { "calm": 150, "sport": 300 }, "minimumDistanceFromOriginMeters": 75, "minimumDistanceFromOriginMetersByPace": { "calm": 75, "sport": 150 }, "maximumAccuracyMeters": 50, "confirmations": 2 } },
+    { "id": "attacked-convoy", "type": "event_location", "defaultPlacement": { "strategy": "distance", "activationPhaseId": "return-journey", "minimumDistanceMeters": 400, "minimumDistanceMetersByPace": { "calm": 400, "sport": 800 }, "confirmations": 2 } },
+    { "id": "brigand-camp-convoy", "type": "brigand_camp", "defaultPlacement": { "strategy": "fixed" } }
+  ],
+  "trails": [{ "id": "convoy-raiders-trail", "points": [{ "traceId": "convoy-trace-1" }, { "traceId": "convoy-trace-2" }], "destinationLocationSlotId": "brigand-camp-convoy" }],
+  "phases": [
+    { "id": "locate-village", "title": "La Répression", "description": "Le prévôt royal vous conduit vers un village qui refuse de lui ouvrir ses portes.", "objectives": [{ "id": "locate-seditious-village", "text": "Suivre le prévôt jusqu'au village assiégé", "trigger": { "type": "locationPlaced", "locationSlotId": "seditious-village", "label": "Matérialiser le village assiégé" }, "eventId": "village-located" }], "eventIds": ["village-located"], "transitions": [{ "nextPhase": "village-arrival" }], "choices": [] },
+    { "id": "village-arrival", "title": "Aux portes de Montfaucon", "description": "Approchez du village pour entendre les deux parties.", "objectives": [{ "id": "enter-seditious-village", "text": "Atteindre les portes du village", "trigger": { "type": "enterLocation", "locationSlotId": "seditious-village" }, "eventId": "village-briefing" }], "eventIds": ["village-briefing"], "transitions": [{ "nextPhase": "arrival" }], "choices": [] },
+    { "id": "arrival", "title": "Village assiégé", "description": "Le prévôt demande votre intervention.", "objectives": [], "eventIds": ["choose-assault", "choose-negotiate"], "transitions": [{ "nextPhase": "royal-assault" }, { "nextPhase": "negotiation" }], "choices": [
+      { "id": "ASSAULT_VILLAGE", "label": "Prendre le village d'assaut", "nextPhase": "royal-assault", "eventId": "choose-assault" },
+      { "id": "NEGOTIATE", "label": "Tenter de négocier", "nextPhase": "negotiation", "eventId": "choose-negotiate" }
+    ] },
+    { "id": "negotiation", "title": "Les comptes du domaine", "description": "Le chevalier accepte de montrer ses registres.", "objectives": [], "eventIds": ["support-provost", "defend-village", "stand-aside"], "transitions": [{ "nextPhase": "royal-assault" }, { "nextPhase": "village-defense" }, { "nextPhase": "village-fall" }], "choices": [
+      { "id": "SUPPORT_PROVOST", "label": "Aider le prévôt", "nextPhase": "royal-assault", "eventId": "support-provost" },
+      { "id": "DEFEND_VILLAGE", "label": "Défendre le village", "nextPhase": "village-defense", "eventId": "defend-village" },
+      { "id": "STAND_ASIDE", "label": "Ne pas intervenir", "nextPhase": "village-fall", "eventId": "stand-aside" }
+    ] },
+    { "id": "royal-assault", "title": "L'assaut royal", "description": "Vainquez le chevalier et les miliciens.", "objectives": [{ "id": "win-royal-assault", "text": "Remporter l'assaut", "trigger": { "type": "battleWon", "locationSlotId": "seditious-village" }, "eventId": "royal-victory" }], "eventIds": ["royal-victory"], "transitions": [{ "nextPhase": "return-journey" }], "choices": [] },
+    { "id": "village-defense", "title": "Défendre le village", "description": "Repoussez les forces royales du prévôt.", "objectives": [{ "id": "win-village-defense", "text": "Vaincre le prévôt", "trigger": { "type": "battleWon", "locationSlotId": "seditious-village" }, "eventId": "village-defended" }], "eventIds": ["village-defended"], "transitions": [{ "nextPhase": "return-journey" }], "choices": [] },
+    { "id": "village-fall", "title": "La chute du village", "description": "Le prévôt lance l'assaut sans vous.", "objectives": [], "eventIds": ["village-fell"], "transitions": [{ "nextPhase": "return-journey" }], "choices": [{ "id": "CONTINUE", "label": "Reprendre la route", "nextPhase": "return-journey", "eventId": "village-fell" }] },
+    { "id": "return-journey", "title": "Retourner à la capitale", "description": "Le convoi attaqué peut être découvert, mais l'enquête reste facultative.", "objectives": [{ "id": "return-capital", "text": "Atteindre la capitale", "trigger": { "type": "enterLocation", "locationSlotId": "capital" }, "eventId": "final-report" }], "listeners": [{ "trigger": { "type": "locationPlaced", "locationSlotId": "attacked-convoy" }, "eventId": "convoy-discovered" }], "eventIds": ["convoy-discovered", "inspect-convoy", "final-report"], "transitions": [{ "nextPhase": "convoy-trace-one" }], "choices": [{ "id": "INSPECT_CONVOY", "label": "Inspecter le convoi", "nextPhase": "convoy-trace-one", "eventId": "inspect-convoy", "condition": { "path": "repression.convoyDiscovered", "equals": true } }] },
+    { "id": "convoy-trace-one", "title": "Une piste fraîche", "description": "Suivez les premières traces.", "objectives": [{ "id": "trace-one", "text": "Examiner la première trace", "trigger": { "type": "trailPointInspected", "trailId": "convoy-raiders-trail", "traceId": "convoy-trace-1" } }], "eventIds": [], "transitions": [{ "nextPhase": "convoy-trace-two" }], "choices": [] },
+    { "id": "convoy-trace-two", "title": "La piste des brigands", "description": "La seconde trace mène au camp.", "objectives": [{ "id": "trace-two", "text": "Examiner la seconde trace", "trigger": { "type": "trailPointInspected", "trailId": "convoy-raiders-trail", "traceId": "convoy-trace-2" }, "eventId": "camp-discovered" }], "eventIds": ["camp-discovered"], "transitions": [{ "nextPhase": "brigand-camp" }], "choices": [] },
+    { "id": "brigand-camp", "title": "Camp des brigands", "description": "Les pillards du convoi occupent le camp.", "objectives": [], "eventIds": ["camp-ignored"], "transitions": [{ "nextPhase": "brigand-battle" }, { "nextPhase": "return-after-investigation" }], "choices": [{ "id": "ATTACK_CAMP", "label": "Attaquer", "nextPhase": "brigand-battle" }, { "id": "IGNORE_CAMP", "label": "Continuer vers la capitale", "nextPhase": "return-after-investigation", "eventId": "camp-ignored" }] },
+    { "id": "brigand-battle", "title": "Les pillards du convoi", "description": "Subjuguez le camp.", "objectives": [{ "id": "defeat-brigands", "text": "Vaincre les brigands", "trigger": { "type": "battleWon", "locationSlotId": "brigand-camp-convoy" }, "eventId": "brigands-defeated" }], "eventIds": ["brigands-defeated"], "transitions": [{ "nextPhase": "treasure-choice" }], "choices": [], "failure": { "policy": "branch", "nextPhase": "return-after-investigation" } },
+    { "id": "treasure-choice", "title": "Le trésor du convoi", "description": "Décidez du sort des biens royaux.", "objectives": [], "eventIds": ["treasure-crown", "treasure-player", "treasure-knight"], "transitions": [{ "nextPhase": "return-after-investigation" }], "choices": [
+      { "id": "RETURN_TREASURE", "label": "Rapporter à la Couronne", "nextPhase": "return-after-investigation", "eventId": "treasure-crown" },
+      { "id": "KEEP_TREASURE", "label": "Garder", "nextPhase": "return-after-investigation", "eventId": "treasure-player" },
+      { "id": "GIVE_TREASURE_TO_KNIGHT", "label": "Donner au chevalier", "nextPhase": "return-after-investigation", "eventId": "treasure-knight", "condition": { "npcId": "ruined_knight", "field": "status", "in": ["alive", "ally"] } }
+    ] },
+    { "id": "return-after-investigation", "title": "Retourner à la capitale", "description": "Présentez votre rapport.", "objectives": [{ "id": "return-capital-after-investigation", "text": "Atteindre la capitale", "trigger": { "type": "enterLocation", "locationSlotId": "capital" }, "eventId": "final-report" }], "eventIds": ["final-report"], "transitions": [], "choices": [] }
+  ],
+  "events": [
+    { "id": "village-located", "effects": [{ "type": "revealLocation", "locationSlotId": "seditious-village" }, { "type": "showNarration", "text": "Au détour du chemin apparaissent les palissades de Montfaucon. Des miliciens gardent les portes tandis que les hommes du prévôt encerclent le village." }] },
+    { "id": "village-briefing", "effects": [{ "type": "showNarration", "text": "Le prévôt affirme agir au nom de la Couronne : le chevalier refuse l'accès à ses officiers et le village est accusé de sédition. Derrière les portes, le chevalier déclare reconnaître l'autorité du roi mais conteste des prélèvements qu'il juge abusifs. Le prévôt vous demande de mettre fin au siège." }] },
+    { "id": "choose-assault", "effects": [{ "type": "setFlag", "path": "repression.resolution", "value": "royal_assault" }, { "type": "revealLocation", "locationSlotId": "seditious-village" }] },
+    { "id": "choose-negotiate", "effects": [{ "type": "setFlag", "path": "repression.negotiated", "value": true }, { "type": "adjustNpcRelation", "npcId": "royal_provost", "amount": -1 }, { "type": "revealLocation", "locationSlotId": "seditious-village" }] },
+    { "id": "support-provost", "effects": [{ "type": "setFlag", "path": "repression.resolution", "value": "supported_provost" }] },
+    { "id": "defend-village", "effects": [{ "type": "setFlag", "path": "repression.resolution", "value": "defended_village" }] },
+    { "id": "stand-aside", "effects": [{ "type": "setFlag", "path": "repression.resolution", "value": "stood_aside" }] },
+    { "id": "royal-victory", "effects": [{ "type": "setNpcStatus", "npcId": "ruined_knight", "status": "dead" }, { "type": "destroyLocationImprovement", "locationSlotId": "seditious-village", "improvementId": "manor" }, { "type": "setLocationState", "locationSlotId": "seditious-village", "state": "royal_control" }, { "type": "setLocationOwner", "locationSlotId": "seditious-village", "ownerId": "kingdom" }, { "type": "setFlag", "path": "repression.manorDestroyed", "value": true }, { "type": "setFlag", "path": "repression.villageStatus", "value": "royal_control" }, { "type": "setFlag", "path": "repression.returnToCapitalEnabled", "value": true }] },
+    { "id": "village-defended", "effects": [{ "type": "setNpcStatus", "npcId": "ruined_knight", "status": "ally" }, { "type": "adjustNpcRelation", "npcId": "ruined_knight", "amount": 2 }, { "type": "setNpcStatus", "npcId": "royal_provost", "status": "defeated" }, { "type": "setLocationState", "locationSlotId": "seditious-village", "state": "independent" }, { "type": "setFlag", "path": "repression.provostDefeated", "value": true }, { "type": "setFlag", "path": "repression.villageStatus", "value": "independent" }, { "type": "setFlag", "path": "repression.returnToCapitalEnabled", "value": true }] },
+    { "id": "village-fell", "effects": [{ "type": "setNpcStatus", "npcId": "ruined_knight", "status": "fugitive" }, { "type": "destroyLocationImprovement", "locationSlotId": "seditious-village", "improvementId": "manor" }, { "type": "setLocationState", "locationSlotId": "seditious-village", "state": "occupied" }, { "type": "setFlag", "path": "repression.manorDestroyed", "value": true }, { "type": "setFlag", "path": "repression.villageStatus", "value": "occupied" }, { "type": "setFlag", "path": "repression.returnToCapitalEnabled", "value": true }] },
+    { "id": "convoy-discovered", "effects": [{ "type": "setFlag", "path": "repression.convoyDiscovered", "value": true }, { "type": "revealLocation", "locationSlotId": "attacked-convoy" }, { "type": "showNarration", "text": "Vestiges du convoi : vous pouvez inspecter les chariots ou continuer vers la capitale." }] },
+    { "id": "inspect-convoy", "effects": [{ "type": "setFlag", "path": "repression.convoyInvestigated", "value": true }, { "type": "showNarration", "text": "Les chariots ont réellement été pillés. Les gardes semblent avoir abandonné le convoi presque immédiatement." }] },
+    { "id": "camp-discovered", "effects": [{ "type": "revealLocation", "locationSlotId": "brigand-camp-convoy" }] },
+    { "id": "camp-ignored", "effects": [{ "type": "setFlag", "path": "repression.campIgnored", "value": true }] },
+    { "id": "brigands-defeated", "effects": [{ "type": "setFlag", "path": "repression.brigandCampCleared", "value": true }, { "type": "setFlag", "path": "repression.brigandTruthKnown", "value": true }, { "type": "setFlag", "path": "repression.treasureRecovered", "value": true }, { "type": "showNarration", "text": "Un inconnu connaissait le trajet, l'heure et le chargement. Il n'a demandé aucun paiement. Son identité demeure inconnue." }] },
+    { "id": "treasure-crown", "effects": [{ "type": "setFlag", "path": "repression.treasureChoice", "value": "crown" }] },
+    { "id": "treasure-player", "effects": [{ "type": "setFlag", "path": "repression.treasureChoice", "value": "player" }, { "type": "grantHeroResource", "playerId": "local", "resource": "gold", "amount": 30 }] },
+    { "id": "treasure-knight", "effects": [{ "type": "setFlag", "path": "repression.treasureChoice", "value": "knight" }, { "type": "incrementNpcGrade", "npcId": "ruined_knight", "amount": 1 }] },
+    { "id": "final-report", "effects": [{ "type": "setFlag", "path": "repression.questCompleted", "value": true }, { "type": "copyNpcFieldToFlag", "npcId": "ruined_knight", "field": "status", "path": "repression.knightStatus" }, { "type": "copyNpcFieldToFlag", "npcId": "ruined_knight", "field": "grade", "path": "repression.knightGrade" }, { "type": "showReport", "reportId": "repression-final", "fragments": [
+      { "text": "Le conflit du village est résolu." },
+      { "text": "Le chevalier est mort.", "condition": { "npcId": "ruined_knight", "field": "status", "equals": "dead" } },
+      { "text": "Le chevalier a survécu comme allié.", "condition": { "npcId": "ruined_knight", "field": "status", "equals": "ally" } },
+      { "text": "Le chevalier est désormais fugitif.", "condition": { "npcId": "ruined_knight", "field": "status", "equals": "fugitive" } },
+      { "text": "Le convoi a été inspecté.", "condition": { "path": "repression.convoyInvestigated", "equals": true } },
+      { "text": "Un inconnu avait renseigné les brigands et les gardes ont fui presque immédiatement.", "condition": { "path": "repression.brigandTruthKnown", "equals": true } }
+    ] }] }
+  ],
+  "victoryConditions": [], "defeatConditions": []
+}

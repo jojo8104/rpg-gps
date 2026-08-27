@@ -42,6 +42,7 @@ export class Location {
     durability = null,
     abandonmentCycles = 0,
     dismantlings = [],
+    improvements = [],
   }) {
     this.id = Location.#requireText(id, "L'identifiant du lieu");
     this.name = Location.#requireText(name, "Le nom du lieu");
@@ -80,6 +81,9 @@ export class Location {
     this.durability = durability === null ? null : Location.#createDurability(durability);
     this.abandonmentCycles = Location.#requireNonNegativeNumber(abandonmentCycles, "La durée d'abandon");
     this.dismantlings = Array.isArray(dismantlings) ? structuredClone(dismantlings) : [];
+    if (!Array.isArray(improvements)) throw new TypeError("Les améliorations doivent être une liste.");
+    this.improvements = improvements.map((item) => ({ id: Location.#requireText(item?.id, "L'identifiant d'amélioration"), type: Location.#requireText(item?.type ?? "utility", "Le type d'amélioration"), defenseBonus: Location.#requireNonNegativeNumber(item?.defenseBonus ?? 0, "Le bonus de défense"), militiaCapacityBonus: Location.#requireNonNegativeInteger(item?.militiaCapacityBonus ?? 0, "Le bonus de miliciens"), destroyed: item?.destroyed === true }));
+    if (new Set(this.improvements.map(({ id }) => id)).size !== this.improvements.length) throw new RangeError("Les améliorations doivent avoir des identifiants uniques.");
     if (this.population === 0 && this.state === "active") this.state = "abandoned";
   }
 
@@ -138,6 +142,12 @@ export class Location {
     if (this.abandonmentCycles >= ABANDONMENT_EXPIRY_CYCLES) this.state = "destroyed";
     return this.state === "destroyed";
   }
+
+  getImprovement(id) { return this.improvements.find((item) => item.id === id) ?? null; }
+  destroyImprovement(id) { const item = this.getImprovement(id); if (item === null || item.destroyed) return false; item.destroyed = true; return true; }
+  get defenseBonus() { return this.improvements.filter((item) => !item.destroyed).reduce((sum, item) => sum + item.defenseBonus, 0); }
+  get militiaCapacityBonus() { return this.improvements.filter((item) => !item.destroyed).reduce((sum, item) => sum + item.militiaCapacityBonus, 0); }
+  get militiaCapacity() { return (this.recruitment.capacity ?? 0) + this.militiaCapacityBonus; }
 
   depositResource(resourceName, amount) {
     this.recalculateStorageCapacity();
@@ -222,6 +232,7 @@ export class Location {
       storageSlotCapacity: this.storageSlotCapacity,
       infrastructure: { ...this.infrastructure }, heroIds: [...this.heroIds], garrison: this.garrison.toJSON(),
       dismantlings: structuredClone(this.dismantlings),
+      improvements: this.improvements.map((item) => ({ ...item })),
       recruitment: Location.#copyRecruitment(this.recruitment),
       questIds: [...this.questIds], eventIds: [...this.eventIds], interactionIds: [...this.interactionIds], chief: this.chief === null ? null : structuredClone(this.chief),
       qr: { ...this.qr }, statistics: { ...this.statistics }, progression: { ...this.progression }, durability: this.durability === null ? null : { ...this.durability }, abandonmentCycles: this.abandonmentCycles,

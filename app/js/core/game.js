@@ -37,10 +37,12 @@ import { distanceMeters } from "./geo.js";
 import { HeroTravelExperienceService } from "./hero-travel-experience-service.js";
 import { LocationDismantlingService } from "./location-dismantling-service.js";
 import { ResultEvaluationService } from "./result-evaluation-service.js";
+import { TrailState } from "./trail.js";
+import { WorldState } from "./world-state.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
 export class Game {
-  constructor({ setup, scenario = null, scenarioLocationBindings = [], heroClasses = [], heroAptitudes = [], unitDefinitions = [], locations = [], autonomousGroups = [], autonomousGroupTraces = [], coordinateMode = "gps", scenarioStartsActive = true, now = () => Date.now(), idGenerator = Game.#defaultIdGenerator }) {
+  constructor({ setup, scenario = null, scenarioLocationBindings = [], heroClasses = [], heroAptitudes = [], unitDefinitions = [], locations = [], autonomousGroups = [], autonomousGroupTraces = [], coordinateMode = "gps", scenarioStartsActive = true, scenarioStateSnapshot = null, worldStateSnapshot = null, trailStateSnapshots = null, scenarioRuntimeSnapshot = null, now = () => Date.now(), idGenerator = Game.#defaultIdGenerator }) {
     this.setup = setup instanceof GameSetup ? setup : new GameSetup(setup);
     if (!["gps", "simulation"].includes(coordinateMode)) throw new RangeError("Le mode de coordonnées doit être gps ou simulation.");
     this.coordinateMode = coordinateMode;
@@ -66,13 +68,16 @@ export class Game {
     this.locationDismantlingService = new LocationDismantlingService();
     this.resultEvaluationService = new ResultEvaluationService();
     this.evacuationStates = {};
+    this.questDeadlines = {};
     this.availableQuests = [];
     this.questSequence = [];
     this.lastQuestResult = null;
     this.engagementService = new EngagementService({ engagementRadiusMeters: this.setup.rules.engagementRadiusMeters, fleeConfirmations: this.setup.rules.fleeConfirmations });
     this.scenario = scenario === null ? null : (scenario instanceof Scenario ? scenario : new Scenario(scenario));
     if (this.scenario !== null && this.scenario.id !== this.setup.scenarioId) throw new RangeError("Le scénario ne correspond pas au GameSetup.");
-    this.scenarioState = this.scenario === null ? null : new ScenarioState(this.scenario, { startsActive: scenarioStartsActive });
+    this.scenarioState = this.scenario === null ? null : new ScenarioState(this.scenario, { startsActive: scenarioStartsActive, state: scenarioStateSnapshot });
+    this.worldState = new WorldState(worldStateSnapshot ?? this.scenario?.worldState ?? {});
+    this.trailStates = Object.fromEntries((this.scenario?.trails ?? []).map((trail) => [trail.id, new TrailState(trail, trailStateSnapshots?.[trail.id] ?? {})]));
     this.locations = Game.#createLocations(locations, this.unitDefinitions);
     this.locations.forEach((location) => { this.locationProgressionService.initialize(location); this.campImprovementService.applyEffects(location); });
     this.scenarioLocationBindings = this.scenario === null
@@ -81,7 +86,7 @@ export class Game {
     this.scenarioEffectResolver = new ScenarioEffectResolver();
     this.questRuntime = new QuestRuntime();
     this.scenarioRuntimeBuilder = new ScenarioRuntimeBuilder();
-    this.scenarioRuntime = this.scenarioRuntimeBuilder.build({ scenario: this.scenario, setup: this.setup, bindings: this.scenarioLocationBindings, locations: this.locations });
+    this.scenarioRuntime = scenarioRuntimeSnapshot === null ? this.scenarioRuntimeBuilder.build({ scenario: this.scenario, setup: this.setup, bindings: this.scenarioLocationBindings, locations: this.locations }) : structuredClone(scenarioRuntimeSnapshot);
     Object.values(this.scenarioRuntime?.placements ?? {}).filter((placement) => placement.status === "placed").forEach((placement) => {
       this.updateLocationPosition({ locationId: placement.locationId, position: placement.position });
     });
@@ -205,8 +210,10 @@ export class Game {
     this.autonomousGroupTraces.push(...result.traces);
     this.autonomousGroupTraces = this.autonomousGroupTraces.filter((trace) => trace.getScore(now) > 0);
     result.events.forEach((event) => {
-      const battle = this.#createBattleFromAutonomousEvent(event);
+      const evacuationAttack = this.#resolveUnopposedEvacuationAttack(event);
+      const battle = evacuationAttack.handled ? null : this.#createBattleFromAutonomousEvent(event);
       if (battle !== null) event.battleId = battle.id;
+      if (evacuationAttack.outcome !== null) event.evacuationOutcome = evacuationAttack.outcome;
       this.eventLog.push(structuredClone(event));
     });
     return result;
@@ -310,15 +317,55 @@ export class Game {
   }
 
   dispatchQuestEvent(event) {
+    if (this.#failExpiredQuestDeadline()) return null;
     return this.questRuntime.dispatch(event, this);
   }
+
+  getQuestChoices() {
+    const phase = this.scenario?.getPhase(this.scenarioState?.currentPhaseId);
+    if (!phase || this.scenarioState.getCurrentPhaseState().status !== "active") return [];
+    return phase.choices.filter((choice) => this.matchesScenarioCondition(choice.condition)).map((choice) => ({ id: choice.id, label: choice.label }));
+  }
+
+  selectQuestChoice(choiceId) {
+    const phase = this.scenario?.getPhase(this.scenarioState?.currentPhaseId); const state = this.scenarioState?.getCurrentPhaseState();
+    if (!phase || state?.status !== "active") return { success: false, reason: "quest_unavailable" };
+    const choice = phase.choices.find((candidate) => candidate.id === choiceId);
+    if (!choice || !this.matchesScenarioCondition(choice.condition)) return { success: false, reason: "choice_unavailable" };
+    state.objectives.forEach((objective) => { if (objective.state === "active") objective.state = "completed"; });
+    const appliedEvent = choice.eventId ? this.triggerScenarioEvent(choice.eventId) : null;
+    if (!this.advanceScenario(choice.nextPhase)) return { success: false, reason: "invalid_transition" };
+    const result = { success: true, type: "quest_choice_selected", choiceId, phaseId: phase.id, nextPhaseId: choice.nextPhase, appliedEvent };
+    this.eventLog.push({ ...result, at: this.now() }); return result;
+  }
+
+  matchesScenarioCondition(condition) {
+    if (condition === undefined || condition === null) return true;
+    if (condition.all) return condition.all.every((entry) => this.matchesScenarioCondition(entry));
+    if (condition.any) return condition.any.some((entry) => this.matchesScenarioCondition(entry));
+    if (condition.not) return !this.matchesScenarioCondition(condition.not);
+    const actual = condition.npcId ? this.worldState.getNpc(condition.npcId)?.[condition.field] : this.worldState.get(condition.path);
+    if (Object.hasOwn(condition, "equals")) return actual === condition.equals;
+    if (Array.isArray(condition.in)) return condition.in.includes(actual);
+    return Boolean(actual);
+  }
+
+  inspectTrailPoint(traceId) {
+    const trail = this.scenario?.trails.find((candidate) => candidate.points.some((point) => point.traceId === traceId)) ?? null;
+    if (trail === null) return { success: false, reason: "trail_not_found" };
+    const result = this.trailStates[trail.id].inspect(trail, traceId);
+    if (result.success) this.eventLog.push({ type: "trail_point_inspected", ...result, at: this.now() });
+    return result;
+  }
+
+  getTrailState(trailId) { return this.trailStates[trailId] ?? null; }
 
   getActiveQuest() {
     if (this.scenario === null || this.scenarioState === null) return null;
     const phase = this.scenario.getPhase(this.scenarioState.currentPhaseId);
     const state = this.scenarioState.getCurrentPhaseState();
     if (state.status !== "active") return null;
-    return { ...phase, status: state.status, failureReason: state.failureReason ?? null, objectives: state.objectives.map((objective) => ({ ...objective })) };
+    return { ...phase, choices: this.getQuestChoices(), status: state.status, failureReason: state.failureReason ?? null, objectives: state.objectives.map((objective) => ({ ...objective })) };
   }
 
   completeCurrentScenarioPhase() { return this.scenarioState?.completeCurrentPhase() ?? false; }
@@ -632,6 +679,15 @@ export class Game {
     return { success: true, wagons: hero.wagons.map((wagon) => ({ ...wagon })), slotCapacity: hero.bagSlotCount };
   }
 
+  returnWagons({ playerId, heroId, wagonIds }) {
+    const hero = this.getHero(heroId); if (hero === null || hero.playerId !== playerId || !Array.isArray(wagonIds)) return { success: false, reason: "invalid_request" };
+    const returnedIds = new Set(wagonIds); const returned = hero.wagons.filter((wagon) => returnedIds.has(wagon.id));
+    hero.wagons = hero.wagons.filter((wagon) => !returnedIds.has(wagon.id));
+    const removedSlots = returned.reduce((sum, wagon) => sum + wagon.slotBonus, 0);
+    this.eventLog.push({ type: "hero_wagons_returned", playerId, heroId, wagonIds: returned.map((wagon) => wagon.id), removedSlots, at: this.now() });
+    return { success: true, wagons: returned.map((wagon) => ({ ...wagon })), removedSlots, slotCapacity: hero.bagSlotCount };
+  }
+
   startLocationDismantling({ playerId, heroId, locationId, structureId }) {
     const hero = this.getHero(heroId); const location = this.getLocation(locationId);
     if (hero === null || location === null || hero.playerId !== playerId || !location.heroIds.includes(hero.id)) return { success: false, reason: "hero_not_at_location" };
@@ -680,15 +736,33 @@ export class Game {
   }
 
   #canOperateEvacuationSource(playerId, locationId) {
-    if (this.getPlayer(playerId) === null || !["defend-evacuation-camp", "prepare-evacuation"].includes(this.scenarioState?.currentPhaseId)) return false;
+    if (this.getPlayer(playerId) === null || !["reach-evacuation-camp", "prepare-evacuation"].includes(this.scenarioState?.currentPhaseId)) return false;
     return Object.values(this.evacuationStates).some((state) => state.playerId === playerId && state.sourceLocationId === locationId && state.departedAt === null && state.completedAt === undefined);
   }
 
   #failExpiredQuestDeadline() {
-    const expired = Object.values(this.evacuationStates).find((state) => state.completedAt === undefined && state.failedAt === undefined && this.now() >= state.expiresAt);
+    const expired = [...Object.values(this.evacuationStates), ...Object.values(this.questDeadlines)].find((state) => state.deadlineCausesFailure !== false && state.completedAt === undefined && state.failedAt === undefined && this.now() >= state.expiresAt);
     if (!expired) return null;
     expired.failedAt = this.now();
     return this.failCurrentQuest({ reason: "deadline_expired" });
+  }
+
+  #resolveUnopposedEvacuationAttack(event) {
+    if (event.type !== "autonomous_group_location_attack_requested") return { handled: false, outcome: null };
+    const state = Object.values(this.evacuationStates).find((candidate) => candidate.sourceLocationId === event.locationId && candidate.completedAt === undefined && candidate.failedAt === undefined);
+    if (!state) return { handled: false, outcome: null };
+    const location = this.getLocation(event.locationId); const hero = this.getPlayer(state.playerId)?.heroIds.map((id) => this.getHero(id)).find((candidate) => candidate !== null) ?? null;
+    if (location?.heroIds.includes(hero?.id)) return { handled: false, outcome: "battle" };
+    const savedPeople = hero?.carriedLoot.filter((item) => item.itemId === "population" && item.metadata?.originLocationId === state.sourceLocationId).reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+    const remainingPeople = (location?.population ?? 0) + (location?.resources.stock.population ?? 0);
+    state.attackedAt = event.at; state.peopleSavedAtAttack = savedPeople; state.peopleLostAtAttack = remainingPeople;
+    if (location) { location.population = 0; location.resources.stock.population = 0; state.resourcesRemaining = structuredClone(location.resources.stock); state.structuresRemaining = Object.values(location.infrastructure).reduce((sum, level) => sum + level, 0); }
+    const group = this.getAutonomousGroup(event.groupId); if (group) { group.mission = null; group.movement = null; group.status = "arrived"; }
+    if (remainingPeople > 0 && savedPeople === 0) { state.failedAt = event.at; this.failCurrentQuest({ reason: "no_inhabitant_saved" }); return { handled: true, outcome: "failure" }; }
+    if (!["return-evacuees-to-capital", "second-prologue-complete"].includes(this.scenarioState?.currentPhaseId)) this.scenarioState?.redirectToPhase(this.scenario, "return-evacuees-to-capital");
+    const outcome = remainingPeople === 0 ? "empty_camp" : "partial_victory";
+    this.eventLog.push({ type: "evacuation_camp_attacked_unopposed", evacuationId: state.id, savedPeople, lostPeople: remainingPeople, outcome, at: event.at });
+    return { handled: true, outcome };
   }
 
   equipHeroItem({ playerId, heroId, packageId, slot = null }) {
@@ -870,6 +944,11 @@ export class Game {
     else this.battleSites.find((site) => site.battleId === battle.id)?.finish();
     const capturedLocation = this.#captureDefeatedLocation(battle);
     const destroyedLocationId = capturedLocation === null ? this.#destroyDefeatedEnemySource(battle) : null;
+    const evacuation = Object.values(this.evacuationStates).find((state) => state.sourceLocationId === battle.sourceLocationId && state.completedAt === undefined && state.failedAt === undefined);
+    if (evacuation) {
+      evacuation.attackedAt = this.now(); evacuation.battleId = battle.id; evacuation.battleWon = !enemyVictory;
+      if (enemyVictory) { evacuation.failedAt = this.now(); this.failCurrentQuest({ reason: "evacuation_battle_lost" }); }
+    }
     return { ...outcome, consequences, heroProgression, enemySalvage, battleLoot: battleLoot?.toJSON() ?? null, destroyedLocationId, capturedLocationId: capturedLocation?.locationId ?? null };
   }
 
@@ -1069,6 +1148,8 @@ export class Game {
       locations: this.locations.map((location) => location.toJSON()), status: this.status,
       scenario: this.scenario?.toJSON() ?? null, scenarioState: this.scenarioState?.toJSON() ?? null,
       scenarioRuntime: this.scenarioRuntime === null ? null : structuredClone(this.scenarioRuntime),
+      trailStates: Object.fromEntries(Object.entries(this.trailStates).map(([id, state]) => [id, state.toJSON()])),
+      worldState: this.worldState.toJSON(),
       availableQuests: this.availableQuests.map((quest) => ({ ...quest })),
       questSequence: this.questSequence.map((quest) => ({ ...quest, phaseIds: [...quest.phaseIds] })), lastQuestResult: this.lastQuestResult === null ? null : { ...this.lastQuestResult },
       scenarioLocationBindings: this.scenarioLocationBindings.map((binding) => binding.toJSON()), eventLog: this.eventLog.map((entry) => ({ ...entry })),

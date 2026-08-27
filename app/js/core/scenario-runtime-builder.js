@@ -14,7 +14,7 @@ export class ScenarioRuntimeBuilder {
     const placements = {};
 
     for (const slot of scenario.locationSlots) {
-      const binding = bindingBySlot.get(slot.id) ?? null;
+      const binding = bindingBySlot.get(slot.id) ?? (locationById.has(slot.id) ? { locationSlotId: slot.id, locationId: slot.id } : null);
       const location = binding === null ? null : locationById.get(binding.locationId) ?? null;
       const config = { ...(slot.defaultPlacement ?? { strategy: "fixed" }), ...(placementOverrides[slot.id] ?? {}) };
       if (!STRATEGIES.has(config.strategy)) throw new RangeError(`Stratégie de placement inconnue pour ${slot.id}.`);
@@ -49,13 +49,16 @@ export class ScenarioRuntimeBuilder {
       }
 
       const minimumDistanceMeters = positive(distanceForPace(config.minimumDistanceMetersByPace, setup.rules?.travelPaceMode ?? "calm", config.minimumDistanceMeters ?? 300), "La distance de placement");
+      const minimumDistanceFromOriginMeters = config.minimumDistanceFromOriginMetersByPace === undefined && config.minimumDistanceFromOriginMeters === undefined
+        ? 0
+        : nonNegative(distanceForPace(config.minimumDistanceFromOriginMetersByPace, setup.rules?.travelPaceMode ?? "calm", config.minimumDistanceFromOriginMeters), "L'éloignement minimal du départ");
       const maximumAccuracyMeters = positive(config.maximumAccuracyMeters ?? 50, "La précision GPS maximale");
       const confirmations = positiveInteger(config.confirmations ?? 2, "Le nombre de confirmations");
       placements[slot.id] = {
         strategy: "distance", status: "waiting", locationId: location.id,
-        minimumDistanceMeters, maximumAccuracyMeters, confirmations,
+        minimumDistanceMeters, minimumDistanceFromOriginMeters, maximumAccuracyMeters, confirmations,
         activationPhaseId: config.activationPhaseId ?? null,
-        origin: null, distanceMeters: 0, confirmationCount: 0, position: null,
+        origin: null, lastPosition: null, distanceMeters: 0, distanceFromOriginMeters: 0, confirmationCount: 0, position: null,
       };
     }
 
@@ -70,6 +73,7 @@ export class ScenarioRuntimeBuilder {
       if (placement.strategy !== "distance" || placement.status !== "waiting") return;
       if (placement.activationPhaseId !== null && placement.activationPhaseId !== phaseId) return;
       placement.origin = { ...position };
+      placement.lastPosition = { ...position };
       placement.status = "walking";
       started.push(slotId);
     });
@@ -82,12 +86,17 @@ export class ScenarioRuntimeBuilder {
     const updates = [];
     Object.entries(runtime.placements).forEach(([slotId, placement]) => {
       if (placement.strategy !== "distance" || placement.status !== "walking") return;
-      placement.distanceMeters = distanceMeters(placement.origin, position);
       const accurate = accuracy === null || (Number.isFinite(accuracy) && accuracy <= placement.maximumAccuracyMeters);
-      const beyondThreshold = placement.distanceMeters >= placement.minimumDistanceMeters;
-      placement.confirmationCount = accurate && beyondThreshold ? placement.confirmationCount + 1 : 0;
+      if (accurate) {
+        if (placement.lastPosition !== null) placement.distanceMeters += distanceMeters(placement.lastPosition, position);
+        placement.lastPosition = { ...position };
+      } else placement.lastPosition = null;
+      placement.distanceFromOriginMeters = distanceMeters(placement.origin, position);
+      const traveledFarEnough = placement.distanceMeters >= placement.minimumDistanceMeters;
+      const farEnoughFromOrigin = placement.distanceFromOriginMeters >= placement.minimumDistanceFromOriginMeters;
+      placement.confirmationCount = accurate && traveledFarEnough && farEnoughFromOrigin ? placement.confirmationCount + 1 : 0;
       if (placement.confirmationCount >= placement.confirmations) placement.status = "ready";
-      updates.push({ slotId, status: placement.status, distanceMeters: placement.distanceMeters, minimumDistanceMeters: placement.minimumDistanceMeters });
+      updates.push({ slotId, status: placement.status, distanceMeters: placement.distanceMeters, minimumDistanceMeters: placement.minimumDistanceMeters, distanceFromOriginMeters: placement.distanceFromOriginMeters, minimumDistanceFromOriginMeters: placement.minimumDistanceFromOriginMeters });
     });
     return updates;
   }
