@@ -7,24 +7,40 @@ import { MapEffectsRenderer } from "./MapEffectsRenderer.js";
 
 export class MapRenderer {
   constructor({ map, mode, onHeroMove, onLocationSelect }) {
-    this.map = map; this.mode = mode; createMapPanes(map);
+    this.map = map;
+    this.mode = mode;
+    createMapPanes(map);
     this.locations = new LocationRenderer({ map, onSelect: onLocationSelect });
     this.units = new UnitRenderer({ map, mode, onMove: onHeroMove });
-    this.terrain = new TerrainRenderer(map); this.fog = new FogRenderer(map); this.effects = new MapEffectsRenderer(map);
-    const updateZoom = () => { map.getContainer().dataset.zoomLevel = zoomLevel(map.getZoom()); };
-    map.on("zoomend", updateZoom); updateZoom();
+    this.terrain = new TerrainRenderer(map);
+    this.fog = new FogRenderer(map);
+    this.effects = new MapEffectsRenderer(map);
+    const updateZoom = () => {
+      map.getContainer().dataset.zoomLevel = zoomLevel(map.getZoom());
+    };
+    map.on("zoomend", updateZoom);
+    updateZoom();
   }
   render({ heroPosition, heroHeading, accuracy, locations }) {
     const ids = new Set(locations.map((item) => item.id));
-    locations.forEach((item) => this.locations.render({ ...item, owner: ownerFor(item), objective: item.type === "quest" || item.type === "mine" }));
-    this.locations.removeMissing(ids); this.units.render(heroPosition, accuracy, heroHeading);
+    locations.forEach((item) =>
+      this.locations.render({
+        ...item,
+        owner: ownerFor(item),
+        objective: item.type === "quest" || item.type === "mine",
+      }),
+    );
+    this.locations.removeMissing(ids);
+    this.units.render(heroPosition, accuracy, heroHeading);
     // Terrain and exploration overlays must come from real game data.
     // Rendering invented geometry around the hero makes the map misleading.
     this.terrain.render([]);
     this.fog.render({ heroPosition, enabled: false });
     this.effects.render(locations);
   }
-  setHeroHeading(heading) { this.units.setHeading(heading); }
+  setHeroHeading(heading) {
+    this.units.setHeading(heading);
+  }
 }
 export function zoomLevel(zoom) {
   if (zoom > 3) return zoom >= 17 ? "near" : zoom >= 14 ? "medium" : "far";
@@ -32,6 +48,7 @@ export function zoomLevel(zoom) {
 }
 function ownerFor(location) {
   if (location.relation === "enemy") return "enemy";
-  if (location.relation === "owned" || location.relation === "allied") return "ally";
+  if (location.relation === "owned" || location.relation === "allied")
+    return "ally";
   return "neutral";
 }

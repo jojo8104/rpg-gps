@@ -1,0 +1,444 @@
+/* Actions de combat compactes : une commande reste un carre au libelle court. */
+.power-buttons button {
+  flex: 0 0 60px;
+  width: 60px;
+  height: 60px;
+  min-height: 60px;
+  padding: 0.3rem;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  background: #654b83;
+  color: #f8efff;
+  font-size: 0.68rem;
+  line-height: 1.05;
+  text-align: center;
+}
+
+.quest-offer {
+  margin-bottom: 0.75rem;
+  border: 1px solid #6d8d56;
+  border-radius: 14px;
+  background: #17251a;
+}
+.quest-offer ol {
+  display: grid;
+  gap: 0.4rem;
+  padding-left: 1.3rem;
+  color: #d6e3d6;
+}
+.quest-offer.is-highlighted {
+  border-color: #d9c06b;
+  box-shadow: 0 0 0 2px #d9c06b2e;
+}
+.quest-offer.is-highlighted > small {
+  color: #ffe083;
+}
+.quest-location-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+.quest-location-actions .quest-location-button {
+  width: auto;
+  min-height: 38px;
+  margin: 0;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.75rem;
+}
+.travel-reward.is-quest-step .travel-reward__distance {
+  color: #d9ead7;
+}
+.travel-reward.is-quest-step .travel-reward__xp {
+  color: #a8ee9d;
+  text-shadow:
+    0 0 7px #dfffd9,
+    0 0 20px #4baf59,
+    0 3px 3px #000;
+}
+.travel-reward.is-quest-complete {
+  animation-duration: 3.4s;
+}
+.travel-reward.is-quest-complete .travel-reward__distance {
+  color: #fff1b0;
+}
+.travel-reward.is-quest-complete .travel-reward__xp {
+  color: #ffe27b;
+  text-shadow:
+    0 0 8px #fff,
+    0 0 24px #ffc64d,
+    0 0 42px #e38216,
+    0 3px 3px #000;
+}
+
+.setup-placement-block {
+  margin: 0.8rem 0;
+  padding: 0.7rem;
+  border: 1px solid #35553b;
+  border-radius: 12px;
+  background: #17251a;
+}
+.setup-placement-block h3 {
+  margin: 0 0 0.4rem;
+}
+.placement-options {
+  display: grid;
+  gap: 0.4rem;
+}
+.placement-option {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4.5rem 7rem;
+  gap: 0.4rem;
+  align-items: center;
+}
+.placement-option label {
+  margin: 0;
+  font-size: 0.78rem;
+}
+.placement-option input,
+.placement-option select {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0.4rem;
+}
+.gps-location-buttons:not(:empty) {
+  margin: 1rem 0;
+  padding: 0.6rem;
+  border: 1px dashed #617667;
+  border-radius: 10px;
+}
+.game-screen.is-gps-setup .gps-setup-panel {
+  max-height: 42svh;
+  overflow: auto;
+}
+@media (max-width: 430px) {
+  .placement-option {
+    grid-template-columns: minmax(0, 1fr) 4rem;
+  }
+  .placement-option label:last-child {
+    grid-column: 1/-1;
+  }
+}
+.quest-hud {
+  padding: 0.65rem 0.8rem;
+  cursor: pointer;
+}
+.quest-hud__compact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.5rem;
+}
+.quest-hud__objective {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.quest-hud__chevron {
+  color: #b9cab9;
+  transition: transform 0.2s ease;
+}
+.quest-hud.is-expanded .quest-hud__compact {
+  display: flex;
+  justify-content: flex-end;
+}
+.quest-hud.is-expanded .quest-hud__objective {
+  display: none;
+}
+.quest-hud.is-expanded .quest-hud__chevron {
+  transform: rotate(180deg);
+}
+.quest-hud__details {
+  padding-top: 0.15rem;
+}
+.quest-hud__details > strong {
+  display: block;
+}
+.quest-hud__details ul {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.55rem 0;
+  padding-left: 1.15rem;
+  color: #d6e3d6;
+  font-size: 0.82rem;
+}
+.quest-hud__details li.is-completed {
+  color: #91d889;
+}
+.quest-hud__progress {
+  position: relative;
+  height: 20px;
+  margin-top: 0.5rem;
+}
+.quest-hud__progress small {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #f4fff2;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 1px 2px #000;
+}
+.quest-hud__progress span {
+  position: absolute;
+  inset: 0 auto 0 0;
+}
+.map-control {
+  top: auto;
+  right: max(0.75rem, env(safe-area-inset-right));
+  bottom: calc(70px + env(safe-area-inset-bottom));
+}
+.conceal-control {
+  top: auto;
+  bottom: calc(128px + env(safe-area-inset-bottom));
+}
+.tools-control {
+  top: auto;
+  bottom: calc(186px + env(safe-area-inset-bottom));
+}
+@media (min-width: 700px) {
+  .map-control {
+    right: 1.5rem;
+    bottom: 94px;
+  }
+  .conceal-control {
+    bottom: 152px;
+  }
+  .tools-control {
+    bottom: 210px;
+  }
+}
+
+.battle-orientation-prompt {
+  display: none;
+}
+.royal-messenger-notice {
+  position: fixed;
+  z-index: 940;
+  top: max(5.2rem, calc(env(safe-area-inset-top) + 4.5rem));
+  left: 50%;
+  width: min(94vw, 480px);
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem;
+  border: 1px solid #e3c36a;
+  border-radius: 14px;
+  background: #2b2517f2;
+  color: #fff5cf;
+  box-shadow: 0 8px 28px #000a;
+}
+.royal-messenger-notice[hidden] {
+  display: none;
+}
+.royal-messenger-notice > span {
+  font-size: 1.6rem;
+  color: #f0ce70;
+}
+.royal-messenger-notice small,
+.royal-messenger-notice strong {
+  display: block;
+}
+.royal-messenger-notice small {
+  color: #d8c99d;
+  font-size: 0.72rem;
+}
+.royal-messenger-notice button {
+  min-height: 38px;
+  padding: 0.45rem 0.65rem;
+  background: #d6ad45;
+  color: #241b08;
+  font-size: 0.75rem;
+}
+
+@media (orientation: landscape) {
+  .bottom-nav {
+    align-content: center;
+
+    border-right: 1px solid #36563d;
+  }
+
+  .view:not(#map-view):not(#battle-view) {
+    min-height: 0;
+
+    overflow: auto;
+  }
+  #map {
+    height: 100dvh;
+  }
+
+  .tools-control {
+    bottom: calc(58px + env(safe-area-inset-bottom));
+  }
+  .world-grid {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+  .army-list {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+  .inventory-slots {
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  }
+  #world-content:has(.location-detail) {
+    height: 100%;
+    min-height: 0;
+  }
+  .location-detail--compact {
+    display: grid;
+    height: 100%;
+    min-height: 0;
+    max-width: none;
+    grid-template-columns: minmax(210px, 28%) minmax(230px, 34%) minmax(
+        250px,
+        1fr
+      );
+    grid-template-rows: 38px minmax(0, 1fr);
+    gap: 0.5rem;
+    overflow: hidden;
+  }
+  .location-detail--compact > .detail-nav {
+    grid-column: 1/-1;
+    grid-row: 1;
+  }
+  .location-detail--compact > .detail-pager {
+    display: none;
+  }
+  .location-detail--compact > .location-overview {
+    grid-column: 1;
+    grid-row: 2;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    min-height: 0;
+    padding: 0.5rem;
+    overflow: hidden;
+  }
+  .location-detail--compact .location-detail-art {
+    grid-row: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: auto;
+    margin: 0;
+  }
+  .location-detail--compact .location-detail-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .location-detail--compact .location-overview-body {
+    grid-row: 2;
+    padding: 0.45rem 0.15rem 0;
+  }
+  .location-detail--compact .location-heading h2 {
+    font-size: 1rem;
+  }
+  .location-detail--compact .location-heading .eyebrow {
+    margin: 0;
+    font-size: 0.65rem;
+  }
+  .location-detail--compact .location-description {
+    display: -webkit-box;
+    overflow: hidden;
+    margin: 0.35rem 0 0;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    font-size: 0.72rem;
+    line-height: 1.3;
+  }
+  .location-detail--compact .location-header-facts {
+    gap: 0.2rem 0.5rem;
+    margin-top: 0.25rem;
+  }
+  .location-detail--compact > .location-actions {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .location-detail--compact > .location-resources,
+  .location-detail--compact > .location-defense,
+  .location-detail--compact > .location-actions {
+    min-height: 0;
+    overflow: auto;
+    padding: 0.55rem;
+  }
+  .location-detail--compact > .location-resources {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: start;
+    max-height: 42%;
+  }
+  .location-detail--compact > .location-defense {
+    grid-column: 3;
+    grid-row: 2;
+    align-self: end;
+    max-height: 57%;
+  }
+  .location-detail--compact > .location-actions > h3,
+  .location-detail--compact > .location-resources > h3,
+  .location-detail--compact > .location-defense > h3,
+  .location-detail--compact > .location-defense > h4 {
+    display: none;
+  }
+  .location-detail--compact .world-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+  .location-detail--compact .world-actions button {
+    min-height: 42px;
+    padding: 0.35rem;
+    font-size: 0.7rem;
+  }
+  .location-detail--compact .location-action-menu {
+    margin-top: 0.35rem;
+  }
+  .location-detail--compact .garrison-summary {
+    margin-top: 0.4rem;
+  }
+  .game-screen.is-gps-setup .view.is-active {
+    margin-left: 0;
+    width: 100%;
+  }
+  #battle-view {
+    inset: 0;
+    margin: 0;
+    width: 100%;
+    height: 100dvh;
+  }
+  .battle-screen {
+    grid-template: 1fr / minmax(0, 1fr) minmax(230px, 30vw);
+    gap: 0.35rem;
+  }
+  .battle-action-dock {
+    align-content: start;
+    overflow-y: auto;
+  }
+  .battle-action-dock .player-hand {
+    display: grid;
+  }
+  .battle-action-dock .hand-cards {
+    flex-basis: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(46px, 1fr));
+    overflow: visible;
+  }
+  .battle-quick-actions {
+    flex-wrap: wrap;
+  }
+  .battle-quick-actions .power-buttons {
+    flex-basis: 100%;
+    order: 2;
+  }
+}
+
+@media (orientation: portrait) {
+  #map-view .map-control {
+    right: auto;
+    left: max(0.65rem, env(safe-area-inset-left));
+    bottom: calc(74px + env(safe-area-inset-bottom));
+  }
+}

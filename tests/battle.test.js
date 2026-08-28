@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { BattleEngine, BattleState } from "../app/js/core/battle.js";
+import { BattleEngine } from "../app/js/core/battle-engine.js";
+import { BattleState } from "../app/js/core/battle-state.js";
 
 const createBattle = () => new BattleEngine({ id: "battle-1", teams: [
   { id: "red", heroes: [{ id: "hero-red", playerId: "red", attack: 5, defense: 2, speed: 2 }], units: [{ id: "unit-red", playerId: "red", attack: 20, defense: 3, speed: 3, range: 1, quantity: 10, maxQuantity: 10 }] },

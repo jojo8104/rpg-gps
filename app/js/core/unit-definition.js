@@ -3,12 +3,32 @@
  * Cette classe ne contient aucun état propre à l'armée d'un joueur.
  */
 export class UnitDefinition {
-  constructor({ id, name, faction, maxQuantity, authorityCost = 1, stats, retreat = {}, abilities = [], costs = {}, tags = [] }) {
+  constructor({
+    id,
+    name,
+    faction,
+    maxQuantity,
+    authorityCost = 1,
+    stats,
+    retreat = {},
+    abilities = [],
+    costs = {},
+    tags = [],
+  }) {
     this.id = UnitDefinition.#requireText(id, "L'identifiant du type d'unité");
     this.name = UnitDefinition.#requireText(name, "Le nom du type d'unité");
-    this.faction = UnitDefinition.#requireText(faction, "La faction de l'unité");
-    this.maxQuantity = UnitDefinition.#requirePositiveInteger(maxQuantity, "L'effectif maximal");
-    this.authorityCost = UnitDefinition.#requirePositiveInteger(authorityCost, "Le cout d'autorite");
+    this.faction = UnitDefinition.#requireText(
+      faction,
+      "La faction de l'unité",
+    );
+    this.maxQuantity = UnitDefinition.#requirePositiveInteger(
+      maxQuantity,
+      "L'effectif maximal",
+    );
+    this.authorityCost = UnitDefinition.#requirePositiveInteger(
+      authorityCost,
+      "Le cout d'autorite",
+    );
     this.stats = UnitDefinition.#createStats(stats);
     this.retreat = UnitDefinition.#createRetreat(retreat, this.stats);
     this.abilities = UnitDefinition.#createTextList(abilities, "Les capacités");
@@ -51,15 +71,32 @@ export class UnitDefinition {
       "Les degats minimum",
     );
     normalizedStats.damageMax = UnitDefinition.#requirePositiveNumber(
-      stats.damageMax ?? Math.max(normalizedStats.damageMin, normalizedStats.attack),
+      stats.damageMax ??
+        Math.max(normalizedStats.damageMin, normalizedStats.attack),
       "Les degats maximum",
     );
-    if (normalizedStats.damageMax < normalizedStats.damageMin) throw new RangeError("Les degats maximum doivent etre superieurs aux degats minimum.");
-    normalizedStats.healthPerSoldier = UnitDefinition.#requirePositiveInteger(stats.healthPerSoldier ?? 10, "Les PV par soldat");
-    normalizedStats.combatHealthThreshold = UnitDefinition.#requireNonNegativeInteger(stats.combatHealthThreshold ?? 4, "Le seuil de blessure");
-    if (normalizedStats.combatHealthThreshold >= normalizedStats.healthPerSoldier) throw new RangeError("Le seuil de blessure doit etre inferieur aux PV par soldat.");
+    if (normalizedStats.damageMax < normalizedStats.damageMin)
+      throw new RangeError(
+        "Les degats maximum doivent etre superieurs aux degats minimum.",
+      );
+    normalizedStats.healthPerSoldier = UnitDefinition.#requirePositiveInteger(
+      stats.healthPerSoldier ?? 10,
+      "Les PV par soldat",
+    );
+    normalizedStats.combatHealthThreshold =
+      UnitDefinition.#requireNonNegativeInteger(
+        stats.combatHealthThreshold ?? 4,
+        "Le seuil de blessure",
+      );
+    if (
+      normalizedStats.combatHealthThreshold >= normalizedStats.healthPerSoldier
+    )
+      throw new RangeError(
+        "Le seuil de blessure doit etre inferieur aux PV par soldat.",
+      );
     normalizedStats.attackIntervalMs = UnitDefinition.#requirePositiveNumber(
-      stats.attackIntervalMs ?? Math.max(350, 1_500 - normalizedStats.speed * 100),
+      stats.attackIntervalMs ??
+        Math.max(350, 1_500 - normalizedStats.speed * 100),
       "La cadence d'attaque",
     );
 
@@ -67,24 +104,50 @@ export class UnitDefinition {
   }
 
   static #createRetreat(retreat, stats) {
-    if (retreat === null || Array.isArray(retreat) || typeof retreat !== "object") throw new TypeError("Les statistiques de retraite doivent etre un objet.");
+    if (
+      retreat === null ||
+      Array.isArray(retreat) ||
+      typeof retreat !== "object"
+    )
+      throw new TypeError(
+        "Les statistiques de retraite doivent etre un objet.",
+      );
     return {
-      speed: UnitDefinition.#requirePositiveNumber(retreat.speed ?? stats.speed, "La vitesse de retraite"),
-      defense: UnitDefinition.#requireNonNegativeNumber(retreat.defense ?? stats.defense, "La defense de retraite"),
-      attack: UnitDefinition.#requireNonNegativeNumber(retreat.attack ?? stats.attack, "L'attaque de retraite"),
-      range: UnitDefinition.#requirePositiveNumber(retreat.range ?? stats.range, "La portee de retraite"),
+      speed: UnitDefinition.#requirePositiveNumber(
+        retreat.speed ?? stats.speed,
+        "La vitesse de retraite",
+      ),
+      defense: UnitDefinition.#requireNonNegativeNumber(
+        retreat.defense ?? stats.defense,
+        "La defense de retraite",
+      ),
+      attack: UnitDefinition.#requireNonNegativeNumber(
+        retreat.attack ?? stats.attack,
+        "L'attaque de retraite",
+      ),
+      range: UnitDefinition.#requirePositiveNumber(
+        retreat.range ?? stats.range,
+        "La portee de retraite",
+      ),
     };
   }
 
   static #createAmounts(amounts, label) {
-    if (amounts === null || Array.isArray(amounts) || typeof amounts !== "object") {
+    if (
+      amounts === null ||
+      Array.isArray(amounts) ||
+      typeof amounts !== "object"
+    ) {
       throw new TypeError(`${label} doivent être un objet.`);
     }
 
     return Object.fromEntries(
       Object.entries(amounts).map(([name, amount]) => [
         UnitDefinition.#requireText(name, "Le nom de la ressource"),
-        UnitDefinition.#requireNonNegativeNumber(amount, "Le montant de la ressource"),
+        UnitDefinition.#requireNonNegativeNumber(
+          amount,
+          "Le montant de la ressource",
+        ),
       ]),
     );
   }
@@ -94,7 +157,13 @@ export class UnitDefinition {
       throw new TypeError(`${label} doivent être une liste.`);
     }
 
-    return [...new Set(values.map((value) => UnitDefinition.#requireText(value, "Un identifiant")))];
+    return [
+      ...new Set(
+        values.map((value) =>
+          UnitDefinition.#requireText(value, "Un identifiant"),
+        ),
+      ),
+    ];
   }
 
   static #requireText(value, label) {
@@ -122,12 +191,14 @@ export class UnitDefinition {
   }
 
   static #requireNonNegativeInteger(value, label) {
-    if (!Number.isInteger(value) || value < 0) throw new RangeError(`${label} doit etre un entier positif ou nul.`);
+    if (!Number.isInteger(value) || value < 0)
+      throw new RangeError(`${label} doit etre un entier positif ou nul.`);
     return value;
   }
 
   static #requirePositiveNumber(value, label) {
-    if (!Number.isFinite(value) || value <= 0) throw new RangeError(`${label} doit etre un nombre strictement positif.`);
+    if (!Number.isFinite(value) || value <= 0)
+      throw new RangeError(`${label} doit etre un nombre strictement positif.`);
     return value;
   }
 }

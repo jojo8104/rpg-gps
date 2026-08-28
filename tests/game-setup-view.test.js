@@ -19,6 +19,12 @@ test("le setup rapide transmet les règles expertes", () => {
   assert.equal(setup.rules.locationMode, "expert");
 });
 
+test("le setup ami est une partie solo qui n'attend aucun héros adverse", () => {
+  const setup = createQuickGameSetup({ name: "La Marche verdoyante", scenarioId: "verdant-frontier", solo: true });
+  assert.equal(setup.playerCount, 1);
+  assert.deepEqual(setup.participants.map(({ playerId }) => playerId), ["local"]);
+});
+
 test("le setup rapide rejette un nom de partie vide", () => {
   assert.throws(() => createQuickGameSetup({ name: "  ", scenarioId: "chaos" }), /nom de la partie/i);
 });

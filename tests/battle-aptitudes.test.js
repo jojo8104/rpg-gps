@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import { BattleEngine } from "../app/js/core/battle.js";
+import { BattleEngine } from "../app/js/core/battle-engine.js";
 import { HeroAptitudeDefinition } from "../app/js/core/hero-aptitude.js";
 
 const aptitudeDefinitions = JSON.parse(readFileSync(new URL("../data/hero-aptitudes.json", import.meta.url), "utf8"));

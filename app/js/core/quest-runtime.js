@@ -4,23 +4,49 @@ export class QuestRuntime {
     if (game.scenario === null || game.scenarioState === null) return null;
     const phase = game.scenario.getPhase(game.scenarioState.currentPhaseId);
     const state = game.scenarioState.getCurrentPhaseState();
-    if (event.type === "BattleLost" && phase.objectives.some((objective) => objective.trigger?.type === "battleWon" && this.#sameLocation(objective.trigger, event, game))) return game.failCurrentQuest({ reason: "battle_lost" });
-    const activeTrailObjective = event.type === "TraceInspected" ? phase.objectives.find((definition) => {
-      const objectiveState = state.objectives.find((objective) => objective.id === definition.id);
-      return objectiveState?.state === "active" && definition.trigger?.type === "trailPointInspected" && definition.trigger.traceId === event.traceId;
-    }) : null;
-    const trailProgress = activeTrailObjective ? game.inspectTrailPoint(event.traceId) : null;
+    if (
+      event.type === "BattleLost" &&
+      phase.objectives.some(
+        (objective) =>
+          objective.trigger?.type === "battleWon" &&
+          this.#sameLocation(objective.trigger, event, game),
+      )
+    )
+      return game.failCurrentQuest({ reason: "battle_lost" });
+    const activeTrailObjective =
+      event.type === "TraceInspected"
+        ? phase.objectives.find((definition) => {
+            const objectiveState = state.objectives.find(
+              (objective) => objective.id === definition.id,
+            );
+            return (
+              objectiveState?.state === "active" &&
+              definition.trigger?.type === "trailPointInspected" &&
+              definition.trigger.traceId === event.traceId
+            );
+          })
+        : null;
+    const trailProgress = activeTrailObjective
+      ? game.inspectTrailPoint(event.traceId)
+      : null;
     const completedObjectiveIds = [];
     const appliedEvents = [];
 
     phase.listeners.forEach((listener) => {
       if (!this.#matches(listener.trigger, event, game, trailProgress)) return;
-      const applied = game.triggerScenarioEvent(listener.eventId); if (applied) appliedEvents.push(applied);
+      const applied = game.triggerScenarioEvent(listener.eventId);
+      if (applied) appliedEvents.push(applied);
     });
 
     phase.objectives.forEach((definition) => {
-      const objectiveState = state.objectives.find((objective) => objective.id === definition.id);
-      if (objectiveState?.state !== "active" || !this.#matches(definition.trigger, event, game, trailProgress)) return;
+      const objectiveState = state.objectives.find(
+        (objective) => objective.id === definition.id,
+      );
+      if (
+        objectiveState?.state !== "active" ||
+        !this.#matches(definition.trigger, event, game, trailProgress)
+      )
+        return;
       if (!game.completeScenarioObjective(definition.id)) return;
       completedObjectiveIds.push(definition.id);
       if (definition.eventId) {
@@ -29,8 +55,21 @@ export class QuestRuntime {
       }
     });
 
-    if (completedObjectiveIds.length === 0) return appliedEvents.length ? { type: "quest_event_applied", phaseId: phase.id, completedObjectiveIds, phaseCompleted: false, nextPhaseId: null, nextQuestId: null, appliedEvents } : null;
-    const phaseCompleted = state.objectives.every((objective) => objective.state === "completed");
+    if (completedObjectiveIds.length === 0)
+      return appliedEvents.length
+        ? {
+            type: "quest_event_applied",
+            phaseId: phase.id,
+            completedObjectiveIds,
+            phaseCompleted: false,
+            nextPhaseId: null,
+            nextQuestId: null,
+            appliedEvents,
+          }
+        : null;
+    const phaseCompleted = state.objectives.every(
+      (objective) => objective.state === "completed",
+    );
     let nextPhaseId = null;
     let nextQuestId = null;
     if (phaseCompleted && phase.transitions.length === 1) {
@@ -38,66 +77,141 @@ export class QuestRuntime {
       if (!game.advanceScenario(nextPhaseId)) nextPhaseId = null;
       else {
         const sequence = game.settleQuestSequenceTerminalPhase();
-        if (sequence) { nextPhaseId = null; nextQuestId = sequence.nextQuestId; }
+        if (sequence) {
+          nextPhaseId = null;
+          nextQuestId = sequence.nextQuestId;
+        }
       }
-    }
-    else if (phaseCompleted && phase.transitions.length === 0) {
+    } else if (phaseCompleted && phase.transitions.length === 0) {
       game.completeCurrentScenarioPhase();
       const sequence = game.advanceQuestSequence({ outcome: "completed" });
-      if (sequence) { nextPhaseId = null; nextQuestId = sequence.nextQuestId; }
-    }
-    else if (phaseCompleted && phase.choices.length > 0) game.completeCurrentScenarioPhase();
-    const result = { type: "quest_progressed", phaseId: phase.id, completedObjectiveIds, phaseCompleted, nextPhaseId, nextQuestId, appliedEvents };
+      if (sequence) {
+        nextPhaseId = null;
+        nextQuestId = sequence.nextQuestId;
+      }
+    } else if (phaseCompleted && phase.choices.length > 0)
+      game.completeCurrentScenarioPhase();
+    const result = {
+      type: "quest_progressed",
+      phaseId: phase.id,
+      completedObjectiveIds,
+      phaseCompleted,
+      nextPhaseId,
+      nextQuestId,
+      appliedEvents,
+    };
     game.eventLog.push({ ...result, at: game.now() });
     return result;
   }
 
   #matches(trigger, event, game, trailProgress = null) {
     if (!trigger) return false;
-    if (trigger.type === "locationPlaced") return event.type === "LocationPlaced" && event.locationSlotId === trigger.locationSlotId;
+    if (trigger.type === "locationPlaced")
+      return (
+        event.type === "LocationPlaced" &&
+        event.locationSlotId === trigger.locationSlotId
+      );
     if (trigger.type === "enterLocation") {
       if (event.type !== "LocationEntered") return false;
-      const binding = game.scenarioLocationBindings.find((candidate) => candidate.locationId === event.locationId);
+      const binding = game.scenarioLocationBindings.find(
+        (candidate) => candidate.locationId === event.locationId,
+      );
       return binding?.locationSlotId === trigger.locationSlotId;
     }
     if (trigger.type === "interactionCompleted") {
-      if (event.type !== "InteractionCompleted" || event.interactionId !== trigger.interactionId) return false;
+      if (
+        event.type !== "InteractionCompleted" ||
+        event.interactionId !== trigger.interactionId
+      )
+        return false;
       if (!trigger.locationSlotId) return true;
-      const binding = game.scenarioLocationBindings.find((candidate) => candidate.locationId === event.locationId);
+      const binding = game.scenarioLocationBindings.find(
+        (candidate) => candidate.locationId === event.locationId,
+      );
       return binding?.locationSlotId === trigger.locationSlotId;
     }
-    if (trigger.type === "traceInspected") return event.type === "TraceInspected" && event.traceId === trigger.traceId;
-    if (trigger.type === "trailPointInspected") return event.type === "TraceInspected" && trailProgress?.success === true && trailProgress.trailId === trigger.trailId && trailProgress.traceId === trigger.traceId;
+    if (trigger.type === "traceInspected")
+      return (
+        event.type === "TraceInspected" && event.traceId === trigger.traceId
+      );
+    if (trigger.type === "trailPointInspected")
+      return (
+        event.type === "TraceInspected" &&
+        trailProgress?.success === true &&
+        trailProgress.trailId === trigger.trailId &&
+        trailProgress.traceId === trigger.traceId
+      );
     if (trigger.type === "battleWon") {
       if (event.type !== "BattleWon") return false;
-      const binding = game.scenarioLocationBindings.find((candidate) => candidate.locationId === event.locationId);
+      const binding = game.scenarioLocationBindings.find(
+        (candidate) => candidate.locationId === event.locationId,
+      );
       return binding?.locationSlotId === trigger.locationSlotId;
     }
     if (trigger.type === "evacuationReady") {
-      if (event.type !== "InteractionCompleted" || event.interactionId !== trigger.interactionId) return false;
+      if (
+        event.type !== "InteractionCompleted" ||
+        event.interactionId !== trigger.interactionId
+      )
+        return false;
       const source = game.getLocationForScenarioSlot(trigger.locationSlotId);
       const ready = source !== null;
-      if (ready && game.evacuationStates[trigger.evacuationId]) { const state = game.evacuationStates[trigger.evacuationId]; state.departedAt = game.now(); state.resourcesRemaining = structuredClone(source.resources.stock); state.structuresRemaining = Object.values(source.infrastructure).reduce((sum, level) => sum + level, 0); }
+      if (ready && game.evacuationStates[trigger.evacuationId]) {
+        const state = game.evacuationStates[trigger.evacuationId];
+        state.departedAt = game.now();
+        state.resourcesRemaining = structuredClone(source.resources.stock);
+        state.structuresRemaining = Object.values(source.infrastructure).reduce(
+          (sum, level) => sum + level,
+          0,
+        );
+      }
       return ready;
     }
     if (trigger.type === "resourceDelivery") {
-      if (event.type !== "InteractionCompleted" || event.interactionId !== trigger.interactionId) return false;
-      const binding = game.scenarioLocationBindings.find((candidate) => candidate.locationId === event.locationId);
+      if (
+        event.type !== "InteractionCompleted" ||
+        event.interactionId !== trigger.interactionId
+      )
+        return false;
+      const binding = game.scenarioLocationBindings.find(
+        (candidate) => candidate.locationId === event.locationId,
+      );
       if (binding?.locationSlotId !== trigger.locationSlotId) return false;
-      const hero = game.getPlayer(trigger.playerId ?? "local")?.heroIds.map((id) => game.getHero(id)).find((candidate) => candidate !== null) ?? null;
-      return hero !== null && hero.getResourceAmount(trigger.resource) >= trigger.amount;
+      const hero =
+        game
+          .getPlayer(trigger.playerId ?? "local")
+          ?.heroIds.map((id) => game.getHero(id))
+          .find((candidate) => candidate !== null) ?? null;
+      return (
+        hero !== null &&
+        hero.getResourceAmount(trigger.resource) >= trigger.amount
+      );
     }
     if (trigger.type === "resourceCollection") {
-      if (event.type !== "InteractionCompleted" || event.interactionId !== trigger.interactionId) return false;
-      const binding = game.scenarioLocationBindings.find((candidate) => candidate.locationId === event.locationId);
-      const source = binding?.locationSlotId === trigger.locationSlotId ? game.getLocation(event.locationId) : null;
-      return source !== null && (source.resources.stock[trigger.resource] ?? 0) >= trigger.amount;
+      if (
+        event.type !== "InteractionCompleted" ||
+        event.interactionId !== trigger.interactionId
+      )
+        return false;
+      const binding = game.scenarioLocationBindings.find(
+        (candidate) => candidate.locationId === event.locationId,
+      );
+      const source =
+        binding?.locationSlotId === trigger.locationSlotId
+          ? game.getLocation(event.locationId)
+          : null;
+      return (
+        source !== null &&
+        (source.resources.stock[trigger.resource] ?? 0) >= trigger.amount
+      );
     }
     return false;
   }
 
   #sameLocation(trigger, event, game) {
-    const binding = game.scenarioLocationBindings.find((candidate) => candidate.locationId === event.locationId);
+    const binding = game.scenarioLocationBindings.find(
+      (candidate) => candidate.locationId === event.locationId,
+    );
     return binding?.locationSlotId === trigger.locationSlotId;
   }
 }
