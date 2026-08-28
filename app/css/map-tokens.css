@@ -1,6 +1,14 @@
 :root {
-  --map-bg: #17191d; --rpg-gold: #d2a85f; --rpg-danger: #b84f45; --rpg-ally: #4c7893;
-  --rpg-neutral: #8b867b; --terrain-forest: #294b35; --terrain-plains: #737342;
-  --map-shadow: 0 4px 14px rgb(0 0 0 / 42%); --map-marker-size: 48px;
-  --map-border: 2px solid rgb(232 215 169 / 85%); --map-fast: 180ms; --map-pulse: 1.8s;
+  --map-bg: #17191d;
+  --rpg-gold: #d2a85f;
+  --rpg-danger: #b84f45;
+  --rpg-ally: #4c7893;
+  --rpg-neutral: #8b867b;
+  --terrain-forest: #294b35;
+  --terrain-plains: #737342;
+  --map-shadow: 0 4px 14px rgb(0 0 0 / 42%);
+  --map-marker-size: 48px;
+  --map-border: 2px solid rgb(232 215 169 / 85%);
+  --map-fast: 180ms;
+  --map-pulse: 1.8s;
 }

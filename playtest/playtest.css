@@ -1,0 +1,11 @@
+:root{--meadow:#f3f1df;--leaf:#496a45;--moss:#78956b;--bark:#745a3c;--sun:#d4a94f;--ink:#263427}
+body.playtest-edition{background:var(--meadow);color:var(--ink)}
+.playtest-edition .setup-screen{background:linear-gradient(#f9f6e8e8,#e6edcee8),radial-gradient(circle at 20% 10%,#fff 0 4%,transparent 5%);color:var(--ink)}
+.playtest-edition .setup-screen h1,.playtest-edition h2,.playtest-edition h3{color:#35523a;font-family:Georgia,serif}
+.playtest-edition .setup-screen fieldset,.playtest-edition .setup-screen .setup-hint{display:none!important}
+.playtest-edition button{background:linear-gradient(#6f9166,#4d704b);border-color:#3f603f;color:#fff;box-shadow:0 3px 0 #365338}
+.playtest-edition .secondary-button{background:#f6f1dc;color:#3d583d;border-color:#879b6f;box-shadow:none}
+.playtest-edition .gps-setup-panel,.playtest-edition .bottom-sheet,.playtest-edition .quest-card,.playtest-edition .army-card,.playtest-edition .compact-hero-card{background:#f8f5e7;color:var(--ink);border-color:#9cab79}
+.playtest-edition .bottom-nav{background:#edf0d8;border-color:#9cab79}.playtest-edition .bottom-nav button{background:transparent;box-shadow:none;color:#50664b}.playtest-edition .bottom-nav button.is-active{background:#65805b;color:#fff}
+.playtest-edition #toggle-field-tools,.playtest-edition #field-tools,.playtest-edition .map-chrome,.playtest-edition #cheat-dialog{display:none!important}
+.playtest-edition .setup-placement-block select{pointer-events:none;opacity:.8}

@@ -94,7 +94,10 @@ test("l’ordre royal déploie le cordon, l’avant-garde et l’armée principa
   assert.ok(game.evacuationStates["royal-camp-evacuation"].expiresAt > 61_000);
   assert.equal(game.autonomousGroups.filter((group) => group.mission.kind === "guard").length, 5);
   assert.ok(game.autonomousGroups.filter((group) => group.mission.kind === "guard").every((group) => group.mission.engagementRadiusMeters === 10));
-  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => group.army.units[0].quantity), [1, 4]);
+  const movingArmies = game.autonomousGroups.filter((group) => group.mission.kind === "attack_location");
+  assert.deepEqual(movingArmies.map((group) => group.army.units.length), [1, 4]);
+  assert.deepEqual(movingArmies.map((group) => group.army.units.reduce((sum, unit) => sum + unit.quantity, 0)), [6, 24]);
+  assert.ok(movingArmies.every((group) => group.army.units.every((unit) => unit.quantity === 6)));
   game.advanceAutonomousGroups(11_000);
   assert.equal(game.getAutonomousGroup("chaos-column-vanguard").movement.arrivesAt - game.getAutonomousGroup("chaos-column-vanguard").movement.startedAt, 60_000);
   assert.ok(Math.abs((game.getAutonomousGroup("chaos-column-main").movement.arrivesAt - game.getAutonomousGroup("chaos-column-main").movement.startedAt) - (game.evacuationStates["royal-camp-evacuation"].expiresAt - game.evacuationStates["royal-camp-evacuation"].startedAt)) < 1);
@@ -120,6 +123,10 @@ test("l’ordre royal autorise l’évacuation et le démontage d’un camp appa
   const result = game.organizeLocationEvacuation({ playerId: "local", heroId: hero.id, locationId: camp.id });
   assert.equal(result.success, true); assert.equal(result.people, 10); assert.equal(camp.population, 0); assert.equal(result.dismantlings.length, 2);
   assert.equal(hero.carriedLoot.filter((entry) => entry.itemId === "population").reduce((sum, entry) => sum + entry.quantity, 0), 10);
+  game.evacuationStates["royal-camp-evacuation"].expiresAt = 0;
+  const delivered = game.dispatchQuestEvent({ type: "LocationEntered", locationId: "royal-capital" });
+  assert.equal(delivered?.phaseId, "return-evacuees-to-capital"); assert.equal(game.evacuationStates["royal-camp-evacuation"].peopleDelivered, 10);
+  assert.equal(hero.carriedLoot.some((entry) => entry.itemId === "population"), false);
 });
 
 test("l’avant-garde reste dans la zone lorsque le camp est près de la limite nord", () => {
@@ -136,7 +143,7 @@ test("l’avant-garde reste dans la zone lorsque le camp est près de la limite 
   assert.equal(game.acceptAvailableQuest("royal-camp-evacuation").success, true);
   assert.doesNotThrow(() => game.dispatchQuestEvent({ type: "InteractionCompleted", interactionId: "receive-evacuation-order", locationId: "royal-capital" }));
   assert.equal(game.autonomousGroups.filter((group) => group.mission.kind === "guard").length, 5);
-  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => group.army.units[0].quantity), [1, 4]);
+  assert.deepEqual(game.autonomousGroups.filter((group) => group.mission.kind === "attack_location").map((group) => [group.army.units.length, group.army.units.reduce((sum, unit) => sum + unit.quantity, 0)]), [[1, 6], [4, 24]]);
 });
 
 test("la capitale et les camps du prologue restent la propriété du royaume", () => {

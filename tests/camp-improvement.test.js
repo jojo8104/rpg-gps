@@ -62,3 +62,38 @@ test("le Camp 3 débloque prospection et messagers sans lancer leurs missions", 
   assert.equal(location.features.prospecting, true);
   assert.equal(location.features.messaging, true);
 });
+
+test("le Camp 3 reste un camp jusqu'au choix explicite d'une branche", () => {
+  const { location, progression, service } = create({ level: 2, population: 20 });
+  service.build(location, "housing"); service.build(location, "housing");
+  service.build(location, "barricades"); service.build(location, "barricades");
+  service.build(location, "depot"); service.build(location, "trading_post");
+  progression.awardExperience(location, progression.getExperienceRequired(location), "quest");
+  assert.equal(service.levelUp(location).success, true);
+  assert.equal(location.type, "camp");
+  assert.equal(location.level, 3);
+});
+
+test("un Camp 3 civil peut devenir volontairement un village", () => {
+  const { location, progression, service } = create({ level: 3, population: 20 });
+  service.build(location, "housing"); service.build(location, "housing");
+  service.build(location, "trading_post"); service.build(location, "healing_tent");
+  progression.awardExperience(location, progression.getExperienceRequired(location), "quest");
+  const result = service.evolve(location, "village");
+  assert.equal(result.success, true);
+  assert.equal(location.type, "village");
+  assert.equal(location.level, 1);
+  assert.equal(location.populationCapacity, 40);
+});
+
+test("un Camp 3 militaire peut devenir volontairement un fort", () => {
+  const { location, progression, service } = create({ level: 3, population: 12 });
+  service.build(location, "barricades"); service.build(location, "barricades"); service.build(location, "barricades");
+  service.build(location, "watch_post"); service.build(location, "watch_post"); service.build(location, "workshop");
+  progression.awardExperience(location, progression.getExperienceRequired(location), "quest");
+  const result = service.evolve(location, "fort");
+  assert.equal(result.success, true);
+  assert.equal(location.type, "fort");
+  assert.equal(location.level, 1);
+  assert.equal(location.defenseSlots, 3);
+});

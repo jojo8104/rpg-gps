@@ -20,13 +20,15 @@
   float: right;
   width: min(42%, 260px);
   aspect-ratio: 1;
-  margin: -.35rem -.15rem .5rem .8rem;
+  margin: -0.35rem -0.15rem 0.5rem 0.8rem;
   border-radius: 14px;
   background: radial-gradient(circle, #304b35, #142119 72%);
   box-shadow: inset 0 0 0 1px #d2a85f55;
 }
 
-.location-overview-body { min-width:0; }
+.location-overview-body {
+  min-width: 0;
+}
 
 .location-detail-art img {
   width: 96%;
@@ -36,5 +38,7 @@
 }
 
 @media (max-width: 430px) {
-  .location-detail-art { width: 38%; }
+  .location-detail-art {
+    width: 38%;
+  }
 }

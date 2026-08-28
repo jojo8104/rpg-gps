@@ -88,7 +88,7 @@ autonomes `rogue`, séparés des armées des joueurs.
 
 Servir le dossier du projet via un serveur HTTP, puis ouvrir `app/index.html`.
 L'interface locale permet de créer une partie solo, choisir une classe, activer le
-GPS et sauvegarder un instantané dans `localStorage`. Elle est conçue mobile-first :
+GPS et conserver les diagnostics terrain dans `localStorage`. Elle est conçue mobile-first :
 grandes cibles tactiles, prise en compte des zones sûres et disposition à une colonne.
 
 La Phase 1 de l'interface fournit aussi une carte fictive Leaflet : déplacez le héros
@@ -107,3 +107,11 @@ coupure temporaire. Le fond OpenStreetMap nécessite toujours une connexion rés
 ## Tests
 
 Exécuter `npm test` depuis la racine du projet.
+
+## Formatage
+
+- `npm run format` reformate les modules JavaScript et les feuilles CSS.
+- `npm run format:check` vérifie le formatage sans modifier les fichiers.
+
+Les conventions de rangement sont documentées dans `app/css/README.md` et
+`app/js/README.md`.

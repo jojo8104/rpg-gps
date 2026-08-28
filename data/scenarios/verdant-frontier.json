@@ -1,0 +1,31 @@
+{
+  "id": "verdant-frontier",
+  "name": "La Marche verdoyante",
+  "intro": "Fondez un foyer, ralliez les lieux voisins et protégez la vallée contre les armées du Chaos.",
+  "initialPhaseId": "hold-the-valley",
+  "playerStart": {
+    "resources": { "gold": 30, "wood": 20, "stone": 10, "iron": 10 },
+    "unitStacks": []
+  },
+  "locationSlots": [
+    { "id": "capital", "type": "camp", "roles": ["home", "military"] },
+    { "id": "gold-mine", "type": "mine", "roles": ["resource", "gold"] },
+    { "id": "iron-mine", "type": "mine", "roles": ["resource", "iron"] },
+    { "id": "quarry", "type": "quarry", "roles": ["resource", "stone"] },
+    { "id": "lumber-camp", "type": "lumber-camp", "roles": ["resource", "wood"] },
+    { "id": "village", "type": "village", "roles": ["social", "food"] }
+  ],
+  "factions": [
+    { "id": "settlers", "name": "Colons de la vallée" },
+    { "id": "chaos", "name": "Chaos" },
+    { "id": "neutral", "name": "Neutres" }
+  ],
+  "phases": [{
+    "id": "hold-the-valley",
+    "title": "Défendre la vallée",
+    "description": "Développez votre camp, prenez le contrôle des ressources et repoussez les vagues du Chaos.",
+    "objectives": [],
+    "eventIds": [],
+    "transitions": []
+  }]
+}

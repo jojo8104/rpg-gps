@@ -1,0 +1,831 @@
+/* Prototype de bataille paysage : trois lignes horizontales et un pion par soldat. */
+@media (orientation: landscape) {
+  #battle-view .battle-screen {
+    grid-template: minmax(0, 1fr) auto/1fr;
+    gap: 0.3rem;
+  }
+  #battle-view .vertical-battlefield {
+    display: grid;
+    grid-template: repeat(3, minmax(0, 1fr)) / 70px minmax(0, 1fr) 70px;
+    min-height: 0;
+  }
+  #battle-view .vertical-lane {
+    grid-column: 2;
+    grid-row: var(--lane-row);
+    min-height: 0;
+
+    border-bottom: 1px solid #ffffff20;
+    border-radius: 0;
+  }
+  #battle-view .vertical-lane:last-of-type {
+    border-bottom: 0;
+  }
+  #battle-view .lane-centerline {
+    top: 50%;
+
+    bottom: auto;
+
+    width: auto;
+    height: 1px;
+    transform: none;
+    background: linear-gradient(90deg, #9ed0ff44, #ffffff20, #ffb1b144);
+  }
+  #battle-view .battle-camp {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    padding: 0.3rem;
+    background: #111a14;
+  }
+  #battle-view .battle-camp.is-allied {
+    grid-column: 1;
+    grid-row: 1/4;
+    border-right: 2px solid #6da8dc;
+    background: linear-gradient(90deg, #14283d, #17251a);
+  }
+  #battle-view .battle-camp.is-enemy {
+    grid-column: 3;
+    grid-row: 1/4;
+    border-left: 2px solid #c66d6d;
+    background: linear-gradient(90deg, #261b1a, #3a1818);
+  }
+  #battle-view .battle-hero-hud {
+    position: static;
+    display: grid;
+    width: 100%;
+    gap: 0.45rem;
+    text-align: center;
+  }
+  .battle-hero-hud .hero-health {
+    display: grid;
+    gap: 0.2rem;
+  }
+  .battle-hero-hud .hero-health i {
+    width: 100%;
+  }
+  #battle-view .field-token {
+    width: auto;
+    min-width: 42px;
+    max-width: 88px;
+    min-height: 38px;
+    padding: 0.18rem 0.25rem;
+    border-radius: 6px;
+    background: #17251ae8;
+  }
+  #battle-view .field-token > small {
+    position: absolute;
+    top: -0.4rem;
+    right: -0.35rem;
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: #101612;
+    color: #fff;
+    font-size: 0.58rem;
+  }
+  .soldier-formation {
+    display: grid;
+    grid-template-rows: repeat(2, 18px);
+    grid-auto-flow: column;
+    grid-auto-columns: 8px;
+    gap: 2px;
+    justify-content: center;
+    align-items: end;
+  }
+  .soldier-piece {
+    position: relative;
+    display: block;
+    width: 8px;
+    height: 18px;
+    overflow: hidden;
+    border: 1px solid #d7e4d5;
+    border-radius: 2px;
+    background: #657565;
+    box-shadow: 0 1px 2px #000;
+  }
+  .soldier-formation.is-allied .soldier-piece {
+    border-color: #94c9ff;
+    background: #315f88;
+  }
+  .soldier-formation.is-enemy .soldier-piece {
+    border-color: #ffaaaa;
+    background: #803e3e;
+  }
+  .soldier-piece.is-wounded {
+    filter: saturate(0.55);
+    opacity: 0.75;
+  }
+  .soldier-piece em {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: #78dc74;
+  }
+  .soldier-piece.is-wounded em {
+    background: #e1b24f;
+  }
+  #battle-view .field-token .casualty-bar {
+    position: absolute;
+    right: 2px;
+    bottom: -6px;
+    left: 2px;
+    height: 4px;
+  }
+  #battle-view .lane-retreat {
+    right: auto;
+    bottom: auto;
+
+    top: 50%;
+    width: 38px;
+    height: 46px;
+    transform: translateY(-50%);
+    border-radius: 5px 5px 10px 10px;
+    background: #5b4926;
+    color: #fff4c5;
+    clip-path: polygon(10% 0, 90% 0, 90% 78%, 50% 100%, 10% 78%);
+  }
+  #battle-view .lane-retreat:not(:disabled):active {
+    transform: translateY(-50%) scale(0.92);
+  }
+  #battle-view .lane-retreat span {
+    font-size: 1.35rem;
+  }
+  #battle-view .battle-action-dock {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 0.8fr);
+    grid-template-areas: "feedback feedback" "hand actions";
+    gap: 0.3rem;
+    padding: 0.3rem;
+    overflow: hidden;
+  }
+  #battle-view .battle-feedback {
+    grid-area: feedback;
+  }
+  #battle-view .player-hand {
+    grid-area: hand;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  #battle-view .battle-quick-actions {
+    grid-area: actions;
+    align-content: center;
+  }
+  #battle-view .hand-cards {
+    display: flex;
+    grid-template-columns: none;
+    gap: 0.35rem;
+    min-height: 62px;
+    overflow-x: auto;
+  }
+  #battle-view .hand-token {
+    flex: 0 0 112px;
+    width: 112px;
+    min-height: 58px;
+    display: grid;
+    grid-template-columns: 30px minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 0.05rem 0.35rem;
+    padding: 0.3rem;
+    text-align: left;
+  }
+  #battle-view .hand-token .hand-unit-icon {
+    grid-row: 1/3;
+    display: grid;
+    place-items: center;
+  }
+  #battle-view .hand-token > strong {
+    overflow: hidden;
+    font-size: 0.72rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #battle-view .hand-token > small {
+    font-size: 0.62rem;
+  }
+  #battle-view .hand-token .casualty-bar {
+    grid-column: 1/-1;
+    width: 100%;
+    height: 5px;
+  }
+}
+
+/* Ces règles finales gagnent sur les anciens layouts paysage conservés plus haut. */
+@media (orientation: landscape) {
+  .game-screen:has(.view.is-active:not(#map-view):not(#battle-view))
+    .bottom-nav {
+    inset: 0 0 0 auto;
+    transform: none;
+    width: 84px;
+    padding: max(0.5rem, env(safe-area-inset-top))
+      max(0.4rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom)) 0.4rem;
+    grid-template: repeat(6, minmax(0, 1fr)) / 1fr;
+    align-content: center;
+    border: 0;
+    border-left: 1px solid #c7a96555;
+    border-radius: 0;
+  }
+  .game-screen:has(.view.is-active:not(#map-view):not(#battle-view))
+    .bottom-nav
+    button {
+    min-height: 0;
+    padding: 0.35rem 0.15rem;
+  }
+  .game-screen > .view.is-active:not(#map-view):not(#battle-view) {
+    width: calc(100% - 84px);
+    margin: 0 84px 0 0;
+    padding: 0.55rem;
+    overflow: hidden;
+  }
+  #hero-content,
+  #hero-content .compact-hero-card {
+    height: 100%;
+    min-height: 0;
+  }
+  #hero-content .compact-hero-card {
+    grid-template-columns: minmax(120px, 20%) minmax(150px, 28%) minmax(
+        240px,
+        1fr
+      );
+    grid-template-rows: minmax(120px, 0.78fr) auto auto 130px;
+    gap: 0.45rem;
+    padding: 0.55rem;
+    overflow: hidden;
+  }
+  #hero-content .hero-bars {
+    grid-column: 1/3;
+    grid-row: 3;
+    width: 100%;
+  }
+  #hero-content .hero-progress {
+    height: 18px;
+    min-height: 18px;
+  }
+  #hero-content .hero-identity {
+    display: contents;
+  }
+  #hero-content .hero-portrait {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+    border: 1px solid #45684c;
+    border-radius: 14px;
+    background: #17251a;
+  }
+  #hero-content .hero-identity > header {
+    grid-column: 1;
+    grid-row: 2;
+    display: grid;
+    place-content: center;
+    min-width: 0;
+    padding: 0.18rem 0.25rem;
+    text-align: center;
+    border: 1px solid #45684c;
+    border-radius: 12px;
+    background: #8b6b3f;
+  }
+  #hero-content .hero-identity > header > div {
+    min-width: 0;
+  }
+  #hero-content .hero-identity h3 {
+    margin: 0;
+    font-size: 0.78rem;
+    line-height: 1;
+  }
+  #hero-content .hero-identity .hero-rank {
+    gap: 0;
+    margin-top: 0.08rem;
+    font-size: 0.8rem;
+    line-height: 1;
+  }
+  #hero-content .hero-identity h3,
+  #hero-content .hero-identity .eyebrow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #hero-content .hero-state {
+    display: none;
+  }
+  #hero-content .hero-aptitudes {
+    grid-column: 2;
+    grid-row: 1/3;
+    overflow: hidden;
+    margin-left: 42%;
+  }
+  #hero-content .hero-aptitudes > .trait-list {
+    height: 100%;
+    grid-template-columns: repeat(3, minmax(0, 48px));
+    grid-template-rows: repeat(3, minmax(0, 48px));
+    place-content: center;
+    gap: 0.25rem;
+  }
+  #hero-content .hero-aptitudes > .trait-list > .trait-chip {
+    width: 48px;
+    height: 48px;
+    min-height: 0;
+    aspect-ratio: 1;
+  }
+  #hero-content .hero-stat-panel {
+    grid-column: 1/3;
+    grid-row: 4;
+    height: 130px;
+    overflow: hidden;
+  }
+  #hero-content .compact-hero-card > .hero-equipment {
+    grid-column: 3;
+    grid-row: 1/5;
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    padding: 0.75rem;
+    border: 1px solid #6d633d;
+    border-radius: 14px;
+    background: #111a14;
+  }
+  #hero-content .hero-equipment-panel,
+  #hero-content .hero-equipment-layout {
+    height: 100%;
+    min-height: 0;
+  }
+  #hero-content .hero-equipment-layout {
+    overflow: hidden;
+    border: 1px solid #4d563f;
+    background: radial-gradient(
+      ellipse at center,
+      #31433b 0,
+      #192720 48%,
+      #0c1210 78%
+    );
+    box-shadow: inset 0 0 50px #0009;
+  }
+  #hero-content .hero-equipment-silhouette {
+    display: block;
+    width: min(42%, 190px);
+    height: 100%;
+    opacity: 0.72;
+  }
+  #hero-content .hero-equipment-slots {
+    position: absolute;
+    inset: 0.55rem;
+    display: block;
+  }
+  #hero-content .hero-equipment-slot {
+    position: absolute;
+    width: clamp(92px, 29%, 138px);
+    min-height: 44px;
+    padding: 0.25rem 0.4rem;
+    display: grid;
+    grid-template-columns: 1.55rem minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    place-items: initial;
+    align-items: center;
+    gap: 0 0.3rem;
+    font-size: 0.62rem;
+    text-align: left;
+    box-shadow: 0 5px 13px #0009;
+    z-index: 2;
+  }
+  #hero-content .hero-equipment-slot > span {
+    grid-row: 1/3;
+    display: grid;
+    place-items: center;
+    font-size: 1.15rem;
+  }
+  #hero-content .hero-equipment-slot > strong,
+  #hero-content .hero-equipment-slot > small {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #hero-content .hero-equipment-slot > small {
+    font-size: 0.5rem;
+  }
+  #hero-content .hero-equipment-slot[data-equipment-slot="head"] {
+    top: 1%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #hero-content .hero-equipment-slot[data-equipment-slot="neck"] {
+    top: 23%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #hero-content .hero-equipment-slot[data-equipment-slot="torso"] {
+    top: 45%;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  #hero-content .hero-equipment-slot[data-equipment-slot="mainHand"] {
+    top: 28%;
+    left: 1%;
+  }
+  #hero-content .hero-equipment-slot[data-equipment-slot="offHand"] {
+    top: 51%;
+    right: 1%;
+  }
+  #hero-content .hero-equipment-slot[data-equipment-slot="feet"] {
+    right: 50%;
+    bottom: 1%;
+    transform: translateX(50%);
+  }
+  #hero-content .hero-equipment-slot[data-equipment-slot="accessory1"] {
+    bottom: 3%;
+    left: 1%;
+  }
+  #hero-content .hero-equipment-slot[data-equipment-slot="accessory2"] {
+    right: 1%;
+    bottom: 3%;
+  }
+  #hero-content .compact-hero-stats {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  #hero-content .hero-equipment-layout {
+    min-height: clamp(180px, 38vh, 285px);
+  }
+  #hero-content .trait-list {
+    flex-wrap: wrap;
+    overflow: hidden;
+  }
+}
+
+@media (orientation: portrait) {
+  #hero-view.is-active {
+    height: 100dvh;
+    min-height: 0;
+    padding: max(0.35rem, env(safe-area-inset-top)) 0.45rem
+      calc(66px + env(safe-area-inset-bottom));
+    overflow: hidden;
+  }
+  #hero-content,
+  #hero-content .compact-hero-card {
+    height: 100%;
+    min-height: 0;
+  }
+  #hero-content .compact-hero-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 0.35rem;
+    padding: 0.4rem;
+    overflow: hidden;
+  }
+  #hero-content .hero-identity {
+    grid-column: 1/-1;
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr);
+    grid-template-rows: 150px;
+    align-items: flex-start;
+  }
+  #hero-content .hero-portrait {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+  }
+  #hero-content .hero-identity > header {
+    grid-column: 3/-1;
+    grid-row: 1;
+    min-width: 0;
+    height: 100%;
+  }
+  #hero-content .hero-bars {
+    grid-column: 1/-1;
+    grid-row: 2;
+    width: 100%;
+    align-self: center;
+    gap: 0.2rem;
+  }
+  #hero-content .hero-progress {
+    height: 7px;
+  }
+
+  #hero-content .hero-stat-panel {
+    grid-column: 1/-1;
+    grid-row: 3;
+    min-height: 130px;
+  }
+  #hero-content .hero-aptitudes {
+    grid-column: 1/-1;
+    grid-row: 4;
+  }
+  #hero-content .hero-identity > header {
+    padding: 0.35rem 0.5rem;
+  }
+  #hero-content .hero-identity h3 {
+    font-size: 2rem;
+  }
+  #hero-content .hero-identity .eyebrow {
+    font-size: 1.1rem;
+    margin-right: -24px;
+  }
+  #hero-content .hero-stat-panel,
+  #hero-content .hero-aptitudes {
+    padding: 0.4rem;
+    gap: 0.3rem;
+    overflow: hidden;
+  }
+  #hero-content .hero-stat-panel > h4,
+  #hero-content .hero-aptitudes > h4 {
+    font-size: 0.78rem;
+  }
+  #hero-content .compact-hero-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.2rem;
+  }
+  #hero-content .compact-hero-stats > div,
+  #hero-content .compact-hero-stats > .hero-stat-button {
+    padding: 0.24rem 0.15rem;
+  }
+  #hero-content .compact-hero-stats strong {
+    font-size: 0.92rem;
+  }
+  #hero-content .compact-hero-stats span {
+    font-size: 0.66rem;
+  }
+  #hero-content .hero-aptitudes > .trait-list {
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-rows: repeat(2, auto);
+    justify-content: center;
+    gap: 0.3rem 0.18rem;
+    overflow: visible;
+  }
+  #hero-content .hero-aptitudes > .trait-list > .trait-chip {
+    grid-column: span 2;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    min-height: 0;
+    padding: 0.18rem;
+    font-size: 0.58rem;
+    white-space: normal;
+  }
+  #hero-content .hero-aptitudes > .trait-list > .trait-chip:nth-child(6) {
+    grid-column: 2 / span 2;
+  }
+  #hero-content .hero-aptitudes > .trait-list > .trait-chip:nth-child(7) {
+    grid-column: 4 / span 2;
+  }
+  #hero-content .hero-aptitudes > .trait-list > .trait-chip:nth-child(8) {
+    grid-column: 6 / span 2;
+  }
+  #hero-content .hero-aptitudes > .trait-list > .trait-chip:nth-child(9) {
+    grid-column: 8 / span 2;
+  }
+  #hero-content .trait-icon {
+    width: 20px;
+    height: 20px;
+    font-size: 0.7rem;
+  }
+  #hero-content .hero-equipment {
+    grid-column: 1/-1;
+    grid-row: 5;
+    overflow: hidden;
+    padding: 0.35rem;
+    border: 1px solid #6d633d;
+    border-radius: 10px;
+  }
+  #hero-content .hero-equipment-panel {
+    gap: 0.25rem;
+  }
+  #hero-content .hero-equipment-panel > header small,
+  #hero-content .hero-equipment-panel h5,
+  #hero-content .hero-equipment-silhouette {
+    display: none;
+  }
+  #hero-content .hero-equipment-layout {
+    min-height: 160px;
+  }
+  #hero-content .hero-equipment-slots {
+    position: static;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-content: stretch;
+    gap: 0.2rem;
+  }
+  #hero-content .hero-equipment-slot {
+    min-height: 72px;
+    padding: 0.3rem;
+    font-size: 0.62rem;
+  }
+  #hero-content .hero-equipment-slot > span {
+    font-size: 0.9rem;
+  }
+  #hero-content .hero-equipment-slot small {
+    display: none;
+  }
+  #hero-content .stat-detail,
+  #hero-content .trait-detail {
+    position: absolute;
+    z-index: 4;
+    right: 0.65rem;
+    top: 26rem;
+    left: 0.65rem;
+    box-shadow: 0 8px 30px #000c;
+    height: 7rem;
+  }
+}
+.quest-result {
+  border: 2px solid currentColor;
+}
+.quest-result--success {
+  color: #b8f5ad;
+  background: #17351d;
+}
+.quest-result--failure {
+  color: #ffc0b8;
+  background: #3a1c1a;
+}
+.quest-result strong {
+  font-size: 1.08rem;
+}
+.quest-offer[data-state="waiting"] {
+  border-style: dashed;
+}
+.dynamic-marker {
+  cursor: default;
+  pointer-events: none;
+}
+.battle-result__loot button {
+  width: 100%;
+  margin-top: 0.65rem;
+}
+
+@media (orientation: landscape) {
+  .bottom-sheet.location-tab {
+    inset: auto 0 calc(82px + env(safe-area-inset-bottom)) auto;
+    transform: none;
+    width: min(260px, 32vw);
+    padding: 0;
+    overflow: hidden;
+    border-right: 0;
+    border-radius: 14px 0 0 14px;
+    background: #111d19f2;
+    box-shadow: -8px 5px 24px #0009;
+  }
+  .location-tab__button {
+    position: relative;
+    display: grid;
+    width: 100%;
+    min-height: 62px;
+    padding: 0.55rem 2.2rem 0.55rem 0.8rem;
+    border-radius: 13px 0 0 13px;
+    background: transparent;
+    color: #f4ead1;
+    text-align: left;
+  }
+  .location-tab__button small {
+    overflow: hidden;
+    color: #d9c384;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .location-tab__button strong {
+    overflow: hidden;
+    font-size: 0.92rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .location-tab__button > span {
+    position: absolute;
+    right: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #d9c384;
+    font-size: 1.6rem;
+  }
+}
+
+/* Perspective de bataille : projection visuelle uniquement, progression moteur inchangée. */
+@media (orientation: landscape) {
+  #battle-view .battle-screen {
+    background: url("../assets/battlefields/perspective-meadow.png")
+      center/cover no-repeat;
+  }
+  #battle-view .vertical-battlefield {
+    isolation: isolate;
+    overflow: visible;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  #battle-view .vertical-battlefield::before {
+    display: none;
+  }
+  #battle-view .vertical-lane {
+    z-index: 1;
+    background: transparent;
+    border: 0;
+    overflow: visible;
+  }
+  #battle-view .vertical-lane::before {
+    display: none;
+  }
+  #battle-view .lane-centerline {
+    display: none;
+  }
+  #battle-view .battle-camp,
+  #battle-view .battle-camp.is-allied,
+  #battle-view .battle-camp.is-enemy {
+    border: 0;
+    background: transparent;
+  }
+  #battle-view .battle-action-dock {
+    position: relative;
+    z-index: 8;
+    background: #0c1511c7;
+    backdrop-filter: blur(3px);
+  }
+  #battle-view .player-hand {
+    background: #111b15a6;
+  }
+  #battle-view .battle-quick-actions {
+    padding: 0.2rem;
+    border-radius: 10px;
+    background: #1117139c;
+  }
+  #battle-view .lane-centerline {
+    z-index: 1;
+    right: calc(var(--lane-inset) + 5%);
+    left: calc(var(--lane-inset) + 5%);
+  }
+  #battle-view .field-token {
+    transform: translate(-50%, -50%) scale(var(--perspective-scale, 1));
+    transform-origin: 50% 78%;
+  }
+  #battle-view .lane-retreat {
+    left: calc(var(--lane-inset) - 48px);
+  }
+  #battle-view .field-token.is-attacking {
+    animation: perspective-attack-pulse 0.45s ease-out;
+  }
+  #battle-view .field-token.is-targeted {
+    animation: perspective-target-hit 0.45s ease-out;
+  }
+  #battle-view .field-token.is-power-target {
+    animation: perspective-power-target-pulse 0.9s ease-in-out infinite
+      alternate;
+  }
+}
+@keyframes perspective-attack-pulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(var(--perspective-scale, 1));
+  }
+  50% {
+    transform: translate(-50%, -65%) scale(var(--perspective-scale, 1))
+      scale(1.2);
+  }
+}
+@keyframes perspective-target-hit {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(var(--perspective-scale, 1));
+    filter: none;
+  }
+  40% {
+    transform: translate(-50%, -50%) scale(var(--perspective-scale, 1));
+    filter: brightness(2);
+    box-shadow: 0 0 16px #ff5b4d;
+  }
+}
+@keyframes perspective-power-target-pulse {
+  from {
+    transform: translate(-50%, -50%) scale(var(--perspective-scale, 1));
+    filter: brightness(1);
+  }
+  to {
+    transform: translate(-50%, -50%) scale(var(--perspective-scale, 1))
+      scale(1.1);
+    filter: brightness(1.5);
+  }
+}
+.quest-hud__deadline {
+  color: #ffd873;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+.quest-hud__deadline.is-expired {
+  color: #ff8b7e;
+}

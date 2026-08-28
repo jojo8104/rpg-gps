@@ -28,5 +28,6 @@ test("la perspective comprime seulement le rendu des lignes du fond", () => {
   const foregroundVisual = battleEntityVisualPosition(foreground, playerTeam, "heroes");
   assert.equal(backgroundVisual.scale, .68);
   assert.equal(foregroundVisual.scale, 1);
+  assert.equal(foregroundVisual.y, 38);
   assert.ok(Math.abs(backgroundVisual.x - 50) < Math.abs(foregroundVisual.x - 50));
 });
