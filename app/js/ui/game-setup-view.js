@@ -50,7 +50,7 @@ export class GameSetupView {
   readSetup() {
     const playtest = this.root.dataset.edition === "playtest";
     return createQuickGameSetup({
-      name: playtest ? "La Marche verdoyante" : "Essai terrain",
+      name: playtest ? "RPG GPS — Survie" : "Essai terrain",
       scenarioId: playtest ? "verdant-frontier" : "chaos",
       solo: playtest,
       travelPaceMode:

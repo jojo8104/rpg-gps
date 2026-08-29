@@ -76,7 +76,7 @@ if (PLAYTEST_EDITION) {
   theme.rel = "stylesheet";
   theme.href = "../playtest/playtest.css";
   document.head.append(theme);
-  document.title = "La Marche verdoyante";
+  document.title = "RPG GPS — Survie";
 }
 document.addEventListener("battle-loot-collect", () => {
   if (!game || !activeBattle || !battleResult?.battleLoot) return;
@@ -176,18 +176,18 @@ const ui = {
 };
 if (PLAYTEST_EDITION) {
   ui.setup.dataset.edition = "playtest";
-  ui.setup.querySelector("h1").textContent = "La Marche verdoyante";
-  ui.setup.querySelector(".eyebrow").textContent = "Aventure GPS";
+  ui.setup.querySelector("h1").textContent = "RPG GPS — Survie";
+  ui.setup.querySelector(".eyebrow").textContent = "Partie GPS";
   ui.setup.querySelector("h1 + p").textContent =
-    "Fondez votre camp, ralliez la vallée et résistez aux armées du Chaos.";
+    "Placez vos ressources, développez votre camp et survivez aux armées du Chaos.";
   ui.setup.querySelectorAll("fieldset").forEach((field) => {
     field.hidden = true;
   });
   ui.setup.querySelector('input[name="test-mode"][value="gps"]').checked = true;
-  ui.create.textContent = "Entrer dans la vallée";
-  $("#gps-setup-panel h2").textContent = "Dessiner votre territoire";
+  ui.create.textContent = "Nouvelle partie";
+  $("#gps-setup-panel h2").textContent = "Configurer la zone de jeu";
   $("#gps-setup-panel .gps-area-step p").textContent =
-    "Tracez la zone dans laquelle vous allez réellement marcher, puis placez les six lieux de la vallée.";
+    "Tracez votre zone GPS réelle, puis placez les six lieux nécessaires à la partie.";
   $("#gps-setup-panel .setup-placement-block h3").textContent = "Votre camp";
   $("#finish-gps-setup").textContent = "Commencer l’aventure";
 }
@@ -733,7 +733,7 @@ function finishGameStart() {
     game.start();
     const testUnits = PLAYTEST_EDITION
       ? [
-          { typeId: "militia", quantity: 6, name: "Garde de l’Aubépine" },
+          { typeId: "militia", quantity: 6, name: "Fantassins" },
           { typeId: "archer", quantity: 5, name: "Archers des Haies" },
           {
             typeId: "mounted-archer",
@@ -811,14 +811,14 @@ function finishGameStart() {
       game.addAutonomousGroup(new AutonomousGroup(definition));
       deviceAlerts.notify("danger");
       logTest(
-        `Une armée du Chaos marche sur ${game.getLocation(definition.mission.targetId)?.name ?? "la vallée"} (${definition.army.units[0].quantity} soldats).`,
+        `Une armée du Chaos marche sur ${game.getLocation(definition.mission.targetId)?.name ?? "un lieu"} (${definition.army.units[0].quantity} soldats).`,
       );
       render();
     };
     setTimeout(spawnWave, 30_000);
     chaosWaveTimer = setInterval(spawnWave, 75_000);
     logTest(
-      "La vallée est fondée. Une première armée du Chaos apparaîtra bientôt, puis de nouvelles vagues attaqueront régulièrement les lieux placés.",
+      "La partie commence. Une première armée du Chaos apparaîtra bientôt, puis de nouvelles vagues attaqueront régulièrement vos lieux.",
     );
     return;
   }
@@ -1349,7 +1349,7 @@ function visibleAutonomousGroups() {
     }));
 }
 function visibleAutonomousTraces() {
-  const questIds = new Set(["prospectors-trace-1", "prospectors-trace-2"]);
+  const questIds = new Set(["prospectors-trace-1", "prospectors-trace-2", "convoy-trace-1", "convoy-trace-2"]);
   const now = Date.now();
   const detectedGroups = new Map(
     visibleAutonomousGroups().map((group) => [group.id, group]),
@@ -1915,6 +1915,9 @@ function applyQuestFeedback(progress) {
   const narration = progress.appliedEvents
     .flatMap((entry) => entry.appliedEffects)
     .find((effect) => effect.type === "narration");
+  const scenarioReport = progress.appliedEvents
+    .flatMap((entry) => entry.appliedEffects)
+    .find((effect) => effect.type === "scenario_report");
   const evacuationResult = progress.appliedEvents
     .flatMap((entry) => entry.appliedEffects)
     .find((effect) => effect.type === "evacuation_completed");
@@ -1942,7 +1945,7 @@ function applyQuestFeedback(progress) {
   const nextObjectiveMessage = nextObjective
     ? `\n\nNouvel objectif — ${nextQuest.title} : ${nextObjective.text}.`
     : "";
-  locationMessage = `${narration?.text ?? "Objectif accompli."}${revealed ? `\n\n${revealed.name} révélée sur la carte.` : ""}${nextObjectiveMessage}${evacuationResult ? `\n\nBilan : ${evacuationResult.result.score}/100 · ${evacuationResult.result.grade} · ${evacuationResult.people} habitant(s) sauvés.` : ""}`;
+  locationMessage = `${narration?.text ?? scenarioReport?.text ?? "Objectif accompli."}${revealed ? `\n\n${revealed.name} révélée sur la carte.` : ""}${nextObjectiveMessage}${evacuationResult ? `\n\nBilan : ${evacuationResult.result.score}/100 · ${evacuationResult.result.grade} · ${evacuationResult.people} habitant(s) sauvés.` : ""}`;
   showQuestProgressFeedback(progress);
   logTest(locationMessage);
   if (progress.nextPhaseId)
@@ -2075,24 +2078,53 @@ function syncEvacuationCampSearch() {
 function syncQuestTrace() {
   const pace = questPaceProfile(game.setup.rules.travelPaceMode);
   const phaseId = game.scenarioState?.currentPhaseId;
-  const definition =
-    phaseId === "follow-first-trace"
-      ? {
+  const definitions = {
+    "follow-first-trace": {
           id: "prospectors-trace-1",
           gpsDistance: pace.firstTraceMeters,
           simulationDistance: 9,
           direction: 55,
           kind: "passage",
-        }
-      : phaseId === "follow-second-trace"
-        ? {
+          groupId: "missing-royal-prospectors",
+          groupType: "prospecting",
+          ownerId: "kingdom",
+          soldierCount: 6,
+        },
+    "follow-second-trace": {
             id: "prospectors-trace-2",
             gpsDistance: pace.secondTraceMeters,
             simulationDistance: 10,
             direction: 52,
             kind: "struggle",
-          }
-        : null;
+            groupId: "missing-royal-prospectors",
+            groupType: "prospecting",
+            ownerId: "kingdom",
+            soldierCount: 6,
+          },
+    "convoy-trace-one": {
+      id: "convoy-trace-1",
+      gpsDistance: Math.max(90, Math.round(pace.firstTraceMeters * 0.7)),
+      simulationDistance: 8,
+      direction: 38,
+      kind: "plunder",
+      groupId: "convoy-raiders",
+      groupType: "rogue",
+      ownerId: "bandits",
+      soldierCount: 6,
+    },
+    "convoy-trace-two": {
+      id: "convoy-trace-2",
+      gpsDistance: Math.max(110, Math.round(pace.secondTraceMeters * 0.75)),
+      simulationDistance: 9,
+      direction: 42,
+      kind: "passage",
+      groupId: "convoy-raiders",
+      groupType: "rogue",
+      ownerId: "bandits",
+      soldierCount: 6,
+    },
+  };
+  const definition = definitions[phaseId] ?? null;
   if (
     !definition ||
     game.autonomousGroupTraces.some((trace) => trace.id === definition.id)
@@ -2112,13 +2144,13 @@ function syncQuestTrace() {
   game.autonomousGroupTraces.push(
     new AutonomousGroupTrace({
       id: definition.id,
-      groupId: "missing-royal-prospectors",
-      groupType: "prospecting",
-      owner: { kind: "faction", id: "kingdom" },
+      groupId: definition.groupId,
+      groupType: definition.groupType,
+      owner: { kind: "faction", id: definition.ownerId },
       kind: definition.kind,
       position,
-      soldierCount: 6,
-      directionDegrees: 45,
+      soldierCount: definition.soldierCount,
+      directionDegrees: definition.direction,
       createdAt: Date.now(),
       decayPerMinute: 0.001,
     }),
@@ -2127,12 +2159,12 @@ function syncQuestTrace() {
 
 function visibleQuestTraces() {
   syncQuestTrace();
-  const visibleTraceId =
-    game.scenarioState?.currentPhaseId === "follow-first-trace"
-      ? "prospectors-trace-1"
-      : game.scenarioState?.currentPhaseId === "follow-second-trace"
-        ? "prospectors-trace-2"
-        : null;
+  const visibleTraceId = ({
+    "follow-first-trace": "prospectors-trace-1",
+    "follow-second-trace": "prospectors-trace-2",
+    "convoy-trace-one": "convoy-trace-1",
+    "convoy-trace-two": "convoy-trace-2",
+  })[game.scenarioState?.currentPhaseId] ?? null;
   return game.autonomousGroupTraces
     .filter(
       (trace) => trace.id === visibleTraceId && trace.getScore(Date.now()) > 0,
@@ -2543,7 +2575,7 @@ function applyWorldSetup() {
     manualSetupPlacements.set("capital", {
       kind: "location",
       id: "royal-capital",
-      label: PLAYTEST_EDITION ? "Camp de l’Aubépine" : "Capitale royale",
+      label: PLAYTEST_EDITION ? "Camp principal" : "Capitale royale",
     });
   }
   const requiredIds = new Set(
@@ -3521,6 +3553,16 @@ function resolveFinishedBattle() {
       battleId: activeBattle.id,
     });
     if (quest) applyQuestFeedback(quest);
+  } else if (activeBattle.sourceLocationId) {
+    const failure = game.dispatchQuestEvent({
+      type: "BattleLost",
+      locationId: activeBattle.sourceLocationId,
+      battleId: activeBattle.id,
+    });
+    const effects = failure?.appliedEvent?.appliedEffects ?? [];
+    const narration = effects.find((effect) => effect.type === "narration");
+    if (narration) { locationMessage = narration.text; logTest(locationMessage); }
+    if (failure?.nextPhaseId) game.startCurrentScenarioPlacements(asGps(heroPosition));
   }
   if (result.destroyedLocationId) {
     rebuildLocationEngine();
@@ -4655,7 +4697,7 @@ window.addEventListener("resize", () => {
 try {
   data = await loadData();
   ui.status.textContent = PLAYTEST_EDITION
-    ? "La vallée est prête à être fondée."
+    ? "La partie est prête."
     : "Le banc d'essai terrain est prêt.";
   ui.create.disabled = false;
 } catch (error) {

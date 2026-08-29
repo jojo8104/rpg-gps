@@ -301,7 +301,7 @@ export class Scenario {
 
   static #createFailure(failure) {
     if (failure === undefined)
-      return { policy: "stop", nextPhase: null, eventId: null };
+      return { policy: "stop", nextPhase: null, eventId: null, scope: "quest" };
     Scenario.#requireObject(failure, "La règle d'échec");
     const policy = Scenario.#requireText(
       failure.policy ?? "stop",
@@ -315,9 +315,13 @@ export class Scenario {
         : Scenario.#requireText(failure.nextPhase, "La phase après échec");
     if (policy === "branch" && nextPhase === null)
       throw new RangeError("Un embranchement d'échec exige une phase cible.");
+    const scope = Scenario.#requireText(failure.scope ?? "quest", "La portée de l'échec");
+    if (!["quest", "phase"].includes(scope))
+      throw new RangeError("La portée de l'échec est invalide.");
     return {
       policy,
       nextPhase,
+      scope,
       eventId:
         failure.eventId == null
           ? null

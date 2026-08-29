@@ -986,10 +986,11 @@ export class Game {
       return null;
     const phase = this.scenario.getPhase(this.scenarioState.currentPhaseId);
     const failure = phase.failure;
-    const isSequencedQuest = this.questSequence.some((quest) =>
+    const belongsToSequencedQuest = this.questSequence.some((quest) =>
       quest.phaseIds.includes(phase.id),
     );
-    let nextPhaseId = isSequencedQuest
+    const isTerminalSequenceFailure = belongsToSequencedQuest && failure.scope !== "phase";
+    let nextPhaseId = isTerminalSequenceFailure
       ? null
       : failure.policy === "branch"
         ? failure.nextPhase
@@ -1007,7 +1008,7 @@ export class Game {
       })
     )
       return null;
-    const sequence = isSequencedQuest
+    const sequence = isTerminalSequenceFailure
       ? this.advanceQuestSequence({ outcome: reason })
       : null;
     if (sequence) nextPhaseId = sequence.nextPhaseId;
