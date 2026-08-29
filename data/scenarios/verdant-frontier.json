@@ -1,7 +1,7 @@
 {
   "id": "verdant-frontier",
-  "name": "La Marche verdoyante",
-  "intro": "Fondez un foyer, ralliez les lieux voisins et protégez la vallée contre les armées du Chaos.",
+  "name": "RPG GPS — Survie",
+  "intro": "Développez votre base, prenez les ressources et survivez aux attaques du Chaos.",
   "initialPhaseId": "hold-the-valley",
   "playerStart": {
     "resources": { "gold": 30, "wood": 20, "stone": 10, "iron": 10 },
@@ -16,14 +16,14 @@
     { "id": "village", "type": "village", "roles": ["social", "food"] }
   ],
   "factions": [
-    { "id": "settlers", "name": "Colons de la vallée" },
+    { "id": "settlers", "name": "Joueur" },
     { "id": "chaos", "name": "Chaos" },
     { "id": "neutral", "name": "Neutres" }
   ],
   "phases": [{
     "id": "hold-the-valley",
-    "title": "Défendre la vallée",
-    "description": "Développez votre camp, prenez le contrôle des ressources et repoussez les vagues du Chaos.",
+    "title": "Survivre au Chaos",
+    "description": "Développez le camp, capturez les ressources et repoussez les vagues ennemies.",
     "objectives": [],
     "eventIds": [],
     "transitions": []

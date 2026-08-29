@@ -20,7 +20,7 @@ test("le setup rapide transmet les règles expertes", () => {
 });
 
 test("le setup ami est une partie solo qui n'attend aucun héros adverse", () => {
-  const setup = createQuickGameSetup({ name: "La Marche verdoyante", scenarioId: "verdant-frontier", solo: true });
+  const setup = createQuickGameSetup({ name: "RPG GPS — Survie", scenarioId: "verdant-frontier", solo: true });
   assert.equal(setup.playerCount, 1);
   assert.deepEqual(setup.participants.map(({ playerId }) => playerId), ["local"]);
 });

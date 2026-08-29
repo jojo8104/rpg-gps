@@ -43,7 +43,8 @@ test("l'assaut immédiat détruit réellement le Manoir et permet un retour dire
   assert.equal(village.defenseBonus, 2); assert.equal(village.militiaCapacity, 12);
   const defendedBattle = game.battleService.createBattle({ id: "manor-before", game, teamParticipants: [{ id: "attackers", locationId: "capital-real" }, { id: "defenders", locationId: "village-real" }], now: 0 });
   assert.equal(defendedBattle.teams.find(({ id }) => id === "defenders").heroes[0].defense, 8);
-  assert.equal(game.selectQuestChoice("ASSAULT_VILLAGE").nextPhaseId, "royal-assault"); win(game);
+  const assault = game.selectQuestChoice("ASSAULT_VILLAGE"); assert.equal(assault.nextPhaseId, "royal-assault"); assert.match(assault.appliedEvent.appliedEffects.find(({ type }) => type === "narration").text, /trompes royales/i);
+  const victory = win(game); assert.match(victory.appliedEvents[0].appliedEffects.find(({ type }) => type === "narration").text, /goût de cendre/i);
   assert.equal(game.worldState.getNpc("ruined_knight").status, "dead"); assert.equal(village.state, "royal_control");
   assert.equal(village.getImprovement("manor").destroyed, true); assert.equal(village.defenseBonus, 0); assert.equal(village.militiaCapacity, 8);
   const ruinedBattle = game.battleService.createBattle({ id: "manor-after", game, teamParticipants: [{ id: "attackers", locationId: "capital-real" }, { id: "defenders", locationId: "village-real" }], now: 0 });
@@ -74,9 +75,11 @@ test("laisser faire rend le chevalier fugitif et l'enquête reste facultative", 
 });
 
 test("la piste impose l'ordre de ses points et révèle le camp à son terme", () => {
-  const game = createGame(); game.selectQuestChoice("ASSAULT_VILLAGE"); win(game); assert.equal(game.getQuestChoices().length, 0); discoverConvoy(game); game.selectQuestChoice("INSPECT_CONVOY");
+  const game = createGame(); game.selectQuestChoice("ASSAULT_VILLAGE"); win(game); assert.equal(game.getQuestChoices().length, 0); discoverConvoy(game); const inspection = game.selectQuestChoice("INSPECT_CONVOY");
+  assert.match(inspection.appliedEvent.appliedEffects.find(({ type }) => type === "narration").text, /piste fraîche/i);
   assert.equal(game.dispatchQuestEvent({ type: "TraceInspected", traceId: "convoy-trace-2" }), null);
-  game.dispatchQuestEvent({ type: "TraceInspected", traceId: "convoy-trace-1" }); game.dispatchQuestEvent({ type: "TraceInspected", traceId: "convoy-trace-2" });
+  const firstTrace = game.dispatchQuestEvent({ type: "TraceInspected", traceId: "convoy-trace-1" }); assert.match(firstTrace.appliedEvents[0].appliedEffects.find(({ type }) => type === "narration").text, /fibres de toile royale/i);
+  const secondTrace = game.dispatchQuestEvent({ type: "TraceInspected", traceId: "convoy-trace-2" }); assert.match(secondTrace.appliedEvents[0].appliedEffects.find(({ type }) => type === "narration").text, /fumée basse/i);
   assert.equal(game.getTrailState("convoy-raiders-trail").status, "completed"); assert.equal(game.getLocation("brigands-real").visibility, "discovered");
 });
 
@@ -85,6 +88,7 @@ test("une défaite au camp ne bloque pas le retour à la capitale", () => {
   game.dispatchQuestEvent({ type: "TraceInspected", traceId: "convoy-trace-1" }); game.dispatchQuestEvent({ type: "TraceInspected", traceId: "convoy-trace-2" }); game.selectQuestChoice("ATTACK_CAMP");
   const result = game.dispatchQuestEvent({ type: "BattleLost", locationId: "brigands-real" });
   assert.equal(result.nextPhaseId, "return-after-investigation"); assert.equal(game.worldState.get("repression.brigandTruthKnown"), false);
+  assert.match(result.appliedEvent.appliedEffects.find(({ type }) => type === "narration").text, /repoussent hors du vallon/i);
 });
 
 test("l'état critique de la quête, des PNJ, du Manoir et de la piste se recharge", () => {
