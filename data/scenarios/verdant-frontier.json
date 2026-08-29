@@ -8,7 +8,7 @@
     "unitStacks": []
   },
   "locationSlots": [
-    { "id": "capital", "type": "camp", "roles": ["home", "military"] },
+    { "id": "capital", "type": "camp", "roles": ["home", "spawn", "military"] },
     { "id": "gold-mine", "type": "mine", "roles": ["resource", "gold"] },
     { "id": "iron-mine", "type": "mine", "roles": ["resource", "iron"] },
     { "id": "quarry", "type": "quarry", "roles": ["resource", "stone"] },
