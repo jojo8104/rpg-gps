@@ -121,6 +121,12 @@ royalMessengerNotice.id = "royal-messenger-notice";
 royalMessengerNotice.className = "royal-messenger-notice";
 royalMessengerNotice.hidden = true;
 $("#game-screen").append(royalMessengerNotice);
+const ghostReturnNotice = document.createElement("aside");
+ghostReturnNotice.id = "ghost-return-notice";
+ghostReturnNotice.className = "ghost-return-notice";
+ghostReturnNotice.hidden = true;
+ghostReturnNotice.setAttribute("role", "alert");
+$("#game-screen").append(ghostReturnNotice);
 const mapChrome = document.createElement("div");
 mapChrome.className = "map-chrome";
 mapChrome.innerHTML = `<button id="toggle-game-menu" class="portrait-menu-toggle" type="button" aria-expanded="false" aria-controls="landscape-tools">☰ <span>Menu</span></button><aside id="landscape-tools" class="landscape-tools" aria-label="Outils système et développement"><strong>Outils</strong><button id="open-field-tools" type="button"><span aria-hidden="true">⚙</span><small>Terrain</small></button><button id="open-cheat-tools" type="button"><span aria-hidden="true">✦</span><small>Triche</small></button><label class="dev-quest-picker"><small>Quête à tester</small><select id="dev-quest-select" aria-label="Quête à tester"></select></label><button id="start-dev-quest" type="button"><span aria-hidden="true">▶</span><small>Lancer</small></button><button id="close-game-menu" class="landscape-tools__close" type="button">Fermer</button></aside><aside class="map-power-nav" aria-label="Pouvoirs utilisables sur la carte"><strong>Pouvoirs</strong><button type="button" disabled title="Pouvoir à débloquer"><span aria-hidden="true">✧</span><small>Magie</small></button><button type="button" disabled title="Pouvoir à débloquer"><span aria-hidden="true">◈</span><small>Talent</small></button></aside>`;
@@ -3906,6 +3912,10 @@ function render() {
     return;
   }
   if (!game || !mapView) return;
+  const heroBase = game.getHeroBaseLocation(hero.id);
+  ghostReturnNotice.hidden = hero.state !== "ghost";
+  if (hero.state === "ghost")
+    ghostReturnNotice.innerHTML = `<strong>Vous êtes un fantôme</strong><span>Retournez à ${heroBase?.name ?? "votre point de réapparition"} pour reprendre forme avec la moitié de vos PV.</span>`;
   syncQuestBattlefield();
   const sites = visibleSites();
   mapView.render({
@@ -4038,13 +4048,6 @@ function render() {
     ui.heroContent
       .querySelector(".hero-aptitudes")
       .insertAdjacentHTML("beforeend", classActions);
-  if (hero.state === "ghost")
-    ui.heroContent
-      .querySelector(".hero-bars")
-      .insertAdjacentHTML(
-        "afterend",
-        `<aside class="ghost-notice"><strong>Héros fantôme</strong><span>Retournez à ${game.getHeroBaseLocation(hero.id)?.name ?? "votre base"} pour revenir avec la moitié de vos PV.</span></aside>`,
-      );
   ui.heroContent
     .querySelector(".compact-hero-stats")
     .insertAdjacentHTML(
