@@ -1,5 +1,5 @@
 /** Ressources minimales nécessaires avant que le cache dynamique prenne le relais. */
-const CACHE = "rpg-gps-field-v108";
+const CACHE = "rpg-gps-field-v110";
 const local = (path) => new URL(path, self.location).href;
 const APP_SHELL = [
   local("./"),

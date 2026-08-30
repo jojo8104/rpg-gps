@@ -1,5 +1,5 @@
 /* La version test partage le thème parchemin de l'application principale. */
-.playtest-edition .setup-screen fieldset,.playtest-edition .setup-screen .setup-hint { display:none!important; }
+.playtest-edition .setup-screen .setup-hint { display:none!important; }
 .playtest-edition #toggle-field-tools,.playtest-edition #field-tools,.playtest-edition .map-chrome,.playtest-edition #cheat-dialog { display:none!important; }
 .playtest-edition .setup-placement-block select { pointer-events:none;opacity:.8; }
 @media(max-width:560px){.playtest-edition .setup-screen{margin:.65rem;padding:1.4rem 1.15rem}}
