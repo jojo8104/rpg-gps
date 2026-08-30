@@ -41,3 +41,128 @@ select,input,textarea { color:var(--parchment-ink)!important;border-color:#71513
 }
 .ghost-return-notice{position:fixed;z-index:1900;top:max(.65rem,env(safe-area-inset-top));right:.7rem;left:.7rem;display:grid;gap:.2rem;max-width:620px;margin:auto;padding:.7rem .85rem;border:2px solid #2a1b18;border-radius:10px;background:linear-gradient(#71352f,#481f20);color:#fff2cf;box-shadow:inset 0 0 0 2px #d4ad52,0 6px 22px #000a;text-align:center;pointer-events:none}
 .ghost-return-notice[hidden]{display:none!important}.ghost-return-notice strong{color:#fff0bd!important;font-size:.92rem}.ghost-return-notice span{color:#f3dfc5!important;font-size:.76rem;line-height:1.25}
+
+/* Toutes les statistiques du héros partagent la même finition bois brun. */
+#hero-content .compact-hero-stats>div,
+#hero-content .compact-hero-stats>.hero-stat-button{
+  color:var(--cream)!important;
+  border-color:#2b1d16!important;
+  background:linear-gradient(#674832,#35251c)!important;
+  box-shadow:inset 0 0 0 1px #c69b38,0 2px 3px #0005!important;
+}
+#hero-content .compact-hero-stats strong{color:#fff0c9!important}
+#hero-content .compact-hero-stats span{color:#ead7ad!important}
+#hero-content .compact-hero-stats>.is-selected{
+  border-color:#e0ba59!important;
+  background:linear-gradient(#79543a,#443025)!important;
+}
+
+/* Fiches détaillées de Monde : parchemin, encre brune et menus assortis. */
+.location-detail{color:var(--parchment-ink)!important}
+.location-detail>header,
+.location-detail>section{
+  color:var(--parchment-ink)!important;
+  border-color:#6f4d34!important;
+  background:repeating-linear-gradient(0deg,transparent 0 31px,#8e653714 32px),linear-gradient(#fff0cc,#e2c18c)!important;
+  box-shadow:inset 0 0 0 1px var(--gold),inset 0 0 12px #7a4b2838!important;
+}
+.location-detail h2,
+.location-detail h3,
+.location-detail h4,
+.location-detail strong{color:var(--parchment-ink)!important}
+.location-detail p,
+.location-detail li,
+.location-detail small,
+.location-detail .location-header-facts,
+.location-detail .world-owner{color:var(--parchment-muted)!important}
+.location-detail .location-heading>span{
+  color:var(--cream)!important;
+  border:1px solid #2b1d16;
+  background:linear-gradient(#674832,#35251c)!important;
+}
+.location-detail .location-action-menu{
+  color:var(--parchment-ink)!important;
+  border-color:#9a7347!important;
+  background:#f4dfb6e8!important;
+}
+.location-detail-art{
+  border-color:#2b1d16!important;
+  background:#4b3325!important;
+  box-shadow:inset 0 0 0 2px var(--gold)!important;
+}
+
+/* Bottom sheet : contraste explicite sur chaque surface claire ou sombre. */
+.bottom-sheet{color:var(--parchment-ink)!important}
+.bottom-sheet>p,
+.bottom-sheet .sheet-grab span{color:var(--parchment-muted)!important}
+.bottom-sheet .sheet-feedback,
+.bottom-sheet .sheet-defense,
+.bottom-sheet .sheet-action-menu{
+  color:var(--parchment-ink)!important;
+  border-color:#795737!important;
+  background:#f4dfb6!important;
+  box-shadow:inset 0 0 0 1px #c69b3866!important;
+}
+.bottom-sheet .sheet-feedback,
+.bottom-sheet .sheet-defense>small,
+.bottom-sheet .sheet-defense span small,
+.bottom-sheet .sheet-action-menu p,
+.bottom-sheet .sheet-action-menu small{color:var(--parchment-muted)!important}
+.bottom-sheet .sheet-defense strong,
+.bottom-sheet .sheet-action-menu h3{color:var(--parchment-ink)!important}
+.bottom-sheet .sheet-defense-slots i:not(.is-occupied){
+  color:#654936!important;
+  border-color:#896748!important;
+  background:#dfc394!important;
+}
+.bottom-sheet .sheet-defense-reinforcements i{
+  color:var(--cream)!important;
+  border-color:#2b1d16!important;
+  background:#4a3225!important;
+}
+
+/* En paysage, l'identité reprend le parchemin lisible de la vue portrait. */
+@media(orientation:landscape){
+  #hero-content .hero-identity>header{
+    min-width:0!important;
+    padding:.2rem .32rem!important;
+    color:var(--parchment-ink)!important;
+    border-color:#6f4d34!important;
+    background:linear-gradient(#fff0cc,#e2c18c)!important;
+    box-shadow:inset 0 0 0 1px var(--gold)!important;
+    text-shadow:none!important;
+  }
+  #hero-content .hero-identity h3{
+    max-width:100%;
+    margin:0!important;
+    color:var(--parchment-ink)!important;
+    font-size:clamp(.62rem,1.65vw,.86rem)!important;
+    line-height:1.05!important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  #hero-content .hero-identity .hero-rank{
+    max-width:100%;
+    margin:.08rem 0 0!important;
+    color:var(--parchment-muted)!important;
+    font-size:clamp(.48rem,1.1vw,.62rem)!important;
+    line-height:1.05!important;
+    letter-spacing:.035em!important;
+    overflow:hidden;
+  }
+  #hero-content .hero-identity .hero-rank span{color:var(--parchment-muted)!important}
+  #hero-content .hero-state{
+    display:block!important;
+    justify-self:center;
+    margin:.1rem 0 0;
+    padding:.12rem .32rem;
+    border:1px solid #5c402c;
+    border-radius:999px;
+    background:#315b35;
+    color:#fff0c9!important;
+    font-size:.46rem;
+    line-height:1;
+    text-transform:uppercase;
+  }
+}

@@ -186,11 +186,10 @@ if (PLAYTEST_EDITION) {
   ui.setup.querySelector(".eyebrow").textContent = "Partie GPS";
   ui.setup.querySelector("h1 + p").textContent =
     "Placez vos ressources, développez votre camp et survivez aux armées du Chaos.";
-  ui.setup.querySelectorAll("fieldset").forEach((field) => {
-    field.hidden = true;
-  });
   ui.setup.querySelector('input[name="test-mode"][value="gps"]').checked = true;
-  ui.create.textContent = "Nouvelle partie";
+  ui.setup.querySelector(
+    'input[name="test-mode"][value="simulation"]',
+  ).disabled = true;
   $("#gps-setup-panel h2").textContent = "Configurer la zone de jeu";
   $("#gps-setup-panel .gps-area-step p").textContent =
     "Tracez votre zone GPS réelle, puis placez les six lieux nécessaires à la partie.";
@@ -201,6 +200,7 @@ document
   .querySelectorAll("#army-view > h2, #inventory-view > h2, #quests-view > h2")
   .forEach((title) => title.remove());
 const setupView = new GameSetupView(ui.setup);
+setupView.initialize();
 
 // Coordonnées et rayons réservés au mode de simulation à la maison.
 const simulationPositions = {
@@ -700,6 +700,7 @@ function start() {
   ui.gpsSetup.classList.toggle("is-simulation", mode === "simulation");
   ui.gpsSetup.hidden = false;
   renderPlacementOptions();
+  if (!PLAYTEST_EDITION) applySetupWorldPreferences();
   renderGpsLocationButtons();
   if (mode === "simulation") {
     validatedPlayArea = new PlayArea({
@@ -2493,6 +2494,28 @@ function renderPlacementOptions() {
     });
     ui.autonomousTypeOptions.closest(".setup-placement-block").hidden = true;
     $("#apply-world-setup").textContent = "Préparer les six placements";
+  }
+}
+function applySetupWorldPreferences() {
+  const { density, placement } = setupView.readWorldPreferences();
+  const densityBonus = { low: 0, balanced: 1, high: 2 }[density] ?? 1;
+  const capitalMode = placement === "auto" ? "auto" : "manual";
+  $("#capital-placement-mode").value = capitalMode;
+  ui.locationTypeOptions.querySelectorAll(".placement-option").forEach((row) => {
+    const input = row.querySelector("input");
+    const minimum = Number(input.min || 0);
+    input.value = Math.min(Number(input.max || 10), minimum + densityBonus);
+    row.querySelector("select").value = placement === "manual" ? "manual" : "auto";
+  });
+  ui.autonomousTypeOptions.querySelectorAll(".placement-option").forEach((row) => {
+    const input = row.querySelector("input");
+    input.value = density === "low" ? 0 : density === "high" ? 2 : 1;
+    row.querySelector("select").value = placement === "manual" ? "manual" : "auto";
+  });
+  if (placement === "mixed") {
+    ui.locationTypeOptions.querySelectorAll("select").forEach((select, index) => {
+      if (index < 2) select.value = "manual";
+    });
   }
 }
 function placementRows(selector, attribute) {
@@ -4699,9 +4722,7 @@ window.addEventListener("resize", () => {
 
 try {
   data = await loadData();
-  ui.status.textContent = PLAYTEST_EDITION
-    ? "La partie est prête."
-    : "Le banc d'essai terrain est prêt.";
+  ui.status.textContent = "";
   ui.create.disabled = false;
 } catch (error) {
   ui.status.textContent = `Chargement impossible : ${error.message}`;
