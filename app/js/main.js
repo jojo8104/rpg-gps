@@ -154,6 +154,14 @@ traceFilter.addEventListener("change", (event) => {
   else traceVisibility.delete(input.value);
   render();
 });
+const fogControl = document.createElement("label");
+fogControl.className = "dev-fog-control";
+fogControl.innerHTML = '<input type="checkbox" checked><span>Brouillard de guerre</span>';
+$("#landscape-tools").insertBefore(fogControl, traceFilter);
+fogControl.querySelector("input").addEventListener("change", (event) => {
+  fogVisible = event.currentTarget.checked;
+  render();
+});
 const battleOrientationPrompt = document.createElement("aside");
 battleOrientationPrompt.className = "battle-orientation-prompt";
 battleOrientationPrompt.innerHTML =
@@ -328,6 +336,7 @@ let battleDragging = false,
   validatedPlayArea = null;
 let playAreaGrid = null,
   heatmapVisible = true,
+  fogVisible = true,
   lastVisitedCellId = null;
 const field = new FieldTestSession({ minimumQuestDistanceMeters: 300 });
 const cheatService = new CheatService();
@@ -4125,6 +4134,7 @@ function render() {
     heroHeading,
     accuracy: gpsAccuracy,
     visionRadius: game.heroClassFeatureService.visionRadius(hero),
+    fogEnabled: fogVisible,
     locations: mappedLocations(),
     autonomousGroups: visibleAutonomousGroups(),
     divinationTargets: visibleDivinationTargets(),

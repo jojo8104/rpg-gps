@@ -12,7 +12,13 @@ export class FogRenderer {
     this.outsideLayer = null;
   }
 
-  render({ heroPosition, gridCells = [], enabled = true, visionRadius = null }) {
+  render({
+    heroPosition,
+    gridCells = [],
+    enabled = true,
+    visionRadius = null,
+    playAreaPoints = [],
+  }) {
     this.layer?.remove();
     this.outsideLayer?.remove();
     this.layer = null;
@@ -30,9 +36,13 @@ export class FogRenderer {
     const radius = simulation
       ? gpsRadius * (FOG_VISION_RADIUS.simulation / FOG_VISION_RADIUS.gps)
       : gpsRadius;
-    const zoneBounds = boundsForCells(gridCells);
+    const areaPoints =
+      playAreaPoints.length >= 3
+        ? playAreaPoints.map(asPosition)
+        : rectanglePoints(boundsForCells(gridCells));
+    const zoneBounds = boundsForPoints(areaPoints);
     this.outsideLayer = L.polygon(
-      [outsideBounds(simulation), zoneRing(zoneBounds)],
+      [outsideBounds(simulation), areaPoints.map(asLatLng)],
       {
         pane: MapLayers.EXPLORATION,
         className: "rpg-fog-outside",
@@ -47,6 +57,7 @@ export class FogRenderer {
       radius,
       simulation,
       zoneBounds,
+      playAreaPoints: areaPoints,
     });
     const svg = document.createElementNS(SVG_NAMESPACE, "svg");
     svg.setAttribute("viewBox", `0 0 ${OVERLAY_SIZE} ${OVERLAY_SIZE}`);
@@ -74,7 +85,20 @@ export function boundsForCells(cells) {
   ];
 }
 
-export function fogMaskGeometry({ cells, center, radius, simulation = false, zoneBounds = boundsForCells(cells) }) {
+export function boundsForPoints(points) {
+  return [
+    {
+      latitude: Math.min(...points.map((point) => point.latitude)),
+      longitude: Math.min(...points.map((point) => point.longitude)),
+    },
+    {
+      latitude: Math.max(...points.map((point) => point.latitude)),
+      longitude: Math.max(...points.map((point) => point.longitude)),
+    },
+  ];
+}
+
+export function fogMaskGeometry({ cells, center, radius, simulation = false, zoneBounds = boundsForCells(cells), playAreaPoints = rectanglePoints(zoneBounds) }) {
   const [southWest, northEast] = zoneBounds;
   const width = northEast.longitude - southWest.longitude;
   const height = northEast.latitude - southWest.latitude;
@@ -91,12 +115,19 @@ export function fogMaskGeometry({ cells, center, radius, simulation = false, zon
     })
     .join(" ");
   const projectedCenter = project(center);
+  const playAreaPath = `${playAreaPoints
+    .map((point, index) => {
+      const projected = project(point);
+      return `${index === 0 ? "M" : "L"}${number(projected.x)} ${number(projected.y)}`;
+    })
+    .join(" ")} Z`;
   const latitudeRadius = simulation ? radius : radius / 111_320;
   const longitudeRadius = simulation
     ? radius
     : radius / (111_320 * Math.max(0.01, Math.cos((center.latitude * Math.PI) / 180)));
   return {
     discoveredPath,
+    playAreaPath,
     vision: {
       cx: projectedCenter.x,
       cy: projectedCenter.y,
@@ -106,7 +137,7 @@ export function fogMaskGeometry({ cells, center, radius, simulation = false, zon
   };
 }
 
-export function fogOverlayMarkup({ discoveredPath, vision }) {
+export function fogOverlayMarkup({ discoveredPath, playAreaPath, vision }) {
   return `<defs>
     <pattern id="rpg-fog-texture" width="320" height="320" patternUnits="userSpaceOnUse" patternTransform="rotate(-4)">
       <image href="${FOG_CLOUD_ASSET}" x="-26" y="-26" width="372" height="372" preserveAspectRatio="xMidYMid slice"/>
@@ -116,9 +147,12 @@ export function fogOverlayMarkup({ discoveredPath, vision }) {
       ${discoveredPath ? `<path d="${discoveredPath}" fill="black"/>` : ""}
       <ellipse cx="${number(vision.cx)}" cy="${number(vision.cy)}" rx="${number(vision.rx)}" ry="${number(vision.ry)}" fill="black"/>
     </mask>
+    <clipPath id="rpg-play-area-clip"><path d="${playAreaPath}"/></clipPath>
   </defs>
-  <rect width="${OVERLAY_SIZE}" height="${OVERLAY_SIZE}" fill="#c7ced0" mask="url(#rpg-fog-mask)"/>
-  <rect width="${OVERLAY_SIZE}" height="${OVERLAY_SIZE}" fill="url(#rpg-fog-texture)" mask="url(#rpg-fog-mask)"/>`;
+  <g clip-path="url(#rpg-play-area-clip)">
+    <rect width="${OVERLAY_SIZE}" height="${OVERLAY_SIZE}" fill="#c7ced0" mask="url(#rpg-fog-mask)"/>
+    <rect width="${OVERLAY_SIZE}" height="${OVERLAY_SIZE}" fill="url(#rpg-fog-texture)" mask="url(#rpg-fog-mask)"/>
+  </g>`;
 }
 
 export function isInsideVision(position, center, radius, simulation = false) {
@@ -141,13 +175,19 @@ function asLatLng(position) {
   return [position.latitude, position.longitude];
 }
 
-function zoneRing([southWest, northEast]) {
+function rectanglePoints([southWest, northEast]) {
   return [
-    [southWest.latitude, southWest.longitude],
-    [southWest.latitude, northEast.longitude],
-    [northEast.latitude, northEast.longitude],
-    [northEast.latitude, southWest.longitude],
+    { latitude: southWest.latitude, longitude: southWest.longitude },
+    { latitude: southWest.latitude, longitude: northEast.longitude },
+    { latitude: northEast.latitude, longitude: northEast.longitude },
+    { latitude: northEast.latitude, longitude: southWest.longitude },
   ];
+}
+
+function asPosition(position) {
+  return Array.isArray(position)
+    ? { latitude: position[0], longitude: position[1] }
+    : { latitude: position.latitude, longitude: position.longitude };
 }
 
 function outsideBounds(simulation) {

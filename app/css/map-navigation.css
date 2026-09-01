@@ -98,6 +98,19 @@
   border: 1px solid #ffffff22;
   border-radius: 8px;
 }
+.dev-fog-control {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem;
+  border: 1px solid #ffffff22;
+  border-radius: 8px;
+  color: #f4ead1;
+  font-size: 0.7rem;
+}
+.dev-fog-control input {
+  margin: 0;
+}
 .dev-trace-filter legend {
   padding: 0 0.25rem;
   color: #d9c384;
