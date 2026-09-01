@@ -53,6 +53,7 @@ import { renderUnitHealthBar } from "./ui/unit-health-bar.js";
 import { renderUnitExperienceBar } from "./ui/unit-experience-bar.js";
 import { closeDialogueView, renderDialogueView } from "./ui/dialogue-view.js";
 import { AutonomousGroupTrace } from "./core/autonomous-group-trace.js";
+import { HeroTraceService } from "./core/hero-trace-service.js";
 import { AutonomousGroup } from "./core/autonomous-group.js";
 import { AutonomousGroupDetectionService } from "./core/autonomous-group-detection-service.js";
 import { HeroConcealmentService } from "./core/hero-concealment-service.js";
@@ -130,12 +131,29 @@ ghostReturnNotice.setAttribute("role", "alert");
 $("#game-screen").append(ghostReturnNotice);
 const mapChrome = document.createElement("div");
 mapChrome.className = "map-chrome";
-mapChrome.innerHTML = `<button id="toggle-game-menu" class="portrait-menu-toggle" type="button" aria-expanded="false" aria-controls="landscape-tools">☰ <span>Menu</span></button><aside id="landscape-tools" class="landscape-tools" aria-label="Outils système et développement"><strong>Outils</strong><button id="open-field-tools" type="button"><span aria-hidden="true">⚙</span><small>Terrain</small></button><button id="open-cheat-tools" type="button"><span aria-hidden="true">✦</span><small>Triche</small></button><label class="dev-quest-picker"><small>Quête à tester</small><select id="dev-quest-select" aria-label="Quête à tester"></select></label><button id="start-dev-quest" type="button"><span aria-hidden="true">▶</span><small>Lancer</small></button><button id="close-game-menu" class="landscape-tools__close" type="button">Fermer</button></aside><aside class="map-power-nav" aria-label="Pouvoirs utilisables sur la carte"><strong>Pouvoirs</strong><button type="button" disabled title="Pouvoir à débloquer"><span aria-hidden="true">✧</span><small>Magie</small></button><button type="button" disabled title="Pouvoir à débloquer"><span aria-hidden="true">◈</span><small>Talent</small></button></aside>`;
+mapChrome.innerHTML = `<button id="toggle-game-menu" class="portrait-menu-toggle" type="button" aria-expanded="false" aria-controls="landscape-tools">☰ <span>Menu</span></button><aside id="landscape-tools" class="landscape-tools" aria-label="Outils système et développement"><strong>Outils</strong><button id="open-field-tools" type="button"><span aria-hidden="true">⚙</span><small>Terrain</small></button><button id="open-cheat-tools" type="button"><span aria-hidden="true">✦</span><small>Triche</small></button><label class="dev-quest-picker"><small>Quête à tester</small><select id="dev-quest-select" aria-label="Quête à tester"></select></label><button id="start-dev-quest" type="button"><span aria-hidden="true">▶</span><small>Lancer</small></button><button id="close-game-menu" class="landscape-tools__close" type="button">Fermer</button></aside><aside class="map-power-nav" aria-label="Pouvoirs utilisables sur la carte"><strong>Pouvoirs</strong></aside>`;
 $("#map-view").append(mapChrome);
 $("#landscape-tools").insertBefore(
   debugPauseControl.element,
   $("#close-game-menu"),
 );
+const traceVisibility = new Set(["blue", "green", "red", "gray"]);
+const traceFilter = document.createElement("fieldset");
+traceFilter.className = "dev-trace-filter";
+traceFilter.innerHTML = `<legend>Traces visibles</legend>${[
+  ["blue", "Joueur"],
+  ["green", "Alliés"],
+  ["red", "Ennemis"],
+  ["gray", "Non reconnues"],
+].map(([color, label]) => `<label><input type="checkbox" value="${color}" checked><i class="is-${color}"></i><span>${label}</span></label>`).join("")}`;
+$("#landscape-tools").insertBefore(traceFilter, $("#close-game-menu"));
+traceFilter.addEventListener("change", (event) => {
+  const input = event.target.closest('input[type="checkbox"]');
+  if (!input) return;
+  if (input.checked) traceVisibility.add(input.value);
+  else traceVisibility.delete(input.value);
+  render();
+});
 const battleOrientationPrompt = document.createElement("aside");
 battleOrientationPrompt.className = "battle-orientation-prompt";
 battleOrientationPrompt.innerHTML =
@@ -322,6 +340,7 @@ const autonomousGroupDetectionService = new AutonomousGroupDetectionService({
           (first.longitude ?? first[1]) - (second.longitude ?? second[1]),
         ),
 });
+const heroTraceService = new HeroTraceService();
 const heroConcealmentService = new HeroConcealmentService();
 const ambushService = new AmbushService({
   preparationDurationMs: heroConcealmentService.stationaryDurationMs,
@@ -339,10 +358,29 @@ const watchBeaconButton = document.createElement("button");
 watchBeaconButton.id = "watch-beacon-action";
 watchBeaconButton.className = "map-power-action watch-beacon-control";
 watchBeaconButton.type = "button";
-watchBeaconButton.innerHTML = '<span aria-hidden="true">⌖</span><small>Vigie 0/3</small>';
+watchBeaconButton.innerHTML =
+  '<span aria-hidden="true">⌖</span><small>Vigie 0/3</small>';
 watchBeaconButton.hidden = true;
 $(".map-power-nav").append(watchBeaconButton);
 watchBeaconButton.onclick = placeWatchBeacon;
+const divinationButton = document.createElement("button");
+divinationButton.id = "divination-map-action";
+divinationButton.className = "map-power-action mage-power-control";
+divinationButton.type = "button";
+divinationButton.hidden = true;
+divinationButton.innerHTML =
+  '<span aria-hidden="true">◉</span><small>Divination</small>';
+$(".map-power-nav").append(divinationButton);
+divinationButton.onclick = useDivination;
+const astralTravelButton = document.createElement("button");
+astralTravelButton.id = "astral-travel-map-action";
+astralTravelButton.className = "map-power-action mage-power-control";
+astralTravelButton.type = "button";
+astralTravelButton.hidden = true;
+astralTravelButton.innerHTML =
+  '<span aria-hidden="true">✧</span><small>Astral</small>';
+$(".map-power-nav").append(astralTravelButton);
+astralTravelButton.onclick = useAstralTravel;
 const setupPlacementService = new SetupPlacementService({
   distanceFn: (first, second) =>
     mode === "gps"
@@ -1343,7 +1381,7 @@ function runProductionCycle() {
 }
 
 function visibleAutonomousGroups() {
-  return autonomousGroupDetectionService
+  const detected = autonomousGroupDetectionService
     .detect({
       observer: {
         position: asGps(heroPosition),
@@ -1353,7 +1391,33 @@ function visibleAutonomousGroups() {
       groups: game.autonomousGroups,
       baseRadius: mode === "gps" ? 15 : 22,
     })
-    .map((group) => ({
+  const divination = game.heroClassFeatureService.activeDivination(hero);
+  if (divination)
+    game.autonomousGroups
+      .filter(
+        (group) =>
+          !["destroyed", "mission_failed"].includes(group.status) &&
+          worldDistance(divination.center, group.position) <= divination.radius,
+      )
+      .forEach((group) => {
+        if (detected.some((entry) => entry.id === group.id)) return;
+        detected.push({
+          id: group.id,
+          type: group.type,
+          owner: { ...group.owner },
+          factionId: group.factionId,
+          behavior: group.behavior,
+          status: group.status,
+          position: { ...group.position },
+          soldiers: group.army.units.reduce(
+            (sum, unit) => sum + unit.combatantCount,
+            0,
+          ),
+          occupiedCargoSlots: group.cargo.length,
+          revealedByDivination: true,
+        });
+      });
+  return detected.map((group) => ({
       ...group,
       position:
         mode === "simulation"
@@ -1361,8 +1425,41 @@ function visibleAutonomousGroups() {
           : group.position,
     }));
 }
+function worldDistance(first, second) {
+  return mode === "gps"
+    ? distanceMeters(first, second)
+    : Math.hypot(
+        first.latitude - second.latitude,
+        first.longitude - second.longitude,
+      );
+}
+function visibleDivinationTargets() {
+  const divination = game.heroClassFeatureService.activeDivination(hero);
+  if (!divination) return [];
+  return game.heroes
+    .filter(
+      (candidate) =>
+        candidate.id !== hero.id &&
+        candidate.state === "active" &&
+        candidate.position &&
+        worldDistance(divination.center, candidate.position) <=
+          divination.radius,
+    )
+    .map((candidate) => ({
+      key: `hero:${candidate.id}`,
+      kind: "hero",
+      id: candidate.id,
+      name: candidate.name,
+      position: { ...candidate.position },
+    }));
+}
 function visibleAutonomousTraces() {
-  const questIds = new Set(["prospectors-trace-1", "prospectors-trace-2", "convoy-trace-1", "convoy-trace-2"]);
+  const questIds = new Set([
+    "prospectors-trace-1",
+    "prospectors-trace-2",
+    "convoy-trace-1",
+    "convoy-trace-2",
+  ]);
   const now = Date.now();
   const detectedGroups = new Map(
     visibleAutonomousGroups().map((group) => [group.id, group]),
@@ -1373,6 +1470,9 @@ function visibleAutonomousTraces() {
   return game.autonomousGroupTraces
     .filter((trace) => {
       if (questIds.has(trace.id)) return false;
+      const ownTrace =
+        trace.owner.kind === "player" && trace.owner.id === hero.playerId;
+      if (ownTrace) return trace.getScore(now) > 0;
       const traceDistance =
         mode === "gps"
           ? distanceMeters(observer, trace.position)
@@ -1397,17 +1497,20 @@ function visibleAutonomousTraces() {
       groupId: trace.groupId,
       createdAt: trace.createdAt,
       directionDegrees: trace.directionDegrees,
-      color:
-        trace.owner.kind === "player" && trace.owner.id === "local"
-          ? "blue"
-          : !detectedGroups.has(trace.groupId)
-            ? "gray"
-            : trace.owner.id === "chaos"
-              ? "red"
-              : trace.owner.kind === "independent"
-                ? "yellow"
-                : "gray",
-    }));
+      color: traceColor(trace, detectedGroups),
+    }))
+    .filter((trace) => traceVisibility.has(trace.color));
+}
+function traceColor(trace, detectedGroups) {
+  if (trace.owner.kind === "player" && trace.owner.id === hero.playerId)
+    return "blue";
+  if (!detectedGroups.has(trace.groupId) && trace.groupType !== "hero")
+    return "gray";
+  if (trace.owner.relation === "ally" || trace.owner.id === "kingdom")
+    return "green";
+  if (trace.owner.relation === "enemy" || trace.owner.id === "chaos")
+    return "red";
+  return "gray";
 }
 function beginAutonomousBattle(group, { ambushResult = null } = {}) {
   if (
@@ -1604,7 +1707,26 @@ function applyPosition(position) {
     }
   }
   hero.updatePosition(asGps(heroPosition));
-  if (game.status === "started") handleWatchBeaconEvents(game.scanWatchBeacons());
+  if (game.status === "started" && !gpsSetupActive) {
+    const at = Date.now();
+    const bag = game.inventoryService.getHeroBagState(hero);
+    game.autonomousGroupTraces.push(
+      ...heroTraceService.recordMovement({
+        hero,
+        position: asGps(heroPosition),
+        at,
+        coordinateMode: mode,
+        occupiedCargoSlots: bag.usedSlots,
+        concealmentMultiplier:
+          game.heroClassFeatureService.signatureMultiplier(hero),
+      }),
+    );
+    game.autonomousGroupTraces = game.autonomousGroupTraces.filter(
+      (trace) => trace.getScore(at) > 0,
+    );
+  }
+  if (game.status === "started")
+    handleWatchBeaconEvents(game.scanWatchBeacons());
   const motion = heroConcealmentService.update({
     position: asGps(heroPosition),
     accuracy: gpsAccuracy ?? 0,
@@ -2094,27 +2216,27 @@ function syncQuestTrace() {
   const phaseId = game.scenarioState?.currentPhaseId;
   const definitions = {
     "follow-first-trace": {
-          id: "prospectors-trace-1",
-          gpsDistance: pace.firstTraceMeters,
-          simulationDistance: 9,
-          direction: 55,
-          kind: "passage",
-          groupId: "missing-royal-prospectors",
-          groupType: "prospecting",
-          ownerId: "kingdom",
-          soldierCount: 6,
-        },
+      id: "prospectors-trace-1",
+      gpsDistance: pace.firstTraceMeters,
+      simulationDistance: 9,
+      direction: 55,
+      kind: "passage",
+      groupId: "missing-royal-prospectors",
+      groupType: "prospecting",
+      ownerId: "kingdom",
+      soldierCount: 6,
+    },
     "follow-second-trace": {
-            id: "prospectors-trace-2",
-            gpsDistance: pace.secondTraceMeters,
-            simulationDistance: 10,
-            direction: 52,
-            kind: "struggle",
-            groupId: "missing-royal-prospectors",
-            groupType: "prospecting",
-            ownerId: "kingdom",
-            soldierCount: 6,
-          },
+      id: "prospectors-trace-2",
+      gpsDistance: pace.secondTraceMeters,
+      simulationDistance: 10,
+      direction: 52,
+      kind: "struggle",
+      groupId: "missing-royal-prospectors",
+      groupType: "prospecting",
+      ownerId: "kingdom",
+      soldierCount: 6,
+    },
     "convoy-trace-one": {
       id: "convoy-trace-1",
       gpsDistance: Math.max(90, Math.round(pace.firstTraceMeters * 0.7)),
@@ -2144,14 +2266,24 @@ function syncQuestTrace() {
     game.autonomousGroupTraces.some((trace) => trace.id === definition.id)
   )
     return;
+  const previousTrace =
+    definition.id.endsWith("-2")
+      ? game.autonomousGroupTraces.find((trace) =>
+          trace.id === definition.id.replace(/-2$/, "-1"),
+        )
+      : null;
+  const preferredDirection = previousTrace?.directionDegrees ?? definition.direction;
+  const origin = asGps(heroPosition);
   const position = setupPlacementService.findPosition({
     playArea: validatedPlayArea ?? game.setup.playArea,
-    origin: asGps(heroPosition),
+    origin,
     preferredDistance:
       mode === "simulation"
         ? definition.simulationDistance
         : definition.gpsDistance,
-    preferredDirectionDegrees: definition.direction,
+    preferredDirectionDegrees: preferredDirection,
+    directionJitterDegrees: previousTrace ? 12 : 28,
+    maximumDirectionDeviationDegrees: 80,
     occupied: game.autonomousGroupTraces.map((trace) => trace.position),
     minimumSpacing: mode === "simulation" ? 3 : 30,
   });
@@ -2164,7 +2296,7 @@ function syncQuestTrace() {
       kind: definition.kind,
       position,
       soldierCount: definition.soldierCount,
-      directionDegrees: definition.direction,
+      directionDegrees: bearingDegrees(origin, position),
       createdAt: Date.now(),
       decayPerMinute: 0.001,
     }),
@@ -2173,12 +2305,13 @@ function syncQuestTrace() {
 
 function visibleQuestTraces() {
   syncQuestTrace();
-  const visibleTraceId = ({
-    "follow-first-trace": "prospectors-trace-1",
-    "follow-second-trace": "prospectors-trace-2",
-    "convoy-trace-one": "convoy-trace-1",
-    "convoy-trace-two": "convoy-trace-2",
-  })[game.scenarioState?.currentPhaseId] ?? null;
+  const visibleTraceId =
+    {
+      "follow-first-trace": "prospectors-trace-1",
+      "follow-second-trace": "prospectors-trace-2",
+      "convoy-trace-one": "convoy-trace-1",
+      "convoy-trace-two": "convoy-trace-2",
+    }[game.scenarioState?.currentPhaseId] ?? null;
   return game.autonomousGroupTraces
     .filter(
       (trace) => trace.id === visibleTraceId && trace.getScore(Date.now()) > 0,
@@ -2195,6 +2328,16 @@ function syncQuestBattlefield() {
   if (game.scenarioState?.currentPhaseId !== "prospectors-battlefield") return;
   const player = game.getPlayer("local");
   if (player.knowsLocation("prospector-battlefield")) return;
+  const firstTrace = game.autonomousGroupTraces.find(
+    (trace) => trace.id === "prospectors-trace-1",
+  );
+  const secondTrace = game.autonomousGroupTraces.find(
+    (trace) => trace.id === "prospectors-trace-2",
+  );
+  const trailDirection =
+    firstTrace && secondTrace
+      ? bearingDegrees(firstTrace.position, secondTrace.position)
+      : 40;
   const targetGps = setupPlacementService.findPosition({
     playArea: validatedPlayArea ?? game.setup.playArea,
     origin: asGps(heroPosition),
@@ -2202,7 +2345,9 @@ function syncQuestBattlefield() {
       mode === "simulation"
         ? 13
         : questPaceProfile(game.setup.rules.travelPaceMode).battlefieldMeters,
-    preferredDirectionDegrees: 40,
+    preferredDirectionDegrees: trailDirection,
+    directionJitterDegrees: 14,
+    maximumDirectionDeviationDegrees: 80,
     occupied: game.autonomousGroupTraces.map((trace) => trace.position),
     minimumSpacing: mode === "simulation" ? 3 : 30,
   });
@@ -2335,12 +2480,14 @@ function confirmScenarioPlacement() {
 function handleMapClick(position) {
   const point =
     mode === "gps" ? position : [position.latitude, position.longitude];
+  if (interactionMode === "target-divination") {
+    activateDivinationAt(asGps(point));
+    return;
+  }
   if (interactionMode === "draw-exclusion") {
     field.addExclusionPoint(asGps(point));
-    $("#gps-finish-exclusion").disabled =
-      field.exclusionDraftPoints.length < 3;
-    ui.gpsAreaStatus.textContent =
-      `${field.exclusionDraftPoints.length} sommet(s) pour l’exclusion.`;
+    $("#gps-finish-exclusion").disabled = field.exclusionDraftPoints.length < 3;
+    ui.gpsAreaStatus.textContent = `${field.exclusionDraftPoints.length} sommet(s) pour l’exclusion.`;
     render();
     return;
   }
@@ -2849,11 +2996,7 @@ function runAction(action, { returnToWorld = false } = {}) {
   if (action === "astral-travel") {
     const baseRadius = baseRangesFor(location).interactionRadius;
     const targetDistance = distance(heroPosition, positionFor(location.id));
-    const reachBonus =
-      mode === "gps"
-        ? (data.heroClasses.find((definition) => definition.id === hero.classId)
-            ?.features?.astralReachBonus ?? 0)
-        : 10;
+    const reachBonus = game.heroClassFeatureService.astralReachBonus(hero);
     const result = game.heroClassFeatureService.activateAstralTravel(hero, {
       locationId: location.id,
       distance: targetDistance,
@@ -3541,8 +3684,12 @@ function resolveFinishedBattle() {
     });
     const effects = failure?.appliedEvent?.appliedEffects ?? [];
     const narration = effects.find((effect) => effect.type === "narration");
-    if (narration) { locationMessage = narration.text; logTest(locationMessage); }
-    if (failure?.nextPhaseId) game.startCurrentScenarioPlacements(asGps(heroPosition));
+    if (narration) {
+      locationMessage = narration.text;
+      logTest(locationMessage);
+    }
+    if (failure?.nextPhaseId)
+      game.startCurrentScenarioPlacements(asGps(heroPosition));
   }
   if (result.destroyedLocationId) {
     rebuildLocationEngine();
@@ -3638,11 +3785,36 @@ function directoryLocations() {
     };
   });
 }
+function formatCooldown(milliseconds) {
+  const seconds = Math.max(0, Math.ceil(milliseconds / 1000));
+  const minutes = Math.floor(seconds / 60);
+  return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
+}
+function classPowerFailure(result) {
+  return result.reason === "ability_on_cooldown"
+    ? `recharge ${formatCooldown(result.cooldownRemainingMs)}`
+    : result.reason;
+}
 function useDivination() {
-  const radius =
-    mode === "gps"
-      ? (game.heroClasses.get(hero.classId)?.features.divinationRadius ?? 0)
-      : 30;
+  const cooldown = game.heroClassFeatureService.cooldownRemaining(
+    hero,
+    "divination",
+  );
+  if (cooldown > 0) {
+    logTest(`Divination : recharge ${formatCooldown(cooldown)}.`);
+    return render();
+  }
+  interactionMode =
+    interactionMode === "target-divination" ? null : "target-divination";
+  if (interactionMode) switchView("map");
+  logTest(
+    interactionMode
+      ? "Divination prête : touchez la zone à révéler sur la carte."
+      : "Divination annulée.",
+  );
+  render();
+}
+function activateDivinationAt(center) {
   const locations = game.locations
     .filter(isLocationEnabled)
     .map((location) => ({
@@ -3653,26 +3825,40 @@ function useDivination() {
     player: game.getPlayer("local"),
     locations,
     distanceFn: (first, second) =>
-      mode === "gps"
-        ? distanceMeters(first, second)
-        : Math.hypot(
-            first.latitude - second.latitude,
-            first.longitude - second.longitude,
-          ),
-    radius,
+      worldDistance(first, second),
+    center,
   });
+  interactionMode = null;
+  if (result.success && playAreaGrid) {
+    playAreaGrid.cells
+      .filter(
+        (cell) => worldDistance(center, cell.center) <= result.vision.radius,
+      )
+      .forEach((cell) => {
+        if (cell.visits === 0)
+          playAreaGrid.recordVisit(cell.center, { activity: 0 });
+      });
+    persistFieldState();
+  }
   logTest(
     result.success
-      ? `Divination : ${result.revealedLocationIds.length} nouveau(x) lieu(x) révélé(s).`
-      : `Divination impossible : ${result.reason}.`,
+      ? `Divination : zone révélée pendant ${Math.round(result.durationMs / 1000)} secondes · ${result.revealedLocationIds.length} nouveau(x) lieu(x).`
+      : `Divination impossible : ${classPowerFailure(result)}.`,
   );
+  if (result.success)
+    setTimeout(() => render(), result.durationMs + 50);
   render();
 }
 function useAstralTravel() {
-  const reachBonus =
-    mode === "gps"
-      ? (game.heroClasses.get(hero.classId)?.features.astralReachBonus ?? 0)
-      : 10;
+  const cooldownRemaining = game.heroClassFeatureService.cooldownRemaining(
+    hero,
+    "astralTravel",
+  );
+  if (cooldownRemaining > 0) {
+    logTest(`Voyage astral : recharge ${formatCooldown(cooldownRemaining)}.`);
+    return render();
+  }
+  const reachBonus = game.heroClassFeatureService.astralReachBonus(hero);
   const player = game.getPlayer("local");
   const target = game.locations
     .filter(
@@ -3708,21 +3894,47 @@ function useAstralTravel() {
       `Voyage astral actif vers ${target.location.name} pendant 5 minutes.`,
     );
     selectLocation(target.location.id);
-  } else logTest(`Voyage astral impossible : ${result.reason}.`);
+  } else logTest(`Voyage astral impossible : ${classPowerFailure(result)}.`);
   render();
 }
 function handleWatchBeaconEvents(events = []) {
-  const unique = new Map(events.filter((event) => event.ownerPlayerId === hero?.playerId).map((event) => [event.target.key, event]));
+  const unique = new Map(
+    events
+      .filter((event) => event.ownerPlayerId === hero?.playerId)
+      .map((event) => [event.target.key, event]),
+  );
   [...unique.values()].forEach((event) => {
-    const target = event.target; const label = target.kind === "hero" ? (target.name ?? "Un joueur") : `Un groupe autonome${target.soldiers ? ` de ${target.soldiers} soldats` : ""}`;
-    deviceAlerts.notify("notice"); logTest(`Vigie : ${label} entre dans la zone de surveillance.`);
+    const target = event.target;
+    const label =
+      target.kind === "hero"
+        ? (target.name ?? "Un joueur")
+        : `Un groupe autonome${target.soldiers ? ` de ${target.soldiers} soldats` : ""}`;
+    deviceAlerts.notify("notice");
+    logTest(`Vigie : ${label} entre dans la zone de surveillance.`);
   });
 }
 function placeWatchBeacon() {
-  const owned = game.getWatchBeaconsForPlayer(hero.playerId).filter((beacon) => beacon.sourceHeroId === hero.id); const replacing = owned.length >= 3;
-  if (!window.confirm(`${replacing ? "La plus ancienne balise sera retirée. " : ""}Poser une balise de vigie à votre position ?`)) return;
-  const result = game.placeScoutWatchBeacon({ playerId: hero.playerId, heroId: hero.id, position: asGps(heroPosition), radius: mode === "gps" ? 75 : 8 });
-  if (result.success) logTest(`Balise de vigie posée · ${result.count}/${result.maximum}${result.removedBeaconId ? " · l’ancienne balise a été retirée" : ""}.`); else logTest(`Pose impossible : ${result.reason}.`);
+  const owned = game
+    .getWatchBeaconsForPlayer(hero.playerId)
+    .filter((beacon) => beacon.sourceHeroId === hero.id);
+  const replacing = owned.length >= 3;
+  if (
+    !window.confirm(
+      `${replacing ? "La plus ancienne balise sera retirée. " : ""}Poser une balise de vigie à votre position ?`,
+    )
+  )
+    return;
+  const result = game.placeScoutWatchBeacon({
+    playerId: hero.playerId,
+    heroId: hero.id,
+    position: asGps(heroPosition),
+    radius: mode === "gps" ? 75 : 8,
+  });
+  if (result.success)
+    logTest(
+      `Balise de vigie posée · ${result.count}/${result.maximum}${result.removedBeaconId ? " · l’ancienne balise a été retirée" : ""}.`,
+    );
+  else logTest(`Pose impossible : ${result.reason}.`);
   render();
 }
 function filteredDirectoryLocations() {
@@ -3906,12 +4118,17 @@ function render() {
     ghostReturnNotice.innerHTML = `<strong>Vous êtes un fantôme</strong><span>Retournez à ${heroBase?.name ?? "votre point de réapparition"} pour reprendre forme avec la moitié de vos PV.</span>`;
   syncQuestBattlefield();
   const sites = visibleSites();
+  const activeDivination =
+    game.heroClassFeatureService.activeDivination(hero);
   mapView.render({
     heroPosition,
     heroHeading,
     accuracy: gpsAccuracy,
+    visionRadius: game.heroClassFeatureService.visionRadius(hero),
     locations: mappedLocations(),
     autonomousGroups: visibleAutonomousGroups(),
+    divinationTargets: visibleDivinationTargets(),
+    revealedZones: activeDivination ? [activeDivination] : [],
     watchBeacons: game.getWatchBeaconsForPlayer(hero.playerId),
     autonomousTraces: visibleAutonomousTraces(),
     playAreaPoints: field.playAreaPoints,
@@ -3935,11 +4152,50 @@ function render() {
     : preparedHeroAmbush
       ? "Embuscade préparée"
       : "Préparer l’embuscade";
-  const activeWatchBeacons = game.getWatchBeaconsForPlayer(hero.playerId).filter((beacon) => beacon.sourceHeroId === hero.id).length;
-  watchBeaconButton.hidden = hero.classId !== "ranger" || hero.state !== "active";
-  watchBeaconButton.disabled = Boolean(activeBattle && activeBattle.status !== "finished");
-  watchBeaconButton.title = activeWatchBeacons >= 3 ? "Poser une nouvelle balise et retirer automatiquement la plus ancienne" : "Poser une balise de vigie à votre position";
+  const activeWatchBeacons = game
+    .getWatchBeaconsForPlayer(hero.playerId)
+    .filter((beacon) => beacon.sourceHeroId === hero.id).length;
+  watchBeaconButton.hidden =
+    hero.classId !== "ranger" || hero.state !== "active";
+  watchBeaconButton.disabled = Boolean(
+    activeBattle && activeBattle.status !== "finished",
+  );
+  watchBeaconButton.title =
+    activeWatchBeacons >= 3
+      ? "Poser une nouvelle balise et retirer automatiquement la plus ancienne"
+      : "Poser une balise de vigie à votre position";
   watchBeaconButton.innerHTML = `<span aria-hidden="true">⌖</span><small>Vigie ${activeWatchBeacons}/3</small>`;
+  const divinationCooldown = game.heroClassFeatureService.cooldownRemaining(
+    hero,
+    "divination",
+  );
+  const astralCooldown = game.heroClassFeatureService.cooldownRemaining(
+    hero,
+    "astralTravel",
+  );
+  const classPowerUnavailable =
+    hero.state !== "active" ||
+    Boolean(activeBattle && activeBattle.status !== "finished");
+  divinationButton.hidden = hero.classId !== "mage";
+  divinationButton.disabled = classPowerUnavailable || divinationCooldown > 0;
+  divinationButton.title =
+    divinationCooldown > 0
+      ? `Recharge : ${formatCooldown(divinationCooldown)}`
+      : interactionMode === "target-divination"
+        ? "Touchez maintenant une zone de la carte"
+        : "Choisir une zone à révéler";
+  divinationButton.classList.toggle(
+    "is-active",
+    interactionMode === "target-divination",
+  );
+  divinationButton.innerHTML = `<span aria-hidden="true">◉</span><small>${divinationCooldown > 0 ? `Div. ${formatCooldown(divinationCooldown)}` : "Divination"}</small>`;
+  astralTravelButton.hidden = hero.classId !== "mage";
+  astralTravelButton.disabled = classPowerUnavailable || astralCooldown > 0;
+  astralTravelButton.title =
+    astralCooldown > 0
+      ? `Recharge : ${formatCooldown(astralCooldown)}`
+      : "Atteindre un lieu connu juste hors de portée";
+  astralTravelButton.innerHTML = `<span aria-hidden="true">✧</span><small>${astralCooldown > 0 ? `Astral ${formatCooldown(astralCooldown)}` : "Astral"}</small>`;
   const player = game.getPlayer("local");
   const heroClass = data.heroClasses.find((item) => item.id === hero.classId);
   const heroModifiers = HeroArmyModifier.calculate({
@@ -4007,18 +4263,107 @@ function render() {
   const statDetail = selectedHeroStat
     ? perceptionStatDetail || standardStatDetail(selectedHeroStat)
     : "";
-  const traitButton = (id, type) => {
-    const aptitude = data.heroAptitudes.find((item) => item.id === id);
-    const rank = hero.aptitudeRanks[id];
-    const name = aptitude?.name ?? id.replaceAll("_", " ").replaceAll("-", " ");
-    return `<button type="button" class="trait-chip ${selectedHeroTrait?.id === id && selectedHeroTrait.type === type ? "is-selected" : ""}" data-trait-id="${id}" data-trait-type="${type}" aria-label="${name}${rank ? `, ${rank}` : ""}"><span class="trait-icon" aria-hidden="true">${type === "skill" ? "✦" : "◆"}</span><span>${name}${rank ? `<small>${rank}</small>` : ""}</span></button>`;
-  };
-  const heroTraits = [
+  const mageDivinationRadius =
+    game.heroClassFeatureService.divinationRadius(hero);
+  const mageAstralReach = game.heroClassFeatureService.astralReachBonus(hero);
+  const mageHealingAura = game.heroClassFeatureService.healingAura(hero);
+  const activeWatchBeaconCount = game
+    .getWatchBeaconsForPlayer(hero.playerId)
+    .filter((beacon) => beacon.sourceHeroId === hero.id).length;
+  const innateTraits =
+    hero.classId === "mage"
+      ? [
+          {
+            id: "mage_divination",
+            type: "innate",
+            icon: "◉",
+            name: "Divination",
+            summary:
+              divinationCooldown > 0
+                ? `Recharge ${formatCooldown(divinationCooldown)}`
+                : `Ø ${Math.round(mageDivinationRadius * 2)} m`,
+            description: `Révèle les lieux dans un diamètre de ${Math.round(mageDivinationRadius * 2)} m autour du Mage. Recharge : 5 minutes.`,
+            action: "divination",
+            disabled: divinationCooldown > 0 || classPowerUnavailable,
+          },
+          {
+            id: "mage_astral_travel",
+            type: "innate",
+            icon: "✧",
+            name: "Voyage astral",
+            summary:
+              astralCooldown > 0
+                ? `Recharge ${formatCooldown(astralCooldown)}`
+                : `+${mageAstralReach} m`,
+            description: `Augmente temporairement de ${mageAstralReach} m la portée d’interaction vers un lieu connu. Recharge : 10 minutes après une activation réussie.`,
+            action: "astral-travel",
+            disabled: astralCooldown > 0 || classPowerUnavailable,
+          },
+          {
+            id: "mage_healing_aura",
+            type: "innate",
+            icon: "✚",
+            name: "Aura de soins",
+            summary: `${mageHealingAura.radius} m`,
+            description: `Soigne automatiquement les autres héros alliés de ${mageHealingAura.healthPerCycle} PV par cycle dans un rayon de ${mageHealingAura.radius} m.`,
+          },
+        ]
+      : hero.classId === "ranger"
+        ? [
+            {
+              id: "ranger_scout_instinct",
+              type: "innate",
+              icon: "◉",
+              name: "Sens de l’éclaireur",
+              summary: `Détection ×${detectionMultiplier.toFixed(1)}`,
+              description:
+                "Augmente la détection et la qualité des renseignements, et annule le malus subi lorsque l’Éclaireur tombe dans une embuscade.",
+            },
+            {
+              id: "ranger_discretion",
+              type: "innate",
+              icon: "◌",
+              name: "Discrétion",
+              summary: `${discretionPercent}%`,
+              description: `Réduit la signature du héros : il est actuellement ${discretionPercent}% plus difficile à détecter.`,
+            },
+            {
+              id: "ranger_watch_beacon",
+              type: "innate",
+              icon: "⌖",
+              name: "Balise de vigie",
+              summary: `${activeWatchBeaconCount}/3`,
+              description:
+                "Pose une balise qui révèle et signale les joueurs ou groupes autonomes entrant dans sa zone de surveillance.",
+              action: "watch-beacon",
+              disabled: classPowerUnavailable,
+            },
+          ]
+        : [];
+  const learnedTraits = [
     ...hero.skillIds.map((id) => ({ id, type: "skill" })),
     ...hero.specialPowerIds.map((id) => ({ id, type: "power" })),
-  ];
+  ].map((trait) => {
+    const aptitude = data.heroAptitudes.find((item) => item.id === trait.id);
+    return {
+      ...trait,
+      icon: trait.type === "skill" ? "✦" : "◆",
+      name:
+        aptitude?.name ??
+        trait.id.replaceAll("_", " ").replaceAll("-", " "),
+      summary: hero.aptitudeRanks[trait.id] ?? "",
+      description:
+        aptitude?.description ??
+        (trait.type === "skill"
+          ? "Bonus permanent appliqué automatiquement."
+          : "Pouvoir utilisable en combat contre des points de commandement."),
+    };
+  });
+  const heroTraits = [...innateTraits, ...learnedTraits];
+  const traitButton = (trait) =>
+    `<button type="button" class="trait-chip ${selectedHeroTrait?.id === trait.id && selectedHeroTrait.type === trait.type ? "is-selected" : ""}" data-trait-id="${trait.id}" data-trait-type="${trait.type}" aria-label="${trait.name}${trait.summary ? `, ${trait.summary}` : ""}"><span class="trait-icon" aria-hidden="true">${trait.icon}</span><span>${trait.name}${trait.summary ? `<small>${trait.summary}</small>` : ""}</span></button>`;
   const traitSlots = heroTraits
-    .map(({ id, type }) => traitButton(id, type))
+    .map(traitButton)
     .concat(
       Array.from(
         { length: Math.max(0, 9 - heroTraits.length) },
@@ -4026,26 +4371,27 @@ function render() {
       ),
     )
     .join("");
-  const traitDetail = selectedHeroTrait
-    ? `<aside class="trait-detail"><span class="trait-icon" aria-hidden="true">${selectedHeroTrait.type === "skill" ? "✦" : "◆"}</span><div><strong>${selectedHeroTrait.id.replaceAll("_", " ").replaceAll("-", " ")}</strong><small>${selectedHeroTrait.type === "skill" ? "Compétence passive" : "Pouvoir spécial"}</small><p>${selectedHeroTrait.type === "skill" ? "Bonus permanent appliqué automatiquement, sans dépense de commandement." : "Action utilisable en combat contre une dépense de points de commandement."}</p><code>${selectedHeroTrait.id}</code></div></aside>`
+  const selectedTrait = heroTraits.find(
+    (trait) =>
+      trait.id === selectedHeroTrait?.id &&
+      trait.type === selectedHeroTrait?.type,
+  );
+  const traitDetail = selectedTrait
+    ? `<aside class="trait-detail"><span class="trait-icon" aria-hidden="true">${selectedTrait.icon}</span><div><strong>${selectedTrait.name}</strong><small>${selectedTrait.type === "innate" ? "Spécialité innée" : selectedTrait.type === "skill" ? "Compétence passive" : "Pouvoir spécial"}</small><p>${selectedTrait.description}</p>${selectedTrait.action ? `<button type="button" class="trait-detail-action" data-class-action="${selectedTrait.action}" ${selectedTrait.disabled ? "disabled" : ""}>Utiliser</button>` : ""}</div></aside>`
     : "";
-  const classActions =
-    hero.classId === "mage"
-      ? `<section class="trait-section"><h4>Pouvoirs de carte</h4><div class="trait-list"><button type="button" class="trait-chip" data-class-action="divination"><span class="trait-icon">◉</span><span>Divination<small>Révèle la zone</small></span></button><button type="button" class="trait-chip" data-class-action="astral-travel"><span class="trait-icon">✧</span><span>Voyage astral<small>Portée temporaire</small></span></button></div><p class="text-muted">Aura : +1 PV par cycle aux héros alliés à moins de 100 m.</p></section>`
-      : hero.classId === "ranger"
-        ? `<section class="trait-section"><h4>Surveillance</h4><div class="trait-list"><button type="button" class="trait-chip" data-class-action="watch-beacon"><span class="trait-icon">⌖</span><span>Poser une balise de vigie<small>${game.getWatchBeaconsForPlayer(hero.playerId).filter((beacon) => beacon.sourceHeroId === hero.id).length}/3 actives</small></span></button></div><p class="text-muted">Révèle et signale les joueurs ou groupes autonomes entrant dans sa zone.</p></section>`
-        : "";
+  const heroPortrait =
+    {
+      ranger: "assets/portraits/hero-ranger.png",
+      mage: "assets/portraits/hero-mage.png",
+    }[hero.classId] ?? "assets/portraits/hero-wanderer.png";
   ui.heroContent.innerHTML = `<article class="hero-card compact-hero-card"><section class="hero-bars"><button type="button" class="hero-progress health-progress hero-stat-trigger ${selectedHeroStat === "health" ? "is-selected" : ""}" data-hero-stat="health" aria-expanded="${selectedHeroStat === "health"}" aria-label="${hero.health} PV sur ${hero.maxHealth}"><span style="width:${healthPercent}%"></span><small>PV ${hero.health}/${hero.maxHealth}</small></button><button type="button" class="hero-progress experience-progress ${progress.canLevelUp || hero.pendingLevelUps.length ? "is-level-up-ready" : ""}" data-open-hero-progress aria-label="${progress.canLevelUp ? "Niveau disponible" : `${levelExperience} XP sur ${progress.xpToNextLevel}`}"><span style="width:${experiencePercent}%"></span><small>${progress.canLevelUp ? "✦ Niveau disponible" : `XP ${levelExperience}/${progress.xpToNextLevel || levelExperience}`}</small></button></section><section class="hero-identity"><img class="hero-portrait" src="assets/portraits/hero-wanderer.png" alt="Portrait de ${hero.name}"><header><div><h3>${hero.name}</h3><span class="eyebrow hero-rank"><span>${heroClass?.name ?? hero.classId}</span><span>${rankLabel(HERO_COMMAND_RANKS, hero.commandRank)}- LvL ${hero.level}</span></span></div><span class="hero-state">${hero.state}</span></header></section><section class="hero-stat-panel" aria-label="Statistiques du héros"><div class="compact-hero-stats">${statButton("attack", signed(heroModifiers.attackBonus))}${statButton("defense", signed(heroModifiers.defenseBonus))}${statButton("morale", signed(heroModifiers.moraleBonus))}${statButton("mobility", `×${heroModifiers.speedMultiplier.toFixed(2)}`)}${statButton("command", `◆ ${hero.commandPoints}/${hero.maxCommandPoints}`)}<div><strong>${hero.army.units.length}/${hero.maxUnitStacks}</strong><span>Unités</span></div><div><strong>${usedBagSlots}/${bagSlotCapacity}</strong><span>Bagages</span></div></div>${statDetail}</section><section class="hero-aptitudes" aria-label="Aptitudes et pouvoirs du héros"><div class="trait-list">${traitSlots}</div>${traitDetail}</section><div class="hero-equipment" aria-label="Équipement du héros"></div></article>`;
+  ui.heroContent.querySelector(".hero-portrait").src = heroPortrait;
   ui.heroContent
     .querySelector(".compact-hero-stats")
     .insertAdjacentHTML(
       "beforeend",
       `${statButton("discretion", `${discretionPercent}%`)}${statButton("detection", `×${detectionMultiplier.toFixed(2)}`)}`,
     );
-  if (classActions)
-    ui.heroContent
-      .querySelector(".hero-aptitudes")
-      .insertAdjacentHTML("beforeend", classActions);
   ui.heroContent
     .querySelector(".compact-hero-stats")
     .insertAdjacentHTML(
@@ -4616,8 +4962,7 @@ $("#gps-finish-exclusion").onclick = () => {
     field.completeExclusion();
     interactionMode = null;
     $("#gps-finish-exclusion").disabled = true;
-    ui.gpsAreaStatus.textContent =
-      `${field.excludedPolygons.length} zone(s) d’exclusion définie(s).`;
+    ui.gpsAreaStatus.textContent = `${field.excludedPolygons.length} zone(s) d’exclusion définie(s).`;
     if (validatedPlayArea) validatePlayArea();
     else render();
   } catch (error) {
@@ -4636,8 +4981,7 @@ $("#save-terrain-profile").onclick = () => {
   try {
     if (!validatedPlayArea) validatePlayArea();
     saveTerrainProfile(validatedPlayArea);
-    ui.gpsAreaStatus.textContent =
-      `Carte sauvegardée avec ${validatedPlayArea.polygon.length} points GPS et ${validatedPlayArea.excludedPolygons.length} exclusion(s).`;
+    ui.gpsAreaStatus.textContent = `Carte sauvegardée avec ${validatedPlayArea.polygon.length} points GPS et ${validatedPlayArea.excludedPolygons.length} exclusion(s).`;
   } catch (error) {
     ui.gpsAreaStatus.textContent = error.message;
   }
@@ -4649,8 +4993,7 @@ $("#load-terrain-profile").onclick = () => {
     field.loadTerrain(profile.playArea);
     validatePlayArea();
     mapView.focus(field.playAreaPoints[0]);
-    ui.gpsAreaStatus.textContent =
-      `Carte chargée · ${field.playAreaPoints.length} points GPS · ${field.excludedPolygons.length} exclusion(s).`;
+    ui.gpsAreaStatus.textContent = `Carte chargée · ${field.playAreaPoints.length} points GPS · ${field.excludedPolygons.length} exclusion(s).`;
   } catch (error) {
     ui.gpsAreaStatus.textContent = error.message;
   }

@@ -794,8 +794,8 @@
     transform: translate(-50%, -50%) scale(var(--perspective-scale, 1));
   }
   50% {
-    transform: translate(-50%, -65%) scale(var(--perspective-scale, 1))
-      scale(1.2);
+    transform: translate(calc(-50% + var(--combat-step)), -50%)
+      scale(var(--perspective-scale, 1));
   }
 }
 @keyframes perspective-target-hit {
@@ -816,8 +816,7 @@
     filter: brightness(1);
   }
   to {
-    transform: translate(-50%, -50%) scale(var(--perspective-scale, 1))
-      scale(1.1);
+    transform: translate(-50%, -50%) scale(var(--perspective-scale, 1));
     filter: brightness(1.5);
   }
 }

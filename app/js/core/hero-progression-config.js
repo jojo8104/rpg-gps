@@ -36,7 +36,7 @@ export const DEFAULT_HERO_CLASSES = Object.freeze([
     name: "Guerrier",
     advantage:
       "Combattant et chef militaire : commandement et autorité supérieurs.",
-    features: { role: "fighter" },
+    features: { role: "fighter", visionRadius: 45 },
     baseStats: {
       attack: 4,
       defense: 3,
@@ -62,6 +62,7 @@ export const DEFAULT_HERO_CLASSES = Object.freeze([
       "Détection, discrétion, renseignement et maîtrise des embuscades.",
     features: {
       role: "scout",
+      visionRadius: 75,
       detectionMultiplier: 1.5,
       concealmentMultiplier: 0.65,
       informationLevelBonus: 1,
@@ -95,10 +96,32 @@ export const DEFAULT_HERO_CLASSES = Object.freeze([
       "Divination, voyage astral et soins automatiques des héros alliés proches.",
     features: {
       role: "arcane_support",
-      divinationRadius: 500,
-      astralReachBonus: 100,
+      visionRadius: 45,
+      divinationDiameterByGrade: {
+        captain: 45,
+        banneret: 75,
+        commander: 120,
+        lord: 180,
+        marshal: 270,
+      },
+      divinationCooldownMs: 300000,
+      divinationDurationMs: 60000,
+      astralReachBonusByGrade: {
+        captain: 15,
+        banneret: 25,
+        commander: 40,
+        lord: 60,
+        marshal: 90,
+      },
+      astralCooldownMs: 600000,
       astralDurationMs: 300000,
-      healingAuraRadius: 100,
+      healingAuraRadiusByGrade: {
+        captain: 15,
+        banneret: 25,
+        commander: 40,
+        lord: 60,
+        marshal: 90,
+      },
       healingAuraPerCycle: 1,
     },
     baseStats: {

@@ -59,6 +59,81 @@
   animation-delay: calc(var(--soldier) * -37ms);
 }
 
+.battle-hero-sprite {
+  display: block;
+  width: 54px;
+  height: 72px;
+  background: center bottom / contain no-repeat;
+  filter: drop-shadow(0 2px 2px #000b);
+  transform: scaleX(var(--hero-facing, 1));
+  transform-origin: center bottom;
+}
+
+.battle-hero-status {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  pointer-events: auto;
+}
+
+.battle-hero-status > .hero-health {
+  width: 100%;
+}
+
+.battle-hero-status > .battle-hero-sprite {
+  flex: 0 0 auto;
+  margin-top: 3px;
+  background-color: transparent;
+}
+
+.battle-hero-status.is-out > .battle-hero-sprite {
+  opacity: 0.35;
+  filter: grayscale(1) drop-shadow(0 2px 2px #0009);
+}
+
+.battle-hero-status.is-power-target > .battle-hero-sprite {
+  filter: brightness(1.45) drop-shadow(0 0 7px #ffe46b);
+}
+
+.battle-hero-sprite.is-player {
+  background-image: url("../assets/units/hero-player.png");
+}
+
+.battle-hero-sprite.is-autonomous {
+  background-image: url("../assets/units/hero-autonomous.png");
+}
+
+.battle-hero-sprite.is-enemy {
+  --hero-facing: -1;
+  filter: sepia(0.12) hue-rotate(125deg) saturate(1.18)
+    drop-shadow(0 2px 2px #000b);
+}
+
+#battle-view .unit-token.field-token.is-hero {
+  width: 58px;
+  height: 78px;
+  padding: 0 2px 6px;
+  overflow: visible;
+}
+
+#battle-view .unit-token.field-token.is-hero > small {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  z-index: 2;
+  min-width: 22px;
+  padding: 0 3px;
+  border-radius: 4px;
+  background: #080b09dd;
+  color: #fff4d5;
+  text-align: center;
+}
+
 .unit-token.field-token.is-moving .militia-formation i {
   animation-play-state: running;
 }
@@ -67,7 +142,15 @@
   background-image: url("../assets/units/archer-walk.png");
 }
 .mounted-archer-formation i {
+  width: 44px;
+  height: 52px;
+  margin-inline: -3px;
   background-image: url("../assets/units/mounted-archer-walk.png");
+}
+
+.mounted-archer-formation .militia-rank {
+  height: 21px;
+  min-height: 21px;
 }
 .chaos-raider-formation i {
   background-image: url("../assets/units/chaos-raider-walk.png");
@@ -213,58 +296,159 @@
   }
 }
 
-.unit-token.field-token.is-moving .militia-formation::after {
-  content: "";
-  display: block;
-  position: absolute;
-  z-index: 0;
-  left: var(--dust-left, 5%);
-  bottom: -5px;
-  width: 58px;
-  height: 22px;
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle at 22% 68%,
-      #654020e8 0 13%,
-      #3f2715c4 14% 31%,
-      transparent 54%
-    ),
-    radial-gradient(
-      circle at 52% 48%,
-      #704722e8 0 15%,
-      #442815d0 16% 36%,
-      transparent 62%
-    ),
-    radial-gradient(
-      circle at 82% 70%,
-      #563219df 0 12%,
-      #2d190db8 13% 32%,
-      transparent 58%
-    );
-  filter: blur(1px);
-  animation: unit-dust 0.56s ease-out infinite;
-}
-
 .militia-formation.is-front {
-  --dust-left: 62%;
-  --dust-drift: 12px;
+  --attack-step: -7px;
+  --recoil-step: 7px;
 }
 .militia-formation.is-back {
-  --dust-drift: -12px;
+  --attack-step: 7px;
+  --recoil-step: -7px;
 }
 
-@keyframes unit-dust {
+.unit-token.field-token:has(.militia-formation).is-attacking {
+  animation: none;
+}
+
+.unit-token.field-token.is-attacking.is-melee .militia-formation i {
+  animation: soldier-strike 0.46s ease-in-out both;
+  animation-delay: calc(var(--soldier) * 7ms);
+}
+
+.unit-token.field-token.is-targeted .militia-formation i {
+  animation: soldier-recoil 0.5s ease-out both;
+  animation-delay: calc(var(--soldier) * 6ms);
+}
+
+@keyframes soldier-strike {
+  0%,
+  100% {
+    transform: translateX(0) scaleX(var(--facing));
+  }
+  45% {
+    transform: translateX(var(--attack-step)) scaleX(var(--facing));
+  }
+}
+
+@keyframes soldier-recoil {
+  0%,
+  100% {
+    transform: translateX(0) scaleX(var(--facing));
+  }
+  32% {
+    transform: translateX(var(--recoil-step)) scaleX(var(--facing));
+    filter: brightness(1.8) drop-shadow(0 1px 1px #000b);
+  }
+}
+
+.unit-token.field-token.is-moving .militia-formation i::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: var(--dust-origin, 72%);
+  bottom: 8px;
+  width: 24px;
+  height: 15px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 45% 52%, #765137c9 0 28%, transparent 68%),
+    radial-gradient(ellipse at 70% 60%, #aa815786 0 20%, transparent 62%);
+  filter: blur(2px);
+  transform-origin: center;
+  animation: soldier-dust 5s ease-out infinite;
+  animation-delay: calc(var(--soldier) * -137ms);
+  pointer-events: none;
+}
+
+.militia-formation.is-front i::after {
+  /* Le parent est retourné : une translation locale négative part à droite. */
+  --dust-rise-x: -38px;
+  --dust-mid-x: -21px;
+}
+
+.militia-formation.is-back i::after {
+  --dust-rise-x: -38px;
+  --dust-mid-x: -21px;
+}
+
+@keyframes soldier-dust {
   0% {
     opacity: 0;
-    transform: translate(0, 1px) scale(0.35);
+    border-radius: 52% 48% 46% 54%;
+    transform: translate(0, 0) scale(0.55, 0.75) rotate(0deg);
   }
-  35% {
+  14% {
     opacity: 0.72;
+  }
+  55% {
+    opacity: 0.5;
+    border-radius: 42% 58% 61% 39%;
+    transform: translate(var(--dust-mid-x), -25px) scale(1.55, 1.95)
+      rotate(18deg);
   }
   100% {
     opacity: 0;
-    transform: translate(var(--dust-drift), -3px) scale(1.25);
+    border-radius: 64% 36% 43% 57%;
+    transform: translate(var(--dust-rise-x), -58px) scale(2.5, 3.25)
+      rotate(42deg);
+  }
+}
+
+.casualty-piece {
+  position: absolute;
+  z-index: 8;
+  width: 32px;
+  height: 43px;
+  background-position: 0 0;
+  background-repeat: no-repeat;
+  background-size: 400% 100%;
+  filter: drop-shadow(0 2px 2px #000c);
+  pointer-events: none;
+  animation: casualty-fall 2s cubic-bezier(0.2, 0.7, 0.35, 1) both;
+  animation-delay: calc(var(--casualty-age) + var(--casualty) * 28ms);
+}
+
+.casualty-piece.is-militia {
+  background-image: url("../assets/units/militia-walk.png");
+}
+.casualty-piece.is-archer {
+  background-image: url("../assets/units/archer-walk.png");
+}
+.casualty-piece.is-mounted-archer {
+  width: 44px;
+  height: 52px;
+  background-image: url("../assets/units/mounted-archer-walk.png");
+}
+.casualty-piece.is-chaos-raider {
+  background-image: url("../assets/units/chaos-raider-walk.png");
+}
+.casualty-piece.is-allied {
+  --fall-mid: -42px;
+  --fall-end: -92px;
+  --casualty-facing: 1;
+}
+.casualty-piece.is-enemy {
+  --fall-mid: 42px;
+  --fall-end: 92px;
+  --casualty-facing: -1;
+}
+
+@keyframes casualty-fall {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(0deg) scaleX(var(--casualty-facing));
+  }
+  35% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--fall-mid)), -190%) rotate(38deg)
+      scaleX(var(--casualty-facing));
+  }
+  72% {
+    opacity: 0.88;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--fall-end)), 58vh) rotate(118deg)
+      scaleX(var(--casualty-facing));
   }
 }
 

@@ -71,5 +71,10 @@ test("le choix de classe prépare le héros correspondant", () => {
     classId: "ranger",
     appearanceId: "ranger",
   });
-  assert.equal(createAutomaticHeroChoice("mage").classId, "mage");
+  assert.deepEqual(createAutomaticHeroChoice("mage"), {
+    name: "Mériane",
+    classId: "mage",
+    appearanceId: "mage",
+    firstAptitudeId: "offensive_magic",
+  });
 });

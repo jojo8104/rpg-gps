@@ -188,6 +188,13 @@ button {
   background: radial-gradient(circle, #9a744c, #3e2a1e 72%);
   color: #ffe59b;
   font-size: 2.1rem;
+  overflow: hidden;
+}
+.hero-class-card__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
 }
 .hero-class-card__body {
   display: grid;
@@ -720,6 +727,12 @@ select {
 .field-token.is-hero {
   z-index: 4;
 }
+.field-token.is-ally {
+  --combat-step: 8%;
+}
+.field-token.is-enemy {
+  --combat-step: -8%;
+}
 .field-token.is-attacking {
   animation: attack-pulse 0.45s ease-out;
 }
@@ -748,14 +761,12 @@ select {
   flex: 0 0 46px;
 }
 @keyframes attack-pulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
+  0%,
+  100% {
+    transform: translate(-50%, -50%);
   }
   50% {
-    transform: translate(-50%, -65%) scale(1.2);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
+    transform: translate(calc(-50% + var(--combat-step)), -50%);
   }
 }
 @keyframes target-hit {

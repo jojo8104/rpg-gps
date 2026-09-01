@@ -101,8 +101,11 @@ export class MapView {
     heroPosition,
     heroHeading = null,
     accuracy = null,
+    visionRadius = null,
     locations = [],
     autonomousGroups = [],
+    divinationTargets = [],
+    revealedZones = [],
     watchBeacons = [],
     autonomousTraces = [],
     playAreaPoints = [],
@@ -117,6 +120,8 @@ export class MapView {
       heroPosition,
       heroHeading,
       accuracy,
+      visionRadius,
+      revealedZones,
       locations,
       gridCells,
     });
@@ -132,10 +137,11 @@ export class MapView {
       this.questTraces,
       new Set(questTraces.map((item) => item.id)),
     );
-    autonomousTraces.forEach((trace) => this.#autonomousTrace(trace));
+    const traceEndpoints = endpointTraces(autonomousTraces);
+    traceEndpoints.forEach((trace) => this.#autonomousTrace(trace));
     this.#removeMissing(
       this.autonomousTraces,
-      new Set(autonomousTraces.map((item) => item.id)),
+      new Set(traceEndpoints.map((item) => item.id)),
     );
     this.#autonomousTracePaths(autonomousTraces);
     autonomousGroups.forEach((group) => this.#autonomousGroup(group));
@@ -148,12 +154,19 @@ export class MapView {
       this.watchBeacons,
       new Set(watchBeacons.map((item) => item.id)),
     );
-    const watchTargets = watchBeacons.flatMap((beacon) =>
-      beacon.visibleTargets.map((target) => ({
+    const watchTargets = [
+      ...watchBeacons.flatMap((beacon) =>
+        beacon.visibleTargets.map((target) => ({
+          ...target,
+          watchTargetId: `${beacon.id}:${target.key}`,
+        })),
+      ),
+      ...divinationTargets.map((target) => ({
         ...target,
-        watchTargetId: `${beacon.id}:${target.key}`,
+        watchTargetId: `divination:${target.key}`,
+        revealedByDivination: true,
       })),
-    );
+    ];
     watchTargets.forEach((target) => this.#watchTarget(target));
     this.#removeMissing(
       this.watchTargets,
@@ -570,6 +583,18 @@ export function dynamicSitePresentation() {
     pane: MapLayers.EFFECTS,
     zIndexOffset: 2500,
   };
+}
+
+export function endpointTraces(traces) {
+  const groups = new Map();
+  traces.forEach((trace) => {
+    if (!groups.has(trace.groupId)) groups.set(trace.groupId, []);
+    groups.get(trace.groupId).push(trace);
+  });
+  return [...groups.values()].flatMap((entries) => {
+    const ordered = entries.sort((left, right) => left.createdAt - right.createdAt);
+    return ordered.length === 1 ? ordered : [ordered[0], ordered.at(-1)];
+  });
 }
 
 function asLatLng(position) {

@@ -25,6 +25,9 @@ export class HeroClassFeatureService {
   detectionRadius(hero, baseRadius) {
     return baseRadius * (this.featuresFor(hero).detectionMultiplier ?? 1);
   }
+  visionRadius(hero, fallback = 45) {
+    return this.featuresFor(hero).visionRadius ?? fallback;
+  }
   informationLevel(hero, knownLevel) {
     return Math.min(
       3,
@@ -42,10 +45,37 @@ export class HeroClassFeatureService {
     const travel = hero?.classFeatureState?.astralTravel;
     if (!travel || travel.locationId !== locationId || at >= travel.expiresAt)
       return baseRadius;
-    return (
-      baseRadius +
-      (travel.reachBonus ?? this.featuresFor(hero).astralReachBonus ?? 0)
+    return baseRadius + (travel.reachBonus ?? this.astralReachBonus(hero));
+  }
+
+  divinationRadius(hero) {
+    const features = this.featuresFor(hero);
+    const diameter = this.#valueForGrade(
+      hero,
+      features.divinationDiameterByGrade,
+      null,
     );
+    return diameter === null ? (features.divinationRadius ?? 0) : diameter / 2;
+  }
+
+  astralReachBonus(hero) {
+    const features = this.featuresFor(hero);
+    return this.#valueForGrade(
+      hero,
+      features.astralReachBonusByGrade,
+      features.astralReachBonus ?? 0,
+    );
+  }
+
+  cooldownRemaining(hero, abilityId, at = this.now()) {
+    const availableAt =
+      hero?.classFeatureState?.cooldowns?.[abilityId]?.availableAt ?? 0;
+    return Math.max(0, availableAt - at);
+  }
+
+  activeDivination(hero, at = this.now()) {
+    const vision = hero?.classFeatureState?.divinationVision;
+    return vision && at < vision.expiresAt ? structuredClone(vision) : null;
   }
 
   activateAstralTravel(
@@ -53,8 +83,19 @@ export class HeroClassFeatureService {
     { locationId, distance, baseRadius, reachBonus = null, at = this.now() },
   ) {
     const features = this.featuresFor(hero);
-    const bonus = reachBonus ?? features.astralReachBonus ?? 0;
+    const bonus = reachBonus ?? this.astralReachBonus(hero);
     if (bonus <= 0) return { success: false, reason: "ability_unavailable" };
+    const cooldownRemainingMs = this.cooldownRemaining(
+      hero,
+      "astralTravel",
+      at,
+    );
+    if (cooldownRemainingMs > 0)
+      return {
+        success: false,
+        reason: "ability_on_cooldown",
+        cooldownRemainingMs,
+      };
     if (
       !Number.isFinite(distance) ||
       !Number.isFinite(baseRadius) ||
@@ -69,16 +110,30 @@ export class HeroClassFeatureService {
       activatedAt: at,
       expiresAt: at + durationMs,
     };
+    const cooldownMs = features.astralCooldownMs ?? 0;
+    this.#startCooldown(hero, "astralTravel", cooldownMs, at);
     return {
       success: true,
       locationId,
       expiresAt: at + durationMs,
       interactionRadius: baseRadius + bonus,
+      cooldownMs,
     };
   }
 
-  divine(hero, { player, locations, distanceFn, radius = null }) {
-    const configuredRadius = this.featuresFor(hero).divinationRadius ?? 0;
+  divine(
+    hero,
+    {
+      player,
+      locations,
+      distanceFn,
+      center = null,
+      radius = null,
+      at = this.now(),
+    },
+  ) {
+    const features = this.featuresFor(hero);
+    const configuredRadius = this.divinationRadius(hero);
     const effectiveRadius = radius ?? configuredRadius;
     if (configuredRadius <= 0)
       return {
@@ -86,7 +141,16 @@ export class HeroClassFeatureService {
         reason: "ability_unavailable",
         revealedLocationIds: [],
       };
-    if (!hero.position)
+    const cooldownRemainingMs = this.cooldownRemaining(hero, "divination", at);
+    if (cooldownRemainingMs > 0)
+      return {
+        success: false,
+        reason: "ability_on_cooldown",
+        cooldownRemainingMs,
+        revealedLocationIds: [],
+      };
+    const targetCenter = center ?? hero.position;
+    if (!targetCenter)
       return {
         success: false,
         reason: "hero_position_unknown",
@@ -96,18 +160,53 @@ export class HeroClassFeatureService {
       .filter(
         (location) =>
           location.position &&
-          distanceFn(hero.position, location.position) <= effectiveRadius,
+          distanceFn(targetCenter, location.position) <= effectiveRadius,
       )
       .filter((location) => player.discoverLocation(location.id, 1))
       .map((location) => location.id);
-    return { success: true, radius: effectiveRadius, revealedLocationIds };
+    const cooldownMs = features.divinationCooldownMs ?? 0;
+    const durationMs = features.divinationDurationMs ?? 60000;
+    hero.classFeatureState.divinationVision = {
+      center: structuredClone(targetCenter),
+      radius: effectiveRadius,
+      activatedAt: at,
+      expiresAt: at + durationMs,
+    };
+    this.#startCooldown(hero, "divination", cooldownMs, at);
+    return {
+      success: true,
+      radius: effectiveRadius,
+      revealedLocationIds,
+      cooldownMs,
+      durationMs,
+      vision: structuredClone(hero.classFeatureState.divinationVision),
+    };
   }
 
   healingAura(hero) {
     const features = this.featuresFor(hero);
     return {
-      radius: features.healingAuraRadius ?? 0,
+      radius: this.#valueForGrade(
+        hero,
+        features.healingAuraRadiusByGrade,
+        features.healingAuraRadius ?? 0,
+      ),
       healthPerCycle: features.healingAuraPerCycle ?? 0,
+    };
+  }
+
+  #valueForGrade(hero, values, fallback) {
+    if (!values || typeof values !== "object" || Array.isArray(values))
+      return fallback;
+    return values[hero?.commandRank] ?? fallback;
+  }
+
+  #startCooldown(hero, abilityId, cooldownMs, at) {
+    if (cooldownMs <= 0) return;
+    hero.classFeatureState.cooldowns ??= {};
+    hero.classFeatureState.cooldowns[abilityId] = {
+      activatedAt: at,
+      availableAt: at + cooldownMs,
     };
   }
 }

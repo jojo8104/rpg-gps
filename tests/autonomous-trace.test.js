@@ -29,3 +29,11 @@ test("détection de l'observateur et discrétion du groupe modifient la percepti
   assert.equal(discreet.isDetectable({ at: 0, minimumScore: 1, distance: 250, distancePerPoint: 50 }), false);
   assert.equal(discreet.isDetectable({ at: 0, minimumScore: 1, distance: 250, distancePerPoint: 50, detectionMultiplier: 2 }), true);
 });
+
+test("une trace conserve sa position pendant toute sa durée de vie", () => {
+  const value = trace();
+  const original = { ...value.position };
+  value.getScore(3 * 60_000);
+  value.isDetectable({ at: 3 * 60_000, minimumScore: 1, distance: 50 });
+  assert.deepEqual(value.position, original);
+});
