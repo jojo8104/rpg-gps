@@ -38,7 +38,7 @@ button {
 }
 .setup-progress {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 0.45rem;
   margin-bottom: 1.5rem;
 }
@@ -145,6 +145,118 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
+.hero-class-options {
+  display: grid;
+  gap: 0.85rem;
+  margin: 1.25rem 0;
+  padding: 0;
+  border: 0;
+}
+.hero-class-card {
+  position: relative;
+  display: grid !important;
+  grid-template-columns: 4.2rem minmax(0, 1fr);
+  gap: 0.85rem !important;
+  margin: 0 !important;
+  padding: 0.9rem;
+  border: 2px solid #9a7347;
+  border-radius: 14px;
+  background: #f4dfb6a8;
+  cursor: pointer;
+}
+.hero-class-card:has(input:checked) {
+  border-color: #76501b;
+  background: #d7ad68a8;
+  box-shadow: inset 0 0 0 2px #fff0b4;
+}
+.hero-class-card > input {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  width: 1.2rem;
+  min-height: 1.2rem;
+  margin: 0;
+  accent-color: #704a18;
+}
+.hero-class-card__portrait {
+  display: grid;
+  place-items: center;
+  width: 4.2rem;
+  height: 4.2rem;
+  border: 2px solid #5d4028;
+  border-radius: 50%;
+  background: radial-gradient(circle, #9a744c, #3e2a1e 72%);
+  color: #ffe59b;
+  font-size: 2.1rem;
+}
+.hero-class-card__body {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 0;
+}
+.hero-class-card__body > strong {
+  padding-right: 1.5rem;
+  font-size: 1.3rem;
+}
+.hero-class-card__advantage {
+  color: #654936;
+  line-height: 1.35;
+}
+.hero-class-card__stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.75rem;
+}
+.hero-class-card__stats > span {
+  display: grid;
+  grid-template-columns: minmax(4.8rem, auto) 1fr 1.6rem;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+}
+.hero-class-card__stats small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hero-class-card__stats i {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #6e523b55;
+}
+.hero-class-card__stats b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #81591f;
+}
+.hero-class-card__stats em {
+  font-style: normal;
+  font-weight: 700;
+  text-align: right;
+}
+.danger-button {
+  background: linear-gradient(#9c3934, #651d1a);
+  color: #fff0d0;
+}
+@media (min-width: 720px) {
+  .hero-class-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .hero-class-card {
+    grid-template-columns: 1fr;
+  }
+  .hero-class-card__portrait {
+    margin-inline: auto;
+  }
+  .hero-class-card__body > strong,
+  .hero-class-card__advantage {
+    text-align: center;
+  }
+  .hero-class-card__stats {
+    grid-template-columns: 1fr;
+  }
+}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -180,6 +292,9 @@ button {
     padding-inline: 0.85rem;
   }
   .setup-summary {
+    grid-template-columns: 1fr;
+  }
+  .hero-class-card__stats {
     grid-template-columns: 1fr;
   }
 }

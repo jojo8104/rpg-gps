@@ -11,6 +11,8 @@ export class FieldTestSession {
       throw new RangeError("La distance de quête doit être positive.");
     this.minimumQuestDistanceMeters = minimumQuestDistanceMeters;
     this.playAreaPoints = [];
+    this.exclusionDraftPoints = [];
+    this.excludedPolygons = [];
     this.questStart = null;
     this.questDistanceMeters = 0;
     this.questCompleted = false;
@@ -23,9 +25,55 @@ export class FieldTestSession {
   }
   clearPlayArea() {
     this.playAreaPoints = [];
+    this.clearExclusions();
+  }
+  addExclusionPoint(position) {
+    validatePosition(position);
+    this.exclusionDraftPoints.push(copy(position));
+    return this.exclusionDraftPoints.length;
+  }
+  completeExclusion() {
+    if (this.exclusionDraftPoints.length < 3)
+      throw new RangeError(
+        "Une zone d’exclusion doit contenir au moins trois points.",
+      );
+    const polygon = this.exclusionDraftPoints.map(copy);
+    if (this.playAreaPoints.length >= 3)
+      new PlayArea({
+        id: "exclusion-validation",
+        name: "Validation des exclusions",
+        polygon: this.playAreaPoints,
+        excludedPolygons: [...this.excludedPolygons, polygon],
+      });
+    this.excludedPolygons.push(polygon);
+    this.exclusionDraftPoints = [];
+    return polygon.map(copy);
+  }
+  clearExclusions() {
+    this.exclusionDraftPoints = [];
+    this.excludedPolygons = [];
+  }
+  loadTerrain({ polygon, excludedPolygons = [] }) {
+    const area = new PlayArea({
+      id: "loaded-terrain",
+      name: "Terrain chargé",
+      polygon,
+      excludedPolygons,
+    });
+    this.playAreaPoints = area.polygon.map(copy);
+    this.excludedPolygons = area.excludedPolygons.map((points) =>
+      points.map(copy),
+    );
+    this.exclusionDraftPoints = [];
+    return area;
   }
   createPlayArea({ id = "field-area", name = "Zone de test IRL" } = {}) {
-    return new PlayArea({ id, name, polygon: this.playAreaPoints });
+    return new PlayArea({
+      id,
+      name,
+      polygon: this.playAreaPoints,
+      excludedPolygons: this.excludedPolygons,
+    });
   }
 
   startDistanceQuest(position) {
@@ -61,6 +109,9 @@ export class FieldTestSession {
     return {
       minimumQuestDistanceMeters: this.minimumQuestDistanceMeters,
       playAreaPoints: this.playAreaPoints.map(copy),
+      excludedPolygons: this.excludedPolygons.map((polygon) =>
+        polygon.map(copy),
+      ),
       questStart: this.questStart && copy(this.questStart),
       questDistanceMeters: this.questDistanceMeters,
       questCompleted: this.questCompleted,

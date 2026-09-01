@@ -48,7 +48,7 @@ export class SetupPlacementService {
   resolveInside({ playArea, preferred, origin = null, minimumDistance = 0 }) {
     const safePreferred = clampGeographicPosition(preferred);
     if (
-      playArea.contains(safePreferred) &&
+      this.#allowsPlacement(playArea, safePreferred) &&
       (origin === null ||
         this.distanceFn(origin, safePreferred) >= minimumDistance)
     )
@@ -133,9 +133,16 @@ export class SetupPlacementService {
           latitude: minLat + ((maxLat - minLat) * row) / 12,
           longitude: minLon + ((maxLon - minLon) * column) / 12,
         };
-        if (playArea.contains(position)) candidates.push(position);
+        if (this.#allowsPlacement(playArea, position))
+          candidates.push(position);
       }
     return candidates;
+  }
+
+  #allowsPlacement(playArea, position) {
+    return typeof playArea.allowsPlacement === "function"
+      ? playArea.allowsPlacement(position)
+      : playArea.contains(position);
   }
 }
 

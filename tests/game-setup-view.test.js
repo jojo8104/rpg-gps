@@ -64,3 +64,12 @@ test("le setup génère un héros jouable sans formulaire dédié", () => {
     appearanceId: "knight",
   });
 });
+
+test("le choix de classe prépare le héros correspondant", () => {
+  assert.deepEqual(createAutomaticHeroChoice("ranger"), {
+    name: "Sylve",
+    classId: "ranger",
+    appearanceId: "ranger",
+  });
+  assert.equal(createAutomaticHeroChoice("mage").classId, "mage");
+});

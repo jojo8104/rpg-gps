@@ -125,10 +125,15 @@ body,
 .map-is-bearing .leaflet-map-pane {
   pointer-events: none;
 }
-.map-is-bearing .rpg-marker-host:not(.rpg-hero-marker-host),
-.map-is-bearing .dynamic-marker,
-.map-is-bearing .heatmap-count {
+.map-is-bearing .rpg-marker-host:not(.rpg-hero-marker-host) > .rpg-location,
+.map-is-bearing .dynamic-marker > span,
+.map-is-bearing .heatmap-count > span {
   rotate: var(--map-counter-bearing);
+}
+.map-is-bearing .rpg-marker-host:not(.rpg-hero-marker-host) > .rpg-location {
+  /* The visual rotates around Leaflet's geographic anchor (32, 38), not around
+     the 64px artwork box, whose centre is six pixels higher. */
+  transform-origin: 32px 38px;
 }
 .sheet-grab {
   gap: 0;
@@ -510,7 +515,8 @@ body,
 
 .dialogue-view {
   position: fixed;
-  z-index: 1200;
+  /* La narration est la seule interface autorisée au-dessus du cartouche. */
+  z-index: 2100;
   inset: 0;
   overflow: hidden;
   background: #080b0c;
@@ -729,6 +735,12 @@ body,
   background: #351126e8;
   color: #ffd1e4;
 }
+
+.watch-beacon-marker,.watch-target-marker{display:grid;place-items:center;border-radius:50%;filter:drop-shadow(0 2px 4px #0008)}
+.watch-beacon-marker span{display:grid;place-items:center;width:30px;height:30px;border:2px solid #b9f0ff;border-radius:50%;background:#126a86;color:#e9fbff;font-size:1.25rem;font-weight:900}
+.watch-target-marker span{display:grid;place-items:center;width:26px;height:26px;border:2px solid #fff7cf;border-radius:50%;background:#b94d3f;color:#fff;font-size:.85rem;animation:watch-target-pulse 1.5s ease-in-out infinite}
+.watch-target-marker.is-hero span{background:#d17b2f}
+@keyframes watch-target-pulse{50%{scale:1.16;box-shadow:0 0 0 7px #ffb05c22}}
 .gps-setup-panel.is-simulation .gps-area-step {
   display: none;
 }

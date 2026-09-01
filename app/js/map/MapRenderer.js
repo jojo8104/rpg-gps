@@ -21,7 +21,7 @@ export class MapRenderer {
     map.on("zoomend", updateZoom);
     updateZoom();
   }
-  render({ heroPosition, heroHeading, accuracy, locations }) {
+  render({ heroPosition, heroHeading, accuracy, locations, gridCells = [] }) {
     const ids = new Set(locations.map((item) => item.id));
     locations.forEach((item) =>
       this.locations.render({
@@ -32,10 +32,9 @@ export class MapRenderer {
     );
     this.locations.removeMissing(ids);
     this.units.render(heroPosition, accuracy, heroHeading);
-    // Terrain and exploration overlays must come from real game data.
-    // Rendering invented geometry around the hero makes the map misleading.
+    // Terrain and exploration overlays come only from real game state.
     this.terrain.render([]);
-    this.fog.render({ heroPosition, enabled: false });
+    this.fog.render({ heroPosition, gridCells });
     this.effects.render(locations);
   }
   setHeroHeading(heading) {

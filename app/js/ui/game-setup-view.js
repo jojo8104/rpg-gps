@@ -40,8 +40,14 @@ export function createQuickGameSetup({
   });
 }
 
-export function createAutomaticHeroChoice() {
-  return { name: "Aldric", classId: "warrior", appearanceId: "knight" };
+export function createAutomaticHeroChoice(classId = "warrior") {
+  const names = { warrior: "Aldric", ranger: "Sylve", mage: "Mériane" };
+  const appearances = { warrior: "knight", ranger: "ranger", mage: "mage" };
+  return {
+    name: names[classId] ?? "Aldric",
+    classId,
+    appearanceId: appearances[classId] ?? "knight",
+  };
 }
 
 export class GameSetupView {
@@ -61,6 +67,55 @@ export class GameSetupView {
       input.addEventListener("change", () => this.updateSummary());
     });
     this.showPage(0);
+  }
+
+  setHeroClasses(heroClasses) {
+    const root = this.root.querySelector("#hero-class-options");
+    if (!root) return;
+    const icons = { warrior: "⚔", ranger: "➶", mage: "✦" };
+    const statLabels = {
+      attack: "Attaque",
+      defense: "Défense",
+      morale: "Moral",
+      mobility: "Mobilité",
+      command: "Commandement",
+      health: "Santé",
+    };
+    const maximums = {
+      attack: 5,
+      defense: 5,
+      morale: 5,
+      mobility: 5,
+      command: 5,
+      health: 25,
+    };
+    root.innerHTML = heroClasses
+      .map(
+        (heroClass, index) => `
+          <label class="hero-class-card">
+            <input type="radio" name="hero-class" value="${heroClass.id}" ${index === 0 ? "checked" : ""}>
+            <span class="hero-class-card__portrait" aria-hidden="true">${icons[heroClass.id] ?? "◆"}</span>
+            <span class="hero-class-card__body">
+              <strong>${heroClass.name}</strong>
+              <span class="hero-class-card__advantage">${heroClass.advantage}</span>
+              <span class="hero-class-card__stats">${Object.entries(
+                heroClass.baseStats,
+              )
+                .map(
+                  ([id, value]) =>
+                    `<span><small>${statLabels[id] ?? id}</small><i><b style="width:${Math.round((value / maximums[id]) * 100)}%"></b></i><em>${value}</em></span>`,
+                )
+                .join("")}</span>
+            </span>
+          </label>`,
+      )
+      .join("");
+    root
+      .querySelectorAll("input")
+      .forEach((input) =>
+        input.addEventListener("change", () => this.updateSummary()),
+      );
+    this.updateSummary();
   }
 
   showPage(index) {
@@ -95,12 +150,19 @@ export class GameSetupView {
     };
   }
 
+  readHeroChoice() {
+    return createAutomaticHeroChoice(
+      this.selectedValue("hero-class", "warrior"),
+    );
+  }
+
   updateSummary() {
     const summary = this.root.querySelector("#setup-summary");
     if (!summary) return;
     const mode = this.selectedValue("test-mode", "simulation");
     const pace = this.selectedValue("travel-pace", "calm");
     const { density, placement } = this.readWorldPreferences();
+    const heroClass = this.selectedValue("hero-class", "warrior");
     const labels = {
       gps: ["Terrain", "Dehors avec le GPS"],
       simulation: ["Terrain", "Simulation à la maison"],
@@ -112,8 +174,11 @@ export class GameSetupView {
       auto: ["Placement", "Automatique"],
       mixed: ["Placement", "Guidé"],
       manual: ["Placement", "Libre"],
+      warrior: ["Héros", "Guerrier"],
+      ranger: ["Héros", "Éclaireur"],
+      mage: ["Héros", "Mage"],
     };
-    summary.innerHTML = [mode, pace, density, placement]
+    summary.innerHTML = [mode, pace, heroClass, density, placement]
       .map(
         (value) =>
           `<div><span>${labels[value][0]}</span><strong>${labels[value][1]}</strong></div>`,
