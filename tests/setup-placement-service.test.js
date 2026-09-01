@@ -128,6 +128,36 @@ test("l'axe de deux indices conserve leur direction pour le lieu suivant", () =>
   assert.ok(position.latitude > secondTrace.latitude);
 });
 
+test("une piste refuse un candidat arrière lorsqu'un candidat avant existe", () => {
+  const service = new SetupPlacementService({ distanceFn: distance });
+  const position = service.findPosition({
+    playArea: area,
+    origin: { latitude: 70, longitude: 0 },
+    preferredDistance: 40,
+    preferredDirectionDegrees: 0,
+    maximumDirectionDeviationDegrees: 80,
+  });
+  assert.ok(position.latitude > 70);
+});
+
+test("la variation aléatoire décale l'axe sans perdre la progression", () => {
+  const service = new SetupPlacementService({
+    distanceFn: distance,
+    randomFn: () => 1,
+  });
+  const origin = { latitude: 0, longitude: 0 };
+  const position = service.findPosition({
+    playArea: area,
+    origin,
+    preferredDistance: 80,
+    preferredDirectionDegrees: 0,
+    directionJitterDegrees: 30,
+    maximumDirectionDeviationDegrees: 45,
+  });
+  const direction = bearingDegrees(origin, position);
+  assert.ok(direction > 0 && direction < 75);
+});
+
 test("les zones interdites sont exclues avant le choix d'un objectif", () => {
   const service = new SetupPlacementService({ distanceFn: distance });
   const forbidden = new PlayArea({

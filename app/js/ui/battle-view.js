@@ -71,6 +71,24 @@ function infantryFormation(type, allied, count) {
   return `<span class="militia-formation ${type}-formation is-${direction}" data-soldiers="${count}" aria-hidden="true">${ranks}</span>`;
 }
 
+export function battleHeroSpriteKind(hero) {
+  return String(hero?.sourceId ?? "").startsWith("autonomous-group-")
+    ? "autonomous"
+    : "player";
+}
+
+export function battleCasualtyCount(event) {
+  return Math.min(
+    24,
+    Math.max(0, (event?.losses ?? 0) + (event?.wounded ?? 0)),
+  );
+}
+
+function heroSprite(hero, allied) {
+  const kind = battleHeroSpriteKind(hero);
+  return `<span class="battle-hero-sprite is-${kind} ${allied ? "is-allied" : "is-enemy"}" aria-hidden="true"></span>`;
+}
+
 export function militiaFormationRows(count) {
   const visibleCount = Math.min(
     24,
@@ -163,10 +181,15 @@ export function renderBattleView({
   const findEntity = (id) =>
     allEntities.find((item) => item.entity.id === id) ?? null;
   const entityIcon = (entity) => {
-    if (entity.kind === "hero") return "<strong>H</strong>";
     const allied =
       battle.teams.find((team) => team.units.includes(entity))?.id ===
       playerTeamId;
+    if (entity.kind === "hero")
+      return heroSprite(
+        entity,
+        battle.teams.find((team) => team.heroes.includes(entity))?.id ===
+          playerTeamId,
+      );
     const spriteTypes = new Set([
       "militia",
       "archer",
@@ -247,12 +270,6 @@ export function renderBattleView({
   const lane = (index) => {
     const laneScale = LANE_PERSPECTIVE[index] ?? 1;
     const laneInset = (1 - laneScale) * 50;
-    const enemyHero = enemy.heroes.find(
-      (hero) => hero.lane === index && hero.state === "active",
-    );
-    const playerHero = player.heroes.find(
-      (hero) => hero.lane === index && hero.state === "active",
-    );
     const enemyUnits = enemy.units.filter(
       (unit) => unit.lane === index && unit.state === "active",
     );
@@ -276,6 +293,7 @@ export function renderBattleView({
     findEntity,
     positionFor,
     battle.state.elapsedMs,
+    playerTeamId,
   );
 
   const powers = commanders
@@ -290,8 +308,15 @@ export function renderBattleView({
         ),
     )
     .join("");
-  const heroHud = (team, side) =>
-    `<div class="battle-hero-hud is-${side}">${team.heroes.map((hero) => `<span class="hero-health ${hero.state !== "active" ? "is-out" : ""}"><b>${hero.name ?? "H"}</b><i role="progressbar" aria-label="${hero.health} PV sur ${hero.maxHealth}" aria-valuemin="0" aria-valuemax="${hero.maxHealth}" aria-valuenow="${hero.health}"><em style="width:${Math.round((hero.health / hero.maxHealth) * 100)}%"></em><small>PV ${hero.health}/${hero.maxHealth}</small></i></span>`).join("")}</div>`;
+  const heroHud = (team, side) => {
+    const allied = team.id === playerTeamId;
+    return `<div class="battle-hero-hud is-${side}">${team.heroes
+      .map((hero) => {
+        const powerTarget = powerTargetIds.has(hero.id);
+        return `<span class="battle-hero-status ${hero.state !== "active" ? "is-out" : ""} ${powerTarget ? "is-power-target" : ""}" ${powerTarget ? `data-power-target="${hero.id}"` : ""}><span class="hero-health"><b>${hero.name ?? "H"}</b><i role="progressbar" aria-label="${hero.health} PV sur ${hero.maxHealth}" aria-valuemin="0" aria-valuemax="${hero.maxHealth}" aria-valuenow="${hero.health}"><em style="width:${Math.round((hero.health / hero.maxHealth) * 100)}%"></em><small>PV ${hero.health}/${hero.maxHealth}</small></i></span>${heroSprite(hero, allied)}</span>`;
+      })
+      .join("")}</div>`;
+  };
   const countdown =
     battle.status === "countdown"
       ? `<div class="battle-countdown" role="status"><strong>${Math.max(1, Math.ceil(battle.state.countdownRemainingMs / 1_000))}</strong><span>Préparez vos lignes</span></div>`
@@ -478,7 +503,13 @@ function findLatestAttacks(battle) {
   return attacks;
 }
 
-function createAttackVisual(events, findEntity, positionFor, elapsedMs) {
+function createAttackVisual(
+  events,
+  findEntity,
+  positionFor,
+  elapsedMs,
+  playerTeamId,
+) {
   if (events.length === 0) return { svg: "", effects: "" };
   const lines = events
     .map((event) => {
@@ -541,9 +572,37 @@ function createAttackVisual(events, findEntity, positionFor, elapsedMs) {
       return `<span class="damage-pop ${target.entity.kind === "hero" ? "is-hero-damage" : "is-unit-loss"}" style="left:${x}%;top:${y}%">${value}</span>`;
     })
     .join("");
+  const casualties = events
+    .map((event) => {
+      const target = findEntity(event.targetId);
+      const count = battleCasualtyCount(event);
+      if (!target || target.entity.kind !== "unit" || count === 0) return "";
+      const position = positionFor(target.entity, target.team);
+      const x = position.x;
+      const y = ((target.entity.lane ?? 1) + position.y / 100) * (100 / 3);
+      const allied = target.team.id === playerTeamId;
+      const casualtyAgeMs = Math.min(
+        2_000,
+        Math.max(0, elapsedMs - event.elapsedMs),
+      );
+      const spriteType = [
+        "militia",
+        "archer",
+        "mounted-archer",
+        "chaos-raider",
+      ].includes(String(target.entity.typeId))
+        ? target.entity.typeId
+        : "militia";
+      return Array.from(
+        { length: count },
+        (_, index) =>
+          `<span class="casualty-piece is-${spriteType} ${allied ? "is-allied" : "is-enemy"}" style="left:${x}%;top:${y}%;--casualty:${index};--casualty-age:-${casualtyAgeMs}ms" aria-hidden="true"></span>`,
+      ).join("");
+    })
+    .join("");
   return {
     svg: `<svg class="attack-overlay" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${lines}</svg>`,
-    effects,
+    effects: effects + casualties,
   };
 }
 

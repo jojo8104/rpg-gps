@@ -698,6 +698,9 @@ body,
 .autonomous-trace-marker.is-red {
   color: #ef655f;
 }
+.autonomous-trace-marker.is-green {
+  color: #69c982;
+}
 .autonomous-trace-marker.is-yellow {
   color: #f1cf62;
 }
@@ -771,6 +774,9 @@ body,
 }
 .autonomous-trace-path.is-red {
   stroke: #ef655f;
+}
+.autonomous-trace-path.is-green {
+  stroke: #69c982;
 }
 .autonomous-trace-path.is-yellow {
   stroke: #f1cf62;

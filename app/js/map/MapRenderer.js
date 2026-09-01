@@ -21,7 +21,15 @@ export class MapRenderer {
     map.on("zoomend", updateZoom);
     updateZoom();
   }
-  render({ heroPosition, heroHeading, accuracy, locations, gridCells = [] }) {
+  render({
+    heroPosition,
+    heroHeading,
+    accuracy,
+    visionRadius,
+    revealedZones = [],
+    locations,
+    gridCells = [],
+  }) {
     const ids = new Set(locations.map((item) => item.id));
     locations.forEach((item) =>
       this.locations.render({
@@ -34,7 +42,7 @@ export class MapRenderer {
     this.units.render(heroPosition, accuracy, heroHeading);
     // Terrain and exploration overlays come only from real game state.
     this.terrain.render([]);
-    this.fog.render({ heroPosition, gridCells });
+    this.fog.render({ heroPosition, gridCells, visionRadius, revealedZones });
     this.effects.render(locations);
   }
   setHeroHeading(heading) {

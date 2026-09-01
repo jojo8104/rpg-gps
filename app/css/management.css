@@ -315,6 +315,15 @@
   color: #718176;
   font-size: 1.1rem;
 }
+
+#hero-content .trait-detail-action {
+  min-height: 30px;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid #a98c52;
+  border-radius: 7px;
+  background: #5f4930;
+  color: #fff2c8;
+}
 #hero-content .hero-equipment {
   padding-top: 0;
   border-top: 0;

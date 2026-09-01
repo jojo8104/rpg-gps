@@ -43,10 +43,14 @@ export function createQuickGameSetup({
 export function createAutomaticHeroChoice(classId = "warrior") {
   const names = { warrior: "Aldric", ranger: "Sylve", mage: "Mériane" };
   const appearances = { warrior: "knight", ranger: "ranger", mage: "mage" };
+  const firstAptitudes = { mage: "offensive_magic" };
   return {
     name: names[classId] ?? "Aldric",
     classId,
     appearanceId: appearances[classId] ?? "knight",
+    ...(firstAptitudes[classId]
+      ? { firstAptitudeId: firstAptitudes[classId] }
+      : {}),
   };
 }
 
@@ -72,7 +76,11 @@ export class GameSetupView {
   setHeroClasses(heroClasses) {
     const root = this.root.querySelector("#hero-class-options");
     if (!root) return;
-    const icons = { warrior: "⚔", ranger: "➶", mage: "✦" };
+    const portraits = {
+      warrior: "assets/portraits/hero-wanderer.png",
+      ranger: "assets/portraits/hero-ranger.png",
+      mage: "assets/portraits/hero-mage.png",
+    };
     const statLabels = {
       attack: "Attaque",
       defense: "Défense",
@@ -94,7 +102,7 @@ export class GameSetupView {
         (heroClass, index) => `
           <label class="hero-class-card">
             <input type="radio" name="hero-class" value="${heroClass.id}" ${index === 0 ? "checked" : ""}>
-            <span class="hero-class-card__portrait" aria-hidden="true">${icons[heroClass.id] ?? "◆"}</span>
+            <span class="hero-class-card__portrait" aria-hidden="true"><img src="${portraits[heroClass.id] ?? portraits.warrior}" alt=""></span>
             <span class="hero-class-card__body">
               <strong>${heroClass.name}</strong>
               <span class="hero-class-card__advantage">${heroClass.advantage}</span>

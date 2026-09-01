@@ -90,6 +90,39 @@
   color: #f4ead1;
   font: inherit;
 }
+.dev-trace-filter {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0.45rem;
+  border: 1px solid #ffffff22;
+  border-radius: 8px;
+}
+.dev-trace-filter legend {
+  padding: 0 0.25rem;
+  color: #d9c384;
+  font-size: 0.62rem;
+}
+.dev-trace-filter label {
+  display: grid;
+  grid-template-columns: auto 0.65rem 1fr;
+  align-items: center;
+  gap: 0.35rem;
+  color: #f4ead1;
+  font-size: 0.7rem;
+}
+.dev-trace-filter input {
+  margin: 0;
+}
+.dev-trace-filter i {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: #a8adb3;
+}
+.dev-trace-filter i.is-blue { background: #62a8ff; }
+.dev-trace-filter i.is-green { background: #69c982; }
+.dev-trace-filter i.is-red { background: #ef655f; }
 .landscape-tools button {
   width: 100%;
   grid-template-columns: 1.4rem 1fr;
@@ -129,6 +162,23 @@
 .map-power-nav .watch-beacon-control:not(:disabled):active {
   background: #2485a0;
 }
+.map-power-nav .mage-power-control {
+  position: static;
+  width: 54px;
+  min-height: 52px;
+  margin: 0;
+  background: #55407f;
+  color: #f5edff;
+  pointer-events: auto;
+}
+.map-power-nav .mage-power-control:not(:disabled):active {
+  background: #765cac;
+}
+.map-power-nav .mage-power-control.is-active {
+  background: #765cac;
+  color: #fff4bd;
+  box-shadow: 0 0 0 2px #d9c38477;
+}
 .map-power-nav .conceal-control.is-active {
   background: #7657a2;
   color: #fff4bd;
@@ -145,8 +195,16 @@
 }
 .game-screen:has(#map-view:not(.is-active)) .map-power-nav .conceal-control,
 .game-screen:has(#bottom-sheet:not([hidden])) .map-power-nav .conceal-control,
-.game-screen:has(#map-view:not(.is-active)) .map-power-nav .watch-beacon-control,
-.game-screen:has(#bottom-sheet:not([hidden])) .map-power-nav .watch-beacon-control {
+.game-screen:has(#map-view:not(.is-active))
+  .map-power-nav
+  .watch-beacon-control,
+.game-screen:has(#bottom-sheet:not([hidden]))
+  .map-power-nav
+  .watch-beacon-control,
+.game-screen:has(#map-view:not(.is-active)) .map-power-nav .mage-power-control,
+.game-screen:has(#bottom-sheet:not([hidden]))
+  .map-power-nav
+  .mage-power-control {
   display: none;
 }
 .game-screen.is-gps-setup .map-chrome {

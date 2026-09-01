@@ -1,5 +1,5 @@
 /** Ressources minimales nécessaires avant que le cache dynamique prenne le relais. */
-const CACHE = "rpg-gps-field-v113";
+const CACHE = "rpg-gps-field-v119";
 const local = (path) => new URL(path, self.location).href;
 const APP_SHELL = [
   local("./"),
@@ -84,6 +84,11 @@ APP_SHELL.push(
 APP_SHELL.push(
   local("./app/js/ui/dialogue-view.js"),
   local("./app/assets/characters/armand-valgrise.png"),
+  local("./app/assets/characters/marshal-aldren.png"),
+  local("./app/assets/portraits/hero-wanderer.png"),
+  local("./app/assets/portraits/hero-ranger.png"),
+  local("./app/assets/portraits/hero-mage.png"),
+  local("./app/assets/effects/fog-cloud.png"),
 );
 APP_SHELL.push(
   local("./app/js/core/item-catalog.js"),
@@ -100,6 +105,7 @@ APP_SHELL.push(
 );
 APP_SHELL.push(local("./app/js/core/setup-placement-service.js"));
 APP_SHELL.push(local("./app/js/core/hero-concealment-service.js"));
+APP_SHELL.push(local("./app/js/core/hero-trace-service.js"));
 APP_SHELL.push(local("./app/js/ui/debug-pause-control.js"));
 APP_SHELL.push(local("./app/js/core/chaos-wave-service.js"));
 APP_SHELL.push(

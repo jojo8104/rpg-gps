@@ -8,6 +8,7 @@ export class AutonomousGroupTrace {
     position,
     soldierCount = 0,
     occupiedCargoSlots = 0,
+    weightBonus = 0,
     directionDegrees = null,
     createdAt,
     decayPerMinute = 1,
@@ -27,6 +28,7 @@ export class AutonomousGroupTrace {
       occupiedCargoSlots,
       "Les slots de cargaison",
     );
+    this.weightBonus = nonNegativeInteger(weightBonus, "Le poids de classe");
     if (!Number.isFinite(concealmentMultiplier) || concealmentMultiplier <= 0)
       throw new RangeError(
         "Le multiplicateur de discrétion de la trace doit être strictement positif.",
@@ -34,7 +36,7 @@ export class AutonomousGroupTrace {
     this.concealmentMultiplier = concealmentMultiplier;
     this.initialDetectionScore = Math.min(
       15,
-      (1 + Math.ceil(this.soldierCount / 10) + this.occupiedCargoSlots) *
+      (1 + Math.ceil(this.soldierCount / 10) + this.occupiedCargoSlots + this.weightBonus) *
         concealmentMultiplier,
     );
     this.directionDegrees = directionDegrees;
@@ -132,6 +134,7 @@ export class AutonomousGroupTrace {
       position: this.position,
       soldierCount: this.soldierCount,
       occupiedCargoSlots: this.occupiedCargoSlots,
+      weightBonus: this.weightBonus,
       directionDegrees: this.directionDegrees,
       createdAt: this.createdAt,
       decayPerMinute: this.decayPerMinute,

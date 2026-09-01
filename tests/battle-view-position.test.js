@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { battleEntityPosition, battleEntityVisualPosition } from "../app/js/ui/battle-view.js";
+import { battleCasualtyCount, battleEntityPosition, battleEntityVisualPosition, battleHeroSpriteKind } from "../app/js/ui/battle-view.js";
 
 const playerTeam = { id: "heroes" };
 const enemyTeam = { id: "enemies" };
@@ -30,4 +30,14 @@ test("la perspective comprime seulement le rendu des lignes du fond", () => {
   assert.equal(foregroundVisual.scale, 1);
   assert.equal(foregroundVisual.y, 38);
   assert.ok(Math.abs(backgroundVisual.x - 50) < Math.abs(foregroundVisual.x - 50));
+});
+
+test("le sprite de héros distingue un joueur d'un groupe autonome", () => {
+  assert.equal(battleHeroSpriteKind({ sourceId: "hero-local" }), "player");
+  assert.equal(battleHeroSpriteKind({ sourceId: "autonomous-group-raiders" }), "autonomous");
+});
+
+test("les blessés et les morts produisent chacun une projection visuelle bornée", () => {
+  assert.equal(battleCasualtyCount({ losses: 2, wounded: 3 }), 5);
+  assert.equal(battleCasualtyCount({ losses: 20, wounded: 20 }), 24);
 });

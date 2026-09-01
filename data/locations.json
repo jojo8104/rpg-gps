@@ -55,7 +55,7 @@
     "defenseSlots": 3,
     "infrastructure": { "walls": 3, "palace": 1 },
     "features": { "healing": true },
-    "chief": { "name": "Maréchal Aldren", "title": "Commandant des armées royales", "greeting": "Le royaume compte sur vous.", "openingLines": ["Le maréchal étudie la carte du royaume.", "Il vous salue brièvement et attend votre rapport."], "trade": false, "tradeLimitPerCycle": 0, "tradeOffers": [], "secondaryQuestIds": [], "dialogues": [] },
+    "chief": { "name": "Maréchal Aldren", "title": "Commandant des armées royales", "portrait": "assets/characters/marshal-aldren.png", "greeting": "Le royaume compte sur vous.", "openingLines": ["Le maréchal étudie la carte du royaume.", "Il vous salue brièvement et attend votre rapport."], "trade": false, "tradeLimitPerCycle": 0, "tradeOffers": [], "secondaryQuestIds": [], "dialogues": [] },
     "qr": { "enabled": false }
   },
   {

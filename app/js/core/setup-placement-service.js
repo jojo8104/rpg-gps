@@ -2,8 +2,9 @@ import { distanceMeters } from "./geo.js";
 
 /** Génère des positions espacées dans une PlayArea, sans dépendance au DOM. */
 export class SetupPlacementService {
-  constructor({ distanceFn = distanceMeters } = {}) {
+  constructor({ distanceFn = distanceMeters, randomFn = Math.random } = {}) {
     this.distanceFn = distanceFn;
+    this.randomFn = randomFn;
   }
 
   generate({ playArea, count, occupied = [], minimumDistance = 0 }) {
@@ -76,6 +77,8 @@ export class SetupPlacementService {
     origin,
     preferredDistance,
     preferredDirectionDegrees = 0,
+    directionJitterDegrees = 0,
+    maximumDirectionDeviationDegrees = 180,
     occupied = [],
     minimumSpacing = 0,
     excludedAreas = [],
@@ -84,7 +87,15 @@ export class SetupPlacementService {
       throw new RangeError("La distance préférée doit être positive ou nulle.");
     if (!Number.isFinite(preferredDirectionDegrees))
       throw new TypeError("La direction préférée doit être un nombre.");
-    const candidates = this.#candidates(playArea)
+    if (!Number.isFinite(directionJitterDegrees) || directionJitterDegrees < 0)
+      throw new RangeError("La variation de direction doit être positive ou nulle.");
+    if (
+      !Number.isFinite(maximumDirectionDeviationDegrees) ||
+      maximumDirectionDeviationDegrees < 0 ||
+      maximumDirectionDeviationDegrees > 180
+    )
+      throw new RangeError("L'écart de direction maximal doit être compris entre 0 et 180 degrés.");
+    const allowedCandidates = this.#candidates(playArea)
       .filter(
         (candidate) => !excludedAreas.some((area) => area.contains(candidate)),
       )
@@ -93,11 +104,21 @@ export class SetupPlacementService {
           (position) => this.distanceFn(position, candidate) >= minimumSpacing,
         ),
       );
-    if (candidates.length === 0)
+    if (allowedCandidates.length === 0)
       throw new RangeError(
         "La PlayArea ne contient aucune position autorisée pour cet objectif.",
       );
-    const direction = normalizeDegrees(preferredDirectionDegrees);
+    const direction = normalizeDegrees(
+      preferredDirectionDegrees +
+        (this.randomFn() * 2 - 1) * directionJitterDegrees,
+    );
+    const forwardCandidates = allowedCandidates.filter(
+      (candidate) =>
+        angularDistance(direction, bearingDegrees(origin, candidate)) <=
+        maximumDirectionDeviationDegrees,
+    );
+    const candidates =
+      forwardCandidates.length > 0 ? forwardCandidates : allowedCandidates;
     return {
       ...candidates
         .map((candidate) => {
