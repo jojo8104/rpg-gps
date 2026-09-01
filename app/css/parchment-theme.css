@@ -121,6 +121,39 @@ select,input,textarea { color:var(--parchment-ink)!important;border-color:#71513
   background:#4a3225!important;
 }
 
+/* Cartouches de terrain : parchemin et bois, sans fond vert sombre. */
+.garrison-summary{
+  color:var(--parchment-ink)!important;
+  border-color:#795737!important;
+  background:linear-gradient(#fff0cc,#e2c18c)!important;
+  box-shadow:inset 0 0 0 1px var(--gold),0 3px 9px #0005!important;
+}
+.garrison-summary small{color:var(--parchment-muted)!important}
+.garrison-summary-slots i:not(.is-occupied){
+  color:#654936!important;
+  border-color:#896748!important;
+  background:#dfc394!important;
+}
+.quest-hud{
+  color:var(--parchment-ink)!important;
+  border-color:#795737!important;
+  background:linear-gradient(#fff0ccf2,#e2c18cf2)!important;
+  box-shadow:inset 0 0 0 1px var(--gold),0 8px 24px #0008!important;
+}
+.quest-hud strong,
+.quest-hud p,
+.quest-hud li{color:var(--parchment-ink)!important}
+.quest-hud__chevron,
+.quest-hud__summary{color:var(--parchment-muted)!important}
+.quest-hud__details li.is-completed{color:var(--success)!important}
+.quest-hud__progress{background:#8d6846!important}
+.quest-hud__progress span{background:#c69b38!important}
+.quest-hud__progress small{color:#fff0c9!important;text-shadow:0 1px 2px #241914}
+.quest-hud.is-ready{
+  border-color:#9b6a25!important;
+  box-shadow:inset 0 0 0 1px #e0ba59,0 8px 24px #0008,0 0 0 3px #c69b3844!important;
+}
+
 /* En paysage, l'identité reprend le parchemin lisible de la vue portrait. */
 @media(orientation:landscape){
   #hero-content .hero-identity>header{

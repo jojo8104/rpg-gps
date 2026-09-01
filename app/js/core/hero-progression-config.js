@@ -65,7 +65,9 @@ export const DEFAULT_HERO_CLASSES = Object.freeze([
       detectionMultiplier: 1.5,
       concealmentMultiplier: 0.65,
       informationLevelBonus: 1,
-      canPrepareAmbush: true,
+      canPlaceWatchBeacon: true,
+      maximumWatchBeacons: 3,
+      watchBeaconRadius: 75,
       ignoresAmbushPenalty: true,
     },
     baseStats: {

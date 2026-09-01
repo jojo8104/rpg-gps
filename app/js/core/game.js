@@ -43,6 +43,7 @@ import { LocationDismantlingService } from "./location-dismantling-service.js";
 import { ResultEvaluationService } from "./result-evaluation-service.js";
 import { TrailState } from "./trail.js";
 import { WorldState } from "./world-state.js";
+import { ScoutWatchBeacon } from "./scout-watch-beacon.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
 export class Game {
@@ -56,6 +57,7 @@ export class Game {
     locations = [],
     autonomousGroups = [],
     autonomousGroupTraces = [],
+    watchBeacons = [],
     coordinateMode = "gps",
     scenarioStartsActive = true,
     scenarioStateSnapshot = null,
@@ -208,6 +210,8 @@ export class Game {
         ? trace
         : new AutonomousGroupTrace(trace),
     );
+    if (!Array.isArray(watchBeacons)) throw new TypeError("Les balises de vigie doivent être une liste.");
+    this.watchBeacons = watchBeacons.map((beacon) => beacon instanceof ScoutWatchBeacon ? beacon : new ScoutWatchBeacon(beacon));
     this.battleLoot = [];
     this.battleSites = [];
   }
@@ -383,9 +387,11 @@ export class Game {
   }
 
   update() {
+    let watchBeaconEvents = [];
     if (this.status === "started" && this.getRemainingTimeMilliseconds() === 0)
       this.finish("time_limit");
     if (this.status === "started") this.advanceAutonomousGroups(this.now());
+    if (this.status === "started") watchBeaconEvents = this.scanWatchBeacons(this.now());
     if (this.status === "started")
       this.locations.forEach((location) =>
         this.locationDismantlingService
@@ -401,6 +407,7 @@ export class Game {
       );
     if (this.status === "started") this.#failExpiredQuestDeadline();
     this.cleanupDynamicSites();
+    return { watchBeaconEvents };
   }
 
   // Déplacement, interception et résolution des groupes non joueurs.
@@ -497,72 +504,41 @@ export class Game {
     return { ...result, event };
   }
 
-  prepareHeroAmbush({
-    playerId,
-    heroId,
-    unitId,
-    position = null,
-    radius = null,
-    durationMs = null,
-  }) {
-    const hero = this.getHero(heroId);
-    const player = this.getPlayer(playerId);
-    if (hero === null || player === null || hero.playerId !== player.id)
-      return { success: false, reason: "hero_not_found" };
+  placeScoutWatchBeacon({ playerId, heroId, position = null, radius = null }) {
+    const hero = this.getHero(heroId); const player = this.getPlayer(playerId);
+    if (hero === null || player === null || hero.playerId !== player.id) return { success: false, reason: "hero_not_found" };
     const features = this.heroClassFeatureService.featuresFor(hero);
-    if (features.canPrepareAmbush !== true)
-      return { success: false, reason: "class_cannot_prepare_ambush" };
-    if (hero.state !== "active" || this.#isHeroBusy(hero.id))
-      return { success: false, reason: "hero_unavailable" };
-    const unit = hero.army.getUnit(unitId);
-    const ambushPosition = position ?? hero.position;
-    if (unit === null) return { success: false, reason: "unit_not_found" };
-    if (!ambushPosition)
-      return { success: false, reason: "hero_position_unknown" };
-    const now = this.now();
-    const ambushRadius = radius ?? features.ambushRadius ?? 75;
-    const ambushDuration = durationMs ?? features.ambushDurationMs ?? 1_800_000;
-    if (
-      !Number.isFinite(ambushRadius) ||
-      ambushRadius <= 0 ||
-      !Number.isFinite(ambushDuration) ||
-      ambushDuration <= 0
-    )
-      return { success: false, reason: "invalid_ambush_configuration" };
-    hero.removeUnit(unit.id);
-    const group = new AutonomousGroup({
-      id: this.idGenerator("hero-ambush"),
-      type: "army",
-      owner: { kind: "player", id: player.id },
-      position: ambushPosition,
-      status: "ambushing",
-      behavior: "aggressive",
-      army: { units: [unit] },
-      detectionMultiplier:
-        this.heroClassFeatureService.detectionMultiplier(hero),
-      concealmentMultiplier:
-        this.heroClassFeatureService.signatureMultiplier(hero),
-      ambush: {
-        radiusMeters: ambushRadius,
-        startedAt: now,
-        expiresAt: now + ambushDuration,
-      },
-      history: [{ type: "hero_ambush_prepared", heroId: hero.id, at: now }],
-    });
-    this.autonomousGroups.push(group);
-    this.eventLog.push({
-      type: "hero_ambush_prepared",
-      heroId: hero.id,
-      unitId: unit.id,
-      groupId: group.id,
-      at: now,
-    });
-    return {
-      success: true,
-      groupId: group.id,
-      unitId: unit.id,
-      expiresAt: now + ambushDuration,
-    };
+    if (features.canPlaceWatchBeacon !== true) return { success: false, reason: "class_cannot_place_watch_beacon" };
+    if (hero.state !== "active" || this.#isHeroBusy(hero.id)) return { success: false, reason: "hero_unavailable" };
+    const beaconPosition = position ?? hero.position; if (!beaconPosition) return { success: false, reason: "hero_position_unknown" };
+    const now = this.now(); const beaconRadius = radius ?? features.watchBeaconRadius ?? 75; const maximum = features.maximumWatchBeacons ?? 3;
+    if (!Number.isFinite(beaconRadius) || beaconRadius <= 0 || !Number.isInteger(maximum) || maximum <= 0) return { success: false, reason: "invalid_watch_beacon_configuration" };
+    const owned = this.watchBeacons.filter((beacon) => beacon.sourceHeroId === hero.id).sort((first, second) => first.placedAt - second.placedAt);
+    const removedBeacon = owned.length >= maximum ? this.watchBeacons.splice(this.watchBeacons.findIndex((beacon) => beacon.id === owned[0].id), 1)[0] : null;
+    const beacon = new ScoutWatchBeacon({ id: this.idGenerator("watch-beacon"), ownerPlayerId: player.id, sourceHeroId: hero.id, position: beaconPosition, radius: beaconRadius, placedAt: now });
+    this.watchBeacons.push(beacon);
+    if (removedBeacon) this.eventLog.push({ type: "watch_beacon_removed", beaconId: removedBeacon.id, sourceHeroId: hero.id, reason: "capacity_rotation", at: now });
+    this.eventLog.push({ type: "watch_beacon_placed", beaconId: beacon.id, sourceHeroId: hero.id, ownerPlayerId: player.id, position: { ...beacon.position }, at: now });
+    return { success: true, beacon: beacon.toJSON(), removedBeaconId: removedBeacon?.id ?? null, count: this.watchBeacons.filter((entry) => entry.sourceHeroId === hero.id).length, maximum };
+  }
+
+  getWatchBeaconsForPlayer(playerId) { return this.watchBeacons.filter((beacon) => beacon.ownerPlayerId === playerId).map((beacon) => beacon.toJSON()); }
+
+  scanWatchBeacons(now = this.now()) {
+    const events = [];
+    for (const beacon of this.watchBeacons) {
+      const targets = [
+        ...this.heroes.filter((candidate) => candidate.state === "active" && candidate.position && candidate.playerId !== beacon.ownerPlayerId).map((candidate) => ({ key: `hero:${candidate.id}`, kind: "hero", id: candidate.id, playerId: candidate.playerId, name: candidate.name, position: { ...candidate.position } })),
+        ...this.autonomousGroups.filter((group) => group.position && !["destroyed", "mission_failed"].includes(group.status) && !(group.owner.kind === "player" && group.owner.id === beacon.ownerPlayerId)).map((group) => ({ key: `autonomous_group:${group.id}`, kind: "autonomous_group", id: group.id, type: group.type, factionId: group.factionId, soldiers: group.army.units.reduce((sum, unit) => sum + unit.combatantCount, 0), position: { ...group.position } })),
+      ].filter((target) => this.#worldDistance(beacon.position, target.position) <= beacon.radius);
+      const previous = new Set(beacon.visibleTargets.map((target) => target.key));
+      for (const target of targets.filter((candidate) => !previous.has(candidate.key))) {
+        const event = { type: "watch_beacon_target_detected", beaconId: beacon.id, sourceHeroId: beacon.sourceHeroId, ownerPlayerId: beacon.ownerPlayerId, target: structuredClone(target), at: now };
+        events.push(event); this.eventLog.push(structuredClone(event));
+      }
+      beacon.visibleTargets = targets.map((target) => structuredClone(target));
+    }
+    return events;
   }
 
   finish(reason = "manual") {
@@ -3054,6 +3030,7 @@ export class Game {
         structuredClone(report),
       ),
       autonomousGroups: this.autonomousGroups.map((group) => group.toJSON()),
+      watchBeacons: this.watchBeacons.map((beacon) => beacon.toJSON()),
       autonomousGroupTraces: this.autonomousGroupTraces.map((trace) =>
         trace.toJSON(),
       ),
@@ -3215,6 +3192,12 @@ export class Game {
         throw new Error("Les unites de depart depassent l'autorite du heros.");
       hero.addUnit(unit);
     });
+  }
+
+  #worldDistance(first, second) {
+    return this.coordinateMode === "simulation"
+      ? Math.hypot(first.latitude - second.latitude, first.longitude - second.longitude)
+      : distanceMeters(first, second);
   }
 
   #isHeroBusy(heroId) {

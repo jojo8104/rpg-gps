@@ -30,11 +30,12 @@ test("la divination révèle uniquement les lieux dans la zone", () => {
   assert.deepEqual(result.revealedLocationIds, ["near"]);
 });
 
-test("l'éclaireur peut détacher une unité dans une embuscade persistante", () => {
-  const setup = { id: "ambush", name: "Embuscade", mode: "quick", scenarioId: "none", playerCount: 1, playArea: { id: "area", name: "Zone", polygon: [{ latitude: 0, longitude: 0 }, { latitude: 0, longitude: 1 }, { latitude: 1, longitude: 0 }] }, participants: [{ playerId: "p", name: "P" }] };
-  const unitDefinitions = [{ id: "scouts", maxQuantity: 10, stats: { attack: 2, defense: 2, speed: 4, range: 1, morale: 4, healthPerSoldier: 10, combatHealthThreshold: 4 }, costs: {} }];
-  let id = 0; const game = new Game({ setup, classDefinitions: classes, heroClasses: [{ id: "ranger", name: "Éclaireur", features: { canPrepareAmbush: true }, startingUnits: [{ typeId: "scouts", quantity: 3 }] }], unitDefinitions, idGenerator: (prefix) => `${prefix}-${++id}` });
-  const ranger = game.chooseHero("p", { name: "R", classId: "ranger" }); game.start(); ranger.updatePosition({ latitude: 0.1, longitude: 0.1 }); const unit = ranger.army.units[0];
-  const result = game.prepareHeroAmbush({ playerId: "p", heroId: ranger.id, unitId: unit.id });
-  assert.equal(result.success, true); assert.equal(ranger.army.units.length, 0); assert.equal(game.getAutonomousGroup(result.groupId).status, "ambushing"); assert.equal(game.getAutonomousGroup(result.groupId).army.units[0].id, unit.id);
+test("l'éclaireur pose trois balises puis la quatrième remplace la plus ancienne", () => {
+  const setup = { id: "watch", name: "Vigies", mode: "quick", scenarioId: "none", playerCount: 2, playArea: { id: "area", name: "Zone", polygon: [{ latitude: 0, longitude: 0 }, { latitude: 0, longitude: 1 }, { latitude: 1, longitude: 0 }] }, participants: [{ playerId: "p1", name: "Éclaireur" }, { playerId: "p2", name: "Intrus" }] };
+  let id = 0; let now = 100; const game = new Game({ setup, heroClasses: [{ id: "ranger", name: "Éclaireur", features: { canPlaceWatchBeacon: true, maximumWatchBeacons: 3, watchBeaconRadius: 10 } }, { id: "warrior", name: "Guerrier" }], coordinateMode: "simulation", now: () => now, idGenerator: (prefix) => `${prefix}-${++id}` });
+  const ranger = game.chooseHero("p1", { name: "R", classId: "ranger" }); const intruder = game.chooseHero("p2", { name: "I", classId: "warrior" }); game.start(); ranger.updatePosition({ latitude: .1, longitude: .1 }); intruder.updatePosition({ latitude: .1, longitude: .1 });
+  const placed = Array.from({ length: 4 }, (_, index) => { now += 1; return game.placeScoutWatchBeacon({ playerId: "p1", heroId: ranger.id, position: { latitude: index, longitude: 0 } }); });
+  assert.ok(placed.every((result) => result.success)); assert.equal(game.watchBeacons.length, 3); assert.equal(placed[3].removedBeaconId, placed[0].beacon.id); assert.equal(game.toJSON().watchBeacons.length, 3);
+  game.addAutonomousGroup({ id: "ga", type: "army", owner: { kind: "faction", id: "chaos" }, factionId: "chaos", position: { latitude: .2, longitude: .1 } });
+  const events = game.scanWatchBeacons(); assert.ok(events.some((event) => event.target.kind === "hero" && event.target.id === intruder.id)); assert.ok(events.some((event) => event.target.kind === "autonomous_group" && event.target.id === "ga")); assert.equal(game.scanWatchBeacons().length, 0);
 });

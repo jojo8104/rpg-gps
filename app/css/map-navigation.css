@@ -117,6 +117,18 @@
   color: #fff;
   pointer-events: auto;
 }
+.map-power-nav .watch-beacon-control {
+  position: static;
+  width: 54px;
+  min-height: 52px;
+  margin: 0;
+  background: #17647a;
+  color: #e9fbff;
+  pointer-events: auto;
+}
+.map-power-nav .watch-beacon-control:not(:disabled):active {
+  background: #2485a0;
+}
 .map-power-nav .conceal-control.is-active {
   background: #7657a2;
   color: #fff4bd;
@@ -132,7 +144,9 @@
   display: none;
 }
 .game-screen:has(#map-view:not(.is-active)) .map-power-nav .conceal-control,
-.game-screen:has(#bottom-sheet:not([hidden])) .map-power-nav .conceal-control {
+.game-screen:has(#bottom-sheet:not([hidden])) .map-power-nav .conceal-control,
+.game-screen:has(#map-view:not(.is-active)) .map-power-nav .watch-beacon-control,
+.game-screen:has(#bottom-sheet:not([hidden])) .map-power-nav .watch-beacon-control {
   display: none;
 }
 .game-screen.is-gps-setup .map-chrome {

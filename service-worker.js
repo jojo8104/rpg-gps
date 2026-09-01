@@ -1,5 +1,5 @@
 /** Ressources minimales nécessaires avant que le cache dynamique prenne le relais. */
-const CACHE = "rpg-gps-field-v110";
+const CACHE = "rpg-gps-field-v113";
 const local = (path) => new URL(path, self.location).href;
 const APP_SHELL = [
   local("./"),
@@ -26,6 +26,7 @@ const APP_SHELL = [
   local("./app/js/position-adapter.js"),
   local("./app/js/device-alerts.js"),
   local("./app/js/field-state-storage.js"),
+  local("./app/js/terrain-profile-storage.js"),
   local("./app/js/wake-lock.js"),
   local("./app/js/ui/game-setup-view.js"),
   local("./app/js/ui/world-view.js"),
@@ -63,6 +64,7 @@ APP_SHELL.push(local("./app/js/core/ambush-service.js"));
 APP_SHELL.push(local("./app/js/core/hero-recovery-service.js"));
 APP_SHELL.push(local("./app/js/core/quest-pace-profile.js"));
 APP_SHELL.push(local("./app/js/core/hero-class-feature-service.js"));
+APP_SHELL.push(local("./app/js/core/scout-watch-beacon.js"));
 APP_SHELL.push(
   local("./app/js/core/quest-runtime.js"),
   local("./app/js/core/scenario-runtime-builder.js"),

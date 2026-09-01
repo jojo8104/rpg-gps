@@ -87,8 +87,12 @@ export class MapView {
     this.autonomousTraces = new Map();
     this.autonomousTraceLines = new Map();
     this.autonomousGroups = new Map();
+    this.watchBeacons = new Map();
+    this.watchTargets = new Map();
     this.playArea = null;
     this.draftArea = null;
+    this.exclusionAreas = L.layerGroup().addTo(this.map);
+    this.exclusionDraft = null;
     this.heatmap = L.layerGroup().addTo(this.map);
   }
 
@@ -99,15 +103,25 @@ export class MapView {
     accuracy = null,
     locations = [],
     autonomousGroups = [],
+    watchBeacons = [],
     autonomousTraces = [],
     playAreaPoints = [],
+    excludedPolygons = [],
+    exclusionDraftPoints = [],
     dynamicSites = [],
     questTraces = [],
     gridCells = [],
     heatmapVisible = true,
   }) {
-    this.renderer.render({ heroPosition, heroHeading, accuracy, locations });
+    this.renderer.render({
+      heroPosition,
+      heroHeading,
+      accuracy,
+      locations,
+      gridCells,
+    });
     this.#area(playAreaPoints);
+    this.#exclusions(excludedPolygons, exclusionDraftPoints);
     dynamicSites.forEach((site) => this.#site(site));
     this.#removeMissing(
       this.dynamicSites,
@@ -129,7 +143,89 @@ export class MapView {
       this.autonomousGroups,
       new Set(autonomousGroups.map((item) => item.id)),
     );
+    watchBeacons.forEach((beacon) => this.#watchBeacon(beacon));
+    this.#removeMissing(
+      this.watchBeacons,
+      new Set(watchBeacons.map((item) => item.id)),
+    );
+    const watchTargets = watchBeacons.flatMap((beacon) =>
+      beacon.visibleTargets.map((target) => ({
+        ...target,
+        watchTargetId: `${beacon.id}:${target.key}`,
+      })),
+    );
+    watchTargets.forEach((target) => this.#watchTarget(target));
+    this.#removeMissing(
+      this.watchTargets,
+      new Set(watchTargets.map((target) => target.watchTargetId)),
+    );
     this.#heatmap(gridCells, heatmapVisible);
+  }
+
+  #watchBeacon(beacon) {
+    const center = asLatLng(beacon.position);
+    const entry = this.watchBeacons.get(beacon.id);
+    const icon = L.divIcon({
+      className: "watch-beacon-marker",
+      html: '<span aria-hidden="true">⌖</span>',
+      iconSize: [34, 34],
+      iconAnchor: [17, 17],
+    });
+    if (!entry) {
+      const radius = L.circle(center, {
+        pane: MapLayers.EXPLORATION,
+        radius: beacon.radius,
+        color: "#64d8ff",
+        weight: 2,
+        dashArray: "6 5",
+        fillColor: "#45bfe8",
+        fillOpacity: 0.12,
+        interactive: false,
+      }).addTo(this.map);
+      const marker = L.marker(center, {
+        pane: MapLayers.EFFECTS,
+        zIndexOffset: 700,
+        icon,
+        interactive: false,
+        title: "Balise de vigie",
+      })
+        .addTo(this.map)
+        .bindTooltip(
+          `Balise de vigie · rayon ${Math.round(beacon.radius)}${this.mode === "gps" ? " m" : ""}`,
+        );
+      this.watchBeacons.set(beacon.id, { marker, radius });
+    } else {
+      entry.marker.setLatLng(center).setIcon(icon);
+      entry.radius.setLatLng(center).setRadius(beacon.radius);
+    }
+  }
+
+  #watchTarget(target) {
+    const center = asLatLng(target.position);
+    const entry = this.watchTargets.get(target.watchTargetId);
+    const heroTarget = target.kind === "hero";
+    const icon = L.divIcon({
+      className: `watch-target-marker is-${heroTarget ? "hero" : "group"}`,
+      html: `<span aria-hidden="true">${heroTarget ? "●" : "⚔"}</span>`,
+      iconSize: [30, 30],
+      iconAnchor: [15, 15],
+    });
+    const label = heroTarget
+      ? (target.name ?? "Joueur détecté")
+      : `Groupe détecté${target.soldiers ? ` · ${target.soldiers}` : ""}`;
+    if (!entry) {
+      const marker = L.marker(center, {
+        pane: MapLayers.UNITS,
+        zIndexOffset: 1100,
+        icon,
+        interactive: false,
+        title: label,
+      })
+        .addTo(this.map)
+        .bindTooltip(label);
+      this.watchTargets.set(target.watchTargetId, { marker });
+    } else
+      entry.marker.setLatLng(center).setIcon(icon).setTooltipContent(label);
   }
 
   // Fabriques Leaflet privées pour les entités dynamiques.
@@ -271,6 +367,10 @@ export class MapView {
         : null;
   }
 
+  setExclusionAreas(polygons) {
+    this.#exclusions(polygons, []);
+  }
+
   focus(position, zoom = this.mode === "gps" ? 18 : 0.5) {
     this.map.flyTo(asLatLng(position), zoom, { duration: 0.35 });
   }
@@ -321,6 +421,63 @@ export class MapView {
           dashArray: "6 6",
         }).addTo(this.map)
       : null;
+  }
+
+  #exclusions(polygons, draftPoints) {
+    this.exclusionAreas.clearLayers();
+    polygons.forEach((points) => {
+      const layer = L.polygon(points.map(asLatLng), {
+        color: "#b32323",
+        weight: 3,
+        dashArray: "8 5",
+        fillColor: "#d52d2d",
+        fillOpacity: 0.28,
+        className: "rpg-exclusion-zone",
+      }).addTo(this.exclusionAreas);
+      this.#applyExclusionHatch(layer);
+    });
+    if (this.exclusionDraft) this.exclusionDraft.remove();
+    this.exclusionDraft = draftPoints.length
+      ? L.polyline(draftPoints.map(asLatLng), {
+          color: "#ff4d4d",
+          weight: 4,
+          dashArray: "5 5",
+        }).addTo(this.map)
+      : null;
+  }
+
+  #applyExclusionHatch(layer) {
+    const element = layer.getElement();
+    const svg = element?.ownerSVGElement;
+    if (!element || !svg) return;
+    const patternId = "rpg-exclusion-hatch";
+    if (!svg.querySelector(`#${patternId}`)) {
+      const namespace = "http://www.w3.org/2000/svg";
+      const defs = document.createElementNS(namespace, "defs");
+      const pattern = document.createElementNS(namespace, "pattern");
+      pattern.setAttribute("id", patternId);
+      pattern.setAttribute("width", "10");
+      pattern.setAttribute("height", "10");
+      pattern.setAttribute("patternUnits", "userSpaceOnUse");
+      pattern.setAttribute("patternTransform", "rotate(35)");
+      const background = document.createElementNS(namespace, "rect");
+      background.setAttribute("width", "10");
+      background.setAttribute("height", "10");
+      background.setAttribute("fill", "#d52d2d");
+      background.setAttribute("fill-opacity", "0.18");
+      const stripe = document.createElementNS(namespace, "line");
+      stripe.setAttribute("x1", "0");
+      stripe.setAttribute("y1", "0");
+      stripe.setAttribute("x2", "0");
+      stripe.setAttribute("y2", "10");
+      stripe.setAttribute("stroke", "#c51f1f");
+      stripe.setAttribute("stroke-width", "4");
+      pattern.append(background, stripe);
+      defs.append(pattern);
+      svg.prepend(defs);
+    }
+    element.setAttribute("fill", `url(#${patternId})`);
+    element.setAttribute("fill-opacity", "1");
   }
 
   #site(site) {
@@ -386,7 +543,7 @@ export class MapView {
           interactive: false,
           icon: L.divIcon({
             className: "heatmap-count",
-            html: String(cell.visits),
+            html: `<span>${cell.visits}</span>`,
             iconSize: [22, 18],
             iconAnchor: [11, 9],
           }),

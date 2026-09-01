@@ -25,6 +25,10 @@ import { GpsTracker } from "./gps.js";
 import { OrientationTracker } from "./orientation.js";
 import { normalizePosition } from "./position-adapter.js";
 import { loadFieldState, saveFieldState } from "./field-state-storage.js";
+import {
+  loadTerrainProfile,
+  saveTerrainProfile,
+} from "./terrain-profile-storage.js";
 import { DeviceAlerts } from "./device-alerts.js";
 import { ScreenAwake } from "./wake-lock.js";
 import { HERO_COMMAND_RANKS, UNIT_RANKS } from "./core/rank-system.js";
@@ -39,10 +43,7 @@ import { buildLocationIntel } from "./core/location-intel.js";
 import { renderLocationDetail, renderWorldDirectory } from "./ui/world-view.js";
 import { renderBattleResultView } from "./ui/battle-result-view.js";
 import { HeroArmyModifier } from "./core/hero-army-modifier.js";
-import {
-  createAutomaticHeroChoice,
-  GameSetupView,
-} from "./ui/game-setup-view.js";
+import { GameSetupView } from "./ui/game-setup-view.js";
 import { renderGarrisonSheet } from "./ui/garrison-sheet.js";
 import { renderUnitTypeIcon } from "./ui/unit-icon.js";
 import { CheatService } from "./core/cheat-service.js";
@@ -176,8 +177,6 @@ const ui = {
   gpsSetup: $("#gps-setup-panel"),
   gpsAreaStatus: $("#gps-area-status"),
   gpsLocationButtons: $("#gps-location-buttons"),
-  locationTypeOptions: $("#location-type-options"),
-  autonomousTypeOptions: $("#autonomous-type-options"),
   finishGpsSetup: $("#finish-gps-setup"),
 };
 if (PLAYTEST_EDITION) {
@@ -193,7 +192,6 @@ if (PLAYTEST_EDITION) {
   $("#gps-setup-panel h2").textContent = "Configurer la zone de jeu";
   $("#gps-setup-panel .gps-area-step p").textContent =
     "Tracez votre zone GPS réelle, puis placez les six lieux nécessaires à la partie.";
-  $("#gps-setup-panel .setup-placement-block h3").textContent = "Votre camp";
   $("#finish-gps-setup").textContent = "Commencer l’aventure";
 }
 document
@@ -337,6 +335,14 @@ concealButton.innerHTML =
 concealButton.hidden = true;
 $(".map-power-nav").append(concealButton);
 concealButton.onclick = launchPreparedAmbush;
+const watchBeaconButton = document.createElement("button");
+watchBeaconButton.id = "watch-beacon-action";
+watchBeaconButton.className = "map-power-action watch-beacon-control";
+watchBeaconButton.type = "button";
+watchBeaconButton.innerHTML = '<span aria-hidden="true">⌖</span><small>Vigie 0/3</small>';
+watchBeaconButton.hidden = true;
+$(".map-power-nav").append(watchBeaconButton);
+watchBeaconButton.onclick = placeWatchBeacon;
 const setupPlacementService = new SetupPlacementService({
   distanceFn: (first, second) =>
     mode === "gps"
@@ -638,7 +644,7 @@ function start() {
   });
   if (!PLAYTEST_EDITION) game.configureQuestSequence(QUEST_SEQUENCE);
   rangePolicy = new LocationRangePolicy(game.setup.locationSetup.rangePolicy);
-  hero = game.chooseHero("local", createAutomaticHeroChoice());
+  hero = game.chooseHero("local", setupView.readHeroChoice());
   if (!PLAYTEST_EDITION) {
     enemyHero = game.chooseHero("bandits", {
       name: "Rask le brigand",
@@ -699,8 +705,6 @@ function start() {
   ui.game.classList.add("is-gps-setup");
   ui.gpsSetup.classList.toggle("is-simulation", mode === "simulation");
   ui.gpsSetup.hidden = false;
-  renderPlacementOptions();
-  if (!PLAYTEST_EDITION) applySetupWorldPreferences();
   renderGpsLocationButtons();
   if (mode === "simulation") {
     validatedPlayArea = new PlayArea({
@@ -716,7 +720,8 @@ function start() {
     game.setup.playArea = validatedPlayArea;
     mapView.setPlayArea(validatedPlayArea.polygon);
     ui.gpsAreaStatus.textContent =
-      "Zone maison agrandie prête. Configure puis génère le monde.";
+      "Zone maison agrandie prête. Le monde utilise vos choix précédents.";
+    applyWorldSetup();
     render();
     setTimeout(() => mapView.map.invalidateSize(), 0);
     return;
@@ -1306,7 +1311,8 @@ function mappedLocations({ knownOnly = true } = {}) {
 
 // Horloge du monde, production et comportement des groupes autonomes.
 function runProductionCycle() {
-  game.update();
+  const worldUpdate = game.update();
+  handleWatchBeaconEvents(worldUpdate.watchBeaconEvents);
   checkSimulationAutonomousAggression();
   syncAutonomousBattle();
   game.cleanupDynamicSites();
@@ -1598,6 +1604,7 @@ function applyPosition(position) {
     }
   }
   hero.updatePosition(asGps(heroPosition));
+  if (game.status === "started") handleWatchBeaconEvents(game.scanWatchBeacons());
   const motion = heroConcealmentService.update({
     position: asGps(heroPosition),
     accuracy: gpsAccuracy ?? 0,
@@ -2291,9 +2298,9 @@ function inspectQuestTrace(traceId) {
 
 function confirmScenarioPlacement() {
   if (!pendingScenarioPlacementSlotId) return;
-  if (validatedPlayArea?.contains(asGps(heroPosition)) !== true) {
+  if (validatedPlayArea?.allowsPlacement(asGps(heroPosition)) !== true) {
     locationMessage =
-      "Impossible de placer ce lieu de quête hors de la zone de jeu.";
+      "Impossible de placer ce lieu de quête hors de la zone autorisée.";
     logTest(locationMessage);
     render();
     return;
@@ -2328,13 +2335,22 @@ function confirmScenarioPlacement() {
 function handleMapClick(position) {
   const point =
     mode === "gps" ? position : [position.latitude, position.longitude];
+  if (interactionMode === "draw-exclusion") {
+    field.addExclusionPoint(asGps(point));
+    $("#gps-finish-exclusion").disabled =
+      field.exclusionDraftPoints.length < 3;
+    ui.gpsAreaStatus.textContent =
+      `${field.exclusionDraftPoints.length} sommet(s) pour l’exclusion.`;
+    render();
+    return;
+  }
   if (interactionMode?.startsWith("setup-manual:")) {
     const key = interactionMode.slice("setup-manual:".length);
     const task = manualSetupPlacements.get(key);
     const gpsPoint = asGps(point);
-    if (!task || validatedPlayArea?.contains(gpsPoint) !== true) {
+    if (!task || validatedPlayArea?.allowsPlacement(gpsPoint) !== true) {
       ui.gpsAreaStatus.textContent =
-        "Le placement doit rester à l’intérieur de la zone de jeu.";
+        "Le placement doit rester dans la zone autorisée, hors des exclusions.";
       return;
     }
     if (task.kind === "location") {
@@ -2350,9 +2366,9 @@ function handleMapClick(position) {
     return;
   }
   if (interactionMode === "place-start-capital") {
-    if (validatedPlayArea?.contains(asGps(point)) !== true) {
+    if (validatedPlayArea?.allowsPlacement(asGps(point)) !== true) {
       ui.gpsAreaStatus.textContent =
-        "La capitale doit être placée à l’intérieur de la zone validée.";
+        "La capitale doit rester dans la zone autorisée, hors des exclusions.";
       return;
     }
     moveLocation("royal-capital", point);
@@ -2375,9 +2391,9 @@ function handleMapClick(position) {
   }
   if (interactionMode?.startsWith("place-location:")) {
     const id = interactionMode.slice("place-location:".length);
-    if (validatedPlayArea?.contains(asGps(point)) !== true) {
+    if (validatedPlayArea?.allowsPlacement(asGps(point)) !== true) {
       ui.gpsAreaStatus.textContent = validatedPlayArea
-        ? "Ce lieu doit être placé à l’intérieur de la zone de jeu."
+        ? "Ce lieu doit rester dans la zone autorisée, hors des exclusions."
         : "Valide d’abord la zone de jeu avant de placer un lieu.";
       return;
     }
@@ -2389,8 +2405,8 @@ function handleMapClick(position) {
     return;
   }
   if (interactionMode === "place-location") {
-    if (validatedPlayArea?.contains(asGps(point)) !== true) {
-      logTest("Placement refusé hors de la zone de jeu.");
+    if (validatedPlayArea?.allowsPlacement(asGps(point)) !== true) {
+      logTest("Placement refusé hors de la zone autorisée.");
       return;
     }
     moveLocation("bandit-camp", point);
@@ -2425,7 +2441,7 @@ function moveLocation(id, position) {
   mapView.focus(position);
   return true;
 }
-function renderPlacementOptions() {
+function automaticPlacementConfiguration() {
   const requiredIds = new Set(
     game.scenarioLocationBindings.map((binding) => binding.locationId),
   );
@@ -2440,98 +2456,36 @@ function renderPlacementOptions() {
         .map((location) => location.type),
     ),
   ];
-  const locationLabels = {
-    camp: "Camps",
-    city: "Villes",
-    forest: "Forêts",
-    fort: "Forts",
-    gold_mine: "Mines d’or",
-    iron_mine: "Mines de fer",
-    "lumber-camp": "Camps de bûcherons",
-    mine: "Mines",
-    quarry: "Carrières",
-    resource: "Ressources",
-    ruins: "Ruines",
-    village: "Villages",
-  };
-  ui.locationTypeOptions.innerHTML = types
-    .map((type) => {
-      const minimum = Math.max(
-        1,
-        game.locations.filter(
-          (location) => location.type === type && requiredIds.has(location.id),
-        ).length,
-      );
-      return `<div class="placement-option" data-location-type="${type}"><strong>${locationLabels[type] ?? type}</strong><label>Nombre<input type="number" min="${minimum}" max="10" value="${minimum}"></label><label>Placement<select><option value="auto">Automatique</option><option value="manual">Manuel</option></select></label></div>`;
-    })
-    .join("");
-  const labels = {
-    rogue: "Rôdeurs",
-    army: "Armée",
-    messenger: "Messagers",
-    convoy: "Convoi",
-    prospecting: "Prospecteurs",
-  };
-  ui.autonomousTypeOptions.innerHTML = [
-    "rogue",
-    "army",
-    "messenger",
-    "convoy",
-    "prospecting",
-  ]
-    .map(
-      (type) =>
-        `<div class="placement-option" data-autonomous-type="${type}"><strong>${labels[type]}</strong><label>Nombre<input type="number" min="0" max="10" value="0"></label><label>Placement<select><option value="auto">Automatique</option><option value="manual">Manuel</option></select></label></div>`,
-    )
-    .join("");
-  if (PLAYTEST_EDITION) {
-    $("#capital-placement-mode").value = "manual";
-    ui.locationTypeOptions.querySelectorAll("select").forEach((select) => {
-      select.value = "manual";
-    });
-    ui.locationTypeOptions.querySelectorAll("input").forEach((input) => {
-      input.readOnly = true;
-    });
-    ui.autonomousTypeOptions.closest(".setup-placement-block").hidden = true;
-    $("#apply-world-setup").textContent = "Préparer les six placements";
-  }
-}
-function applySetupWorldPreferences() {
   const { density, placement } = setupView.readWorldPreferences();
   const densityBonus = { low: 0, balanced: 1, high: 2 }[density] ?? 1;
-  const capitalMode = placement === "auto" ? "auto" : "manual";
-  $("#capital-placement-mode").value = capitalMode;
-  ui.locationTypeOptions.querySelectorAll(".placement-option").forEach((row) => {
-    const input = row.querySelector("input");
-    const minimum = Number(input.min || 0);
-    input.value = Math.min(Number(input.max || 10), minimum + densityBonus);
-    row.querySelector("select").value = placement === "manual" ? "manual" : "auto";
-  });
-  ui.autonomousTypeOptions.querySelectorAll(".placement-option").forEach((row) => {
-    const input = row.querySelector("input");
-    input.value = density === "low" ? 0 : density === "high" ? 2 : 1;
-    row.querySelector("select").value = placement === "manual" ? "manual" : "auto";
-  });
-  if (placement === "mixed") {
-    ui.locationTypeOptions.querySelectorAll("select").forEach((select, index) => {
-      if (index < 2) select.value = "manual";
-    });
-  }
-}
-function placementRows(selector, attribute) {
-  return [...document.querySelectorAll(selector)].map((row) => {
-    const input = row.querySelector("input");
-    const count = Math.max(
-      Number(input.min || 0),
-      Math.min(Number(input.max || Infinity), Number(input.value) || 0),
+  const locationModes = types.map((type, index) => {
+    const minimum = Math.max(
+      1,
+      game.locations.filter(
+        (location) => location.type === type && requiredIds.has(location.id),
+      ).length,
     );
-    input.value = count;
     return {
-      type: row.dataset[attribute],
-      count,
-      placement: row.querySelector("select").value,
+      type,
+      count: Math.min(10, minimum + densityBonus),
+      placement:
+        placement === "manual" || (placement === "mixed" && index < 2)
+          ? "manual"
+          : "auto",
     };
   });
+  const autonomousCount = density === "low" ? 0 : density === "high" ? 2 : 1;
+  return {
+    capitalMode: placement === "auto" ? "auto" : "manual",
+    locations: locationModes,
+    autonomous: ["rogue", "army", "messenger", "convoy", "prospecting"].map(
+      (type) => ({
+        type,
+        count: autonomousCount,
+        placement: placement === "manual" ? "manual" : "auto",
+      }),
+    ),
+  };
 }
 function addSetupAutonomousGroup(type, index, position) {
   const id = `setup-${type}-${index + 1}`;
@@ -2588,7 +2542,8 @@ function applyWorldSetup() {
       occupied,
       minimumDistance,
     })[0];
-  if ($("#capital-placement-mode").value === "auto") {
+  const configuration = automaticPlacementConfiguration();
+  if (configuration.capitalMode === "auto") {
     const position = placeAutomatically();
     occupied.push(position);
     enabledGpsLocationIds.add("royal-capital");
@@ -2610,7 +2565,7 @@ function applyWorldSetup() {
   const requiredIds = new Set(
     game.scenarioLocationBindings.map((binding) => binding.locationId),
   );
-  for (const config of placementRows("[data-location-type]", "locationType")) {
+  for (const config of configuration.locations) {
     const templates = game.locations
       .filter((location) => location.type === config.type)
       .sort(
@@ -2653,10 +2608,7 @@ function applyWorldSetup() {
         });
     });
   }
-  for (const config of placementRows(
-    "[data-autonomous-type]",
-    "autonomousType",
-  ))
+  for (const config of configuration.autonomous)
     for (let index = 0; index < config.count; index += 1) {
       if (config.placement === "auto") {
         const position = placeAutomatically();
@@ -2717,9 +2669,8 @@ function validatePlayArea() {
   applyPosition(heroPosition);
   const message = `Zone validée · ${(validatedPlayArea.getAreaSquareMeters() / 10_000).toFixed(1)} ha · ${playAreaGrid.cells.length} cellules de 15 m × 15 m.`;
   if (gpsSetupActive) {
-    ui.gpsAreaStatus.textContent = `${message} Configure puis génère les placements.`;
-    ui.finishGpsSetup.disabled = true;
-    renderGpsLocationButtons();
+    ui.gpsAreaStatus.textContent = `${message} Préparation du monde…`;
+    applyWorldSetup();
   }
   logTest(message);
 }
@@ -3760,6 +3711,20 @@ function useAstralTravel() {
   } else logTest(`Voyage astral impossible : ${result.reason}.`);
   render();
 }
+function handleWatchBeaconEvents(events = []) {
+  const unique = new Map(events.filter((event) => event.ownerPlayerId === hero?.playerId).map((event) => [event.target.key, event]));
+  [...unique.values()].forEach((event) => {
+    const target = event.target; const label = target.kind === "hero" ? (target.name ?? "Un joueur") : `Un groupe autonome${target.soldiers ? ` de ${target.soldiers} soldats` : ""}`;
+    deviceAlerts.notify("notice"); logTest(`Vigie : ${label} entre dans la zone de surveillance.`);
+  });
+}
+function placeWatchBeacon() {
+  const owned = game.getWatchBeaconsForPlayer(hero.playerId).filter((beacon) => beacon.sourceHeroId === hero.id); const replacing = owned.length >= 3;
+  if (!window.confirm(`${replacing ? "La plus ancienne balise sera retirée. " : ""}Poser une balise de vigie à votre position ?`)) return;
+  const result = game.placeScoutWatchBeacon({ playerId: hero.playerId, heroId: hero.id, position: asGps(heroPosition), radius: mode === "gps" ? 75 : 8 });
+  if (result.success) logTest(`Balise de vigie posée · ${result.count}/${result.maximum}${result.removedBeaconId ? " · l’ancienne balise a été retirée" : ""}.`); else logTest(`Pose impossible : ${result.reason}.`);
+  render();
+}
 function filteredDirectoryLocations() {
   const search = worldFilters.search.trim().toLocaleLowerCase("fr");
   const locations = directoryLocations().filter(
@@ -3947,8 +3912,11 @@ function render() {
     accuracy: gpsAccuracy,
     locations: mappedLocations(),
     autonomousGroups: visibleAutonomousGroups(),
+    watchBeacons: game.getWatchBeaconsForPlayer(hero.playerId),
     autonomousTraces: visibleAutonomousTraces(),
     playAreaPoints: field.playAreaPoints,
+    excludedPolygons: field.excludedPolygons,
+    exclusionDraftPoints: field.exclusionDraftPoints,
     dynamicSites: sites,
     questTraces: visibleQuestTraces(),
     gridCells: playAreaGrid?.cells ?? [],
@@ -3967,6 +3935,11 @@ function render() {
     : preparedHeroAmbush
       ? "Embuscade préparée"
       : "Préparer l’embuscade";
+  const activeWatchBeacons = game.getWatchBeaconsForPlayer(hero.playerId).filter((beacon) => beacon.sourceHeroId === hero.id).length;
+  watchBeaconButton.hidden = hero.classId !== "ranger" || hero.state !== "active";
+  watchBeaconButton.disabled = Boolean(activeBattle && activeBattle.status !== "finished");
+  watchBeaconButton.title = activeWatchBeacons >= 3 ? "Poser une nouvelle balise et retirer automatiquement la plus ancienne" : "Poser une balise de vigie à votre position";
+  watchBeaconButton.innerHTML = `<span aria-hidden="true">⌖</span><small>Vigie ${activeWatchBeacons}/3</small>`;
   const player = game.getPlayer("local");
   const heroClass = data.heroClasses.find((item) => item.id === hero.classId);
   const heroModifiers = HeroArmyModifier.calculate({
@@ -4059,7 +4032,9 @@ function render() {
   const classActions =
     hero.classId === "mage"
       ? `<section class="trait-section"><h4>Pouvoirs de carte</h4><div class="trait-list"><button type="button" class="trait-chip" data-class-action="divination"><span class="trait-icon">◉</span><span>Divination<small>Révèle la zone</small></span></button><button type="button" class="trait-chip" data-class-action="astral-travel"><span class="trait-icon">✧</span><span>Voyage astral<small>Portée temporaire</small></span></button></div><p class="text-muted">Aura : +1 PV par cycle aux héros alliés à moins de 100 m.</p></section>`
-      : "";
+      : hero.classId === "ranger"
+        ? `<section class="trait-section"><h4>Surveillance</h4><div class="trait-list"><button type="button" class="trait-chip" data-class-action="watch-beacon"><span class="trait-icon">⌖</span><span>Poser une balise de vigie<small>${game.getWatchBeaconsForPlayer(hero.playerId).filter((beacon) => beacon.sourceHeroId === hero.id).length}/3 actives</small></span></button></div><p class="text-muted">Révèle et signale les joueurs ou groupes autonomes entrant dans sa zone.</p></section>`
+        : "";
   ui.heroContent.innerHTML = `<article class="hero-card compact-hero-card"><section class="hero-bars"><button type="button" class="hero-progress health-progress hero-stat-trigger ${selectedHeroStat === "health" ? "is-selected" : ""}" data-hero-stat="health" aria-expanded="${selectedHeroStat === "health"}" aria-label="${hero.health} PV sur ${hero.maxHealth}"><span style="width:${healthPercent}%"></span><small>PV ${hero.health}/${hero.maxHealth}</small></button><button type="button" class="hero-progress experience-progress ${progress.canLevelUp || hero.pendingLevelUps.length ? "is-level-up-ready" : ""}" data-open-hero-progress aria-label="${progress.canLevelUp ? "Niveau disponible" : `${levelExperience} XP sur ${progress.xpToNextLevel}`}"><span style="width:${experiencePercent}%"></span><small>${progress.canLevelUp ? "✦ Niveau disponible" : `XP ${levelExperience}/${progress.xpToNextLevel || levelExperience}`}</small></button></section><section class="hero-identity"><img class="hero-portrait" src="assets/portraits/hero-wanderer.png" alt="Portrait de ${hero.name}"><header><div><h3>${hero.name}</h3><span class="eyebrow hero-rank"><span>${heroClass?.name ?? hero.classId}</span><span>${rankLabel(HERO_COMMAND_RANKS, hero.commandRank)}- LvL ${hero.level}</span></span></div><span class="hero-state">${hero.state}</span></header></section><section class="hero-stat-panel" aria-label="Statistiques du héros"><div class="compact-hero-stats">${statButton("attack", signed(heroModifiers.attackBonus))}${statButton("defense", signed(heroModifiers.defenseBonus))}${statButton("morale", signed(heroModifiers.moraleBonus))}${statButton("mobility", `×${heroModifiers.speedMultiplier.toFixed(2)}`)}${statButton("command", `◆ ${hero.commandPoints}/${hero.maxCommandPoints}`)}<div><strong>${hero.army.units.length}/${hero.maxUnitStacks}</strong><span>Unités</span></div><div><strong>${usedBagSlots}/${bagSlotCapacity}</strong><span>Bagages</span></div></div>${statDetail}</section><section class="hero-aptitudes" aria-label="Aptitudes et pouvoirs du héros"><div class="trait-list">${traitSlots}</div>${traitDetail}</section><div class="hero-equipment" aria-label="Équipement du héros"></div></article>`;
   ui.heroContent
     .querySelector(".compact-hero-stats")
@@ -4117,6 +4092,9 @@ function render() {
   ui.heroContent
     .querySelector('[data-class-action="astral-travel"]')
     ?.addEventListener("click", useAstralTravel);
+  ui.heroContent
+    .querySelector('[data-class-action="watch-beacon"]')
+    ?.addEventListener("click", placeWatchBeacon);
   bindEquipmentView(ui.heroContent, {
     onEquip: (packageId, slot) => {
       const result = game.equipHeroItem({
@@ -4196,15 +4174,6 @@ function render() {
       "afterbegin",
       '<button type="button" class="army-detail-back secondary-button" data-army-back>← Retour aux armées</button>',
     );
-  if (hero.classId === "ranger")
-    ui.armyContent
-      .querySelectorAll(".army-card__actions")
-      .forEach((actions) =>
-        actions.insertAdjacentHTML(
-          "afterbegin",
-          `<button type="button" class="secondary-button" data-prepare-ambush="${actions.closest("[data-army-unit]").dataset.armyUnit}">Cacher en embuscade</button>`,
-        ),
-      );
   const toggleArmyCard = (card) => {
     expandedArmyUnitId =
       card.getAttribute("aria-expanded") === "true"
@@ -4251,31 +4220,6 @@ function render() {
         logTest(`${result.unit.name ?? result.unit.typeId} a été dissoute.`);
         render();
       }
-    }),
-  );
-  ui.armyContent.querySelectorAll("[data-prepare-ambush]").forEach((button) =>
-    button.addEventListener("click", () => {
-      const unit = hero.army.getUnit(button.dataset.prepareAmbush);
-      if (
-        !unit ||
-        !window.confirm(
-          `Cacher ${unit.name ?? unit.typeId} ici pendant 30 minutes ? L’unité quittera temporairement l’armée et attaquera automatiquement un ennemi entrant dans la zone.`,
-        )
-      )
-        return;
-      const result = game.prepareHeroAmbush({
-        playerId: hero.playerId,
-        heroId: hero.id,
-        unitId: unit.id,
-        position: asGps(heroPosition),
-        radius: mode === "gps" ? 75 : 8,
-      });
-      logTest(
-        result.success
-          ? `${unit.name ?? unit.typeId} est caché en embuscade.`
-          : `Embuscade impossible : ${result.reason}.`,
-      );
-      render();
     }),
   );
   [...ui.armyContent.querySelectorAll(".army-card")].forEach((card, index) => {
@@ -4654,6 +4598,63 @@ $("#gps-draw-area").onclick = () => {
   ui.gpsAreaStatus.textContent =
     "Tracé actif : touche la carte pour poser les sommets.";
 };
+$("#gps-draw-exclusion").onclick = () => {
+  if (field.playAreaPoints.length < 3) {
+    ui.gpsAreaStatus.textContent =
+      "Trace d’abord la limite extérieure avec au moins trois sommets.";
+    return;
+  }
+  field.exclusionDraftPoints = [];
+  interactionMode = "draw-exclusion";
+  $("#gps-finish-exclusion").disabled = true;
+  ui.gpsAreaStatus.textContent =
+    "Exclusion active : touche la carte pour dessiner son contour.";
+  render();
+};
+$("#gps-finish-exclusion").onclick = () => {
+  try {
+    field.completeExclusion();
+    interactionMode = null;
+    $("#gps-finish-exclusion").disabled = true;
+    ui.gpsAreaStatus.textContent =
+      `${field.excludedPolygons.length} zone(s) d’exclusion définie(s).`;
+    if (validatedPlayArea) validatePlayArea();
+    else render();
+  } catch (error) {
+    ui.gpsAreaStatus.textContent = error.message;
+  }
+};
+$("#gps-clear-exclusions").onclick = () => {
+  field.clearExclusions();
+  interactionMode = null;
+  $("#gps-finish-exclusion").disabled = true;
+  if (validatedPlayArea) validatePlayArea();
+  else render();
+  ui.gpsAreaStatus.textContent = "Toutes les exclusions ont été effacées.";
+};
+$("#save-terrain-profile").onclick = () => {
+  try {
+    if (!validatedPlayArea) validatePlayArea();
+    saveTerrainProfile(validatedPlayArea);
+    ui.gpsAreaStatus.textContent =
+      `Carte sauvegardée avec ${validatedPlayArea.polygon.length} points GPS et ${validatedPlayArea.excludedPolygons.length} exclusion(s).`;
+  } catch (error) {
+    ui.gpsAreaStatus.textContent = error.message;
+  }
+};
+$("#load-terrain-profile").onclick = () => {
+  try {
+    const profile = loadTerrainProfile();
+    if (!profile) throw new Error("Aucune carte sauvegardée sur cet appareil.");
+    field.loadTerrain(profile.playArea);
+    validatePlayArea();
+    mapView.focus(field.playAreaPoints[0]);
+    ui.gpsAreaStatus.textContent =
+      `Carte chargée · ${field.playAreaPoints.length} points GPS · ${field.excludedPolygons.length} exclusion(s).`;
+  } catch (error) {
+    ui.gpsAreaStatus.textContent = error.message;
+  }
+};
 $("#gps-clear-area").onclick = () => {
   field.clearPlayArea();
   validatedPlayArea = null;
@@ -4677,7 +4678,6 @@ $("#gps-validate-area").onclick = () => {
     ui.gpsAreaStatus.textContent = error.message;
   }
 };
-$("#apply-world-setup").onclick = applyWorldSetup;
 ui.finishGpsSetup.onclick = () => {
   if (!capitalPlaced || manualSetupPlacements.size > 0 || !validatedPlayArea)
     return;
@@ -4722,6 +4722,7 @@ window.addEventListener("resize", () => {
 
 try {
   data = await loadData();
+  setupView.setHeroClasses(data.heroClasses);
   ui.status.textContent = "";
   ui.create.disabled = false;
 } catch (error) {

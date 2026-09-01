@@ -1,40 +1,113 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { PlayArea } from "../app/js/core/play-area.js";
-import { SetupPlacementService, bearingDegrees } from "../app/js/core/setup-placement-service.js";
+import {
+  SetupPlacementService,
+  bearingDegrees,
+} from "../app/js/core/setup-placement-service.js";
 
-const area = new PlayArea({ id: "setup-area", name: "Zone", polygon: [{ latitude: -89, longitude: -179 }, { latitude: -89, longitude: 179 }, { latitude: 89, longitude: 179 }, { latitude: 89, longitude: -179 }] });
-const distance = (first, second) => Math.hypot(first.latitude - second.latitude, first.longitude - second.longitude);
+const area = new PlayArea({
+  id: "setup-area",
+  name: "Zone",
+  polygon: [
+    { latitude: -89, longitude: -179 },
+    { latitude: -89, longitude: 179 },
+    { latitude: 89, longitude: 179 },
+    { latitude: 89, longitude: -179 },
+  ],
+});
+const distance = (first, second) =>
+  Math.hypot(
+    first.latitude - second.latitude,
+    first.longitude - second.longitude,
+  );
 
 test("le placement automatique reste dans la zone et espace les éléments", () => {
   const service = new SetupPlacementService({ distanceFn: distance });
-  const positions = service.generate({ playArea: area, count: 6, minimumDistance: 24 });
-  assert.equal(positions.every((position) => area.contains(position)), true);
-  positions.forEach((position, index) => positions.slice(index + 1).forEach((other) => assert.ok(distance(position, other) >= 24)));
+  const positions = service.generate({
+    playArea: area,
+    count: 6,
+    minimumDistance: 24,
+  });
+  assert.equal(
+    positions.every((position) => area.contains(position)),
+    true,
+  );
+  positions.forEach((position, index) =>
+    positions
+      .slice(index + 1)
+      .forEach((other) => assert.ok(distance(position, other) >= 24)),
+  );
 });
 
 test("le placement automatique tient compte des positions déjà occupées", () => {
   const service = new SetupPlacementService({ distanceFn: distance });
   const occupied = [{ latitude: 16.666, longitude: 16.666 }];
-  const [position] = service.generate({ playArea: area, count: 1, occupied, minimumDistance: 24 });
+  const [position] = service.generate({
+    playArea: area,
+    count: 1,
+    occupied,
+    minimumDistance: 24,
+  });
   assert.ok(distance(position, occupied[0]) >= 24);
+});
+
+test("le placement automatique évite les exclusions du terrain", () => {
+  const excludedArea = new PlayArea({
+    id: "excluded-center",
+    name: "Terrain",
+    polygon: [
+      { latitude: 0, longitude: 0 },
+      { latitude: 0, longitude: 1 },
+      { latitude: 1, longitude: 1 },
+      { latitude: 1, longitude: 0 },
+    ],
+    excludedPolygons: [
+      [
+        { latitude: 0.2, longitude: 0.2 },
+        { latitude: 0.2, longitude: 0.8 },
+        { latitude: 0.8, longitude: 0.8 },
+        { latitude: 0.8, longitude: 0.2 },
+      ],
+    ],
+  });
+  const positions = new SetupPlacementService().generate({
+    playArea: excludedArea,
+    count: 6,
+  });
+  assert.ok(
+    positions.every((position) => excludedArea.allowsPlacement(position)),
+  );
 });
 
 test("un objectif proposé hors zone est ramené à l'intérieur de la PlayArea", () => {
   const service = new SetupPlacementService({ distanceFn: distance });
-  const position = service.resolveInside({ playArea: area, preferred: { latitude: 89.5, longitude: 179.5 }, origin: { latitude: 0, longitude: 0 } });
+  const position = service.resolveInside({
+    playArea: area,
+    preferred: { latitude: 89.5, longitude: 179.5 },
+    origin: { latitude: 0, longitude: 0 },
+  });
   assert.equal(area.contains(position), true);
 });
 
 test("un objectif dont la latitude calculée dépasse les limites GPS est ramené dans la PlayArea", () => {
   const service = new SetupPlacementService({ distanceFn: distance });
-  const position = service.resolveInside({ playArea: area, preferred: { latitude: 124, longitude: 220 } });
+  const position = service.resolveInside({
+    playArea: area,
+    preferred: { latitude: 124, longitude: 220 },
+  });
   assert.equal(area.contains(position), true);
 });
 
 test("une quête choisit directement un candidat valide selon distance et direction", () => {
-  const service = new SetupPlacementService({ distanceFn: distance }); const origin = { latitude: 0, longitude: 0 };
-  const position = service.findPosition({ playArea: area, origin, preferredDistance: 80, preferredDirectionDegrees: 90 });
+  const service = new SetupPlacementService({ distanceFn: distance });
+  const origin = { latitude: 0, longitude: 0 };
+  const position = service.findPosition({
+    playArea: area,
+    origin,
+    preferredDistance: 80,
+    preferredDirectionDegrees: 90,
+  });
   assert.equal(area.contains(position), true);
   assert.ok(position.longitude > 0);
   assert.ok(Math.abs(distance(origin, position) - 80) < 35);
@@ -45,15 +118,35 @@ test("l'axe de deux indices conserve leur direction pour le lieu suivant", () =>
   const secondTrace = { latitude: 45.001, longitude: 5 };
   const direction = bearingDegrees(firstTrace, secondTrace);
   const service = new SetupPlacementService({ distanceFn: distance });
-  const position = service.findPosition({ playArea: area, origin: secondTrace, preferredDistance: 40, preferredDirectionDegrees: direction });
+  const position = service.findPosition({
+    playArea: area,
+    origin: secondTrace,
+    preferredDistance: 40,
+    preferredDirectionDegrees: direction,
+  });
   assert.ok(direction < 1 || direction > 359);
   assert.ok(position.latitude > secondTrace.latitude);
 });
 
 test("les zones interdites sont exclues avant le choix d'un objectif", () => {
   const service = new SetupPlacementService({ distanceFn: distance });
-  const forbidden = new PlayArea({ id: "forbidden", name: "Bâtiment fermé", polygon: [{ latitude: -20, longitude: 40 }, { latitude: -20, longitude: 179 }, { latitude: 20, longitude: 179 }, { latitude: 20, longitude: 40 }] });
-  const position = service.findPosition({ playArea: area, origin: { latitude: 0, longitude: 0 }, preferredDistance: 80, preferredDirectionDegrees: 90, excludedAreas: [forbidden] });
+  const forbidden = new PlayArea({
+    id: "forbidden",
+    name: "Bâtiment fermé",
+    polygon: [
+      { latitude: -20, longitude: 40 },
+      { latitude: -20, longitude: 179 },
+      { latitude: 20, longitude: 179 },
+      { latitude: 20, longitude: 40 },
+    ],
+  });
+  const position = service.findPosition({
+    playArea: area,
+    origin: { latitude: 0, longitude: 0 },
+    preferredDistance: 80,
+    preferredDirectionDegrees: 90,
+    excludedAreas: [forbidden],
+  });
   assert.equal(area.contains(position), true);
   assert.equal(forbidden.contains(position), false);
 });

@@ -247,6 +247,14 @@
   stroke-dasharray: 3 8;
   filter: drop-shadow(0 0 9px #000);
 }
+.rpg-fog--out-of-sight {
+  fill: #080b0a;
+  fill-opacity: 0.48;
+}
+.rpg-fog--undiscovered {
+  fill: #020303;
+  fill-opacity: 0.5;
+}
 .rpg-gps-accuracy {
   fill: #6cb2dc;
   fill-opacity: 0.07;
