@@ -1,15 +1,29 @@
 import { HERO_EQUIPMENT_SLOTS } from "../core/equipment-service.js";
 import { getItemDefinition } from "../core/item-catalog.js";
 
-export function renderEquipmentView({ hero }) {
+export function renderEquipmentView({ hero, openSlotId = null }) {
   const equipmentSlots = HERO_EQUIPMENT_SLOTS.map((slot) =>
     equipmentSlot(hero, slot),
   ).join("");
-  return `<section class="hero-equipment-panel" aria-label="Équipement du héros"><div class="hero-equipment-layout"><div class="hero-equipment-silhouette" aria-hidden="true"><svg viewBox="0 0 180 420" role="presentation"><circle cx="90" cy="45" r="31"/><path d="M60 88 Q90 72 120 88 L139 190 L119 247 L112 399 L72 399 L65 247 L42 190 Z"/><path d="M55 105 L20 218 L42 229 L72 151 M125 105 L160 218 L138 229 L108 151"/><path d="M68 245 L47 397 L78 397 L91 274 L102 397 L133 397 L112 245"/></svg></div><div class="hero-equipment-slots">${equipmentSlots}</div></div><aside class="equipment-slot-menu" hidden></aside></section>`;
+  const openSlot = HERO_EQUIPMENT_SLOTS.find((slot) => slot.id === openSlotId);
+  const menu = openSlot ? equipmentMenu(hero, openSlot) : "";
+  return `<section class="hero-equipment-panel" aria-label="Équipement du héros"><div class="hero-equipment-layout"><div class="hero-equipment-silhouette" aria-hidden="true"><svg viewBox="0 0 180 420" role="presentation"><circle cx="90" cy="45" r="31"/><path d="M60 88 Q90 72 120 88 L139 190 L119 247 L112 399 L72 399 L65 247 L42 190 Z"/><path d="M55 105 L20 218 L42 229 L72 151 M125 105 L160 218 L138 229 L108 151"/><path d="M68 245 L47 397 L78 397 L91 274 L102 397 L133 397 L112 245"/></svg></div><div class="hero-equipment-slots">${equipmentSlots}</div></div><aside class="equipment-slot-menu" data-equipment-menu-slot="${openSlotId ?? ""}" ${openSlot ? "" : "hidden"}>${menu}</aside></section>`;
 }
 
-export function bindEquipmentView(element, { onEquip, onUnequip }) {
+export function bindEquipmentView(element, { onEquip, onUnequip, onMenuChange = () => {} }) {
   const menu = element.querySelector(".equipment-slot-menu");
+  const bindMenu = () => {
+    const slotId = menu.dataset.equipmentMenuSlot;
+    menu.querySelector(".equipment-menu-close")?.addEventListener("click", () => {
+      menu.hidden = true;
+      onMenuChange(null);
+    });
+    menu.querySelectorAll("[data-equip-package]").forEach((choice) =>
+      choice.addEventListener("click", () => onEquip(choice.dataset.equipPackage, slotId)),
+    );
+    menu.querySelector("[data-remove-equipment]")?.addEventListener("click", () => onUnequip(slotId));
+  };
+  if (!menu.hidden) bindMenu();
   element.querySelectorAll("[data-equipment-slot]").forEach((button) =>
     button.addEventListener("click", () => {
       const slotId = button.dataset.equipmentSlot;
@@ -18,24 +32,18 @@ export function bindEquipmentView(element, { onEquip, onUnequip }) {
       );
       const current = button.dataset.currentItem;
       menu.innerHTML = `<button type="button" class="equipment-menu-close" aria-label="Fermer">×</button><div>${choices.map(equipmentChoice).join("")}${current ? `<button type="button" class="equipment-menu-choice is-remove" data-remove-equipment="${slotId}"><span>−</span><strong>Retirer</strong></button>` : ""}</div>`;
+      menu.dataset.equipmentMenuSlot = slotId;
       menu.hidden = false;
-      menu
-        .querySelector(".equipment-menu-close")
-        .addEventListener("click", () => {
-          menu.hidden = true;
-        });
-      menu
-        .querySelectorAll("[data-equip-package]")
-        .forEach((choice) =>
-          choice.addEventListener("click", () =>
-            onEquip(choice.dataset.equipPackage, slotId),
-          ),
-        );
-      menu
-        .querySelector("[data-remove-equipment]")
-        ?.addEventListener("click", () => onUnequip(slotId));
+      onMenuChange(slotId);
+      bindMenu();
     }),
   );
+}
+
+function equipmentMenu(hero, slot) {
+  const state = equipmentSlotState(hero, slot);
+  const choices = state.available.map((entry) => ({ id: entry.id, itemId: entry.itemId, name: entry.definition.name, icon: entry.definition.icon, modifiers: modifierLabel(entry.definition.modifiers) }));
+  return `<button type="button" class="equipment-menu-close" aria-label="Fermer">×</button><div>${choices.map(equipmentChoice).join("")}${state.definition ? `<button type="button" class="equipment-menu-choice is-remove" data-remove-equipment="${slot.id}"><span>−</span><strong>Retirer</strong></button>` : ""}</div>`;
 }
 
 function equipmentSlot(hero, slot) {

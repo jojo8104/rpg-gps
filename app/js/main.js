@@ -145,7 +145,12 @@ traceFilter.innerHTML = `<legend>Traces visibles</legend>${[
   ["green", "Alliés"],
   ["red", "Ennemis"],
   ["gray", "Non reconnues"],
-].map(([color, label]) => `<label><input type="checkbox" value="${color}" checked><i class="is-${color}"></i><span>${label}</span></label>`).join("")}`;
+]
+  .map(
+    ([color, label]) =>
+      `<label><input type="checkbox" value="${color}" checked><i class="is-${color}"></i><span>${label}</span></label>`,
+  )
+  .join("")}`;
 $("#landscape-tools").insertBefore(traceFilter, $("#close-game-menu"));
 traceFilter.addEventListener("change", (event) => {
   const input = event.target.closest('input[type="checkbox"]');
@@ -156,7 +161,8 @@ traceFilter.addEventListener("change", (event) => {
 });
 const fogControl = document.createElement("label");
 fogControl.className = "dev-fog-control";
-fogControl.innerHTML = '<input type="checkbox" checked><span>Brouillard de guerre</span>';
+fogControl.innerHTML =
+  '<input type="checkbox" checked><span>Brouillard de guerre</span>';
 $("#landscape-tools").insertBefore(fogControl, traceFilter);
 fogControl.querySelector("input").addEventListener("change", (event) => {
   fogVisible = event.currentTarget.checked;
@@ -164,7 +170,8 @@ fogControl.querySelector("input").addEventListener("change", (event) => {
 });
 const heatmapControl = document.createElement("label");
 heatmapControl.className = "dev-fog-control";
-heatmapControl.innerHTML = '<input type="checkbox" checked><span>Heatmap</span>';
+heatmapControl.innerHTML =
+  '<input type="checkbox" checked><span>Heatmap</span>';
 $("#landscape-tools").insertBefore(heatmapControl, traceFilter);
 heatmapControl.querySelector("input").addEventListener("change", (event) => {
   heatmapVisible = event.currentTarget.checked;
@@ -335,6 +342,7 @@ let worldMessage = "";
 let worldSelectedLocationId = null;
 let selectedHeroTrait = null;
 let selectedHeroStat = null;
+let selectedEquipmentSlotId = null;
 let heroLevelUpWasReady = false;
 let expandedArmyUnitId = null;
 const worldFilters = { search: "", type: "", owner: "", sort: "distance" };
@@ -1088,6 +1096,31 @@ function locationDefenseSnapshot(location) {
   };
 }
 
+function recruitmentUnavailableMessage(result) {
+  const messages = {
+    insufficient_authority: "Autorité insuffisante.",
+    hero_not_at_location: "Le héros doit être présent dans ce lieu.",
+    recruitment_not_available: "Le recrutement n'est pas disponible ici.",
+    unit_not_available: "Ce type d'unité n'est pas disponible.",
+    army_full: "L'armée ne peut plus accueillir d'unité.",
+    unknown_unit_type: "Ce type d'unité est inconnu.",
+    insufficient_recruits: "Aucune recrue disponible.",
+    insufficient_resources: `Ressources insuffisantes${result.missingResources?.length ? ` : ${result.missingResources.join(", ")}` : ""}.`,
+  };
+  return (
+    messages[result.reason] ?? `Recrutement impossible : ${result.reason}.`
+  );
+}
+
+function serviceActionDetails(result) {
+  return {
+    costs: { ...(result.costs ?? {}) },
+    unavailableReason: result.success
+      ? null
+      : recruitmentUnavailableMessage(result),
+  };
+}
+
 function mappedLocations({ knownOnly = true } = {}) {
   const player = game.getPlayer("local");
   const heroClass = data.heroClasses.find(
@@ -1121,6 +1154,12 @@ function mappedLocations({ knownOnly = true } = {}) {
         );
         location.recruitment.availableUnitTypeIds.forEach((type) => {
           const definition = game.unitDefinitions.get(type);
+          const availability = game.getRecruitmentAvailability({
+            playerId: player.id,
+            heroId: hero.id,
+            locationId: location.id,
+            unitTypeId: type,
+          });
           actions.push({
             id: `recruit:${type}`,
             label: `Recruter ${definition?.name ?? type}`,
@@ -1131,6 +1170,9 @@ function mappedLocations({ knownOnly = true } = {}) {
               capacity: location.recruitment.capacity,
               stats: definition ? { ...definition.stats } : {},
               costs: definition ? { ...definition.costs } : {},
+              unavailableReason: availability.success
+                ? null
+                : recruitmentUnavailableMessage(availability),
             },
           });
         });
@@ -1143,14 +1185,35 @@ function mappedLocations({ knownOnly = true } = {}) {
             (location.recruitment.stock[unit.typeId] ?? 0) > 0,
         )
       )
-        actions.push({ id: "complete-units", label: "Compléter les unités" });
+        actions.push({
+          id: "complete-units",
+          label: "Compléter les effectifs",
+          details: serviceActionDetails(
+            game.getHeroUnitCompletionQuote({
+              playerId: player.id,
+              heroId: hero.id,
+              locationId: location.id,
+            }),
+          ),
+        });
       if (
         can("heal") &&
         hero.army.units.some((unit) =>
           unit.soldierHealth.some((health) => health < unit.healthPerSoldier),
         )
       )
-        actions.push({ id: "heal-units", label: "Soigner (1 unité de temps)" });
+        actions.push({
+          id: "heal-units",
+          label: "Soigner (1 unité de temps)",
+          details: serviceActionDetails(
+            game.getHeroUnitHealingQuote({
+              playerId: player.id,
+              heroId: hero.id,
+              locationId: location.id,
+              timeUnits: 1,
+            }),
+          ),
+        });
       if (can("manageReserves")) {
         const resourceIds = new Set(
           [
@@ -1401,16 +1464,15 @@ function runProductionCycle() {
 }
 
 function visibleAutonomousGroups() {
-  const detected = autonomousGroupDetectionService
-    .detect({
-      observer: {
-        position: asGps(heroPosition),
-        detectionMultiplier:
-          game.heroClassFeatureService.detectionMultiplier(hero),
-      },
-      groups: game.autonomousGroups,
-      baseRadius: mode === "gps" ? 15 : 22,
-    })
+  const detected = autonomousGroupDetectionService.detect({
+    observer: {
+      position: asGps(heroPosition),
+      detectionMultiplier:
+        game.heroClassFeatureService.detectionMultiplier(hero),
+    },
+    groups: game.autonomousGroups,
+    baseRadius: mode === "gps" ? 15 : 22,
+  });
   const divination = game.heroClassFeatureService.activeDivination(hero);
   if (divination)
     game.autonomousGroups
@@ -1438,12 +1500,12 @@ function visibleAutonomousGroups() {
         });
       });
   return detected.map((group) => ({
-      ...group,
-      position:
-        mode === "simulation"
-          ? [group.position.latitude, group.position.longitude]
-          : group.position,
-    }));
+    ...group,
+    position:
+      mode === "simulation"
+        ? [group.position.latitude, group.position.longitude]
+        : group.position,
+  }));
 }
 function worldDistance(first, second) {
   return mode === "gps"
@@ -2286,13 +2348,13 @@ function syncQuestTrace() {
     game.autonomousGroupTraces.some((trace) => trace.id === definition.id)
   )
     return;
-  const previousTrace =
-    definition.id.endsWith("-2")
-      ? game.autonomousGroupTraces.find((trace) =>
-          trace.id === definition.id.replace(/-2$/, "-1"),
-        )
-      : null;
-  const preferredDirection = previousTrace?.directionDegrees ?? definition.direction;
+  const previousTrace = definition.id.endsWith("-2")
+    ? game.autonomousGroupTraces.find(
+        (trace) => trace.id === definition.id.replace(/-2$/, "-1"),
+      )
+    : null;
+  const preferredDirection =
+    previousTrace?.directionDegrees ?? definition.direction;
   const origin = asGps(heroPosition);
   const position = setupPlacementService.findPosition({
     playArea: validatedPlayArea ?? game.setup.playArea,
@@ -3844,8 +3906,7 @@ function activateDivinationAt(center) {
   const result = game.heroClassFeatureService.divine(hero, {
     player: game.getPlayer("local"),
     locations,
-    distanceFn: (first, second) =>
-      worldDistance(first, second),
+    distanceFn: (first, second) => worldDistance(first, second),
     center,
   });
   interactionMode = null;
@@ -3865,8 +3926,7 @@ function activateDivinationAt(center) {
       ? `Divination : zone révélée pendant ${Math.round(result.durationMs / 1000)} secondes · ${result.revealedLocationIds.length} nouveau(x) lieu(x).`
       : `Divination impossible : ${classPowerFailure(result)}.`,
   );
-  if (result.success)
-    setTimeout(() => render(), result.durationMs + 50);
+  if (result.success) setTimeout(() => render(), result.durationMs + 50);
   render();
 }
 function useAstralTravel() {
@@ -4138,8 +4198,7 @@ function render() {
     ghostReturnNotice.innerHTML = `<strong>Vous êtes un fantôme</strong><span>Retournez à ${heroBase?.name ?? "votre point de réapparition"} pour reprendre forme avec la moitié de vos PV.</span>`;
   syncQuestBattlefield();
   const sites = visibleSites();
-  const activeDivination =
-    game.heroClassFeatureService.activeDivination(hero);
+  const activeDivination = game.heroClassFeatureService.activeDivination(hero);
   mapView.render({
     heroPosition,
     heroHeading,
@@ -4370,8 +4429,7 @@ function render() {
       ...trait,
       icon: trait.type === "skill" ? "✦" : "◆",
       name:
-        aptitude?.name ??
-        trait.id.replaceAll("_", " ").replaceAll("-", " "),
+        aptitude?.name ?? trait.id.replaceAll("_", " ").replaceAll("-", " "),
       summary: hero.aptitudeRanks[trait.id] ?? "",
       description:
         aptitude?.description ??
@@ -4420,7 +4478,7 @@ function render() {
       `<div><strong>${authority.used}/${authority.maximum}</strong><span>Autorité</span></div>`,
     );
   ui.heroContent.querySelector(".hero-equipment").innerHTML =
-    renderEquipmentView({ hero });
+    renderEquipmentView({ hero, openSlotId: selectedEquipmentSlotId });
   const pending = hero.pendingLevelUps[0];
   if (pending)
     ui.heroContent.querySelector(".experience-progress small").textContent =
@@ -4463,6 +4521,9 @@ function render() {
     .querySelector('[data-class-action="watch-beacon"]')
     ?.addEventListener("click", placeWatchBeacon);
   bindEquipmentView(ui.heroContent, {
+    onMenuChange: (slotId) => {
+      selectedEquipmentSlotId = slotId;
+    },
     onEquip: (packageId, slot) => {
       const result = game.equipHeroItem({
         playerId: hero.playerId,
@@ -4475,6 +4536,7 @@ function render() {
           ? `${result.itemId} équipé sur ${result.slot}.`
           : `Équipement impossible : ${result.reason}.`,
       );
+      selectedEquipmentSlotId = null;
       render();
     },
     onUnequip: (slot) => {
@@ -4488,6 +4550,7 @@ function render() {
           ? `${result.itemId} replacé dans les bagages.`
           : `Retrait impossible : ${result.reason}.`,
       );
+      selectedEquipmentSlotId = null;
       render();
     },
   });

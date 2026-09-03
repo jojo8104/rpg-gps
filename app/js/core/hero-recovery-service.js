@@ -1,4 +1,4 @@
-export const HERO_NATURAL_HEAL_PER_CYCLE = 1;
+export const HERO_NATURAL_HEAL_PER_CYCLE = 0;
 export const HERO_REVIVE_HEALTH_RATIO = 0.5;
 
 /** Règles de récupération du héros, indépendantes de la carte et du DOM. */
@@ -7,8 +7,8 @@ export class HeroRecoveryService {
     naturalHealPerCycle = HERO_NATURAL_HEAL_PER_CYCLE,
     reviveHealthRatio = HERO_REVIVE_HEALTH_RATIO,
   } = {}) {
-    if (!Number.isFinite(naturalHealPerCycle) || naturalHealPerCycle <= 0)
-      throw new RangeError("Le soin naturel par cycle doit être positif.");
+    if (!Number.isFinite(naturalHealPerCycle) || naturalHealPerCycle < 0)
+      throw new RangeError("Le soin naturel par cycle ne peut pas être négatif.");
     if (
       !Number.isFinite(reviveHealthRatio) ||
       reviveHealthRatio <= 0 ||
@@ -48,7 +48,8 @@ export class HeroRecoveryService {
         ? 0
         : Math.max(1, healingLocation.infrastructure?.healing_tent ?? 0);
     const locationHealing = healingLevel * cycles;
-    const restoredHealth = hero.recoverHealth(naturalHealing + locationHealing);
+    const healing = naturalHealing + locationHealing;
+    const restoredHealth = healing > 0 ? hero.recoverHealth(healing) : 0;
     return {
       heroId: hero.id,
       restoredHealth,

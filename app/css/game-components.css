@@ -143,6 +143,7 @@ body,
 .inventory-panel {
   display: grid;
   gap: 0.8rem;
+  padding: max(0.65rem, env(safe-area-inset-top)) max(0.65rem, env(safe-area-inset-right)) max(0.65rem, env(safe-area-inset-bottom)) max(0.65rem, env(safe-area-inset-left));
 }
 .inventory-panel > header,
 .inventory-panel > footer {
@@ -200,6 +201,87 @@ body,
 }
 .inventory-warning {
   color: #e28b78;
+}
+.inventory-item-dialog {
+  width: min(90vw, 430px);
+  max-height: min(82svh, 560px);
+  padding: 0;
+  overflow: visible;
+  border: 1px solid #5b4029;
+  border-radius: 18px;
+  background: #ead09f;
+  color: #21160f;
+  box-shadow: inset 0 0 0 2px #b89155, 0 18px 60px #000b;
+}
+.inventory-item-dialog::backdrop {
+  background: #080604b8;
+  backdrop-filter: blur(2px);
+}
+.inventory-item-detail {
+  position: relative;
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: repeating-linear-gradient(0deg, transparent 0 31px, #8e653714 32px), linear-gradient(110deg, #fff0cc, #dfbb80);
+  border-radius: inherit;
+}
+.inventory-item-detail__close {
+  position: absolute;
+  z-index: 2;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 34px;
+  height: 34px;
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+  background: #39271c;
+  color: #fff0cc;
+  font-size: 1.35rem;
+}
+.inventory-item-detail > header {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.8rem;
+  padding-right: 2.5rem;
+}
+.inventory-item-detail__icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border: 1px solid #6f5034;
+  border-radius: 14px;
+  background: radial-gradient(circle, #fff1cc, #b98a50);
+  font-size: 2rem;
+}
+.inventory-item-detail h3,
+.inventory-item-detail h4,
+.inventory-item-detail p {
+  margin: 0;
+}
+.inventory-item-detail header small {
+  color: #71543b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.inventory-item-detail header strong {
+  display: block;
+  margin-top: 0.2rem;
+  color: #5e412b;
+  font-size: 0.75rem;
+}
+.inventory-item-detail > section {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.7rem;
+  border: 1px solid #9f7649;
+  border-radius: 10px;
+  background: #fff0c099;
+}
+.inventory-item-detail p {
+  line-height: 1.45;
 }
 .stock-manager {
   display: grid;

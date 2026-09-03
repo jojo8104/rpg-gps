@@ -159,7 +159,7 @@ export function renderLocationDetail({
       !action.id.startsWith("settle-population:") &&
       !action.id.startsWith("build-improvement:"),
   );
-  const actionButtons = `${recruitActions.length ? '<button type="button" data-open-action-menu="recruit" aria-expanded="false">Recruter</button>' : ""}${reserveActions.length ? '<button type="button" data-open-action-menu="reserves" aria-expanded="false">Gérer les réserves</button>' : ""}${improvementActions.length ? '<button type="button" data-open-action-menu="improvements" aria-expanded="false">Améliorations</button>' : ""}${directActions.map((action) => `<button type="button" data-action="${action.id}">${action.label}</button>`).join("")}`;
+  const actionButtons = `${recruitActions.length ? '<button type="button" data-open-action-menu="recruit" aria-expanded="false">Recruter</button>' : ""}${reserveActions.length ? '<button type="button" data-open-action-menu="reserves" aria-expanded="false">Gérer les réserves</button>' : ""}${improvementActions.length ? '<button type="button" data-open-action-menu="improvements" aria-expanded="false">Améliorations</button>' : ""}${directActions.map(serviceActionButton).join("")}`;
   const recruitMenu = recruitActions.length
     ? `<div class="location-action-menu" data-action-menu="recruit" hidden><div class="action-menu-heading"><h4>Recruter une unité</h4><button type="button" class="secondary-button" data-close-action-menu>Fermer</button></div><div class="recruit-options">${recruitActions
         .map((action) => {
@@ -170,7 +170,8 @@ export function renderLocationDetail({
               .filter(([, amount]) => amount > 0)
               .map(([id, amount]) => `${amount} ${id}`)
               .join(" · ") || "Gratuit";
-          return `<article class="recruit-option"><div><strong>${details.name ?? action.label}</strong><span>${details.available ?? 0} recrue(s) disponible(s)</span></div><p>ATQ ${stats.attack ?? "?"} · DÉF ${stats.defense ?? "?"} · VIT ${stats.speed ?? "?"} · POR ${stats.range ?? "?"} · MOR ${stats.morale ?? "?"}</p><footer><span>${costs}</span><button type="button" data-action="${action.id}">Recruter</button></footer></article>`;
+          const unavailable = details.unavailableReason;
+          return `<article class="recruit-option${unavailable ? " is-unavailable" : ""}"><div><strong>${details.name ?? action.label}</strong><span>${details.available ?? 0} recrue(s) disponible(s)</span></div><p>ATQ ${stats.attack ?? "?"} · DÉF ${stats.defense ?? "?"} · VIT ${stats.speed ?? "?"} · POR ${stats.range ?? "?"} · MOR ${stats.morale ?? "?"}</p>${unavailable ? `<p class="recruit-unavailable" role="status">${unavailable}</p>` : ""}<footer><span>${costs}</span><button type="button" data-action="${action.id}" ${unavailable ? `disabled title="${unavailable}"` : ""}>Recruter</button></footer></article>`;
         })
         .join("")}</div></div>`
     : "";
@@ -364,6 +365,15 @@ export function compactLocationDescription(value, maximumLength = 150) {
   const excerpt = text.slice(0, Math.max(1, maximumLength - 1));
   const boundary = excerpt.lastIndexOf(" ");
   return `${excerpt.slice(0, boundary > maximumLength * 0.6 ? boundary : excerpt.length).trimEnd()}…`;
+}
+
+function serviceActionButton(action) {
+  const costs = Object.entries(action.details?.costs ?? {})
+    .filter(([, amount]) => amount > 0)
+    .map(([id, amount]) => `${amount} ${id}`)
+    .join(" · ");
+  const unavailable = action.details?.unavailableReason;
+  return `<button type="button" data-action="${action.id}" ${unavailable ? `disabled title="${unavailable}"` : ""}><span>${action.label}</span>${costs ? `<small>${costs}</small>` : ""}${unavailable ? `<small>${unavailable}</small>` : ""}</button>`;
 }
 
 function improvementCard(action) {

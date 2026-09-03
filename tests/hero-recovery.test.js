@@ -8,10 +8,10 @@ const playArea = { id: "area", name: "Zone", polygon: [{ latitude: 0, longitude:
 const setupFor = (players) => ({ id: "recovery", name: "Récupération", mode: "quick", scenarioId: "none", playerCount: players.length, playArea, participants: players.map((id) => ({ playerId: id, name: id })) });
 const baseLocation = { id: "base", name: "Refuge", type: "fort", roles: ["spawn"], source: "test", position: { latitude: 0, longitude: 0 }, ownerId: "p1", infrastructure: { healing_tent: 2 }, features: { healing: true } };
 
-test("un héros actif récupère naturellement mais un ghost reste à zéro", () => {
+test("aucun héros ne récupère naturellement de PV", () => {
   const service = new HeroRecoveryService();
   const hero = new Hero({ id: "hero", playerId: "p1", name: "A", maxHealth: 20, health: 10 });
-  assert.equal(service.recover(hero).restoredHealth, 1); assert.equal(hero.health, 11);
+  assert.equal(service.recover(hero).restoredHealth, 0); assert.equal(hero.health, 10);
   hero.setBattleState({ health: 0, state: "ghost" });
   assert.equal(service.recover(hero, { cycles: 5 }).restoredHealth, 0); assert.equal(hero.health, 0); assert.equal(hero.state, "ghost");
 });
@@ -21,7 +21,7 @@ test("une localisation de soins ajoute son niveau au soin cyclique", () => {
   const hero = game.chooseHero("p1", { name: "A", classId: "warrior" }); game.start();
   hero.health = 10; game.getLocation("base").addHero(hero.id);
   const cycle = game.advanceCycle(1, () => 0.5); const recovery = cycle.heroes.find((entry) => entry.heroId === hero.id);
-  assert.equal(recovery.naturalHealing, 1); assert.equal(recovery.locationHealing, 2); assert.equal(recovery.restoredHealth, 3); assert.equal(hero.health, 13);
+  assert.equal(recovery.naturalHealing, 0); assert.equal(recovery.locationHealing, 2); assert.equal(recovery.restoredHealth, 2); assert.equal(hero.health, 12);
 });
 
 test("l'aura du mage soigne automatiquement les autres héros alliés proches", () => {
@@ -30,7 +30,7 @@ test("l'aura du mage soigne automatiquement les autres héros alliés proches", 
   let id = 0; const game = new Game({ setup, heroClasses: classes, idGenerator: (prefix) => `${prefix}-${++id}` });
   const mage = game.chooseHero("p1", { name: "Mage", classId: "mage" }); const ally = game.chooseHero("p2", { name: "Allié", classId: "warrior" }); const enemy = game.chooseHero("p3", { name: "Ennemi", classId: "warrior" }); game.start();
   [mage, ally, enemy].forEach((hero) => { hero.health = 10; hero.updatePosition({ latitude: 48.8566, longitude: 2.3522 }); });
-  const results = game.recoverHeroes(1); assert.equal(results.find((entry) => entry.heroId === ally.id).auraHealing, 1); assert.equal(ally.health, 12); assert.equal(mage.health, 11); assert.equal(enemy.health, 11);
+  const results = game.recoverHeroes(1); assert.equal(results.find((entry) => entry.heroId === ally.id).auraHealing, 1); assert.equal(ally.health, 11); assert.equal(mage.health, 10); assert.equal(enemy.health, 10);
 });
 
 test("un ghost revient uniquement à sa base avec la moitié supérieure de ses PV", () => {
