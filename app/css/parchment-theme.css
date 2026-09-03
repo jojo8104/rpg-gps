@@ -85,6 +85,18 @@ select,input,textarea { color:var(--parchment-ink)!important;border-color:#71513
   border-color:#9a7347!important;
   background:#f4dfb6e8!important;
 }
+.location-detail .recruit-capacity{
+  color:#2d1c12!important;
+  border:1px solid #8f673f;
+  background:linear-gradient(#fff2cf,#dcb77e)!important;
+  box-shadow:inset 0 1px #fff9e3,0 1px 2px #51331c55;
+  font-weight:700;
+}
+.location-detail .recruit-capacity.is-full{
+  color:#35160f!important;
+  border-color:#8b482f;
+  background:linear-gradient(#f2c27f,#c98352)!important;
+}
 .location-detail-art{
   border-color:#2b1d16!important;
   background:#4b3325!important;

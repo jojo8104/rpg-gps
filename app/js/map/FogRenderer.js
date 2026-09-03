@@ -8,6 +8,7 @@ const OVERLAY_SIZE = 1024;
 export class FogRenderer {
   constructor(map) {
     this.map = map;
+    this.visionLayer = null;
     this.layer = null;
     this.outsideLayer = null;
   }
@@ -19,8 +20,10 @@ export class FogRenderer {
     visionRadius = null,
     playAreaPoints = [],
   }) {
+    this.visionLayer?.remove();
     this.layer?.remove();
     this.outsideLayer?.remove();
+    this.visionLayer = null;
     this.layer = null;
     this.outsideLayer = null;
     if (!enabled || gridCells.length === 0) return;
@@ -36,6 +39,12 @@ export class FogRenderer {
     const radius = simulation
       ? gpsRadius * (FOG_VISION_RADIUS.simulation / FOG_VISION_RADIUS.gps)
       : gpsRadius;
+    this.visionLayer = L.circle(asLatLng(center), {
+      pane: MapLayers.EXPLORATION,
+      radius,
+      className: "rpg-theoretical-vision",
+      interactive: false,
+    }).addTo(this.map);
     const areaPoints =
       playAreaPoints.length >= 3
         ? playAreaPoints.map(asPosition)

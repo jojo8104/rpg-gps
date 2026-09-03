@@ -44,7 +44,7 @@ export function renderLocationSheet({
       !action.id.startsWith("build-improvement:") &&
       action.id !== "talk-chief",
   );
-  const actionButtons = `${recruitActions.length ? '<button data-menu="recruit" type="button">Recruter</button>' : ""}${reserveActions.length ? '<button data-open-reserves type="button">Gérer les réserves</button>' : ""}${improvementActions.length ? '<button data-menu="improvements" type="button">Améliorations</button>' : ""}${chiefAction ? `<button data-action="talk-chief" type="button">${chiefAction.label}</button>` : ""}${directActions.map((action) => `<button data-action="${action.id}" type="button">${action.label}</button>`).join("")}`;
+  const actionButtons = `${recruitActions.length ? '<button data-menu="recruit" type="button">Recruter</button>' : ""}${reserveActions.length ? '<button data-open-reserves type="button">Gérer les réserves</button>' : ""}${improvementActions.length ? '<button data-menu="improvements" type="button">Améliorations</button>' : ""}${chiefAction ? `<button data-action="talk-chief" type="button">${chiefAction.label}</button>` : ""}${directActions.map(serviceActionButton).join("")}`;
   const recruitMenu = `<div class="sheet-action-menu" data-sheet-menu="recruit" ${activeActionMenu === "recruit" ? "" : "hidden"}><button class="secondary-button sheet-menu-back" data-menu-back type="button">← Retour</button><h3>Recruter</h3>${recruitActions
     .map((action) => {
       const details = action.details ?? {};
@@ -54,7 +54,8 @@ export function renderLocationSheet({
           .filter(([, amount]) => amount > 0)
           .map(([id, amount]) => `${amount} ${id}`)
           .join(" · ") || "Gratuit";
-      return `<article class="recruit-option"><div><strong>${details.name ?? action.label}</strong><span>${details.available ?? 0} disponible(s)</span></div><p>ATQ ${stats.attack ?? "?"} · DÉF ${stats.defense ?? "?"} · VIT ${stats.speed ?? "?"} · POR ${stats.range ?? "?"} · MOR ${stats.morale ?? "?"}</p><footer><span>${costs}</span><button data-action="${action.id}" type="button">Recruter</button></footer></article>`;
+      const unavailable = details.unavailableReason;
+      return `<article class="recruit-option${unavailable ? " is-unavailable" : ""}"><div><strong>${details.name ?? action.label}</strong><span>${details.available ?? 0} disponible(s)</span></div><p>ATQ ${stats.attack ?? "?"} · DÉF ${stats.defense ?? "?"} · VIT ${stats.speed ?? "?"} · POR ${stats.range ?? "?"} · MOR ${stats.morale ?? "?"}</p>${unavailable ? `<p class="recruit-unavailable" role="status">${unavailable}</p>` : ""}<footer><span>${costs}</span><button data-action="${action.id}" type="button" ${unavailable ? `disabled title="${unavailable}"` : ""}>Recruter</button></footer></article>`;
     })
     .join("")}</div>`;
   const improvementMenu = `<div class="sheet-action-menu" data-sheet-menu="improvements" ${activeActionMenu === "improvements" ? "" : "hidden"}><button class="secondary-button sheet-menu-back" data-menu-back type="button">← Retour</button><h3>Améliorations</h3>${improvementActions.map(improvementCard).join("")}</div>`;
@@ -218,6 +219,15 @@ export function renderLocationTab({ element, location, onOpen }) {
   button.append(type, name, chevron);
   button.addEventListener("click", onOpen);
   element.append(button);
+}
+
+function serviceActionButton(action) {
+  const costs = Object.entries(action.details?.costs ?? {})
+    .filter(([, amount]) => amount > 0)
+    .map(([id, amount]) => `${amount} ${id}`)
+    .join(" · ");
+  const unavailable = action.details?.unavailableReason;
+  return `<button data-action="${action.id}" type="button" ${unavailable ? `disabled title="${unavailable}"` : ""}><span>${action.label}</span>${costs ? `<small>${costs}</small>` : ""}${unavailable ? `<small>${unavailable}</small>` : ""}</button>`;
 }
 
 function improvementCard(action) {

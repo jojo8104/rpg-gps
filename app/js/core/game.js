@@ -43,6 +43,7 @@ import { LocationDismantlingService } from "./location-dismantling-service.js";
 import { ResultEvaluationService } from "./result-evaluation-service.js";
 import { TrailState } from "./trail.js";
 import { WorldState } from "./world-state.js";
+import { UNIT_RANKS } from "./rank-system.js";
 import { ScoutWatchBeacon } from "./scout-watch-beacon.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
@@ -210,8 +211,13 @@ export class Game {
         ? trace
         : new AutonomousGroupTrace(trace),
     );
-    if (!Array.isArray(watchBeacons)) throw new TypeError("Les balises de vigie doivent être une liste.");
-    this.watchBeacons = watchBeacons.map((beacon) => beacon instanceof ScoutWatchBeacon ? beacon : new ScoutWatchBeacon(beacon));
+    if (!Array.isArray(watchBeacons))
+      throw new TypeError("Les balises de vigie doivent être une liste.");
+    this.watchBeacons = watchBeacons.map((beacon) =>
+      beacon instanceof ScoutWatchBeacon
+        ? beacon
+        : new ScoutWatchBeacon(beacon),
+    );
     this.battleLoot = [];
     this.battleSites = [];
   }
@@ -391,7 +397,8 @@ export class Game {
     if (this.status === "started" && this.getRemainingTimeMilliseconds() === 0)
       this.finish("time_limit");
     if (this.status === "started") this.advanceAutonomousGroups(this.now());
-    if (this.status === "started") watchBeaconEvents = this.scanWatchBeacons(this.now());
+    if (this.status === "started")
+      watchBeaconEvents = this.scanWatchBeacons(this.now());
     if (this.status === "started")
       this.locations.forEach((location) =>
         this.locationDismantlingService
@@ -505,36 +512,141 @@ export class Game {
   }
 
   placeScoutWatchBeacon({ playerId, heroId, position = null, radius = null }) {
-    const hero = this.getHero(heroId); const player = this.getPlayer(playerId);
-    if (hero === null || player === null || hero.playerId !== player.id) return { success: false, reason: "hero_not_found" };
+    const hero = this.getHero(heroId);
+    const player = this.getPlayer(playerId);
+    if (hero === null || player === null || hero.playerId !== player.id)
+      return { success: false, reason: "hero_not_found" };
     const features = this.heroClassFeatureService.featuresFor(hero);
-    if (features.canPlaceWatchBeacon !== true) return { success: false, reason: "class_cannot_place_watch_beacon" };
-    if (hero.state !== "active" || this.#isHeroBusy(hero.id)) return { success: false, reason: "hero_unavailable" };
-    const beaconPosition = position ?? hero.position; if (!beaconPosition) return { success: false, reason: "hero_position_unknown" };
-    const now = this.now(); const beaconRadius = radius ?? features.watchBeaconRadius ?? 75; const maximum = features.maximumWatchBeacons ?? 3;
-    if (!Number.isFinite(beaconRadius) || beaconRadius <= 0 || !Number.isInteger(maximum) || maximum <= 0) return { success: false, reason: "invalid_watch_beacon_configuration" };
-    const owned = this.watchBeacons.filter((beacon) => beacon.sourceHeroId === hero.id).sort((first, second) => first.placedAt - second.placedAt);
-    const removedBeacon = owned.length >= maximum ? this.watchBeacons.splice(this.watchBeacons.findIndex((beacon) => beacon.id === owned[0].id), 1)[0] : null;
-    const beacon = new ScoutWatchBeacon({ id: this.idGenerator("watch-beacon"), ownerPlayerId: player.id, sourceHeroId: hero.id, position: beaconPosition, radius: beaconRadius, placedAt: now });
+    if (features.canPlaceWatchBeacon !== true)
+      return { success: false, reason: "class_cannot_place_watch_beacon" };
+    if (hero.state !== "active" || this.#isHeroBusy(hero.id))
+      return { success: false, reason: "hero_unavailable" };
+    const beaconPosition = position ?? hero.position;
+    if (!beaconPosition)
+      return { success: false, reason: "hero_position_unknown" };
+    const now = this.now();
+    const beaconRadius = radius ?? features.watchBeaconRadius ?? 75;
+    const maximum = features.maximumWatchBeacons ?? 3;
+    if (
+      !Number.isFinite(beaconRadius) ||
+      beaconRadius <= 0 ||
+      !Number.isInteger(maximum) ||
+      maximum <= 0
+    )
+      return { success: false, reason: "invalid_watch_beacon_configuration" };
+    const owned = this.watchBeacons
+      .filter((beacon) => beacon.sourceHeroId === hero.id)
+      .sort((first, second) => first.placedAt - second.placedAt);
+    const removedBeacon =
+      owned.length >= maximum
+        ? this.watchBeacons.splice(
+            this.watchBeacons.findIndex((beacon) => beacon.id === owned[0].id),
+            1,
+          )[0]
+        : null;
+    const beacon = new ScoutWatchBeacon({
+      id: this.idGenerator("watch-beacon"),
+      ownerPlayerId: player.id,
+      sourceHeroId: hero.id,
+      position: beaconPosition,
+      radius: beaconRadius,
+      placedAt: now,
+    });
     this.watchBeacons.push(beacon);
-    if (removedBeacon) this.eventLog.push({ type: "watch_beacon_removed", beaconId: removedBeacon.id, sourceHeroId: hero.id, reason: "capacity_rotation", at: now });
-    this.eventLog.push({ type: "watch_beacon_placed", beaconId: beacon.id, sourceHeroId: hero.id, ownerPlayerId: player.id, position: { ...beacon.position }, at: now });
-    return { success: true, beacon: beacon.toJSON(), removedBeaconId: removedBeacon?.id ?? null, count: this.watchBeacons.filter((entry) => entry.sourceHeroId === hero.id).length, maximum };
+    if (removedBeacon)
+      this.eventLog.push({
+        type: "watch_beacon_removed",
+        beaconId: removedBeacon.id,
+        sourceHeroId: hero.id,
+        reason: "capacity_rotation",
+        at: now,
+      });
+    this.eventLog.push({
+      type: "watch_beacon_placed",
+      beaconId: beacon.id,
+      sourceHeroId: hero.id,
+      ownerPlayerId: player.id,
+      position: { ...beacon.position },
+      at: now,
+    });
+    return {
+      success: true,
+      beacon: beacon.toJSON(),
+      removedBeaconId: removedBeacon?.id ?? null,
+      count: this.watchBeacons.filter((entry) => entry.sourceHeroId === hero.id)
+        .length,
+      maximum,
+    };
   }
 
-  getWatchBeaconsForPlayer(playerId) { return this.watchBeacons.filter((beacon) => beacon.ownerPlayerId === playerId).map((beacon) => beacon.toJSON()); }
+  getWatchBeaconsForPlayer(playerId) {
+    return this.watchBeacons
+      .filter((beacon) => beacon.ownerPlayerId === playerId)
+      .map((beacon) => beacon.toJSON());
+  }
 
   scanWatchBeacons(now = this.now()) {
     const events = [];
     for (const beacon of this.watchBeacons) {
       const targets = [
-        ...this.heroes.filter((candidate) => candidate.state === "active" && candidate.position && candidate.playerId !== beacon.ownerPlayerId).map((candidate) => ({ key: `hero:${candidate.id}`, kind: "hero", id: candidate.id, playerId: candidate.playerId, name: candidate.name, position: { ...candidate.position } })),
-        ...this.autonomousGroups.filter((group) => group.position && !["destroyed", "mission_failed"].includes(group.status) && !(group.owner.kind === "player" && group.owner.id === beacon.ownerPlayerId)).map((group) => ({ key: `autonomous_group:${group.id}`, kind: "autonomous_group", id: group.id, type: group.type, factionId: group.factionId, soldiers: group.army.units.reduce((sum, unit) => sum + unit.combatantCount, 0), position: { ...group.position } })),
-      ].filter((target) => this.#worldDistance(beacon.position, target.position) <= beacon.radius);
-      const previous = new Set(beacon.visibleTargets.map((target) => target.key));
-      for (const target of targets.filter((candidate) => !previous.has(candidate.key))) {
-        const event = { type: "watch_beacon_target_detected", beaconId: beacon.id, sourceHeroId: beacon.sourceHeroId, ownerPlayerId: beacon.ownerPlayerId, target: structuredClone(target), at: now };
-        events.push(event); this.eventLog.push(structuredClone(event));
+        ...this.heroes
+          .filter(
+            (candidate) =>
+              candidate.state === "active" &&
+              candidate.position &&
+              candidate.playerId !== beacon.ownerPlayerId,
+          )
+          .map((candidate) => ({
+            key: `hero:${candidate.id}`,
+            kind: "hero",
+            id: candidate.id,
+            playerId: candidate.playerId,
+            name: candidate.name,
+            position: { ...candidate.position },
+          })),
+        ...this.autonomousGroups
+          .filter(
+            (group) =>
+              group.position &&
+              !["destroyed", "mission_failed"].includes(group.status) &&
+              !(
+                group.owner.kind === "player" &&
+                group.owner.id === beacon.ownerPlayerId
+              ),
+          )
+          .map((group) => ({
+            key: `autonomous_group:${group.id}`,
+            kind: "autonomous_group",
+            id: group.id,
+            type: group.type,
+            factionId: group.factionId,
+            soldiers: group.army.units.reduce(
+              (sum, unit) => sum + unit.combatantCount,
+              0,
+            ),
+            position: { ...group.position },
+          })),
+      ].filter(
+        (target) =>
+          this.#worldDistance(beacon.position, target.position) <=
+          beacon.radius,
+      );
+      const previous = new Set(
+        beacon.visibleTargets.map((target) => target.key),
+      );
+      for (const target of targets.filter(
+        (candidate) => !previous.has(candidate.key),
+      )) {
+        const event = {
+          type: "watch_beacon_target_detected",
+          beaconId: beacon.id,
+          sourceHeroId: beacon.sourceHeroId,
+          ownerPlayerId: beacon.ownerPlayerId,
+          target: structuredClone(target),
+          at: now,
+        };
+        events.push(event);
+        this.eventLog.push(structuredClone(event));
       }
       beacon.visibleTargets = targets.map((target) => structuredClone(target));
     }
@@ -965,7 +1077,8 @@ export class Game {
     const belongsToSequencedQuest = this.questSequence.some((quest) =>
       quest.phaseIds.includes(phase.id),
     );
-    const isTerminalSequenceFailure = belongsToSequencedQuest && failure.scope !== "phase";
+    const isTerminalSequenceFailure =
+      belongsToSequencedQuest && failure.scope !== "phase";
     let nextPhaseId = isTerminalSequenceFailure
       ? null
       : failure.policy === "branch"
@@ -1295,7 +1408,7 @@ export class Game {
   }
 
   // Recrutement, garnisons et transferts de ressources ou de population.
-  recruitUnit({ playerId, heroId, locationId, unitTypeId }) {
+  getRecruitmentAvailability({ playerId, heroId, locationId, unitTypeId }) {
     if (this.status !== "started")
       return { success: false, reason: "game_not_started" };
     const player = this.getPlayer(playerId);
@@ -1314,6 +1427,42 @@ export class Game {
     const authority = this.getHeroAuthority(hero.id);
     if (authority.used + this.getUnitAuthorityCost(preview) > authority.maximum)
       return { success: false, reason: "insufficient_authority", authority };
+    if (!location.heroIds.includes(hero.id))
+      return { success: false, reason: "hero_not_at_location" };
+    if (location.features.recruitment !== true)
+      return { success: false, reason: "recruitment_not_available" };
+    if (!location.recruitment.availableUnitTypeIds.includes(unitTypeId))
+      return { success: false, reason: "unit_not_available" };
+    if (hero.army.units.length >= hero.maxUnitStacks)
+      return { success: false, reason: "army_full" };
+    const definition = this.unitDefinitions.get(unitTypeId);
+    if (definition === undefined)
+      return { success: false, reason: "unknown_unit_type" };
+    if (Math.floor(location.recruitment.stock[unitTypeId] ?? 0) <= 0)
+      return { success: false, reason: "insufficient_recruits" };
+    const missingResources = Object.entries(definition.costs)
+      .filter(([resource, amount]) => hero.getResourceAmount(resource) < amount)
+      .map(([resource]) => resource);
+    if (missingResources.length > 0)
+      return {
+        success: false,
+        reason: "insufficient_resources",
+        missingResources,
+      };
+    return { success: true };
+  }
+
+  recruitUnit({ playerId, heroId, locationId, unitTypeId }) {
+    const availability = this.getRecruitmentAvailability({
+      playerId,
+      heroId,
+      locationId,
+      unitTypeId,
+    });
+    if (!availability.success) return availability;
+    const player = this.getPlayer(playerId);
+    const hero = this.getHero(heroId);
+    const location = this.getLocation(locationId);
     return this.recruitmentService.recruit({
       player,
       hero,
@@ -1325,6 +1474,30 @@ export class Game {
   }
 
   completeHeroUnits({ playerId, heroId, locationId }) {
+    const quote = this.getHeroUnitCompletionQuote({
+      playerId,
+      heroId,
+      locationId,
+    });
+    if (!quote.success) return { ...quote, reinforced: [] };
+    const player = this.getPlayer(playerId);
+    const hero = this.getHero(heroId);
+    const location = this.getLocation(locationId);
+    Object.entries(quote.costs).forEach(([resource, amount]) => {
+      if (amount > 0) hero.spendResource(resource, amount);
+    });
+    const result = this.recruitmentService.completeUnits({ hero, location });
+    const added = result.reinforced.reduce((sum, unit) => sum + unit.added, 0);
+    if (result.success && location.type === "camp" && added > 0)
+      this.locationProgressionService.awardExperience(
+        location,
+        added / 5,
+        "reinforcement",
+      );
+    return { ...result, costs: quote.costs };
+  }
+
+  getHeroUnitCompletionQuote({ playerId, heroId, locationId }) {
     const player = this.getPlayer(playerId);
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
@@ -1334,53 +1507,61 @@ export class Game {
       location === null ||
       hero.playerId !== player.id
     )
-      return {
-        success: false,
-        reason: "invalid_reinforcement_request",
-        reinforced: [],
-      };
+      return { success: false, reason: "invalid_reinforcement_request" };
     if (!this.locationAccessPolicy.can(player.id, location, "reinforce"))
-      return {
-        success: false,
-        reason: "location_access_denied",
-        reinforced: [],
-      };
-    const result = this.recruitmentService.completeUnits({ hero, location });
-    const added = result.reinforced.reduce((sum, unit) => sum + unit.added, 0);
-    if (result.success && location.type === "camp" && added > 0)
-      this.locationProgressionService.awardExperience(
-        location,
-        added / 5,
-        "reinforcement",
-      );
-    return result;
+      return { success: false, reason: "location_access_denied" };
+    if (!location.heroIds.includes(hero.id))
+      return { success: false, reason: "hero_not_at_location" };
+    const quantities = {};
+    for (const unit of hero.army.units) {
+      const available = Math.floor(location.recruitment.stock[unit.typeId] ?? 0);
+      const quantity = Math.min(unit.missingQuantity, available);
+      if (quantity > 0)
+        quantities[unit.typeId] =
+          (quantities[unit.typeId] ?? 0) + quantity;
+    }
+    const soldiers = Object.values(quantities).reduce(
+      (sum, value) => sum + value,
+      0,
+    );
+    if (soldiers <= 0)
+      return { success: false, reason: "no_compatible_recruits" };
+    const costs = {};
+    Object.entries(quantities).forEach(([typeId, quantity]) => {
+      const definition = this.unitDefinitions.get(typeId);
+      Object.entries(definition?.costs ?? {}).forEach(([resource, amount]) => {
+        if (amount > 0)
+          costs[resource] =
+            (costs[resource] ?? 0) +
+            Math.ceil((amount * quantity) / UNIT_RANKS[0].capacity);
+      });
+    });
+    const missingResources = Object.entries(costs)
+      .filter(([resource, amount]) => hero.getResourceAmount(resource) < amount)
+      .map(([resource]) => resource);
+    return missingResources.length > 0
+      ? {
+          success: false,
+          reason: "insufficient_resources",
+          costs,
+          soldiers,
+          missingResources,
+        }
+      : { success: true, costs, soldiers };
   }
 
   healHeroUnits({ playerId, heroId, locationId, timeUnits = 1 }) {
+    const quote = this.getHeroUnitHealingQuote({
+      playerId,
+      heroId,
+      locationId,
+      timeUnits,
+    });
+    if (!quote.success) return { ...quote, restoredHealth: 0, units: [] };
     const player = this.getPlayer(playerId);
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
-    if (
-      player === null ||
-      hero === null ||
-      location === null ||
-      hero.playerId !== player.id ||
-      hero.state !== "active" ||
-      !location.heroIds.includes(hero.id)
-    )
-      return {
-        success: false,
-        reason: "hero_not_at_location",
-        restoredHealth: 0,
-      };
-    if (!this.locationAccessPolicy.can(player.id, location, "heal"))
-      return {
-        success: false,
-        reason: "location_access_denied",
-        restoredHealth: 0,
-      };
-    if (!Number.isInteger(timeUnits) || timeUnits <= 0)
-      return { success: false, reason: "invalid_time", restoredHealth: 0 };
+    hero.spendResource("gold", quote.costs.gold);
     const units = hero.army.units
       .map((unit) => ({ unitId: unit.id, ...unit.heal(timeUnits) }))
       .filter((result) => result.restoredHealth > 0);
@@ -1395,13 +1576,51 @@ export class Game {
         "healing",
       );
     return restoredHealth > 0
-      ? { success: true, timeUnits, restoredHealth, units }
+      ? { success: true, timeUnits, restoredHealth, units, costs: quote.costs }
       : {
           success: false,
           reason: "no_wounded_soldiers",
           restoredHealth: 0,
           units: [],
         };
+  }
+
+  getHeroUnitHealingQuote({ playerId, heroId, locationId, timeUnits = 1 }) {
+    const player = this.getPlayer(playerId);
+    const hero = this.getHero(heroId);
+    const location = this.getLocation(locationId);
+    if (
+      player === null ||
+      hero === null ||
+      location === null ||
+      hero.playerId !== player.id ||
+      hero.state !== "active" ||
+      !location.heroIds.includes(hero.id)
+    )
+      return { success: false, reason: "hero_not_at_location" };
+    if (!this.locationAccessPolicy.can(player.id, location, "heal"))
+      return { success: false, reason: "location_access_denied" };
+    if (!Number.isInteger(timeUnits) || timeUnits <= 0)
+      return { success: false, reason: "invalid_time" };
+    const soldiers = hero.army.units.reduce(
+      (sum, unit) =>
+        sum +
+        unit.soldierHealth.filter((health) => health < unit.healthPerSoldier)
+          .length,
+      0,
+    );
+    if (soldiers <= 0)
+      return { success: false, reason: "no_wounded_soldiers" };
+    const costs = { gold: soldiers };
+    return hero.getResourceAmount("gold") < costs.gold
+      ? {
+          success: false,
+          reason: "insufficient_resources",
+          costs,
+          soldiers,
+          missingResources: ["gold"],
+        }
+      : { success: true, costs, soldiers };
   }
 
   collectLocationResources({ playerId, heroId, locationId }) {
@@ -3196,7 +3415,10 @@ export class Game {
 
   #worldDistance(first, second) {
     return this.coordinateMode === "simulation"
-      ? Math.hypot(first.latitude - second.latitude, first.longitude - second.longitude)
+      ? Math.hypot(
+          first.latitude - second.latitude,
+          first.longitude - second.longitude,
+        )
       : distanceMeters(first, second);
   }
 

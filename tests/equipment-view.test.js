@@ -14,3 +14,11 @@ test("un équipement sans meilleur choix est signalé en or", () => {
   const state = equipmentSlotState(hero, { id: "mainHand", name: "Main droite" });
   assert.equal(state.className, "is-equipped is-best");
 });
+
+test("le menu du slot ouvert survit à une reconstruction de la vue", () => {
+  const hero = { equipment: {}, carriedLoot: [{ id: "sword", itemId: "iron_sword", quantity: 1 }] };
+  const html = renderEquipmentView({ hero, openSlotId: "mainHand" });
+  assert.match(html, /data-equipment-menu-slot="mainHand"/);
+  assert.match(html, /data-equip-package="sword"/);
+  assert.doesNotMatch(html, /data-equipment-menu-slot="mainHand" hidden/);
+});
