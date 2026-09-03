@@ -544,14 +544,14 @@ export class MapView {
       L.rectangle(cell.bounds.map(asLatLng), {
         color,
         weight: signal > 0 ? 2 : 1,
-        opacity: 0.7,
+        opacity: 0.48,
         fillColor: color,
         fillOpacity:
           signal > 0
-            ? 0.18 + signal * 0.42
+            ? 0.12 + signal * 0.28
             : intensity === 0
               ? 0.035
-              : 0.15 + intensity * 0.45,
+              : 0.08 + intensity * 0.28,
         interactive: false,
       }).addTo(this.heatmap);
       if (cell.visits > 0)

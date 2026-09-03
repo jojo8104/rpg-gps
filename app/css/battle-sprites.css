@@ -141,16 +141,45 @@
 .archer-formation i {
   background-image: url("../assets/units/archer-walk.png");
 }
+.spearman-formation i {
+  background-image: url("../assets/units/spearman-walk.png");
+}
+.swordsman-formation i {
+  background-image: url("../assets/units/swordsman-walk.png");
+}
+.heavy-infantry-formation i {
+  width: 35px;
+  height: 46px;
+  margin-inline: -1px;
+  background-image: url("../assets/units/heavy-infantry-walk.png");
+}
 .mounted-archer-formation i {
   width: 44px;
   height: 52px;
   margin-inline: -3px;
   background-image: url("../assets/units/mounted-archer-walk.png");
 }
+.light-cavalry-formation i {
+  width: 44px;
+  height: 52px;
+  margin-inline: -3px;
+  background-image: url("../assets/units/light-cavalry-walk.png");
+}
+.heavy-cavalry-formation i {
+  width: 50px;
+  height: 58px;
+  margin-inline: -5px;
+  background-image: url("../assets/units/heavy-cavalry-walk.png");
+}
 
-.mounted-archer-formation .militia-rank {
+.mounted-archer-formation .militia-rank,
+.light-cavalry-formation .militia-rank {
   height: 21px;
   min-height: 21px;
+}
+.heavy-cavalry-formation .militia-rank {
+  height: 24px;
+  min-height: 24px;
 }
 .chaos-raider-formation i {
   background-image: url("../assets/units/chaos-raider-walk.png");
@@ -417,6 +446,27 @@
   width: 44px;
   height: 52px;
   background-image: url("../assets/units/mounted-archer-walk.png");
+}
+.casualty-piece.is-spearman {
+  background-image: url("../assets/units/spearman-walk.png");
+}
+.casualty-piece.is-swordsman {
+  background-image: url("../assets/units/swordsman-walk.png");
+}
+.casualty-piece.is-heavy-infantry {
+  width: 35px;
+  height: 46px;
+  background-image: url("../assets/units/heavy-infantry-walk.png");
+}
+.casualty-piece.is-light-cavalry {
+  width: 44px;
+  height: 52px;
+  background-image: url("../assets/units/light-cavalry-walk.png");
+}
+.casualty-piece.is-heavy-cavalry {
+  width: 50px;
+  height: 58px;
+  background-image: url("../assets/units/heavy-cavalry-walk.png");
 }
 .casualty-piece.is-chaos-raider {
   background-image: url("../assets/units/chaos-raider-walk.png");

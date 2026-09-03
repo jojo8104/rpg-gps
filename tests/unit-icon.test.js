@@ -12,4 +12,20 @@ test("les types d'unites partagent une icone SVG explicite", () => {
 test("les miliciens utilisent leur vignette d'unite illustrée", () => {
   assert.match(renderUnitTypeIcon({ typeId: "militia" }), /militia-thumbnail\.png/);
   assert.match(renderUnitTypeIcon({ typeId: "archer" }), /archer-thumbnail\.png/);
+  assert.match(
+    renderUnitTypeIcon({ typeId: "mounted-archer" }),
+    /mounted-archer-thumbnail\.png/,
+  );
+  for (const typeId of [
+    "spearman",
+    "swordsman",
+    "heavy-infantry",
+    "light-cavalry",
+    "heavy-cavalry",
+  ]) {
+    assert.match(
+      renderUnitTypeIcon({ typeId }),
+      new RegExp(`${typeId}-thumbnail\\.png`),
+    );
+  }
 });

@@ -36,6 +36,66 @@
     "tags": ["human", "cavalry", "ranged", "harassment"]
   },
   {
+    "id": "spearman",
+    "name": "Lanciers",
+    "faction": "kingdom",
+    "maxQuantity": 10,
+    "authorityCost": 2,
+    "stats": { "attack": 4, "defense": 4, "damageMin": 1, "damageMax": 3, "healthPerSoldier": 11, "combatHealthThreshold": 4, "speed": 2.5, "range": 1, "attackIntervalMs": 1200, "morale": 6 },
+    "retreat": { "attack": 1, "defense": 2, "speed": 4, "range": 1 },
+    "abilities": [],
+    "costs": { "gold": 35, "wood": 5, "stone": 0, "iron": 10 },
+    "tags": ["human", "infantry", "light_infantry", "spear"]
+  },
+  {
+    "id": "swordsman",
+    "name": "Soldats à l’épée",
+    "faction": "kingdom",
+    "maxQuantity": 10,
+    "authorityCost": 2,
+    "stats": { "attack": 5, "defense": 3, "damageMin": 2, "damageMax": 3, "healthPerSoldier": 10, "combatHealthThreshold": 4, "speed": 3, "range": 1, "attackIntervalMs": 1050, "morale": 6 },
+    "retreat": { "attack": 2, "defense": 1, "speed": 4.5, "range": 1 },
+    "abilities": [],
+    "costs": { "gold": 40, "wood": 0, "stone": 0, "iron": 12 },
+    "tags": ["human", "infantry", "light_infantry", "sword"]
+  },
+  {
+    "id": "heavy-infantry",
+    "name": "Infanterie lourde",
+    "faction": "kingdom",
+    "maxQuantity": 8,
+    "authorityCost": 3,
+    "stats": { "attack": 6, "defense": 8, "damageMin": 2, "damageMax": 4, "healthPerSoldier": 16, "combatHealthThreshold": 6, "speed": 1.4, "range": 1, "attackIntervalMs": 1500, "morale": 8 },
+    "retreat": { "attack": 1, "defense": 5, "speed": 2, "range": 1 },
+    "abilities": [],
+    "costs": { "gold": 80, "wood": 5, "stone": 0, "iron": 35 },
+    "tags": ["human", "infantry", "heavy_armor", "shield", "mace"]
+  },
+  {
+    "id": "light-cavalry",
+    "name": "Cavalerie légère",
+    "faction": "kingdom",
+    "maxQuantity": 8,
+    "authorityCost": 3,
+    "stats": { "attack": 5, "defense": 4, "damageMin": 2, "damageMax": 4, "healthPerSoldier": 12, "combatHealthThreshold": 5, "speed": 6, "range": 1, "attackIntervalMs": 1100, "morale": 7 },
+    "retreat": { "attack": 3, "defense": 2, "speed": 8, "range": 1 },
+    "abilities": ["skirmisher"],
+    "costs": { "gold": 70, "wood": 5, "stone": 0, "iron": 15 },
+    "tags": ["human", "cavalry", "light_cavalry", "spear", "skirmisher"]
+  },
+  {
+    "id": "heavy-cavalry",
+    "name": "Chevaliers montés",
+    "faction": "kingdom",
+    "maxQuantity": 6,
+    "authorityCost": 4,
+    "stats": { "attack": 8, "defense": 8, "damageMin": 3, "damageMax": 6, "healthPerSoldier": 18, "combatHealthThreshold": 7, "speed": 4.5, "range": 1, "attackIntervalMs": 1600, "morale": 9 },
+    "retreat": { "attack": 3, "defense": 6, "speed": 5.5, "range": 1 },
+    "abilities": [],
+    "costs": { "gold": 120, "wood": 10, "stone": 0, "iron": 50 },
+    "tags": ["human", "cavalry", "heavy_armor", "shield", "lance"]
+  },
+  {
     "id": "chaos-raider",
     "name": "Maraudeurs du Chaos",
     "faction": "chaos",

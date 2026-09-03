@@ -948,6 +948,7 @@ select {
   font-size: 0.68rem;
   font-weight: 800;
   box-shadow: 0 1px 4px #0008;
+  opacity: 0.78;
 }
 .travel-reward-layer {
   z-index: 1300;

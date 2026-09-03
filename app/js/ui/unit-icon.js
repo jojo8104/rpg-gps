@@ -26,6 +26,12 @@ export function renderUnitTypeIcon(unit = {}) {
   const artwork = {
     militia: "militia-thumbnail.png",
     archer: "archer-thumbnail.png",
+    "mounted-archer": "mounted-archer-thumbnail.png",
+    spearman: "spearman-thumbnail.png",
+    swordsman: "swordsman-thumbnail.png",
+    "heavy-infantry": "heavy-infantry-thumbnail.png",
+    "light-cavalry": "light-cavalry-thumbnail.png",
+    "heavy-cavalry": "heavy-cavalry-thumbnail.png",
   }[String(unit.typeId).toLowerCase()];
   if (artwork)
     return `<img class="unit-art-thumbnail" src="assets/units/${artwork}" alt="" draggable="false">`;
