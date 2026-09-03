@@ -26,6 +26,8 @@ export class MapRenderer {
     heroHeading,
     accuracy,
     visionRadius,
+    fogEnabled = true,
+    playAreaPoints = [],
     revealedZones = [],
     locations,
     gridCells = [],
@@ -42,7 +44,14 @@ export class MapRenderer {
     this.units.render(heroPosition, accuracy, heroHeading);
     // Terrain and exploration overlays come only from real game state.
     this.terrain.render([]);
-    this.fog.render({ heroPosition, gridCells, visionRadius, revealedZones });
+    this.fog.render({
+      heroPosition,
+      gridCells,
+      visionRadius,
+      revealedZones,
+      enabled: fogEnabled,
+      playAreaPoints,
+    });
     this.effects.render(locations);
   }
   setHeroHeading(heading) {

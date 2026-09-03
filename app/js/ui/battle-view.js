@@ -194,6 +194,11 @@ export function renderBattleView({
       "militia",
       "archer",
       "mounted-archer",
+      "spearman",
+      "swordsman",
+      "heavy-infantry",
+      "light-cavalry",
+      "heavy-cavalry",
       "chaos-raider",
     ]);
     return spriteTypes.has(entity.typeId)
@@ -589,6 +594,11 @@ function createAttackVisual(
         "militia",
         "archer",
         "mounted-archer",
+        "spearman",
+        "swordsman",
+        "heavy-infantry",
+        "light-cavalry",
+        "heavy-cavalry",
         "chaos-raider",
       ].includes(String(target.entity.typeId))
         ? target.entity.typeId

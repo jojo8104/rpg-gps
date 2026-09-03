@@ -154,6 +154,25 @@ traceFilter.addEventListener("change", (event) => {
   else traceVisibility.delete(input.value);
   render();
 });
+const fogControl = document.createElement("label");
+fogControl.className = "dev-fog-control";
+fogControl.innerHTML = '<input type="checkbox" checked><span>Brouillard de guerre</span>';
+$("#landscape-tools").insertBefore(fogControl, traceFilter);
+fogControl.querySelector("input").addEventListener("change", (event) => {
+  fogVisible = event.currentTarget.checked;
+  render();
+});
+const heatmapControl = document.createElement("label");
+heatmapControl.className = "dev-fog-control";
+heatmapControl.innerHTML = '<input type="checkbox" checked><span>Heatmap</span>';
+$("#landscape-tools").insertBefore(heatmapControl, traceFilter);
+heatmapControl.querySelector("input").addEventListener("change", (event) => {
+  heatmapVisible = event.currentTarget.checked;
+  $("#toggle-heatmap").textContent = heatmapVisible
+    ? "Masquer la heatmap"
+    : "Afficher la heatmap";
+  render();
+});
 const battleOrientationPrompt = document.createElement("aside");
 battleOrientationPrompt.className = "battle-orientation-prompt";
 battleOrientationPrompt.innerHTML =
@@ -328,6 +347,7 @@ let battleDragging = false,
   validatedPlayArea = null;
 let playAreaGrid = null,
   heatmapVisible = true,
+  fogVisible = true,
   lastVisitedCellId = null;
 const field = new FieldTestSession({ minimumQuestDistanceMeters: 300 });
 const cheatService = new CheatService();
@@ -4125,6 +4145,7 @@ function render() {
     heroHeading,
     accuracy: gpsAccuracy,
     visionRadius: game.heroClassFeatureService.visionRadius(hero),
+    fogEnabled: fogVisible,
     locations: mappedLocations(),
     autonomousGroups: visibleAutonomousGroups(),
     divinationTargets: visibleDivinationTargets(),
@@ -4500,12 +4521,7 @@ function render() {
           range: stats?.range ?? 1,
         });
         const expanded = expandedArmyUnitId === unit.id;
-        const currentHealth = unit.soldierHealth.reduce(
-          (total, health) => total + health,
-          0,
-        );
-        const maximumHealth = unit.maxQuantity * unit.healthPerSoldier;
-        return `<article class="army-card${expanded ? " is-expanded" : ""}" data-army-unit="${unit.id}" role="button" tabindex="0" aria-expanded="${expanded}" aria-label="${expanded ? "Réduire" : "Afficher les détails de"} ${unitName}"><div class="army-illustration" aria-hidden="true">${illustration}</div><div class="army-card__content"><p class="eyebrow">${rankLabel(UNIT_RANKS, unit.rank)} · niveau ${unit.level}</p><div class="army-card__heading"><h3>${unitName}</h3><span class="army-card__chevron" aria-hidden="true">⌄</span></div>${unitHealthBar(unit)}<div class="army-card__summary"><strong>${unit.combatantCount}/${unit.maxQuantity} aptes</strong><span>${currentHealth}/${maximumHealth} PV</span></div><div class="army-card__details" ${expanded ? "" : "hidden"}><div class="army-card__stats"><div><strong>${unit.quantity}/${unit.maxQuantity}</strong><span>Effectif</span></div><div><strong>${unit.combatantCount}</strong><span>Apte(s)</span></div><div><strong>${unit.woundedCount}</strong><span>Blessé(s)</span></div><div><strong>${unit.experience}</strong><span>Expérience</span></div>${stats ? `<div><strong>${stats.attack}</strong><span>Attaque</span></div><div><strong>${stats.defense}</strong><span>Défense</span></div><div><strong>${stats.speed}</strong><span>Vitesse</span></div>` : ""}</div><div class="army-card__meta"></div><div class="army-card__actions"><button type="button" class="disband-unit-button" data-disband-unit="${unit.id}" aria-label="Dissoudre ${unitName}">Dissoudre</button></div></div></div></article>`;
+        return `<article class="army-card${expanded ? " is-expanded" : ""}" data-army-unit="${unit.id}" role="button" tabindex="0" aria-expanded="${expanded}" aria-label="${expanded ? "Réduire" : "Afficher les détails de"} ${unitName}"><div class="army-illustration" aria-hidden="true">${illustration}</div><div class="army-card__content"><p class="eyebrow">${rankLabel(UNIT_RANKS, unit.rank)} · niveau ${unit.level}</p><div class="army-card__heading"><h3>${unitName}</h3><span class="army-card__chevron" aria-hidden="true">⌄</span></div>${unitHealthBar(unit)}<div class="army-card__summary"><strong>${unit.combatantCount}/${unit.maxQuantity} aptes</strong></div><div class="army-card__details" ${expanded ? "" : "hidden"}><div class="army-card__stats"><div><strong>${unit.quantity}/${unit.maxQuantity}</strong><span>Effectif</span></div><div><strong>${unit.combatantCount}</strong><span>Apte(s)</span></div><div><strong>${unit.woundedCount}</strong><span>Blessé(s)</span></div><div><strong>${unit.experience}</strong><span>Expérience</span></div>${stats ? `<div><strong>${stats.attack}</strong><span>Attaque</span></div><div><strong>${stats.defense}</strong><span>Défense</span></div><div><strong>${stats.speed}</strong><span>Vitesse</span></div>` : ""}</div><div class="army-card__meta"></div><div class="army-card__actions"><button type="button" class="disband-unit-button" data-disband-unit="${unit.id}" aria-label="Dissoudre ${unitName}">Dissoudre</button></div></div></div></article>`;
       })
       .join("") || '<p class="text-muted">Aucune unité.</p>'
   }</div>`;
@@ -4574,12 +4590,6 @@ function render() {
     card
       .querySelector(".army-card__summary")
       ?.insertAdjacentHTML("afterend", renderUnitExperienceBar(unit));
-    card
-      .querySelector(".army-card__details")
-      ?.insertAdjacentHTML(
-        "afterbegin",
-        renderUnitExperienceBar(unit, { detailed: true }),
-      );
     const stats = game.unitDefinitions.get(unit.typeId)?.stats;
     if (stats)
       card
@@ -4930,6 +4940,7 @@ $("#validate-area").onclick = () => {
 };
 $("#toggle-heatmap").onclick = () => {
   heatmapVisible = !heatmapVisible;
+  heatmapControl.querySelector("input").checked = heatmapVisible;
   $("#toggle-heatmap").textContent = heatmapVisible
     ? "Masquer la heatmap"
     : "Afficher la heatmap";

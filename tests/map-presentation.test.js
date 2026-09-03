@@ -171,6 +171,34 @@ test("le brouillard utilise un seul calque texturé et un masque", () => {
   assert.match(markup, /<mask id="rpg-fog-mask">/);
   assert.match(markup, /<ellipse[^>]+fill="black"/);
   assert.match(markup, /<path[^>]+fill="black"/);
+  assert.match(markup, /<clipPath id="rpg-play-area-clip">/);
+});
+
+test("le contour du brouillard suit le polygone réel de la zone de jeu", () => {
+  const cells = [{
+    id: "cell",
+    visits: 0,
+    bounds: [
+      { latitude: 0, longitude: 0 },
+      { latitude: 2, longitude: 2 },
+    ],
+  }];
+  const geometry = fogMaskGeometry({
+    cells,
+    center: { latitude: 0.5, longitude: 0.5 },
+    radius: 0.1,
+    simulation: true,
+    zoneBounds: [
+      { latitude: 0, longitude: 0 },
+      { latitude: 2, longitude: 2 },
+    ],
+    playAreaPoints: [
+      { latitude: 0, longitude: 0 },
+      { latitude: 0, longitude: 2 },
+      { latitude: 2, longitude: 1 },
+    ],
+  });
+  assert.equal(geometry.playAreaPath, "M0 1024 L1024 1024 L512 0 Z");
 });
 
 test("la fiche détaillée raccourcit uniquement les descriptions trop longues", () => {
