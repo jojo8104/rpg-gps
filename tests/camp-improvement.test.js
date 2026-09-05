@@ -97,3 +97,52 @@ test("un Camp 3 militaire peut devenir volontairement un fort", () => {
   assert.equal(location.level, 1);
   assert.equal(location.defenseSlots, 3);
 });
+
+test("les nouveaux bâtiments sont présents avec leurs niveaux et prérequis", () => {
+  const { location, service } = create({ level: 3, population: 20 });
+  const state = service.getState(location);
+  for (const id of ["tavern", "forge", "stable", "barracks", "magic_academy", "armorers", "archery_range", "palisades", "walls", "ramparts", "chapel", "habitation", "farm", "palace", "houses", "brewery", "military_school"])
+    assert.ok(state.improvements.some((entry) => entry.id === id), id);
+});
+
+test("les habitations augmentent la capacité et la ferme produit de la nourriture", () => {
+  const { location, service } = create({ level: 3, population: 8 });
+  service.build(location, "habitation");
+  service.build(location, "farm");
+  assert.equal(location.populationCapacity, 29);
+  assert.equal(location.resources.production.food, 2);
+});
+
+test("la population croît par cycle selon les habitants et les infrastructures sans dépasser la capacité", () => {
+  const { location, service } = create({ level: 3, population: 20 });
+  service.build(location, "habitation");
+  service.build(location, "farm");
+  const first = service.advancePopulation(location, 2);
+  assert.equal(first.gained, 1);
+  const final = service.advancePopulation(location, 100);
+  assert.equal(final.population, location.populationCapacity);
+});
+
+test("les combinaisons militaires débloquent les unités et augmentent leurs capacités", () => {
+  const { location, service } = create({ level: 3, population: 20 });
+  location.infrastructure = {
+    hunting_lodge: 1, barracks: 2, forge: 1, archery_range: 2,
+    stable: 1, armorers: 1,
+  };
+  service.applyEffects(location);
+  assert.deepEqual(new Set(location.recruitment.availableUnitTypeIds), new Set([
+    "archer", "swordsman", "spearman", "mounted-archer",
+    "light-cavalry", "heavy-cavalry", "heavy-infantry",
+  ]));
+  assert.equal(location.recruitment.capacities.archer, 12);
+  assert.equal(location.recruitment.capacities.spearman, 7);
+  assert.equal(location.recruitment.capacities.swordsman, 7);
+});
+
+test("un village débloque les miliciens", () => {
+  const { location, progression, service } = create({ level: 3, population: 20 });
+  location.infrastructure = { housing: 2, trading_post: 1, healing_tent: 1 };
+  progression.awardExperience(location, progression.getExperienceRequired(location), "quest");
+  assert.equal(service.evolve(location, "village").success, true);
+  assert.ok(location.recruitment.availableUnitTypeIds.includes("militia"));
+});

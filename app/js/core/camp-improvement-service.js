@@ -75,6 +75,75 @@ export const CAMP_IMPROVEMENTS = Object.freeze({
     3,
     [level({ wood: 10, gold: 10 }, "Débloque les futurs messages physiques.")],
   ),
+  tavern: improvement("Taverne", "development", "population", 2, [
+    level({ wood: 12, gold: 5 }, "Favorise l'arrivée de nouveaux habitants.", { populationGrowthRate: 0.01 }),
+    level({ wood: 18, stone: 5, gold: 10 }, "Renforce fortement l'attractivité du lieu.", { populationGrowthRate: 0.02 }),
+  ]),
+  forge: improvement("Forge", "development", "craft", 2, [
+    level({ wood: 10, stone: 8, iron: 5 }, "Débloque le travail du métal."),
+    level({ wood: 15, stone: 12, iron: 10 }, "Améliore la fabrication métallique."),
+  ]),
+  stable: improvement("Écurie", "development", "military", 2, [
+    level({ wood: 15, gold: 5 }, "Permet d'accueillir et d'entraîner des montures."),
+    level({ wood: 20, stone: 5, gold: 10 }, "Augmente les capacités équestres du lieu."),
+  ]),
+  barracks: improvement("Caserne", "development", "military", 2, [
+    level({ wood: 15, stone: 10, iron: 3 }, "Débloque l'entraînement militaire."),
+    level({ wood: 20, stone: 15, iron: 6 }, "Augmente la capacité de garnison."),
+  ]),
+  magic_academy: improvement("Académie de magie", "development", "knowledge", 3, [
+    level({ wood: 20, stone: 20, gold: 25 }, "Débloque l'enseignement de la magie."),
+    level({ stone: 30, iron: 5, gold: 40 }, "Développe la formation magique avancée."),
+  ]),
+  armorers: improvement("Armuriers", "development", "craft", 3, [
+    level({ wood: 15, iron: 12, gold: 10 }, "Débloque la fabrication d'armures."),
+    level({ stone: 15, iron: 20, gold: 15 }, "Améliore la qualité des armures."),
+  ]),
+  archery_range: improvement("Champ de tir", "development", "military", 2, [
+    level({ wood: 15, iron: 2 }, "Débloque l'entraînement des archers."),
+    level({ wood: 22, stone: 5, iron: 5 }, "Améliore l'entraînement à distance."),
+  ]),
+  palisades: improvement("Palissades", "fundamental", "defense", 1, [
+    level({ wood: 15 }, "Renforce l'enceinte du lieu."),
+    level({ wood: 25, iron: 3 }, "Épaissit l'enceinte en bois."),
+  ]),
+  walls: improvement("Murs", "fundamental", "defense", 2, [
+    level({ stone: 20, wood: 10 }, "Établit une enceinte de pierre."),
+    level({ stone: 35, iron: 5 }, "Renforce l'enceinte de pierre."),
+  ]),
+  ramparts: improvement("Murailles", "fundamental", "defense", 3, [
+    level({ stone: 45, iron: 10, gold: 10 }, "Érige des fortifications monumentales."),
+  ]),
+  chapel: improvement("Chapelle", "development", "population", 2, [
+    level({ wood: 12, stone: 10, gold: 5 }, "Soutient la cohésion et la croissance de la communauté.", { populationGrowthRate: 0.005 }),
+    level({ stone: 20, gold: 12 }, "Accroît l'influence spirituelle du lieu.", { populationGrowthRate: 0.01 }),
+  ]),
+  habitation: improvement("Habitations", "fundamental", "population", 1, [
+    level({ wood: 12 }, "Ajoute 4 places de population.", { populationCapacity: 4, populationGrowthRate: 0.005 }),
+    level({ wood: 20, stone: 8 }, "Ajoute 8 places de population.", { populationCapacity: 8, populationGrowthRate: 0.01 }),
+    level({ wood: 25, stone: 15, iron: 3 }, "Ajoute 14 places de population.", { populationCapacity: 14, populationGrowthRate: 0.015 }),
+  ]),
+  farm: improvement("Ferme", "development", "economy", 1, [
+    level({ wood: 12 }, "Produit de la nourriture et favorise la croissance.", { foodProduction: 2, populationGrowthRate: 0.01 }),
+    level({ wood: 18, stone: 5 }, "Augmente la production agricole.", { foodProduction: 4, populationGrowthRate: 0.02 }),
+    level({ wood: 25, stone: 10, iron: 3 }, "Établit une exploitation agricole majeure.", { foodProduction: 7, populationGrowthRate: 0.03 }),
+  ]),
+  palace: improvement("Palais", "development", "government", 3, [
+    level({ wood: 30, stone: 40, iron: 10, gold: 50 }, "Établit un centre de pouvoir et attire la population.", { populationCapacity: 10, populationGrowthRate: 0.02 }),
+  ]),
+  houses: improvement("Maisons", "fundamental", "population", 2, [
+    level({ wood: 15, stone: 5 }, "Ajoute 6 places de population.", { populationCapacity: 6, populationGrowthRate: 0.005 }),
+    level({ wood: 25, stone: 12 }, "Ajoute 12 places de population.", { populationCapacity: 12, populationGrowthRate: 0.01 }),
+    level({ wood: 35, stone: 20, iron: 4 }, "Ajoute 20 places de population.", { populationCapacity: 20, populationGrowthRate: 0.015 }),
+  ]),
+  brewery: improvement("Brasserie", "development", "economy", 2, [
+    level({ wood: 12, stone: 5, gold: 5 }, "Améliore l'attractivité économique du lieu.", { populationGrowthRate: 0.005 }),
+    level({ wood: 18, stone: 10, gold: 10 }, "Développe l'activité de la brasserie.", { populationGrowthRate: 0.01 }),
+  ]),
+  military_school: improvement("École militaire", "development", "military", 3, [
+    level({ wood: 20, stone: 20, iron: 10, gold: 15 }, "Débloque la formation militaire avancée."),
+    level({ stone: 30, iron: 15, gold: 25 }, "Améliore la formation des officiers."),
+  ]),
 });
 
 export const CAMP_LEVEL_REQUIREMENTS = Object.freeze({
@@ -197,7 +266,11 @@ export class CampImprovementService {
   }
 
   applyEffects(location) {
-    if (location.type !== "camp") return null;
+    if (location.type !== "camp") {
+      if (location.type === "village") this.#unlockRecruitment(location, "militia");
+      return null;
+    }
+    this.progressionService.initialize(location);
     const depotLevel = location.infrastructure.depot ?? 0;
     location.resources.infrastructureStorage =
       CAMP_IMPROVEMENTS.depot.levels[depotLevel - 1]?.effects
@@ -212,8 +285,10 @@ export class CampImprovementService {
     location.features.messaging =
       (location.infrastructure.messenger_relay ?? 0) > 0;
     const huntingLevel = location.infrastructure.hunting_lodge ?? 0;
-    location.features.resourceProduction = huntingLevel > 0;
-    location.resources.production.food = huntingLevel;
+    const farmLevel = location.infrastructure.farm ?? 0;
+    const farmFood = CAMP_IMPROVEMENTS.farm.levels[farmLevel - 1]?.effects.foodProduction ?? 0;
+    location.features.resourceProduction = huntingLevel > 0 || farmLevel > 0;
+    location.resources.production.food = huntingLevel + farmFood;
     location.features.recruitment = huntingLevel > 0;
     if (
       huntingLevel > 0 &&
@@ -228,8 +303,90 @@ export class CampImprovementService {
         Math.floor((location.population ?? 0) / 4),
       );
     }
-    this.progressionService.initialize(location);
+    this.#applyMilitaryRecruitment(location);
+    const capacityBonus = this.#sumCurrentEffects(location, "populationCapacity");
+    location.populationCapacity += capacityBonus;
+    location.features.forge = (location.infrastructure.forge ?? 0) > 0;
+    location.features.stable = (location.infrastructure.stable ?? 0) > 0;
+    location.features.militaryTraining = (location.infrastructure.barracks ?? 0) > 0 || (location.infrastructure.military_school ?? 0) > 0;
+    location.features.magicTraining = (location.infrastructure.magic_academy ?? 0) > 0;
+    location.features.armorer = (location.infrastructure.armorers ?? 0) > 0;
     return this.getState(location);
+  }
+
+  #applyMilitaryRecruitment(location) {
+    const level = (id) => location.infrastructure[id] ?? 0;
+    const has = (id) => level(id) > 0;
+    if (has("hunting_lodge")) this.#unlockRecruitment(location, "archer");
+    if (has("barracks") && has("forge")) {
+      this.#unlockRecruitment(location, "swordsman");
+      this.#unlockRecruitment(location, "spearman");
+    }
+    if (has("stable") && has("archery_range"))
+      this.#unlockRecruitment(location, "mounted-archer");
+    if (has("stable") && has("barracks") && has("forge"))
+      this.#unlockRecruitment(location, "light-cavalry");
+    if (has("stable") && has("barracks") && has("armorers"))
+      this.#unlockRecruitment(location, "heavy-cavalry");
+    if (has("barracks") && has("armorers"))
+      this.#unlockRecruitment(location, "heavy-infantry");
+
+    const base = Math.max(1, Math.floor((location.population ?? 0) / 4));
+    const capacityMultipliers = {
+      militia: 1 + level("barracks") * 0.5,
+      archer: 1 + level("barracks") * 0.25 + level("archery_range") * 0.5,
+      spearman: 1 + level("armorers") * 0.5,
+      swordsman: 1 + level("armorers") * 0.5,
+    };
+    location.recruitment.availableUnitTypeIds.forEach((typeId) => {
+      location.recruitment.capacities[typeId] = Math.max(
+        location.recruitment.capacities[typeId] ?? 0,
+        Math.floor(base * (capacityMultipliers[typeId] ?? 1)),
+      );
+    });
+  }
+
+  #unlockRecruitment(location, typeId) {
+    location.features.recruitment = true;
+    if (!location.recruitment.availableUnitTypeIds.includes(typeId))
+      location.recruitment.availableUnitTypeIds.push(typeId);
+    location.recruitment.production[typeId] ??= 1;
+    location.recruitment.stock[typeId] ??= 0;
+    location.recruitment.weights[typeId] ??= 1;
+    location.recruitment.capacities[typeId] ??= Math.max(
+      1,
+      Math.floor((location.population ?? 0) / 4),
+    );
+  }
+
+  advancePopulation(location, cycles = 1, modifier = 1) {
+    if (!Number.isInteger(cycles) || cycles <= 0)
+      throw new RangeError("Le nombre de cycles démographiques doit être un entier positif.");
+    if (location.population === null || location.population <= 0 || location.populationCapacity === null || location.state === "abandoned" || location.state === "destroyed")
+      return { gained: 0, population: location.population };
+    const infrastructureRate = location.type === "camp"
+      ? this.#sumCurrentEffects(location, "populationGrowthRate")
+      : 0;
+    const rate = Math.max(0, (0.02 + infrastructureRate) * modifier);
+    const initial = location.population;
+    let progress = location.statistics.populationGrowthProgress ?? 0;
+    for (let cycle = 0; cycle < cycles && location.population < location.populationCapacity; cycle += 1) {
+      progress += location.population * rate;
+      const newcomers = Math.min(Math.floor(progress), location.populationCapacity - location.population);
+      if (newcomers > 0) {
+        location.addPopulation(newcomers);
+        progress -= newcomers;
+      }
+    }
+    location.statistics.populationGrowthProgress = location.population >= location.populationCapacity ? 0 : progress;
+    return { gained: location.population - initial, population: location.population, capacity: location.populationCapacity, rate };
+  }
+
+  #sumCurrentEffects(location, effectId) {
+    return Object.entries(CAMP_IMPROVEMENTS).reduce((total, [id, definition]) => {
+      const currentLevel = location.infrastructure[id] ?? 0;
+      return total + (definition.levels[currentLevel - 1]?.effects[effectId] ?? 0);
+    }, 0);
   }
 
   getLevelUpStatus(location) {
@@ -360,6 +517,8 @@ export class CampImprovementService {
       );
     if (branch.targetType === "fort")
       location.defenseSlots = Math.max(location.defenseSlots, 3);
+    if (branch.targetType === "village")
+      this.#unlockRecruitment(location, "militia");
     const durability = this.progressionService.initialize(location);
     if (durability) durability.health = durability.maxHealth;
     return {

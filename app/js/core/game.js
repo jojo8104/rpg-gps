@@ -773,6 +773,8 @@ export class Game {
 
   dispatchQuestEvent(event) {
     if (this.#failExpiredQuestDeadline()) return null;
+    if (event.type === "LocationEntered" && event.actorId)
+      this.trainHeroAtLocation({ heroId: event.actorId, locationId: event.locationId });
     if (
       event.type === "LocationEntered" &&
       this.scenarioState?.currentPhaseId === "prepare-evacuation"
@@ -800,6 +802,49 @@ export class Game {
       }
     }
     return this.questRuntime.dispatch(event, this);
+  }
+
+  trainHeroAtLocation({ heroId, locationId }) {
+    const hero = this.getHero(heroId);
+    const location = this.getLocation(locationId);
+    if (hero === null || location === null)
+      return { success: false, reason: "hero_or_location_not_found" };
+    const visits = (hero.classFeatureState.infrastructureTraining ??= {});
+    const results = [];
+    const train = (buildingId, allowedAptitudeIds) => {
+      if ((location.infrastructure[buildingId] ?? 0) <= 0) return;
+      const visitId = `${location.id}:${buildingId}`;
+      if (visits[visitId]) return;
+      visits[visitId] = true;
+      hero.statGrowth.attack += 1;
+      hero.statGrowth.defense += 1;
+      const aptitudeId = allowedAptitudeIds.find(
+        (id) => !Object.hasOwn(hero.aptitudeRanks, id),
+      ) ?? null;
+      if (aptitudeId) {
+        hero.aptitudeRanks[aptitudeId] = "novice";
+        const aptitude = this.heroProgressionService.aptitudes.get(aptitudeId);
+        if (["active", "reaction"].includes(aptitude?.type))
+          hero.addSpecialPower(aptitudeId);
+        else hero.addSkill(aptitudeId);
+      }
+      results.push({ buildingId, aptitudeId, attack: 1, defense: 1 });
+    };
+    const heroClass = this.heroClasses.get(hero.classId);
+    train("military_school", [
+      ...(heroClass?.aptitudeIds ?? []),
+      ...(heroClass?.commonAptitudeIds ?? []),
+    ]);
+    if (hero.classId === "mage")
+      train("magic_academy", heroClass?.aptitudeIds ?? []);
+    results.forEach((result) => this.eventLog.push({
+      type: "hero_infrastructure_training",
+      heroId,
+      locationId,
+      ...result,
+      at: this.now(),
+    }));
+    return { success: results.length > 0, results };
   }
 
   getQuestChoices() {
@@ -2296,6 +2341,11 @@ export class Game {
           random,
           modifier,
         );
+        const populationGrowth = this.campImprovementService.advancePopulation(
+          location,
+          cycles,
+          modifier,
+        );
         if (location.type === "camp") {
           const activity =
             (produced.food ?? 0) / 10 +
@@ -2316,6 +2366,7 @@ export class Game {
           contentmentModifier: modifier,
           produced,
           producedRecruits,
+          populationGrowth,
           market,
         };
       })
@@ -2323,6 +2374,7 @@ export class Game {
         (result) =>
           Object.keys(result.produced).length > 0 ||
           Object.keys(result.producedRecruits).length > 0 ||
+          result.populationGrowth.gained > 0 ||
           result.market.gold > 0,
       );
   }

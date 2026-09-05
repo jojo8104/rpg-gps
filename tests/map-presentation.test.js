@@ -143,7 +143,8 @@ test("le brouillard utilise un seul calque texturé et un masque", () => {
       id: String(index),
       row,
       column,
-      visits: index === 0 ? 1 : 0,
+      visits: 0,
+      explored: index === 0,
       bounds: [
         { latitude: row, longitude: column },
         { latitude: row + 1, longitude: column + 1 },

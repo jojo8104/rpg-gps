@@ -48,8 +48,29 @@ export class PlayAreaGrid {
     if (cell === null) return null;
     cell.visits += 1;
     cell.activity += activity;
+    cell.explored = true;
     cell.lastVisitedAt = visitedAt;
     return { ...cell, bounds: cell.bounds.map((point) => ({ ...point })) };
+  }
+
+  revealWithinRadius(position, { radius, coordinateMode = "gps" }) {
+    if (!Number.isFinite(radius) || radius <= 0)
+      throw new RangeError("Le rayon d'exploration doit être positif.");
+    const distanceTo =
+      coordinateMode === "simulation"
+        ? (point) =>
+            Math.hypot(
+              point.latitude - position.latitude,
+              point.longitude - position.longitude,
+            )
+        : (point) => distanceMeters(position, point);
+    const revealedCellIds = [];
+    this.cells.forEach((cell) => {
+      if (cell.explored || distanceTo(cell.center) > radius) return;
+      cell.explored = true;
+      revealedCellIds.push(cell.id);
+    });
+    return revealedCellIds;
   }
 
   setQuestSignal(position, { radiusCells = 1 } = {}) {
@@ -127,6 +148,7 @@ export class PlayAreaGrid {
             { latitude: north, longitude: east },
           ],
           visits: 0,
+          explored: false,
           activity: 0,
           questSignal: 0,
           lastVisitedAt: null,
@@ -152,8 +174,18 @@ function normalizeCell(cell) {
     center: { ...cell.center },
     bounds: cell.bounds.map((point) => ({ ...point })),
     visits: cell.visits ?? 0,
+    explored: cell.explored ?? (cell.visits ?? 0) > 0,
     activity: cell.activity ?? 0,
     questSignal: cell.questSignal ?? 0,
     lastVisitedAt: cell.lastVisitedAt ?? null,
   };
+}
+
+function distanceMeters(first, second) {
+  const latitudeMeters = (second.latitude - first.latitude) * 111_320;
+  const longitudeMeters =
+    (second.longitude - first.longitude) *
+    111_320 *
+    Math.cos((first.latitude * Math.PI) / 180);
+  return Math.hypot(latitudeMeters, longitudeMeters);
 }

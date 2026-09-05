@@ -249,11 +249,7 @@
 }
 .rpg-theoretical-vision {
   fill: #101719;
-  fill-opacity: 0.32;
-  stroke: #bac4c5;
-  stroke-width: 2;
-  stroke-opacity: 0.34;
-  stroke-dasharray: 5 7;
+  fill-opacity: 0.25;
   pointer-events: none;
 }
 .rpg-fog-overlay {

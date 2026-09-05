@@ -1,5 +1,5 @@
 /** Ressources minimales nécessaires avant que le cache dynamique prenne le relais. */
-const CACHE = "rpg-gps-field-v119";
+const CACHE = "rpg-gps-field-v123";
 const local = (path) => new URL(path, self.location).href;
 const APP_SHELL = [
   local("./"),
@@ -37,6 +37,8 @@ const APP_SHELL = [
   local("./app/js/core/play-area-presence.js"),
   local("./app/manifest.webmanifest"),
   local("./app/icon.svg"),
+  local("./app/assets/welcome-portrait.png"),
+  local("./app/assets/welcome-landscape.png"),
   local("./data/scenarios/chaos.json"),
   local("./data/scenarios/verdant-frontier.json"),
   local("./data/hero-classes.json"),

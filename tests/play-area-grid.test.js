@@ -28,3 +28,19 @@ test("un signal de quête colore une zone sans modifier l'activité réelle", ()
   const signal = grid.setQuestSignal(position, { radiusCells: 1 }); assert.ok(signal.targetCellId); assert.equal(grid.getCellAt(position).questSignal, 1); assert.equal(grid.getCellAt(position).activity, 0);
   grid.clearQuestSignal(); assert.equal(grid.cells.some((cell) => cell.questSignal > 0), false);
 });
+
+test("les cases aperçues restent explorées sans compter comme visitées", () => {
+  const grid = new PlayAreaGrid({ playArea: area, cellSizeMeters: 100 });
+  const position = { latitude: 48.001, longitude: 2.001 };
+  const revealed = grid.revealWithinRadius(position, {
+    radius: 160,
+    coordinateMode: "gps",
+  });
+  assert.ok(revealed.length > 1);
+  assert.ok(grid.cells.some((cell) => cell.explored && cell.visits === 0));
+  const restored = new PlayAreaGrid(grid.toJSON());
+  assert.deepEqual(
+    restored.cells.map((cell) => cell.explored),
+    grid.cells.map((cell) => cell.explored),
+  );
+});
