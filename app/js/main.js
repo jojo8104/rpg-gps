@@ -44,6 +44,7 @@ import { renderLocationDetail, renderWorldDirectory } from "./ui/world-view.js";
 import { renderBattleResultView } from "./ui/battle-result-view.js";
 import { HeroArmyModifier } from "./core/hero-army-modifier.js";
 import { GameSetupView } from "./ui/game-setup-view.js";
+import { setupMapVisibility } from "./map/SetupMapVisibility.js";
 import { renderGarrisonSheet } from "./ui/garrison-sheet.js";
 import { renderUnitTypeIcon } from "./ui/unit-icon.js";
 import { CheatService } from "./core/cheat-service.js";
@@ -1019,8 +1020,9 @@ function resolveLocationEnemy({ location }) {
 function radiusFor(location) {
   return rangesFor(location).interactionRadius;
 }
-function isLocationEnabled(location) {
+function isLocationEnabled(location, { includeHiddenLocations = false } = {}) {
   if (
+    !includeHiddenLocations &&
     location.visibility === "hidden" &&
     !game?.getPlayer("local")?.knowsLocation(location.id)
   )
@@ -1130,7 +1132,10 @@ function serviceActionDetails(result) {
   };
 }
 
-function mappedLocations({ knownOnly = true } = {}) {
+function mappedLocations({
+  knownOnly = true,
+  includeHiddenLocations = false,
+} = {}) {
   const player = game.getPlayer("local");
   const heroClass = data.heroClasses.find(
     (definition) => definition.id === hero.classId,
@@ -1138,7 +1143,7 @@ function mappedLocations({ knownOnly = true } = {}) {
   return game.locations
     .filter(
       (location) =>
-        isLocationEnabled(location) &&
+        isLocationEnabled(location, { includeHiddenLocations }) &&
         (!knownOnly || player.knowsLocation(location.id)),
     )
     .map((location) => {
@@ -4220,13 +4225,17 @@ function render() {
   syncQuestBattlefield();
   const sites = visibleSites();
   const activeDivination = game.heroClassFeatureService.activeDivination(hero);
+  const mapVisibility = setupMapVisibility({
+    setupActive: gpsSetupActive,
+    fogEnabled: fogVisible,
+  });
   mapView.render({
     heroPosition,
     heroHeading,
     accuracy: gpsAccuracy,
     visionRadius: game.heroClassFeatureService.visionRadius(hero),
-    fogEnabled: fogVisible,
-    locations: mappedLocations(),
+    fogEnabled: mapVisibility.fogEnabled,
+    locations: mappedLocations(mapVisibility),
     autonomousGroups: visibleAutonomousGroups(),
     divinationTargets: visibleDivinationTargets(),
     revealedZones: activeDivination ? [activeDivination] : [],
