@@ -493,6 +493,64 @@
   display: grid;
   gap: 0.45rem;
 }
+.improvement-options {
+  display: grid;
+  gap: 0.65rem;
+}
+.improvement-option {
+  padding: 0.75rem;
+  border: 1px solid #8f7148;
+  border-radius: 9px;
+  background: linear-gradient(#fff0cc, #e2c18c);
+  color: #352319;
+}
+.improvement-option > div,
+.improvement-option footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.improvement-option p {
+  margin: 0.45rem 0;
+  color: #654936;
+  font-size: 0.78rem;
+}
+.improvement-option > div span,
+.improvement-option footer span {
+  color: #654936;
+  font-size: 0.72rem;
+}
+.location-detail.is-interaction-open > :not(.location-actions) {
+  display: none;
+}
+.location-detail.is-interaction-open .location-actions {
+  min-height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.location-detail.is-interaction-open .location-actions > h3,
+.location-detail.is-interaction-open .location-actions > .world-actions {
+  display: none;
+}
+.location-detail.is-interaction-open .location-action-menu {
+  min-height: 100%;
+  margin: 0;
+  padding: clamp(0.7rem, 2vw, 1.1rem);
+  border: 0;
+  background: transparent;
+}
+.location-detail.is-interaction-open .action-menu-heading {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+}
+.location-detail.is-interaction-open .action-menu-heading h4 {
+  font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+}
+.interaction-menu-back {
+  order: -1;
+}
 .recruit-option {
   padding: 0.6rem;
   border: 1px solid #405d45;

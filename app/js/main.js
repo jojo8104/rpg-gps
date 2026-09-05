@@ -3077,7 +3077,8 @@ function selectLocation(id) {
       closeSheet(ui.sheet);
     },
     onAction: runAction,
-    onOpenWorld: () => openLocationDetail(id),
+    onOpenWorld: (interactionMenu = null) =>
+      openLocationDetail(id, interactionMenu),
     onOpenReserves: () => openLocationDetail(id, "reserves"),
     onOpenGarrison: () => openGarrisonManager(id),
   });

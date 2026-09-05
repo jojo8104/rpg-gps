@@ -1,6 +1,3 @@
-import { renderUnitTypeIcon } from "./unit-icon.js";
-
-let activeActionMenu = null;
 let activeLocationId = null;
 
 export function renderLocationSheet({
@@ -15,7 +12,6 @@ export function renderLocationSheet({
   element.classList.remove("location-tab");
   if (activeLocationId !== location.id) {
     activeLocationId = location.id;
-    activeActionMenu = null;
   }
   const recruitActions = location.actions.filter((action) =>
     action.id.startsWith("recruit:"),
@@ -44,44 +40,12 @@ export function renderLocationSheet({
       !action.id.startsWith("build-improvement:") &&
       action.id !== "talk-chief",
   );
-  const actionButtons = `${recruitActions.length ? '<button data-menu="recruit" type="button">Recruter</button>' : ""}${reserveActions.length ? '<button data-open-reserves type="button">Gérer les réserves</button>' : ""}${improvementActions.length ? '<button data-menu="improvements" type="button">Améliorations</button>' : ""}${chiefAction ? `<button data-action="talk-chief" type="button">${chiefAction.label}</button>` : ""}${directActions.map(serviceActionButton).join("")}`;
-  const recruitMenu = `<div class="sheet-action-menu" data-sheet-menu="recruit" ${activeActionMenu === "recruit" ? "" : "hidden"}><button class="secondary-button sheet-menu-back" data-menu-back type="button">← Retour</button><h3>Recruter</h3>${recruitActions
-    .map((action) => {
-      const details = action.details ?? {};
-      const stats = details.stats ?? {};
-      const costs =
-        Object.entries(details.costs ?? {})
-          .filter(([, amount]) => amount > 0)
-          .map(([id, amount]) => `${amount} ${id}`)
-          .join(" · ") || "Gratuit";
-      const unavailable = details.unavailableReason;
-      return `<article class="recruit-option${unavailable ? " is-unavailable" : ""}"><div><strong>${details.name ?? action.label}</strong><span>${details.available ?? 0} disponible(s)</span></div><p>ATQ ${stats.attack ?? "?"} · DÉF ${stats.defense ?? "?"} · VIT ${stats.speed ?? "?"} · POR ${stats.range ?? "?"} · MOR ${stats.morale ?? "?"}</p>${unavailable ? `<p class="recruit-unavailable" role="status">${unavailable}</p>` : ""}<footer><span>${costs}</span><button data-action="${action.id}" type="button" ${unavailable ? `disabled title="${unavailable}"` : ""}>Recruter</button></footer></article>`;
-    })
-    .join("")}</div>`;
-  const improvementMenu = `<div class="sheet-action-menu" data-sheet-menu="improvements" ${activeActionMenu === "improvements" ? "" : "hidden"}><button class="secondary-button sheet-menu-back" data-menu-back type="button">← Retour</button><h3>Améliorations</h3>${improvementActions.map(improvementCard).join("")}</div>`;
+  const actionButtons = `${recruitActions.length ? '<button data-open-interaction="recruit" type="button">Recruter</button>' : ""}${reserveActions.length ? '<button data-open-reserves type="button">Gérer les réserves</button>' : ""}${improvementActions.length ? '<button data-open-interaction="improvements" type="button">Améliorations</button>' : ""}${chiefAction ? `<button data-action="talk-chief" type="button">${chiefAction.label}</button>` : ""}${directActions.map(serviceActionButton).join("")}`;
   element.hidden = false;
-  element.innerHTML = `<button class="sheet-close" type="button">Fermer</button><span class="sheet-state">${location.state}</span><h2>${location.name}</h2><p>${location.type} · ${Math.round(location.distance)} m</p><p>${location.description}</p>${campProgress(location.campDevelopment)}${structureList(location.structures)}<div class="sheet-actions" ${activeActionMenu ? "hidden" : ""}>${location.nearby ? actionButtons : "Approchez-vous pour interagir."}</div>${location.nearby ? recruitMenu + improvementMenu : ""}`;
-  element
-    .querySelectorAll('[data-sheet-menu="recruit"] .recruit-option')
-    .forEach((card, index) => {
-      const typeId = recruitActions[index]?.id.split(":")[1];
-      if (typeId)
-        card.insertAdjacentHTML(
-          "afterbegin",
-          `<div class="recruit-illustration" aria-hidden="true">${renderUnitTypeIcon({ typeId })}</div>`,
-        );
-    });
-  if (recruitActions.length) {
-    const details = recruitActions[0].details;
-    const status = document.createElement("p");
-    status.className = `recruit-capacity${details.totalAvailable >= details.capacity ? " is-full" : ""}`;
-    status.textContent = `Stock total : ${details.totalAvailable}/${details.capacity}${details.totalAvailable >= details.capacity ? " · capacité atteinte" : ""}`;
-    element.querySelector('[data-sheet-menu="recruit"] h3')?.after(status);
-  }
+  element.innerHTML = `<button class="sheet-close" type="button">Fermer</button><span class="sheet-state">${location.state}</span><h2>${location.name}</h2><p>${location.type} · ${Math.round(location.distance)} m</p><p>${location.description}</p>${campProgress(location.campDevelopment)}${structureList(location.structures)}<div class="sheet-actions">${location.nearby ? actionButtons : "Approchez-vous pour interagir."}</div>`;
   element.querySelector(".sheet-close").addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
-    activeActionMenu = null;
     onClose();
   });
   element.querySelectorAll("[data-action]").forEach((button) =>
@@ -98,20 +62,10 @@ export function renderLocationSheet({
       event.stopPropagation();
       onOpenReserves?.();
     });
-  element.querySelectorAll("[data-menu]").forEach((button) =>
-    button.addEventListener("click", () => {
-      activeActionMenu = button.dataset.menu;
-      element.querySelector(".sheet-actions").hidden = true;
-      element.querySelector(`[data-sheet-menu="${activeActionMenu}"]`).hidden =
-        false;
-    }),
-  );
-  element.querySelectorAll("[data-menu-back]").forEach((button) =>
-    button.addEventListener("click", () => {
-      activeActionMenu = null;
-      button.closest("[data-sheet-menu]").hidden = true;
-      element.querySelector(".sheet-actions").hidden = false;
-    }),
+  element.querySelectorAll("[data-open-interaction]").forEach((button) =>
+    button.addEventListener("click", () =>
+      onOpenWorld?.(button.dataset.openInteraction),
+    ),
   );
   const grab = document.createElement("div");
   grab.className = "sheet-grab";
@@ -170,7 +124,6 @@ export function renderLocationSheet({
       openedByDrag = true;
       if (deltaY < 0) onOpenWorld?.();
       else {
-        activeActionMenu = null;
         onClose();
       }
     },
@@ -230,13 +183,6 @@ function serviceActionButton(action) {
   return `<button data-action="${action.id}" type="button" ${unavailable ? `disabled title="${unavailable}"` : ""}><span>${action.label}</span>${costs ? `<small>${costs}</small>` : ""}${unavailable ? `<small>${unavailable}</small>` : ""}</button>`;
 }
 
-function improvementCard(action) {
-  const details = action.details ?? {};
-  const costs = Object.entries(details.costs ?? {})
-    .map(([id, amount]) => `${amount} ${id}`)
-    .join(" · ");
-  return `<article class="recruit-option"><div><strong>${action.label}</strong><span>${details.slotType === "fundamental" ? "Fondation" : "Développement"}</span></div><p>${details.description ?? ""}</p><footer><span>${costs}</span><button data-action="${action.id}" type="button">Construire</button></footer></article>`;
-}
 function structureList(structures = []) {
   if (!structures.length) return "";
   return `<section class="location-structures"><h3>Bâtiments</h3><ul>${structures.map((structure) => `<li><span>${structure.id} <small>Niv. ${structure.level}</small></span>${structure.dismantling ? '<small class="structure-dismantling">Démontage en cours</small>' : structure.canDismantle ? `<button class="structure-remove" data-action="dismantle:${structure.id}" type="button" aria-label="Démanteler ${structure.id}" title="Démanteler">×</button>` : ""}</li>`).join("")}</ul></section>`;
@@ -262,6 +208,5 @@ export function closeSheet(element) {
   element.hidden = true;
   element.innerHTML = "";
   element.classList.remove("garrison-sheet", "location-tab");
-  activeActionMenu = null;
   activeLocationId = null;
 }

@@ -16,6 +16,20 @@ export function renderBattleResultView({
   onReturnToMap,
 }) {
   const victory = battle.winnerTeamId === playerTeamId;
+  const enemyTeam = battle.teams.find((team) => team.id !== playerTeamId);
+  const enemyHeroName =
+    enemyTeam?.heroes.find((enemy) => enemy.name)?.name ??
+    "le commandant ennemi";
+  const outcomeTitle = victory
+    ? "Victoire"
+    : battle.winnerTeamId === null
+      ? "Issue indécise"
+      : "Défaite";
+  const outcomeSubtitle = victory
+    ? `Vous avez vaincu ${enemyHeroName}`
+    : battle.winnerTeamId === null
+      ? "Aucun camp n’a remporté la bataille"
+      : `${enemyHeroName} a remporté la bataille`;
   const heroRows = result.heroProgression
     .filter((entry) => entry.playerId === playerId)
     .map((entry) => {
@@ -61,7 +75,7 @@ export function renderBattleResultView({
         `<li><strong>${unitName(entry)}</strong><span>Unité perdue</span></li>`,
     )
     .join("");
-  element.innerHTML = `<section class="battle-result ${victory ? "is-victory" : "is-defeat"}"><header class="battle-result__header"><p class="eyebrow">Résultat du combat</p><h3>${victory ? "Victoire" : battle.winnerTeamId === null ? "Issue indécise" : "Défaite"}</h3></header><div class="battle-result__panels"><section><h4>Héros</h4><ul>${heroRows || "<li>Aucune progression</li>"}</ul></section><section><h4>Unités survivantes</h4><ul>${unitRows || "<li>Aucune unité survivante</li>"}</ul>${lossRows ? `<h4>Unités perdues</h4><ul>${lossRows}</ul>` : ""}</section><section class="battle-result__loot"><h4>Butin</h4><div data-result-loot></div></section></div><footer class="battle-result__actions"><button type="button" data-return-map>Retourner sur la carte</button></footer></section>`;
+  element.innerHTML = `<section class="battle-result ${victory ? "is-victory" : "is-defeat"}"><header class="battle-result__header"><span class="battle-result__emblem" aria-hidden="true">${victory ? "✦" : "◆"}</span><div class="battle-result__heading"><p class="eyebrow">Résultat du combat</p><h3>${outcomeTitle}</h3><p class="battle-result__subtitle">${outcomeSubtitle}</p></div></header><div class="battle-result__divider" aria-hidden="true"><i></i><span>◆</span><i></i></div><div class="battle-result__panels"><section class="battle-result__panel battle-result__heroes"><h4><span aria-hidden="true">♛</span> Héros</h4><ul>${heroRows || "<li>Aucune progression</li>"}</ul></section><section class="battle-result__panel battle-result__units"><h4><span aria-hidden="true">⚔</span> Unités survivantes</h4><ul>${unitRows || "<li>Aucune unité survivante</li>"}</ul>${lossRows ? `<h4 class="battle-result__loss-title">Unités perdues</h4><ul>${lossRows}</ul>` : ""}</section><section class="battle-result__panel battle-result__loot"><h4><span aria-hidden="true">✧</span> Butin</h4><div data-result-loot></div></section></div><footer class="battle-result__actions"><button type="button" data-return-map>Retourner sur la carte</button></footer></section>`;
   const lootElement = element.querySelector("[data-result-loot]");
   if (result.battleLoot && bag && onCollectLoot)
     renderLootStockSheet({
