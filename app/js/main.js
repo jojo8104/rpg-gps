@@ -200,6 +200,8 @@ const rankLabel = (ranks, id) =>
   ranks.find((rank) => rank.id === id)?.label ?? id;
 const unitHealthBar = (unit) => renderUnitHealthBar(unit);
 const ui = {
+  presentation: $("#presentation-screen"),
+  enterApp: $("#enter-app"),
   setup: $("#setup-screen"),
   game: $("#game-screen"),
   create: $("#create-game"),
@@ -223,6 +225,13 @@ const ui = {
   gpsLocationButtons: $("#gps-location-buttons"),
   finishGpsSetup: $("#finish-gps-setup"),
 };
+ui.enterApp.addEventListener("click", () => {
+  ui.presentation.classList.add("is-leaving");
+  ui.setup.hidden = false;
+  setTimeout(() => {
+    ui.presentation.hidden = true;
+  }, 650);
+});
 if (PLAYTEST_EDITION) {
   ui.setup.dataset.edition = "playtest";
   ui.setup.querySelector("h1").textContent = "RPG GPS — Survie";
@@ -1858,6 +1867,16 @@ function applyPosition(position) {
     }
   }
   if (playAreaGrid) {
+    const configuredVisionRadius =
+      game.heroClassFeatureService.visionRadius(hero);
+    const explorationRadius =
+      mode === "simulation"
+        ? configuredVisionRadius * (32 / 150)
+        : configuredVisionRadius;
+    const revealedCellIds = playAreaGrid.revealWithinRadius(
+      asGps(heroPosition),
+      { radius: explorationRadius, coordinateMode: mode },
+    );
     const cell = playAreaGrid.getCellAt(asGps(heroPosition));
     if (!cell) lastVisitedCellId = null;
     else if (cell.id !== lastVisitedCellId) {
@@ -1866,6 +1885,7 @@ function applyPosition(position) {
       persistFieldState();
       logTest(`Passage ${passage.visits} dans ${cell.id}.`);
     }
+    if (revealedCellIds.length > 0) persistFieldState();
   }
   syncEvacuationCampSearch();
   updatePresence();
@@ -4588,11 +4608,11 @@ function render() {
       })
       .join("") || '<p class="text-muted">Aucune unité.</p>'
   }</div>`;
-  renderInventoryView({
-    element: ui.inventory,
-    hero,
-    slotCount: hero.bagSlotCount,
-  });
+  if (
+    !$("#inventory-view").classList.contains("is-active") ||
+    !ui.inventory.hasChildNodes()
+  )
+    renderInventory();
   ui.armyContent
     .querySelector(".army-card.is-expanded .army-card__details")
     ?.insertAdjacentHTML(
@@ -4910,8 +4930,18 @@ function switchView(name) {
     );
   if (name === "map") setTimeout(() => mapView.map.invalidateSize(), 0);
   else closeSheet(ui.sheet);
+  if (name === "inventory") renderInventory();
   if (name === "world") renderWorld();
   return true;
+}
+
+function renderInventory() {
+  if (!hero) return;
+  renderInventoryView({
+    element: ui.inventory,
+    hero,
+    slotCount: hero.bagSlotCount,
+  });
 }
 
 ui.create.disabled = true;

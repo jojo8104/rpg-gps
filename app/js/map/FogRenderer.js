@@ -39,17 +39,24 @@ export class FogRenderer {
     const radius = simulation
       ? gpsRadius * (FOG_VISION_RADIUS.simulation / FOG_VISION_RADIUS.gps)
       : gpsRadius;
-    this.visionLayer = L.circle(asLatLng(center), {
-      pane: MapLayers.EXPLORATION,
-      radius,
-      className: "rpg-theoretical-vision",
-      interactive: false,
-    }).addTo(this.map);
     const areaPoints =
       playAreaPoints.length >= 3
         ? playAreaPoints.map(asPosition)
         : rectanglePoints(boundsForCells(gridCells));
     const zoneBounds = boundsForPoints(areaPoints);
+    this.visionLayer = L.polygon(
+      [
+        areaPoints.map(asLatLng),
+        visionRing(center, radius, simulation),
+      ],
+      {
+        pane: MapLayers.EXPLORATION,
+        className: "rpg-theoretical-vision",
+        stroke: false,
+        fillRule: "evenodd",
+        interactive: false,
+      },
+    ).addTo(this.map);
     this.outsideLayer = L.polygon(
       [outsideBounds(simulation), areaPoints.map(asLatLng)],
       {
@@ -116,7 +123,7 @@ export function fogMaskGeometry({ cells, center, radius, simulation = false, zon
     y: ((northEast.latitude - position.latitude) / height) * OVERLAY_SIZE,
   });
   const discoveredPath = cells
-    .filter((cell) => cell.visits > 0)
+    .filter((cell) => cell.explored === true || cell.visits > 0)
     .map((cell) => {
       const topLeft = project({ latitude: cell.bounds[1].latitude, longitude: cell.bounds[0].longitude });
       const bottomRight = project({ latitude: cell.bounds[0].latitude, longitude: cell.bounds[1].longitude });
@@ -213,4 +220,25 @@ function outsideBounds(simulation) {
         [89.9, 179.9],
         [89.9, -179.9],
       ];
+}
+
+function visionRing(center, radius, simulation) {
+  return Array.from({ length: 64 }, (_, index) => {
+    const angle = (index / 64) * Math.PI * 2;
+    if (simulation)
+      return [
+        center.latitude + Math.sin(angle) * radius,
+        center.longitude + Math.cos(angle) * radius,
+      ];
+    return [
+      center.latitude + (Math.sin(angle) * radius) / 111_320,
+      center.longitude +
+        (Math.cos(angle) * radius) /
+          (111_320 *
+            Math.max(
+              0.01,
+              Math.cos((center.latitude * Math.PI) / 180),
+            )),
+    ];
+  });
 }

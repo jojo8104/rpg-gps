@@ -2,7 +2,12 @@
   "name": "rpg-gps",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
+    "start": "node server/server.js",
+    "server": "node server/server.js",
     "format": "prettier --write app/css app/js service-worker.js",
     "format:check": "prettier --check app/css app/js service-worker.js",
     "test": "node --test tests/*.test.js"

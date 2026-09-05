@@ -12,6 +12,105 @@ body {
   min-width: 320px;
   min-height: 100svh;
 }
+.presentation-screen {
+  position: fixed;
+  z-index: 5000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 0;
+  background: #07100c;
+  transition:
+    opacity 0.6s ease,
+    visibility 0.6s ease;
+}
+.presentation-screen.is-leaving {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.presentation-screen__artwork {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.presentation-screen__artwork img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.presentation-screen__mist {
+  position: absolute;
+  inset: -10%;
+  opacity: 1;
+  background:
+    linear-gradient(180deg, #07100c22 0%, transparent 38%, #07100cbb 100%),
+    radial-gradient(ellipse at 50% 45%, transparent 25%, #07100c77 100%);
+  animation: presentation-mist 12s ease-in-out infinite alternate;
+}
+.presentation-screen__enter {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  gap: 0.65rem;
+  width: 100%;
+  height: 100%;
+  min-height: 100svh;
+  padding: max(2rem, env(safe-area-inset-top)) 1.5rem
+    max(3rem, calc(env(safe-area-inset-bottom) + 2rem));
+  border: 0;
+  background: transparent;
+  color: #fff4d2;
+  box-shadow: none;
+  text-shadow: 0 3px 12px #000;
+  cursor: pointer;
+}
+.presentation-screen__title {
+  font:
+    700 clamp(3rem, 13vw, 5.5rem) / 0.9 Georgia,
+    serif;
+  letter-spacing: 0.04em;
+  font-variant: small-caps;
+}
+.presentation-screen__subtitle {
+  color: #d9cba5;
+  font:
+    600 clamp(0.78rem, 3.2vw, 1rem) / 1.4 Georgia,
+    serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.presentation-screen__prompt {
+  margin-top: clamp(1.5rem, 5vh, 3rem);
+  color: #ffe7a1;
+  font:
+    700 clamp(1rem, 4.2vw, 1.25rem) / 1.2 Georgia,
+    serif;
+  letter-spacing: 0.08em;
+  animation: presentation-prompt 1.8s ease-in-out infinite;
+}
+@keyframes presentation-mist {
+  to {
+    transform: translate3d(5%, -3%, 0) scale(1.08);
+  }
+}
+@keyframes presentation-prompt {
+  50% {
+    opacity: 0.45;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .presentation-screen__mist,
+  .presentation-screen__prompt {
+    animation: none;
+  }
+}
 button,
 input,
 select {

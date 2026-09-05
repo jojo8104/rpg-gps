@@ -26,11 +26,35 @@
     <link rel="stylesheet" href="css/map.css" />
   </head>
   <body>
+    <section
+      id="presentation-screen"
+      class="presentation-screen"
+      aria-labelledby="presentation-title"
+    >
+      <picture class="presentation-screen__artwork" aria-hidden="true">
+        <source
+          media="(orientation: landscape)"
+          srcset="assets/welcome-landscape.png"
+        />
+        <img src="assets/welcome-portrait.png" alt="" />
+      </picture>
+      <div class="presentation-screen__mist" aria-hidden="true"></div>
+      <button id="enter-app" class="presentation-screen__enter" type="button">
+        <span id="presentation-title" class="presentation-screen__title"
+          >RPG GPS</span
+        >
+        <span class="presentation-screen__subtitle"
+          >Une aventure dans le monde réel</span
+        >
+        <span class="presentation-screen__prompt">Tapez pour commencer</span>
+      </button>
+    </section>
     <main id="app">
       <section
         id="setup-screen"
         class="setup-screen"
         aria-labelledby="setup-title"
+        hidden
       >
         <nav class="setup-progress" aria-label="Progression de la création">
           <span class="is-active">1</span><span>2</span><span>3</span
@@ -251,21 +275,42 @@
                 </button>
               </div>
               <div class="gps-setup-actions terrain-profile-actions">
-                <button id="gps-draw-exclusion" class="danger-button" type="button">
+                <button
+                  id="gps-draw-exclusion"
+                  class="danger-button"
+                  type="button"
+                >
                   Tracer une exclusion
                 </button>
-                <button id="gps-finish-exclusion" class="secondary-button" type="button" disabled>
+                <button
+                  id="gps-finish-exclusion"
+                  class="secondary-button"
+                  type="button"
+                  disabled
+                >
                   Fermer l’exclusion
                 </button>
-                <button id="gps-clear-exclusions" class="secondary-button" type="button">
+                <button
+                  id="gps-clear-exclusions"
+                  class="secondary-button"
+                  type="button"
+                >
                   Effacer les exclusions
                 </button>
               </div>
               <div class="gps-setup-actions terrain-profile-actions">
-                <button id="save-terrain-profile" class="secondary-button" type="button">
+                <button
+                  id="save-terrain-profile"
+                  class="secondary-button"
+                  type="button"
+                >
                   Sauvegarder la carte
                 </button>
-                <button id="load-terrain-profile" class="secondary-button" type="button">
+                <button
+                  id="load-terrain-profile"
+                  class="secondary-button"
+                  type="button"
+                >
                   Charger la carte
                 </button>
               </div>
@@ -275,7 +320,8 @@
             </p>
             <section class="setup-placement-block">
               <h3>Capitale</h3>
-              <label>Placement
+              <label
+                >Placement
                 <select id="capital-placement-mode">
                   <option value="auto">Automatique</option>
                   <option value="manual">Manuel</option>
