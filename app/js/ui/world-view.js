@@ -161,7 +161,7 @@ export function renderLocationDetail({
   );
   const actionButtons = `${recruitActions.length ? '<button type="button" data-open-action-menu="recruit" aria-expanded="false">Recruter</button>' : ""}${reserveActions.length ? '<button type="button" data-open-action-menu="reserves" aria-expanded="false">Gérer les réserves</button>' : ""}${improvementActions.length ? '<button type="button" data-open-action-menu="improvements" aria-expanded="false">Améliorations</button>' : ""}${directActions.map(serviceActionButton).join("")}`;
   const recruitMenu = recruitActions.length
-    ? `<div class="location-action-menu" data-action-menu="recruit" hidden><div class="action-menu-heading"><h4>Recruter une unité</h4><button type="button" class="secondary-button" data-close-action-menu>Fermer</button></div><div class="recruit-options">${recruitActions
+    ? `<div class="location-action-menu" data-action-menu="recruit" hidden><div class="action-menu-heading"><button type="button" class="secondary-button interaction-menu-back" data-close-action-menu>← Retour à la localisation</button><h4>Recruter une unité</h4></div><div class="recruit-options">${recruitActions
         .map((action) => {
           const details = action.details ?? {};
           const stats = details.stats ?? {};
@@ -176,10 +176,10 @@ export function renderLocationDetail({
         .join("")}</div></div>`
     : "";
   const reserveMenu = reserveActions.length
-    ? `<div class="location-action-menu" data-action-menu="reserves" hidden><div class="action-menu-heading"><h4>Gérer les stocks</h4><button type="button" class="secondary-button" data-close-action-menu>Fermer</button></div>${renderStockSlots(reserveActions)}</div>`
+    ? `<div class="location-action-menu" data-action-menu="reserves" hidden><div class="action-menu-heading"><button type="button" class="secondary-button interaction-menu-back" data-close-action-menu>← Retour à la localisation</button><h4>Gérer les stocks</h4></div>${renderStockSlots(reserveActions)}</div>`
     : "";
   const improvementMenu = improvementActions.length
-    ? `<div class="location-action-menu" data-action-menu="improvements" hidden><div class="action-menu-heading"><h4>Améliorations</h4><button type="button" class="secondary-button" data-close-action-menu>Fermer</button></div><div class="recruit-options">${improvementActions.map(improvementCard).join("")}</div></div>`
+    ? `<div class="location-action-menu" data-action-menu="improvements" hidden><div class="action-menu-heading"><button type="button" class="secondary-button interaction-menu-back" data-close-action-menu>← Retour à la localisation</button><h4>Améliorations</h4></div><div class="improvement-options">${improvementActions.map(improvementCard).join("")}</div></div>`
     : "";
   const actions = location.nearby
     ? actionButtons || "Aucune action disponible."
@@ -264,48 +264,24 @@ export function renderLocationDetail({
     .forEach(
       (button) => (button.onclick = () => onAction(button.dataset.action)),
     );
-  element.querySelectorAll("[data-open-action-menu]").forEach(
-    (button) =>
-      (button.onclick = () => {
-        const menu = element.querySelector(
-          `[data-action-menu="${button.dataset.openActionMenu}"]`,
-        );
-        element.querySelectorAll("[data-action-menu]").forEach((candidate) => {
-          candidate.hidden = candidate !== menu || !candidate.hidden;
-        });
-        element
-          .querySelectorAll("[data-open-action-menu]")
-          .forEach((candidate) =>
-            candidate.setAttribute(
-              "aria-expanded",
-              String(candidate === button && !menu.hidden),
-            ),
-          );
-      }),
-  );
-  element.querySelectorAll("[data-close-action-menu]").forEach(
-    (button) =>
-      (button.onclick = () => {
-        const menu = button.closest("[data-action-menu]");
-        menu.hidden = true;
-        element
-          .querySelector(`[data-open-action-menu="${menu.dataset.actionMenu}"]`)
-          ?.setAttribute("aria-expanded", "false");
-      }),
-  );
+  const detail = element.querySelector(".location-detail");
   const actionBar = element.querySelector(".location-actions > .world-actions");
   if (activeDetailActionMenu) {
-    actionBar.hidden = true;
     const activeMenu = element.querySelector(
       `[data-action-menu="${activeDetailActionMenu}"]`,
     );
-    if (activeMenu) activeMenu.hidden = false;
+    if (activeMenu) {
+      actionBar.hidden = true;
+      detail.classList.add("is-interaction-open");
+      activeMenu.hidden = false;
+    } else activeDetailActionMenu = null;
   }
   element.querySelectorAll("[data-open-action-menu]").forEach(
     (button) =>
       (button.onclick = () => {
         activeDetailActionMenu = button.dataset.openActionMenu;
         actionBar.hidden = true;
+        detail.classList.add("is-interaction-open");
         element.querySelectorAll("[data-action-menu]").forEach((menu) => {
           menu.hidden = menu.dataset.actionMenu !== activeDetailActionMenu;
         });
@@ -317,10 +293,10 @@ export function renderLocationDetail({
         activeDetailActionMenu = null;
         button.closest("[data-action-menu]").hidden = true;
         actionBar.hidden = false;
+        detail.classList.remove("is-interaction-open");
       }),
   );
   bindStockSlots(element, onAction);
-  const detail = element.querySelector(".location-detail");
   let swipeStart = null;
   detail.addEventListener(
     "touchstart",
@@ -381,7 +357,7 @@ function improvementCard(action) {
   const costs = Object.entries(details.costs ?? {})
     .map(([id, amount]) => `${amount} ${id}`)
     .join(" · ");
-  return `<article class="recruit-option"><div><strong>${action.label}</strong><span>${details.slotType === "fundamental" ? "Fondation" : "Développement"}</span></div><p>${details.description ?? ""}</p><footer><span>${costs}</span><button type="button" data-action="${action.id}">Construire</button></footer></article>`;
+  return `<article class="improvement-option"><div><strong>${action.label}</strong><span>${details.slotType === "fundamental" ? "Fondation" : "Développement"}</span></div><p>${details.description ?? ""}</p><footer><span>${costs}</span><button type="button" data-action="${action.id}">Construire</button></footer></article>`;
 }
 function reserveBalanceForm(action) {
   const details = action.details ?? {};

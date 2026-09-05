@@ -1,4 +1,4 @@
-import { createReadStream } from "node:fs";
+import { createReadStream, realpathSync } from "node:fs";
 import { stat } from "node:fs/promises";
 import { createServer as createHttpServer } from "node:http";
 import path from "node:path";
@@ -113,9 +113,18 @@ export async function startServer(config = readServerConfig()) {
   return server;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (isMainModule()) {
   startServer().catch((error) => {
     console.error("Impossible de démarrer RPG GPS :", error.message);
     process.exitCode = 1;
   });
+}
+
+function isMainModule() {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
 }
