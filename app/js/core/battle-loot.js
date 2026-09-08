@@ -2,7 +2,7 @@ import { getItemDefinition } from "./item-catalog.js";
 
 /** Butin attribué à la fin d'un combat, sans présence ni contrainte géographique. */
 export class BattleLoot {
-  constructor({ id, battleId, entries, shares, now = () => Date.now() }) {
+  constructor({ id, battleId, entries, shares, status = "AVAILABLE", collectionLog = [], now = () => Date.now() }) {
     this.id = requireText(id, "L'identifiant du butin");
     this.battleId = requireText(battleId, "La bataille");
     this.entries = entries.map((entry) =>
@@ -16,9 +16,13 @@ export class BattleLoot {
       }),
     );
     this.shares = structuredClone(shares);
-    this.status = "AVAILABLE";
+    if (!["AVAILABLE", "COLLECTED"].includes(status))
+      throw new RangeError("Le statut du butin est invalide.");
+    if (!Array.isArray(collectionLog))
+      throw new TypeError("Le journal de collecte doit être une liste.");
+    this.status = status;
     this.now = now;
-    this.collectionLog = [];
+    this.collectionLog = structuredClone(collectionLog);
   }
 
   collect({ playerId, bag, selection }) {

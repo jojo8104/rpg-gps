@@ -224,6 +224,48 @@
   stroke: #4b2c20;
   stroke-width: 1;
 }
+.rpg-ally-marker-host {
+  background: none;
+  border: 0;
+}
+.rpg-ally-marker {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 3px solid #d8f7ff;
+  border-radius: 50%;
+  background: #397bb5;
+  color: #fff;
+  box-shadow: 0 2px 8px #000a;
+}
+.rpg-ally-marker[data-class="ranger"] {
+  background: #3d8748;
+}
+.rpg-ally-marker[data-class="mage"] {
+  background: #7654aa;
+}
+.rpg-ally-marker__initial {
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+.rpg-ally-marker__name {
+  position: absolute;
+  top: 43px;
+  max-width: 110px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 3px #000;
+  white-space: nowrap;
+}
+.rpg-ally-marker-host.is-offline {
+  opacity: 0.48;
+  filter: grayscale(0.8);
+}
 .rpg-terrain {
   stroke-width: 1.5;
   stroke-dasharray: 5 4;

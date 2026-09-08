@@ -45,6 +45,8 @@ import { TrailState } from "./trail.js";
 import { WorldState } from "./world-state.js";
 import { UNIT_RANKS } from "./rank-system.js";
 import { ScoutWatchBeacon } from "./scout-watch-beacon.js";
+import { BattleEngine } from "./battle-engine.js";
+import { BattleLoot } from "./battle-loot.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
 export class Game {
@@ -293,6 +295,14 @@ export class Game {
         source: "travel:gps",
       });
     return travel;
+  }
+
+  discoverLocation({ playerId, locationId, level = 1 }) {
+    const player = this.getPlayer(playerId);
+    if (player === null) throw new RangeError("Le joueur n’existe pas.");
+    if (this.getLocation(locationId) === null)
+      throw new RangeError("Le lieu n’existe pas.");
+    return player.discoverLocation(locationId, level);
   }
 
   selectHeroLevelUp({ heroId, pendingId, upgradeId }) {
@@ -2816,7 +2826,8 @@ export class Game {
         this.failCurrentQuest({ reason: "evacuation_battle_lost" });
       }
     }
-    return {
+    const report = {
+      battleId: battle.id,
       ...outcome,
       consequences,
       heroProgression,
@@ -2825,6 +2836,8 @@ export class Game {
       destroyedLocationId,
       capturedLocationId: capturedLocation?.locationId ?? null,
     };
+    this.battleReports.push(structuredClone(report));
+    return report;
   }
 
   // Sites dynamiques issus d'une bataille et collecte différée du butin.
@@ -3265,6 +3278,15 @@ export class Game {
       heroClasses: [...this.heroClasses.values()].map((heroClass) =>
         structuredClone(heroClass),
       ),
+      heroAptitudes: [...this.heroProgressionService.aptitudes.values()].map(
+        (aptitude) => aptitude.toJSON(),
+      ),
+      unitDefinitions: [...this.unitDefinitions.values()].map((definition) =>
+        typeof definition.toJSON === "function"
+          ? definition.toJSON()
+          : structuredClone(definition),
+      ),
+      coordinateMode: this.coordinateMode,
       players: this.players.map((player) => player.toJSON()),
       heroes: this.heroes.map((hero) => hero.toJSON()),
       locations: this.locations.map((location) => location.toJSON()),
@@ -3293,6 +3315,9 @@ export class Game {
         binding.toJSON(),
       ),
       eventLog: this.eventLog.map((entry) => ({ ...entry })),
+      activeScenarioEventId: this.activeScenarioEventId,
+      evacuationStates: structuredClone(this.evacuationStates),
+      questDeadlines: structuredClone(this.questDeadlines),
       startedAt: this.startedAt,
       finishedAt: this.finishedAt,
       finishReason: this.finishReason,
@@ -3308,6 +3333,72 @@ export class Game {
       battleLoot: this.battleLoot.map((reward) => reward.toJSON()),
       battleSites: this.battleSites.map((site) => site.toJSON()),
     };
+  }
+
+  static fromJSON(snapshot, options = {}) {
+    if (!snapshot || Array.isArray(snapshot) || typeof snapshot !== "object")
+      throw new TypeError("L’instantané de partie est invalide.");
+    const game = new Game({
+      setup: snapshot.setup,
+      scenario: snapshot.scenario,
+      scenarioLocationBindings: snapshot.scenarioLocationBindings ?? [],
+      heroClasses: snapshot.heroClasses ?? [],
+      heroAptitudes: snapshot.heroAptitudes ?? [],
+      unitDefinitions: snapshot.unitDefinitions ?? [],
+      locations: snapshot.locations ?? [],
+      autonomousGroups: snapshot.autonomousGroups ?? [],
+      autonomousGroupTraces: snapshot.autonomousGroupTraces ?? [],
+      watchBeacons: snapshot.watchBeacons ?? [],
+      coordinateMode: snapshot.coordinateMode ?? "gps",
+      scenarioStartsActive: false,
+      scenarioStateSnapshot: snapshot.scenarioState,
+      worldStateSnapshot: snapshot.worldState,
+      trailStateSnapshots: snapshot.trailStates,
+      scenarioRuntimeSnapshot: snapshot.scenarioRuntime,
+      ...(typeof options.now === "function" ? { now: options.now } : {}),
+      ...(typeof options.idGenerator === "function"
+        ? { idGenerator: options.idGenerator }
+        : {}),
+    });
+    game.players = (snapshot.players ?? []).map((player) => new Player(player));
+    game.heroes = (snapshot.heroes ?? []).map((hero) => new Hero(hero));
+    game.locations = (snapshot.locations ?? []).map(
+      (location) => new Location(location),
+    );
+    game.status = snapshot.status ?? "preparing";
+    game.startedAt = snapshot.startedAt ?? null;
+    game.finishedAt = snapshot.finishedAt ?? null;
+    game.finishReason = snapshot.finishReason ?? null;
+    game.availableQuests = structuredClone(snapshot.availableQuests ?? []);
+    game.questSequence = structuredClone(snapshot.questSequence ?? []);
+    game.lastQuestResult = structuredClone(snapshot.lastQuestResult ?? null);
+    game.eventLog = structuredClone(snapshot.eventLog ?? []);
+    game.activeScenarioEventId = snapshot.activeScenarioEventId ?? null;
+    game.evacuationStates = structuredClone(snapshot.evacuationStates ?? {});
+    game.questDeadlines = structuredClone(snapshot.questDeadlines ?? {});
+    game.battles = (snapshot.battles ?? []).map(
+      (battle) =>
+        new BattleEngine({
+          ...battle,
+          ...(typeof options.now === "function" ? { now: options.now } : {}),
+        }),
+    );
+    game.battleReports = structuredClone(snapshot.battleReports ?? []);
+    game.battleLoot = (snapshot.battleLoot ?? []).map(
+      (loot) =>
+        new BattleLoot({
+          ...loot,
+          ...(typeof options.now === "function" ? { now: options.now } : {}),
+        }),
+    );
+    game.battleSites = (snapshot.battleSites ?? []).map(
+      (site) =>
+        new BattleSite({
+          ...site,
+          ...(typeof options.now === "function" ? { now: options.now } : {}),
+        }),
+    );
+    return game;
   }
 
   // Normalisation défensive des catalogues injectés au constructeur.

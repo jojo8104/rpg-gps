@@ -10,6 +10,12 @@ export class BattleEngine {
     this.state =
       options instanceof BattleState ? options : new BattleState(options);
     this.aptitudes = new BattleAptitudeService(this.state.aptitudeDefinitions);
+    this.lootPosition = options?.lootPosition ? { ...options.lootPosition } : null;
+    this.sourceLocationId = options?.sourceLocationId ?? null;
+    this.sourceEnemyTeamId = options?.sourceEnemyTeamId ?? null;
+    this.engagementContext = options?.engagementContext
+      ? structuredClone(options.engagementContext)
+      : null;
   }
   get id() {
     return this.state.id;
@@ -63,7 +69,15 @@ export class BattleEngine {
     return entity ? this.#effectiveStat(entity, stat) : null;
   }
   toJSON() {
-    return this.state.toJSON();
+    return {
+      ...this.state.toJSON(),
+      lootPosition: this.lootPosition ? { ...this.lootPosition } : null,
+      sourceLocationId: this.sourceLocationId,
+      sourceEnemyTeamId: this.sourceEnemyTeamId,
+      engagementContext: this.engagementContext
+        ? structuredClone(this.engagementContext)
+        : null,
+    };
   }
 
   start() {

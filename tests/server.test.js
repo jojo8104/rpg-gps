@@ -5,15 +5,33 @@ import { fileURLToPath } from "node:url";
 import { readServerConfig } from "../server/config.js";
 import { createRpgGpsServer } from "../server/server.js";
 
-const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const projectRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 
 test("la configuration du serveur possède des valeurs sûres", () => {
-  assert.deepEqual(readServerConfig({}), { host: "127.0.0.1", port: 3000 });
-  assert.deepEqual(readServerConfig({ RPG_GPS_HOST: "0.0.0.0", RPG_GPS_PORT: "8080" }), {
-    host: "0.0.0.0",
-    port: 8080,
+  assert.deepEqual(readServerConfig({}), {
+    host: "127.0.0.1",
+    port: 3000,
+    dataDirectory: "/var/lib/rpg-gps",
   });
-  assert.throws(() => readServerConfig({ RPG_GPS_PORT: "70000" }), /port valide/);
+  assert.deepEqual(
+    readServerConfig({
+      RPG_GPS_HOST: "0.0.0.0",
+      RPG_GPS_PORT: "8080",
+      RPG_GPS_DATA_DIR: "/tmp/rpg-test",
+    }),
+    {
+      host: "0.0.0.0",
+      port: 8080,
+      dataDirectory: "/tmp/rpg-test",
+    },
+  );
+  assert.throws(
+    () => readServerConfig({ RPG_GPS_PORT: "70000" }),
+    /port valide/,
+  );
 });
 
 test("le serveur expose sa santé et les fichiers du jeu", async (context) => {
@@ -36,6 +54,13 @@ test("le serveur expose sa santé et les fichiers du jeu", async (context) => {
   const script = await fetch(`${origin}/app/js/main.js`);
   assert.equal(script.status, 200);
   assert.match(script.headers.get("content-type"), /^text\/javascript/);
+
+  const socketClient = await fetch(`${origin}/socket.io/socket.io.js`);
+  assert.equal(socketClient.status, 200);
+  assert.match(
+    socketClient.headers.get("content-type"),
+    /^application\/javascript/,
+  );
 });
 
 test("le serveur refuse les méthodes d’écriture et les fichiers absents", async (context) => {

@@ -6,6 +6,7 @@
  * traduire des événements techniques ou des intentions d'interface.
  */
 import { Game } from "./core/game.js";
+import { CAMP_IMPROVEMENTS } from "./core/camp-improvement-service.js";
 import { Location } from "./core/location.js";
 import { LocationEngine } from "./core/location-engine.js";
 import { InteractionEngine } from "./core/interaction-engine.js";
@@ -45,6 +46,10 @@ import { renderBattleResultView } from "./ui/battle-result-view.js";
 import { HeroArmyModifier } from "./core/hero-army-modifier.js";
 import { GameSetupView } from "./ui/game-setup-view.js";
 import { setupMapVisibility } from "./map/SetupMapVisibility.js";
+import {
+  distanceGeneratedLocationIds,
+  initiallyPlacedScenarioLocationIds,
+} from "./map/SetupLocationPolicy.js";
 import { renderGarrisonSheet } from "./ui/garrison-sheet.js";
 import { renderUnitTypeIcon } from "./ui/unit-icon.js";
 import { CheatService } from "./core/cheat-service.js";
@@ -68,6 +73,36 @@ import { questPaceProfile } from "./core/quest-pace-profile.js";
 import { createDebugPauseControl } from "./ui/debug-pause-control.js";
 import { composeScenario } from "./core/scenario-composer.js";
 import { ChaosWaveService } from "./core/chaos-wave-service.js";
+import { MultiplayerClient } from "./multiplayer-client.js";
+import { LobbyView } from "./ui/lobby-view.js";
+import {
+  createMultiplayerLaunch,
+  createSeededIdGenerator,
+} from "./core/multiplayer-launch.js";
+import {
+  applyMultiplayerWorldState,
+  createMultiplayerWorldState,
+  multiplayerWorldFingerprint,
+} from "./core/multiplayer-world-state.js";
+
+const SERVER_GAME_COMMANDS = new Set([
+  "discoverLocation", "selectHeroLevelUp", "levelUpHero", "promoteUnit",
+  "placeScoutWatchBeacon", "startCurrentScenarioPlacements",
+  "updateScenarioPosition", "placeScenarioLocation", "dispatchQuestEvent",
+  "trainHeroAtLocation", "selectQuestChoice", "inspectTrailPoint",
+  "acceptAvailableQuest", "abandonCurrentQuest", "buildCampImprovement",
+  "levelUpCamp", "evolveCamp", "selectLocationChiefOption",
+  "attemptLocationCapture", "recruitUnit", "completeHeroUnits",
+  "healHeroUnits", "collectLocationResources", "depositLocationResource",
+  "depositLocationItem", "transferLocationResource",
+  "transferLocationProduction", "preparePopulationPackages",
+  "takeLocationPopulationPackage", "assignWagons", "returnWagons",
+  "startLocationDismantling", "organizeLocationEvacuation",
+  "settlePopulationPackage", "equipHeroItem", "unequipHeroItem",
+  "reviveHeroAtBase", "garrisonUnit", "withdrawGarrisonUnit", "disbandUnit",
+  "createBattle", "collectBattleLoot", "surrenderBattle", "fleeBattleHero",
+  "joinBattle", "updateBattleHeroPosition",
+]);
 
 // Initialisation de l'interface et des couches persistantes de la page.
 const $ = (selector) => document.querySelector(selector);
@@ -86,12 +121,12 @@ document.addEventListener("battle-loot-collect", () => {
   const selection = Object.fromEntries(
     battleResult.battleLoot.entries.map((entry) => [
       entry.id,
-      entry.allocations?.local ?? 0,
+      entry.allocations?.[localPlayerId] ?? 0,
     ]),
   );
   const result = game.collectBattleLoot({
     battleId: activeBattle.id,
-    playerId: "local",
+    playerId: localPlayerId,
     heroId: hero.id,
     selection,
   });
@@ -132,7 +167,7 @@ ghostReturnNotice.setAttribute("role", "alert");
 $("#game-screen").append(ghostReturnNotice);
 const mapChrome = document.createElement("div");
 mapChrome.className = "map-chrome";
-mapChrome.innerHTML = `<button id="toggle-game-menu" class="portrait-menu-toggle" type="button" aria-expanded="false" aria-controls="landscape-tools">☰ <span>Menu</span></button><aside id="landscape-tools" class="landscape-tools" aria-label="Outils système et développement"><strong>Outils</strong><button id="open-field-tools" type="button"><span aria-hidden="true">⚙</span><small>Terrain</small></button><button id="open-cheat-tools" type="button"><span aria-hidden="true">✦</span><small>Triche</small></button><label class="dev-quest-picker"><small>Quête à tester</small><select id="dev-quest-select" aria-label="Quête à tester"></select></label><button id="start-dev-quest" type="button"><span aria-hidden="true">▶</span><small>Lancer</small></button><button id="close-game-menu" class="landscape-tools__close" type="button">Fermer</button></aside><aside class="map-power-nav" aria-label="Pouvoirs utilisables sur la carte"><strong>Pouvoirs</strong></aside>`;
+mapChrome.innerHTML = `<button id="toggle-game-menu" class="portrait-menu-toggle" type="button" aria-expanded="false" aria-controls="landscape-tools">☰ <span>Menu</span></button><aside id="landscape-tools" class="landscape-tools" aria-label="Outils système et développement"><strong>Outils</strong><button id="save-and-end-game" type="button" hidden><span aria-hidden="true">▣</span><small>Sauvegarder et terminer</small></button><button id="open-field-tools" type="button"><span aria-hidden="true">⚙</span><small>Terrain</small></button><button id="open-cheat-tools" type="button"><span aria-hidden="true">✦</span><small>Triche</small></button><label class="dev-quest-picker"><small>Quête à tester</small><select id="dev-quest-select" aria-label="Quête à tester"></select></label><button id="start-dev-quest" type="button"><span aria-hidden="true">▶</span><small>Lancer</small></button><button id="close-game-menu" class="landscape-tools__close" type="button">Fermer</button></aside><aside class="map-power-nav" aria-label="Pouvoirs utilisables sur la carte"><strong>Pouvoirs</strong></aside>`;
 $("#map-view").append(mapChrome);
 $("#landscape-tools").insertBefore(
   debugPauseControl.element,
@@ -203,6 +238,7 @@ const unitHealthBar = (unit) => renderUnitHealthBar(unit);
 const ui = {
   presentation: $("#presentation-screen"),
   enterApp: $("#enter-app"),
+  lobby: $("#lobby-screen"),
   setup: $("#setup-screen"),
   game: $("#game-screen"),
   create: $("#create-game"),
@@ -228,7 +264,8 @@ const ui = {
 };
 ui.enterApp.addEventListener("click", () => {
   ui.presentation.classList.add("is-leaving");
-  ui.setup.hidden = false;
+  if (PLAYTEST_EDITION) ui.setup.hidden = false;
+  else ui.lobby.hidden = false;
   setTimeout(() => {
     ui.presentation.hidden = true;
   }, 650);
@@ -253,6 +290,67 @@ document
   .forEach((title) => title.remove());
 const setupView = new GameSetupView(ui.setup);
 setupView.initialize();
+let multiplayerClient = null;
+let multiplayerPositions = [];
+let pendingMultiplayerWorld = null;
+let multiplayerWorldReady = false;
+let multiplayerIsHost = false;
+let multiplayerGameActive = false;
+let authoritativeServerReady = false;
+let authoritativeBootstrapStarted = false;
+let pendingAuthoritativeGame = null;
+let lastMultiplayerWorldFingerprint = null;
+let multiplayerWorldPublishTimer = null;
+if (!PLAYTEST_EDITION) {
+  try {
+    multiplayerClient = new MultiplayerClient();
+    multiplayerClient.onPositions((snapshot) => {
+      multiplayerPositions = snapshot?.positions ?? [];
+      mapView?.setAlliedHeroes(
+        multiplayerPositions.filter(
+          (player) => player.playerId !== localPlayerId,
+        ),
+      );
+    });
+    multiplayerClient.onWorldState((snapshot) => {
+      if (!snapshot?.state) return;
+      pendingMultiplayerWorld = snapshot.state;
+      multiplayerWorldReady = true;
+      if (game && mapView) applyReceivedMultiplayerWorld(snapshot.state);
+    });
+    multiplayerClient.onGameState((snapshot) => {
+      if (!snapshot?.state) return;
+      pendingAuthoritativeGame = snapshot.state;
+      if (game && mapView) applyAuthoritativeGameState(snapshot.state);
+    });
+    const lobbyView = new LobbyView(ui.lobby, multiplayerClient, {
+      onSolo: () => {
+        ui.lobby.hidden = true;
+        ui.setup.hidden = false;
+      },
+      onStart: ({ lobby, playerId }) => {
+        const launch = createMultiplayerLaunch(lobby);
+        pendingMultiplayerStart = {
+          ...launch,
+          localPlayerId: playerId,
+          isHost: lobby.hostPlayerId === playerId,
+        };
+        if (data) start(pendingMultiplayerStart);
+        else $("#lobby-status").textContent = "Chargement du monde…";
+      },
+    });
+    lobbyView.initialize();
+    multiplayerClient.onGameSaved((notice) => {
+      window.alert(notice?.message ?? "La partie a été sauvegardée.");
+      ui.game.hidden = true;
+      ui.lobby.hidden = false;
+      lobbyView.showChoice();
+    });
+  } catch (error) {
+    $("#choose-multiplayer").disabled = true;
+    $("#lobby-status").textContent = error.message;
+  }
+}
 
 // Coordonnées et rayons réservés au mode de simulation à la maison.
 const simulationPositions = {
@@ -323,6 +421,9 @@ let data,
   productionTimer,
   chaosWaveTimer;
 let mode = "simulation",
+  localPlayerId = "local",
+  activeAdventureId = "chaos",
+  pendingMultiplayerStart = null,
   heroPosition,
   gpsAccuracy = null,
   firstGpsFix = true,
@@ -640,7 +741,7 @@ async function loadData() {
     locations: [...locations, ...repressionLocations, ...granariesLocations],
   };
 }
-function start() {
+function start(multiplayerLaunch = null) {
   if (
     !data?.scenario ||
     !data?.heroClasses ||
@@ -654,14 +755,25 @@ function start() {
     );
     return;
   }
+  const networkLaunch = multiplayerLaunch?.setup ? multiplayerLaunch : null;
+  multiplayerGameActive = Boolean(networkLaunch);
+  multiplayerIsHost = Boolean(networkLaunch?.isHost);
+  $("#save-and-end-game").hidden = !multiplayerGameActive || !multiplayerIsHost;
+  authoritativeServerReady = false;
+  authoritativeBootstrapStarted = false;
+  pendingAuthoritativeGame = null;
   let setup;
   try {
-    setup = setupView.readSetup();
+    setup = networkLaunch?.setup ?? setupView.readSetup();
   } catch (error) {
     setupView.showError(error);
     return;
   }
-  mode = PLAYTEST_EDITION ? "gps" : setupView.readPositionMode();
+  mode = PLAYTEST_EDITION
+    ? "gps"
+    : (networkLaunch?.positionMode ?? setupView.readPositionMode());
+  localPlayerId = networkLaunch?.localPlayerId ?? "local";
+  activeAdventureId = networkLaunch?.adventureId ?? "chaos";
   const bindings = PLAYTEST_EDITION
     ? [
         { locationSlotId: "capital", locationId: "royal-capital" },
@@ -717,10 +829,19 @@ function start() {
     scenarioLocationBindings: bindings,
     coordinateMode: mode,
     scenarioStartsActive: false,
+    ...(networkLaunch
+      ? { idGenerator: createSeededIdGenerator(networkLaunch.seed) }
+      : {}),
   });
   if (!PLAYTEST_EDITION) game.configureQuestSequence(QUEST_SEQUENCE);
   rangePolicy = new LocationRangePolicy(game.setup.locationSetup.rangePolicy);
-  hero = game.chooseHero("local", setupView.readHeroChoice());
+  if (networkLaunch) {
+    networkLaunch.heroChoices.forEach(({ playerId, choice }) => {
+      const selectedHero = game.chooseHero(playerId, choice);
+      if (playerId === localPlayerId) hero = selectedHero;
+    });
+  } else hero = game.chooseHero(localPlayerId, setupView.readHeroChoice());
+  if (!hero) throw new Error("Le héros de ce joueur n’a pas pu être créé.");
   if (!PLAYTEST_EDITION) {
     enemyHero = game.chooseHero("bandits", {
       name: "Rask le brigand",
@@ -730,15 +851,15 @@ function start() {
   }
   if (PLAYTEST_EDITION)
     game.locations.forEach((location) =>
-      game.getPlayer("local").discoverLocation(location.id, 3),
+      game.getPlayer(localPlayerId).discoverLocation(location.id, 3),
     );
   else {
-    game.getPlayer("local").discoverLocation("fort-nord", 2);
-    game.getPlayer("local").discoverLocation("royal-capital", 3);
-    game.getPlayer("local").discoverLocation("bandit-camp", 3);
-    game.getPlayer("local").discoverLocation("camp-local", 3);
-    game.getPlayer("local").discoverLocation("enemy-fort", 3);
-    game.getPlayer("local").discoverLocation("lumber-camp-test", 3);
+    game.getPlayer(localPlayerId).discoverLocation("fort-nord", 2);
+    game.getPlayer(localPlayerId).discoverLocation("royal-capital", 3);
+    game.getPlayer(localPlayerId).discoverLocation("bandit-camp", 3);
+    game.getPlayer(localPlayerId).discoverLocation("camp-local", 3);
+    game.getPlayer(localPlayerId).discoverLocation("enemy-fort", 3);
+    game.getPlayer(localPlayerId).discoverLocation("lumber-camp-test", 3);
   }
   heroPosition =
     mode === "gps"
@@ -758,7 +879,10 @@ function start() {
     locations: game.locations,
     enemyResolver: resolveLocationEnemy,
   });
+  if (pendingMultiplayerWorld)
+    applyReceivedMultiplayerWorld(pendingMultiplayerWorld, { renderNow: false });
   ui.setup.hidden = true;
+  ui.lobby.hidden = true;
   ui.game.hidden = false;
   mapView = new MapView({
     element: $("#map"),
@@ -770,6 +894,11 @@ function start() {
     onAutonomousGroupSelect: selectAutonomousGroup,
     onMapClick: handleMapClick,
   });
+  if (pendingAuthoritativeGame)
+    applyAuthoritativeGameState(pendingAuthoritativeGame, { renderNow: false });
+  mapView.setAlliedHeroes(
+    multiplayerPositions.filter((player) => player.playerId !== localPlayerId),
+  );
   mapFollowMode = "centered";
   updateMapFollowButton();
   mapView.map.on("dragstart", () => {
@@ -782,6 +911,18 @@ function start() {
   ui.gpsSetup.classList.toggle("is-simulation", mode === "simulation");
   ui.gpsSetup.hidden = false;
   renderGpsLocationButtons();
+  if (networkLaunch && mode === "gps") {
+    validatedPlayArea = game.setup.playArea;
+    field.loadTerrain(validatedPlayArea.toJSON());
+    mapView.setPlayArea(validatedPlayArea.polygon);
+    ui.gpsAreaStatus.textContent =
+      "Zone GPS reçue de l’organisateur. Préparation du monde…";
+    applyWorldSetup();
+    render();
+    setTimeout(() => mapView.map.invalidateSize(), 0);
+    finishGameStart();
+    return;
+  }
   if (mode === "simulation") {
     validatedPlayArea = new PlayArea({
       id: "simulation-area",
@@ -800,6 +941,7 @@ function start() {
     applyWorldSetup();
     render();
     setTimeout(() => mapView.map.invalidateSize(), 0);
+    if (networkLaunch) finishGameStart();
     return;
   }
   field.clearPlayArea();
@@ -816,6 +958,14 @@ function finishGameStart() {
     ? [...capitalPosition]
     : { ...capitalPosition };
   hero.updatePosition(asGps(heroPosition));
+  if (multiplayerClient && game.status === "started" && !gpsSetupActive)
+    multiplayerClient
+      .sendPosition({
+        ...asGps(heroPosition),
+        accuracy: gpsAccuracy,
+        heading: heroHeading,
+      })
+      .catch(() => {});
   mapView.focus(heroPosition);
   if (game.status === "preparing") {
     game.start();
@@ -837,7 +987,7 @@ function finishGameStart() {
       )
         hero.addUnit(
           game.recruitmentService.createUnit({
-            ownerPlayerId: "local",
+            ownerPlayerId: localPlayerId,
             ...entry,
             idGenerator: game.idGenerator,
           }),
@@ -853,6 +1003,8 @@ function finishGameStart() {
   ui.game.classList.remove("is-gps-setup");
   ui.gpsSetup.hidden = true;
   interactionMode = null;
+  if (multiplayerGameActive && multiplayerIsHost)
+    bootstrapAuthoritativeGame();
   deviceAlerts
     .enable()
     .then((enabled) =>
@@ -908,6 +1060,18 @@ function finishGameStart() {
     logTest(
       "La partie commence. Une première armée du Chaos apparaîtra bientôt, puis de nouvelles vagues attaqueront régulièrement vos lieux.",
     );
+    return;
+  }
+  if (activeAdventureId !== "chaos") {
+    const questId =
+      activeAdventureId === "granaries_of_the_king"
+        ? "granaries-of-the-king"
+        : activeAdventureId;
+    const quest = QUEST_SEQUENCE.find((entry) => entry.id === questId);
+    if (quest) {
+      game.offerQuest({ ...quest, briefingLines: [] });
+      logTest(`Aventure sélectionnée : ${quest.title}.`);
+    }
     return;
   }
   clearTimeout(firstRoyalMessengerTimer);
@@ -1009,7 +1173,7 @@ function rangesFor(location) {
 }
 function resolveLocationEnemy({ location }) {
   return location.features.battle &&
-    game.getLocationRelation("local", location.id) === "enemy"
+    game.getLocationRelation(localPlayerId, location.id) === "enemy"
     ? {
         name: location.ownerId === "chaos" ? "Créatures du Chaos" : "Brigands",
         danger: 2,
@@ -1024,17 +1188,19 @@ function isLocationEnabled(location, { includeHiddenLocations = false } = {}) {
   if (
     !includeHiddenLocations &&
     location.visibility === "hidden" &&
-    !game?.getPlayer("local")?.knowsLocation(location.id)
+    !game?.getPlayer(localPlayerId)?.knowsLocation(location.id)
   )
     return false;
   if (
+    !includeHiddenLocations &&
     location.id === "evacuation-camp" &&
-    !game?.getPlayer("local")?.knowsLocation(location.id)
+    !game?.getPlayer(localPlayerId)?.knowsLocation(location.id)
   )
     return false;
   if (location.id === "prospector-battlefield") {
     const phaseId = game?.scenarioState?.currentPhaseId;
     if (
+      !includeHiddenLocations &&
       ![
         "prospectors-battlefield",
         "free-gold-mine",
@@ -1070,6 +1236,187 @@ function rebuildLocationEngine() {
     distanceFn: distance,
     validatePositionFn: () => {},
   });
+}
+
+function applyReceivedMultiplayerWorld(snapshot, { renderNow = true } = {}) {
+  if (authoritativeServerReady) return false;
+  const fingerprint = multiplayerWorldFingerprint(snapshot);
+  if (fingerprint === lastMultiplayerWorldFingerprint) return false;
+  try {
+    const activeBattleId = activeBattle?.id ?? null;
+    const locations = applyMultiplayerWorldState(game, snapshot);
+    runtimePositions.clear();
+    locations.forEach((location) =>
+      runtimePositions.set(
+        location.id,
+        mode === "gps"
+          ? { ...location.position }
+          : [location.position.latitude, location.position.longitude],
+      ),
+    );
+    interactionEngine = new InteractionEngine({
+      locations: game.locations,
+      enemyResolver: resolveLocationEnemy,
+    });
+    rebuildLocationEngine();
+    if (activeBattleId)
+      activeBattle = game.battles.find((battle) => battle.id === activeBattleId) ?? null;
+    if (!activeBattle) {
+      const joinedBattle = [...game.battles]
+        .reverse()
+        .find(
+          (battle) =>
+            battle.status !== "finished" &&
+            battle.teams.some((team) =>
+              team.heroes.some((entry) => entry.playerId === localPlayerId),
+            ),
+        );
+      if (joinedBattle)
+        activateBattle(joinedBattle, {
+          ambushTeamId: joinedBattle.config.ambushTeamId,
+          restore: true,
+        });
+    }
+    if (activeBattle?.status === "finished") {
+      battleResolved = true;
+      battleResult = [...game.battleReports]
+        .reverse()
+        .find((report) => report.battleId === activeBattle.id) ?? battleResult;
+      setBattleNavigationLocked(false);
+    }
+    lastMultiplayerWorldFingerprint = fingerprint;
+    if (renderNow) render();
+    return true;
+  } catch (error) {
+    console.warn("État multijoueur des lieux refusé.", error);
+    return false;
+  }
+}
+
+function bootstrapAuthoritativeGame() {
+  if (authoritativeBootstrapStarted || !multiplayerClient) return;
+  authoritativeBootstrapStarted = true;
+  const snapshot = game.toJSON();
+  snapshot.locations = createMultiplayerWorldState(
+    game,
+    runtimePositions,
+  ).locations;
+  multiplayerClient.bootstrapGame(snapshot).catch((error) => {
+    authoritativeBootstrapStarted = false;
+    logTest(`Moteur serveur indisponible : ${error.message}`);
+  });
+}
+
+function applyAuthoritativeGameState(snapshot, { renderNow = true } = {}) {
+  try {
+    const previousBattleId = activeBattle?.id ?? null;
+    const restored = Game.fromJSON(snapshot);
+    authoritativeServerReady = true;
+    authoritativeBootstrapStarted = true;
+    game = commandingGame(restored);
+    hero = game.heroes.find((entry) => entry.playerId === localPlayerId) ?? hero;
+    enemyHero = game.heroes.find((entry) => entry.playerId === "bandits") ?? null;
+    runtimePositions.clear();
+    game.locations.forEach((location) =>
+      runtimePositions.set(
+        location.id,
+        mode === "gps"
+          ? { ...location.position }
+          : [location.position.latitude, location.position.longitude],
+      ),
+    );
+    interactionEngine = new InteractionEngine({
+      locations: game.locations,
+      enemyResolver: resolveLocationEnemy,
+    });
+    rebuildLocationEngine();
+    activeBattle = previousBattleId
+      ? game.battles.find((battle) => battle.id === previousBattleId) ?? null
+      : null;
+    if (!activeBattle) {
+      const joined = [...game.battles].reverse().find(
+        (battle) =>
+          battle.status !== "finished" &&
+          battle.teams.some((team) =>
+            team.heroes.some((entry) => entry.playerId === localPlayerId),
+          ),
+      );
+      if (joined)
+        activateBattle(joined, {
+          ambushTeamId: joined.config.ambushTeamId,
+          restore: true,
+        });
+    }
+    if (activeBattle?.status === "finished") {
+      battleResolved = true;
+      battleResult = [...game.battleReports]
+        .reverse()
+        .find((report) => report.battleId === activeBattle.id) ?? battleResult;
+      setBattleNavigationLocked(false);
+    }
+    if (renderNow) {
+      render();
+      if (activeBattle && !ui.battle.hidden) renderBattle();
+    }
+    return true;
+  } catch (error) {
+    console.error("État officiel du serveur refusé.", error);
+    return false;
+  }
+}
+
+function commandingGame(target) {
+  return new Proxy(target, {
+    get(object, property, receiver) {
+      const value = Reflect.get(object, property, receiver);
+      if (
+        typeof value !== "function" ||
+        !SERVER_GAME_COMMANDS.has(property) ||
+        !authoritativeServerReady
+      )
+        return typeof value === "function" ? value.bind(object) : value;
+      return (...args) => {
+        const result = value.apply(object, args);
+        multiplayerClient.sendGameCommand(property, args).catch(() =>
+          multiplayerClient.requestGameState().catch(() => {}),
+        );
+        return result;
+      };
+    },
+  });
+}
+
+function sendAuthoritativeBattleCommand(command, args) {
+  if (!authoritativeServerReady || !activeBattle) return;
+  multiplayerClient
+    .sendBattleCommand(activeBattle.id, command, args)
+    .catch(() => multiplayerClient.requestGameState().catch(() => {}));
+}
+
+function queueMultiplayerWorldPublish() {
+  if (
+    !multiplayerClient ||
+    !game ||
+    authoritativeBootstrapStarted ||
+    game.status !== "started" ||
+    (!multiplayerWorldReady && !multiplayerIsHost)
+  )
+    return;
+  const snapshot = createMultiplayerWorldState(game, runtimePositions);
+  const fingerprint = multiplayerWorldFingerprint(snapshot);
+  if (fingerprint === lastMultiplayerWorldFingerprint) return;
+  clearTimeout(multiplayerWorldPublishTimer);
+  multiplayerWorldPublishTimer = setTimeout(() => {
+    const current = createMultiplayerWorldState(game, runtimePositions);
+    const currentFingerprint = multiplayerWorldFingerprint(current);
+    if (currentFingerprint === lastMultiplayerWorldFingerprint) return;
+    lastMultiplayerWorldFingerprint = currentFingerprint;
+    multiplayerClient.sendWorldState(current).catch(() => {
+      if (lastMultiplayerWorldFingerprint === currentFingerprint)
+        lastMultiplayerWorldFingerprint = null;
+      setTimeout(queueMultiplayerWorldPublish, 1_000);
+    });
+  }, 250);
 }
 function unitDefenseSummary(unit, source, hero = null) {
   return {
@@ -1136,7 +1483,7 @@ function mappedLocations({
   knownOnly = true,
   includeHiddenLocations = false,
 } = {}) {
-  const player = game.getPlayer("local");
+  const player = game.getPlayer(localPlayerId);
   const heroClass = data.heroClasses.find(
     (definition) => definition.id === hero.classId,
   );
@@ -1408,19 +1755,43 @@ function mappedLocations({
           );
       }
       const defense = locationDefenseSnapshot(location);
-      const structures = Object.entries(location.infrastructure).map(
+      const infrastructureImprovements = Object.entries(location.infrastructure).map(
         ([id, level]) => {
           const task = location.dismantlings.find(
             (entry) => entry.structureId === id,
           );
           return {
             id,
+            name: CAMP_IMPROVEMENTS[id]?.name ?? improvementName(id),
             level,
+            category: CAMP_IMPROVEMENTS[id]?.category ?? "utility",
+            description:
+              CAMP_IMPROVEMENTS[id]?.levels[level - 1]?.description ??
+              `Infrastructure de niveau ${level}.`,
             dismantling: task ? { completesAt: task.deadline.expiresAt } : null,
             canDismantle: nearby && can("dismantle") && !task,
           };
         },
       );
+      const scenarioImprovements = location.improvements
+        .filter((entry) => !entry.destroyed)
+        .map((entry) => ({
+          id: entry.id,
+          name: improvementName(entry.id),
+          level: 1,
+          category: entry.type === "defensive" ? "defense" : entry.type,
+          description: entry.type === "defensive"
+            ? `Structure défensive${entry.defenseBonus ? ` : +${entry.defenseBonus} défense` : ""}.`
+            : "Amélioration spéciale du lieu.",
+          dismantling: null,
+          canDismantle: false,
+        }));
+      const allImprovements = [...infrastructureImprovements, ...scenarioImprovements];
+      const structures = allImprovements.filter(isDefensiveImprovement);
+      const improvements = allImprovements.filter(
+        (entry) => !isDefensiveImprovement(entry),
+      );
+      defense.structures = structures;
       return {
         id: location.id,
         name: location.name,
@@ -1437,6 +1808,7 @@ function mappedLocations({
           descriptions[location.id] ?? "Lieu créé pendant le test terrain.",
         defense,
         structures,
+        improvements,
         canDismantle: nearby && can("dismantle"),
         campDevelopment,
         actions,
@@ -1444,8 +1816,22 @@ function mappedLocations({
     });
 }
 
+function isDefensiveImprovement(improvement) {
+  return improvement.category === "defense" ||
+    ["barricades", "palisade", "palissade", "palisades", "wall", "walls", "ramparts", "manor", "watch_post"].includes(improvement.id);
+}
+
+function improvementName(id) {
+  return String(id)
+    .replaceAll("_", " ")
+    .replaceAll("-", " ")
+    .replace(/^./, (letter) => letter.toUpperCase());
+}
+
 // Horloge du monde, production et comportement des groupes autonomes.
 function runProductionCycle() {
+  if (multiplayerGameActive && (authoritativeServerReady || !multiplayerIsHost))
+    return;
   const worldUpdate = game.update();
   handleWatchBeaconEvents(worldUpdate.watchBeaconEvents);
   checkSimulationAutonomousAggression();
@@ -1617,7 +2003,7 @@ function beginAutonomousBattle(group, { ambushResult = null } = {}) {
   group.status = "interrupted";
   const battle = game.createBattle({
     teamParticipants: [
-      { id: "heroes", heroIds: [hero.id] },
+      { id: "heroes", heroIds: nearbyMultiplayerHeroIds() },
       {
         id: `autonomous-${group.id}`,
         heroIds: [],
@@ -1645,7 +2031,7 @@ function preparedAmbushTarget() {
   const candidate = game.autonomousGroups
     .filter(
       (group) =>
-        group.owner.id !== "local" &&
+        group.owner.id !== localPlayerId &&
         !["destroyed", "mission_failed"].includes(group.status),
     )
     .map((group) => ({
@@ -1803,7 +2189,11 @@ function applyPosition(position) {
     }
   }
   hero.updatePosition(asGps(heroPosition));
-  if (game.status === "started" && !gpsSetupActive) {
+  if (
+    game.status === "started" &&
+    !gpsSetupActive &&
+    !authoritativeServerReady
+  ) {
     const at = Date.now();
     const bag = game.inventoryService.getHeroBagState(hero);
     game.autonomousGroupTraces.push(
@@ -1821,7 +2211,7 @@ function applyPosition(position) {
       (trace) => trace.getScore(at) > 0,
     );
   }
-  if (game.status === "started")
+  if (game.status === "started" && !authoritativeServerReady)
     handleWatchBeaconEvents(game.scanWatchBeacons());
   const motion = heroConcealmentService.update({
     position: asGps(heroPosition),
@@ -1830,6 +2220,15 @@ function applyPosition(position) {
   });
   hero.classFeatureState.gpsConcealmentMultiplier =
     heroConcealmentService.signatureMultiplier;
+  if (multiplayerClient && game.status === "started" && !gpsSetupActive)
+    multiplayerClient
+      .sendPosition({
+        ...asGps(heroPosition),
+        accuracy: gpsAccuracy,
+        heading: heroHeading,
+        concealmentMultiplier: heroConcealmentService.signatureMultiplier,
+      })
+      .catch(() => {});
   if (motion.concealmentCancelled) {
     preparedHeroAmbush = null;
     logTest("Embuscade annulée : déplacement confirmé.");
@@ -2109,7 +2508,7 @@ function announceMarshalConvocation(offer) {
 }
 function updatePresence() {
   if (!game) return;
-  const player = game.getPlayer("local");
+  const player = game.getPlayer(localPlayerId);
   mappedLocations({ knownOnly: false }).forEach((item) => {
     const location = game.getLocation(item.id);
     if (item.distance <= item.detectionRadius)
@@ -2173,7 +2572,11 @@ function applyQuestFeedback(progress) {
   revealedLocations.forEach((effect) => {
     alignRevealedQuestLocation(effect.locationId);
     ensureRevealedLocationInsidePlayArea(effect.locationId);
-    game.getPlayer("local").discoverLocation(effect.locationId, 2);
+    game.discoverLocation({
+      playerId: localPlayerId,
+      locationId: effect.locationId,
+      level: 2,
+    });
     if (enabledGpsLocationIds !== null)
       enabledGpsLocationIds.add(effect.locationId);
   });
@@ -2217,7 +2620,11 @@ function applyQuestChoiceFeedback(result) {
   );
   revealed.forEach((effect) => {
     ensureRevealedLocationInsidePlayArea(effect.locationId);
-    game.getPlayer("local").discoverLocation(effect.locationId, 2);
+    game.discoverLocation({
+      playerId: localPlayerId,
+      locationId: effect.locationId,
+      level: 2,
+    });
     enabledGpsLocationIds?.add(effect.locationId);
   });
   if (revealed.length) rebuildLocationEngine();
@@ -2286,7 +2693,7 @@ function syncEvacuationCampSearch() {
   if (game?.scenarioState?.currentPhaseId !== "reach-evacuation-camp")
     return false;
   const location = game.getLocation("evacuation-camp");
-  const player = game.getPlayer("local");
+  const player = game.getPlayer(localPlayerId);
   if (!location || player.knowsLocation(location.id)) return false;
   const position = asGps(positionFor(location.id) ?? location.position);
   const evacuation = game.evacuationStates["royal-camp-evacuation"];
@@ -2433,7 +2840,7 @@ function visibleQuestTraces() {
 }
 function syncQuestBattlefield() {
   if (game.scenarioState?.currentPhaseId !== "prospectors-battlefield") return;
-  const player = game.getPlayer("local");
+  const player = game.getPlayer(localPlayerId);
   if (player.knowsLocation("prospector-battlefield")) return;
   const firstTrace = game.autonomousGroupTraces.find(
     (trace) => trace.id === "prospectors-trace-1",
@@ -2571,7 +2978,11 @@ function confirmScenarioPlacement() {
   );
   if (enabledGpsLocationIds !== null)
     enabledGpsLocationIds.add(result.locationId);
-  game.getPlayer("local").discoverLocation(result.locationId, 3);
+  game.discoverLocation({
+    playerId: localPlayerId,
+    locationId: result.locationId,
+    level: 3,
+  });
   interactionEngine = new InteractionEngine({
     locations: game.locations,
     enemyResolver: resolveLocationEnemy,
@@ -2696,8 +3107,14 @@ function moveLocation(id, position) {
   return true;
 }
 function automaticPlacementConfiguration() {
+  const deferredLocationIds = distanceGeneratedLocationIds({
+    bindings: game.scenarioLocationBindings,
+    placements: game.scenarioRuntime?.placements,
+  });
   const requiredIds = new Set(
-    game.scenarioLocationBindings.map((binding) => binding.locationId),
+    game.scenarioLocationBindings
+      .map((binding) => binding.locationId)
+      .filter((locationId) => !deferredLocationIds.has(locationId)),
   );
   const types = [
     ...new Set(
@@ -2705,6 +3122,7 @@ function automaticPlacementConfiguration() {
         .filter(
           (location) =>
             location.id !== "royal-capital" &&
+            !deferredLocationIds.has(location.id) &&
             !["capital", "quest"].includes(location.type),
         )
         .map((location) => location.type),
@@ -2732,6 +3150,7 @@ function automaticPlacementConfiguration() {
   return {
     capitalMode: placement === "auto" ? "auto" : "manual",
     locations: locationModes,
+    deferredLocationIds,
     autonomous: ["rogue", "army", "messenger", "convoy", "prospecting"].map(
       (type) => ({
         type,
@@ -2782,6 +3201,10 @@ function applyWorldSetup() {
     return;
   }
   enabledGpsLocationIds.clear();
+  initiallyPlacedScenarioLocationIds({
+    bindings: game.scenarioLocationBindings,
+    placements: game.scenarioRuntime?.placements,
+  }).forEach((locationId) => enabledGpsLocationIds.add(locationId));
   manualSetupPlacements.clear();
   game.autonomousGroups
     .filter((group) => group.id.startsWith("setup-"))
@@ -2821,7 +3244,11 @@ function applyWorldSetup() {
   );
   for (const config of configuration.locations) {
     const templates = game.locations
-      .filter((location) => location.type === config.type)
+      .filter(
+        (location) =>
+          location.type === config.type &&
+          !configuration.deferredLocationIds.has(location.id),
+      )
       .sort(
         (a, b) => Number(requiredIds.has(b.id)) - Number(requiredIds.has(a.id)),
       );
@@ -2995,7 +3422,11 @@ function createCheatLocation() {
       location.id,
       Array.isArray(heroPosition) ? [...heroPosition] : { ...heroPosition },
     );
-    game.getPlayer("local").discoverLocation(location.id, 3);
+    game.discoverLocation({
+      playerId: localPlayerId,
+      locationId: location.id,
+      level: 3,
+    });
     interactionEngine = new InteractionEngine({
       locations: game.locations,
       enemyResolver: resolveLocationEnemy,
@@ -3140,7 +3571,7 @@ function runAction(action, { returnToWorld = false } = {}) {
     }
   } else if (action === "organize-evacuation") {
     const result = game.organizeLocationEvacuation({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
     });
@@ -3152,7 +3583,7 @@ function runAction(action, { returnToWorld = false } = {}) {
   } else if (action.startsWith("dismantle:")) {
     const structureId = action.slice("dismantle:".length);
     const result = game.startLocationDismantling({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       structureId,
@@ -3164,7 +3595,7 @@ function runAction(action, { returnToWorld = false } = {}) {
     locationMessage = "Ce bâtiment est déjà en cours de démantèlement.";
   } else if (action.startsWith("recruit:")) {
     const result = game.recruitUnit({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       unitTypeId: action.split(":")[1],
@@ -3174,7 +3605,7 @@ function runAction(action, { returnToWorld = false } = {}) {
       : `Impossible : ${result.reason}.`;
   } else if (action === "complete-units") {
     const result = game.completeHeroUnits({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
     });
@@ -3184,7 +3615,7 @@ function runAction(action, { returnToWorld = false } = {}) {
       : `Renfort impossible : ${result.reason}.`;
   } else if (action === "heal-units") {
     const result = game.healHeroUnits({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       timeUnits: 1,
@@ -3203,7 +3634,7 @@ function runAction(action, { returnToWorld = false } = {}) {
     }
     const direction = difference > 0 ? "to_hero" : "to_location";
     const result = game.transferLocationResource({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       resourceName,
@@ -3222,7 +3653,7 @@ function runAction(action, { returnToWorld = false } = {}) {
   } else if (action.startsWith("production-transfer:")) {
     const [, resourceName, destination, amount] = action.split(":");
     const result = game.transferLocationProduction({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       resourceName,
@@ -3234,7 +3665,7 @@ function runAction(action, { returnToWorld = false } = {}) {
       : `Transfert impossible : ${result.reason}.`;
   } else if (action.startsWith("prepare-population:")) {
     const result = game.preparePopulationPackages({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       people: Number(action.split(":")[1]),
@@ -3244,7 +3675,7 @@ function runAction(action, { returnToWorld = false } = {}) {
       : `Préparation impossible : ${result.reason}.`;
   } else if (action.startsWith("take-population:")) {
     const result = game.takeLocationPopulationPackage({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       people: Number(action.split(":")[1]),
@@ -3254,7 +3685,7 @@ function runAction(action, { returnToWorld = false } = {}) {
       : `Retrait impossible : ${result.reason}.`;
   } else if (action.startsWith("settle-population:")) {
     const result = game.settlePopulationPackage({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       packageId: action.slice("settle-population:".length),
@@ -3269,7 +3700,7 @@ function runAction(action, { returnToWorld = false } = {}) {
     const amount =
       requestedAmount === undefined ? undefined : Number(requestedAmount);
     const result = game.depositLocationResource({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       resourceName,
@@ -3280,7 +3711,7 @@ function runAction(action, { returnToWorld = false } = {}) {
       : `Dépôt impossible : ${result.reason}.`;
   } else if (action.startsWith("deposit-item:")) {
     const result = game.depositLocationItem({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       lootId: action.slice("deposit-item:".length),
@@ -3290,7 +3721,7 @@ function runAction(action, { returnToWorld = false } = {}) {
       : `Dépôt impossible : ${result.reason}.`;
   } else if (action.startsWith("build-improvement:")) {
     const result = game.buildCampImprovement({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       improvementId: action.slice("build-improvement:".length),
@@ -3300,7 +3731,7 @@ function runAction(action, { returnToWorld = false } = {}) {
       : `Construction impossible : ${result.reason}.`;
   } else if (action === "level-up-camp") {
     const result = game.levelUpCamp({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
     });
@@ -3309,7 +3740,7 @@ function runAction(action, { returnToWorld = false } = {}) {
       : `Évolution impossible : ${result.status?.blockers?.join(" · ") || result.reason}.`;
   } else if (action.startsWith("evolve-camp:")) {
     const result = game.evolveCamp({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: location.id,
       branchId: action.slice("evolve-camp:".length),
@@ -3322,12 +3753,12 @@ function runAction(action, { returnToWorld = false } = {}) {
       "Le commerce est disponible ici ; les offres et quotas seront ajoutés avec le système d’objets.";
   else if (action === "battle") {
     const requirement = game.getLocationCaptureRequirement({
-      playerId: "local",
+      playerId: localPlayerId,
       locationId: location.id,
     });
     if (requirement.state === "can_capture") {
       const capture = game.attemptLocationCapture({
-        playerId: "local",
+        playerId: localPlayerId,
         heroId: hero.id,
         locationId: location.id,
       });
@@ -3384,7 +3815,7 @@ function openChiefDialogue(locationId) {
 
 function conversationFor(locationId) {
   const conversation = game.getLocationChiefConversation({
-    playerId: "local",
+    playerId: localPlayerId,
     locationId,
   });
   if (!conversation) return null;
@@ -3493,7 +3924,7 @@ function chooseDialogueOption(optionId) {
     }
   } else {
     const result = game.selectLocationChiefOption({
-      playerId: "local",
+      playerId: localPlayerId,
       heroId: hero.id,
       locationId: activeDialogue.locationId,
       optionId,
@@ -3540,7 +3971,7 @@ function openBattle({ ambushTeamId = null } = {}) {
     ambushTeamId === null &&
     sourceLocationId &&
     !game.canPerformLocationAction({
-      playerId: "local",
+      playerId: localPlayerId,
       locationId: sourceLocationId,
       action: "attack",
     })
@@ -3576,6 +4007,38 @@ function openBattle({ ambushTeamId = null } = {}) {
   activateBattle(battle, { ambushTeamId });
 }
 
+function nearbyMultiplayerHeroIds() {
+  if (!multiplayerGameActive) return [hero.id];
+  const nearbyPlayerIds = multiplayerPositions
+    .filter(
+      (entry) =>
+        entry.playerId !== localPlayerId &&
+        entry.connected &&
+        entry.position &&
+        worldDistance(asGps(heroPosition), entry.position) <=
+          game.setup.rules.engagementRadiusMeters,
+    )
+    .sort(
+      (first, second) =>
+        worldDistance(asGps(heroPosition), first.position) -
+        worldDistance(asGps(heroPosition), second.position),
+    )
+    .slice(0, 2)
+    .map((entry) => entry.playerId);
+  return [
+    hero.id,
+    ...nearbyPlayerIds
+      .map(
+        (playerId) =>
+          game.heroes.find(
+            (candidate) =>
+              candidate.playerId === playerId && candidate.state === "active",
+          )?.id,
+      )
+      .filter(Boolean),
+  ];
+}
+
 function syncAutonomousBattle() {
   if (activeBattle && activeBattle.status !== "finished") return;
   const battle = [...game.battles]
@@ -3591,16 +4054,18 @@ function syncAutonomousBattle() {
     activateBattle(battle, { ambushTeamId: battle.config.ambushTeamId });
 }
 
-function activateBattle(battle, { ambushTeamId = null } = {}) {
+function activateBattle(battle, { ambushTeamId = null, restore = false } = {}) {
   activeBattle = battle;
-  activeBattle.teams[0].units.forEach((unit) => {
-    unit.lane = null;
-    unit.progress = 0;
-  });
-  activeBattle.teams[1].units.forEach((unit, index) => {
-    unit.lane = index % 3;
-    unit.progress = 0;
-  });
+  if (!restore) {
+    activeBattle.teams[0].units.forEach((unit) => {
+      unit.lane = null;
+      unit.progress = 0;
+    });
+    activeBattle.teams[1].units.forEach((unit, index) => {
+      unit.lane = index % 3;
+      unit.progress = 0;
+    });
+  }
   battleResolved = false;
   battleResult = null;
   selectedBattlePower = null;
@@ -3631,6 +4096,8 @@ function activateBattle(battle, { ambushTeamId = null } = {}) {
   clearInterval(battleTimer);
   battleTimer = setInterval(() => {
     if (!isBattleLandscape()) return;
+    if (multiplayerGameActive && authoritativeServerReady) return;
+    if (multiplayerGameActive && !multiplayerIsHost) return;
     activeBattle.tick(500);
     resolveFinishedBattle();
     if (!battleDragging) renderBattle();
@@ -3646,12 +4113,13 @@ function renderBattle() {
     pendingBattleRender = true;
     return;
   }
+  queueMultiplayerWorldPublish();
   if (battleResult) {
     renderBattleResultView({
       element: ui.battle,
       battle: activeBattle,
       result: battleResult,
-      playerId: "local",
+      playerId: localPlayerId,
       playerTeamId: "heroes",
       onReturnToMap: () => {
         switchView("map");
@@ -3677,11 +4145,14 @@ function renderBattle() {
     },
     onAssign: (unitId, lane) => {
       const heroId = activeBattle.teams[0].heroes.find(
-        (item) => item.state === "active",
+        (item) =>
+          item.playerId === localPlayerId && item.state === "active",
       )?.id;
       const result = heroId
         ? activeBattle.assignUnit(unitId, heroId, lane)
         : { success: false };
+      if (result.success)
+        sendAuthoritativeBattleCommand("assignUnit", [unitId, heroId, lane]);
       selectedBattleUnitId = null;
       battleMessage = result.success
         ? `Unité sur la ligne ${lane + 1}.`
@@ -3691,6 +4162,8 @@ function renderBattle() {
     onRetreatLine: (lane) => {
       selectedBattlePower = null;
       const result = activeBattle.orderRetreat("heroes", lane);
+      if (result.success)
+        sendAuthoritativeBattleCommand("orderRetreat", [lane]);
       battleMessage = result.success
         ? `Retraite ordonnée ligne ${lane + 1} · commandement dépensé.`
         : result.reason === "insufficient_command_points"
@@ -3723,6 +4196,10 @@ function renderBattle() {
         cost,
         targetId,
       });
+      if (result.success)
+        sendAuthoritativeBattleCommand("activateSpecialPower", [
+          { userId, powerId, cost, targetId },
+        ]);
       const label =
         name ??
         activeBattle.getSpecialPowerDefinition(powerId)?.name ??
@@ -3825,7 +4302,7 @@ function visibleSites() {
   if (!game || !heroPosition) return [];
   return game
     .getVisibleDynamicSites({
-      playerId: "local",
+      playerId: localPlayerId,
       position: asGps(heroPosition),
     })
     .map((site) =>
@@ -3844,7 +4321,7 @@ function renderGpsAccuracySummary() {
     : "Journal GPS : aucun relevé.";
 }
 function directoryLocations() {
-  const player = game.getPlayer("local");
+  const player = game.getPlayer(localPlayerId);
   return mappedLocations().map((snapshot) => {
     const location = game.getLocation(snapshot.id);
     const ownerPlayer = location.ownerId
@@ -3859,7 +4336,7 @@ function directoryLocations() {
           id: location.ownerId,
           name: ownerName,
           color:
-            location.ownerId === "local"
+            location.ownerId === localPlayerId
               ? "#62a8ff"
               : location.ownerId === "bandits"
                 ? "#d86868"
@@ -3930,7 +4407,7 @@ function activateDivinationAt(center) {
       position: asGps(positionFor(location.id)),
     }));
   const result = game.heroClassFeatureService.divine(hero, {
-    player: game.getPlayer("local"),
+    player: game.getPlayer(localPlayerId),
     locations,
     distanceFn: (first, second) => worldDistance(first, second),
     center,
@@ -3965,7 +4442,7 @@ function useAstralTravel() {
     return render();
   }
   const reachBonus = game.heroClassFeatureService.astralReachBonus(hero);
-  const player = game.getPlayer("local");
+  const player = game.getPlayer(localPlayerId);
   const target = game.locations
     .filter(
       (location) =>
@@ -4103,7 +4580,7 @@ function openGarrisonManager(locationId, message = "") {
     element: ui.sheet,
     location,
     hero,
-    playerId: "local",
+    playerId: localPlayerId,
     unitDefinitions: game.unitDefinitions,
     message,
     onClose: () => {
@@ -4114,13 +4591,13 @@ function openGarrisonManager(locationId, message = "") {
       const success =
         direction === "deposit"
           ? game.garrisonUnit({
-              playerId: "local",
+              playerId: localPlayerId,
               heroId: hero.id,
               locationId,
               unitId,
             })
           : game.withdrawGarrisonUnit({
-              playerId: "local",
+              playerId: localPlayerId,
               heroId: hero.id,
               locationId,
               unitId,
@@ -4218,6 +4695,13 @@ function render() {
     return;
   }
   if (!game || !mapView) return;
+  if (
+    multiplayerClient &&
+    game.status === "started" &&
+    !authoritativeServerReady
+  )
+    multiplayerClient.sendHeroState(hero).catch(() => {});
+  queueMultiplayerWorldPublish();
   const heroBase = game.getHeroBaseLocation(hero.id);
   ghostReturnNotice.hidden = hero.state !== "ghost";
   if (hero.state === "ghost")
@@ -4306,7 +4790,7 @@ function render() {
       ? `Recharge : ${formatCooldown(astralCooldown)}`
       : "Atteindre un lieu connu juste hors de portée";
   astralTravelButton.innerHTML = `<span aria-hidden="true">✧</span><small>${astralCooldown > 0 ? `Astral ${formatCooldown(astralCooldown)}` : "Astral"}</small>`;
-  const player = game.getPlayer("local");
+  const player = game.getPlayer(localPlayerId);
   const heroClass = data.heroClasses.find((item) => item.id === hero.classId);
   const heroModifiers = HeroArmyModifier.calculate({
     hero,
@@ -4614,7 +5098,7 @@ function render() {
           range: stats?.range ?? 1,
         });
         const expanded = expandedArmyUnitId === unit.id;
-        return `<article class="army-card${expanded ? " is-expanded" : ""}" data-army-unit="${unit.id}" role="button" tabindex="0" aria-expanded="${expanded}" aria-label="${expanded ? "Réduire" : "Afficher les détails de"} ${unitName}"><div class="army-illustration" aria-hidden="true">${illustration}</div><div class="army-card__content"><p class="eyebrow">${rankLabel(UNIT_RANKS, unit.rank)} · niveau ${unit.level}</p><div class="army-card__heading"><h3>${unitName}</h3><span class="army-card__chevron" aria-hidden="true">⌄</span></div>${unitHealthBar(unit)}<div class="army-card__summary"><strong>${unit.combatantCount}/${unit.maxQuantity} aptes</strong></div><div class="army-card__details" ${expanded ? "" : "hidden"}><div class="army-card__stats"><div><strong>${unit.quantity}/${unit.maxQuantity}</strong><span>Effectif</span></div><div><strong>${unit.combatantCount}</strong><span>Apte(s)</span></div><div><strong>${unit.woundedCount}</strong><span>Blessé(s)</span></div><div><strong>${unit.experience}</strong><span>Expérience</span></div>${stats ? `<div><strong>${stats.attack}</strong><span>Attaque</span></div><div><strong>${stats.defense}</strong><span>Défense</span></div><div><strong>${stats.speed}</strong><span>Vitesse</span></div>` : ""}</div><div class="army-card__meta"></div><div class="army-card__actions"><button type="button" class="disband-unit-button" data-disband-unit="${unit.id}" aria-label="Dissoudre ${unitName}">Dissoudre</button></div></div></div></article>`;
+        return `<article class="army-card${expanded ? " is-expanded" : ""}" data-army-unit="${unit.id}" role="button" tabindex="0" aria-expanded="${expanded}" aria-label="${expanded ? "Réduire" : "Afficher les détails de"} ${unitName}"><div class="army-illustration" aria-hidden="true">${illustration}</div><div class="army-card__content"><p class="eyebrow">${rankLabel(UNIT_RANKS, unit.rank)} · niveau ${unit.level}</p><div class="army-card__heading"><h3>${unitName}</h3><span class="army-card__chevron" aria-hidden="true">⌄</span></div>${unitHealthBar(unit)}<div class="army-card__summary"><strong>${unit.combatantCount}/${unit.maxQuantity} aptes</strong></div><div class="army-card__details" ${expanded ? "" : "hidden"}><div class="army-card__stats"><div><span>Effectif :</span><strong>${unit.quantity}/${unit.maxQuantity}</strong></div><div><span>Aptes :</span><strong>${unit.combatantCount}</strong></div><div><span>Blessés :</span><strong>${unit.woundedCount}</strong></div><div><span>Expérience :</span><strong>${unit.experience}</strong></div>${stats ? `<div><span>Attaque :</span><strong>${stats.attack}</strong></div><div><span>Défense :</span><strong>${stats.defense}</strong></div><div><span>Vitesse :</span><strong>${stats.speed}</strong></div>` : ""}</div><div class="army-card__meta"></div><div class="army-card__actions"><button type="button" class="disband-unit-button" data-disband-unit="${unit.id}" aria-label="Dissoudre ${unitName}">Dissoudre</button></div></div></div></article>`;
       })
       .join("") || '<p class="text-muted">Aucune unité.</p>'
   }</div>`;
@@ -4984,6 +5468,18 @@ $("#toggle-game-menu").onclick = () => {
   $("#toggle-game-menu").setAttribute("aria-expanded", String(open));
 };
 $("#close-game-menu").onclick = closeGameMenu;
+$("#save-and-end-game").onclick = async () => {
+  if (!multiplayerClient || !multiplayerIsHost) return;
+  const name = window.prompt("Nom de cette sauvegarde :", "Notre aventure");
+  if (!name) return;
+  if (!window.confirm(`Sauvegarder « ${name.trim()} » et terminer la session pour tous les joueurs ?`)) return;
+  try {
+    await multiplayerClient.saveAndEnd(name);
+    closeGameMenu();
+  } catch (error) {
+    window.alert(error.message);
+  }
+};
 $("#open-field-tools").onclick = () => {
   closeGameMenu();
   ui.tools.hidden = false;
@@ -5182,6 +5678,7 @@ try {
   setupView.setHeroClasses(data.heroClasses);
   ui.status.textContent = "";
   ui.create.disabled = false;
+  if (pendingMultiplayerStart) start(pendingMultiplayerStart);
 } catch (error) {
   ui.status.textContent = `Chargement impossible : ${error.message}`;
   ui.create.disabled = true;

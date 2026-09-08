@@ -130,6 +130,136 @@ button {
   margin: 0 auto;
   padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem 2rem;
 }
+.lobby-screen {
+  width: min(100% - 2rem, 640px);
+  margin: 0 auto;
+  padding: max(2rem, env(safe-area-inset-top)) 1.25rem 2rem;
+}
+.lobby-screen h1,
+.lobby-screen h2 {
+  margin: 0.35rem 0 1rem;
+}
+#lobby-room-code {
+  color: #ffe083;
+  text-shadow: 0 1px 3px #000;
+  letter-spacing: 0.12em;
+}
+.lobby-mode-grid,
+.lobby-actions {
+  display: grid;
+  gap: 0.75rem;
+}
+.lobby-mode-grid button {
+  display: grid;
+  gap: 0.35rem;
+  text-align: left;
+}
+.lobby-mode-grid span {
+  font-weight: 400;
+}
+.lobby-form {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid #9a7347;
+  border-radius: 14px;
+  background: #f4dfb6a8;
+  color: #352319;
+}
+.lobby-form label {
+  display: grid;
+  gap: 0.35rem;
+}
+.lobby-form input {
+  min-height: 46px;
+  border: 1px solid #806a4b;
+  border-radius: 9px;
+  padding: 0.6rem 0.75rem;
+  font: inherit;
+  text-transform: none;
+}
+.lobby-form input,
+.lobby-form select,
+.lobby-hero-choice select {
+  min-height: 46px;
+  border: 1px solid #806a4b;
+  border-radius: 9px;
+  padding: 0.6rem 0.75rem;
+  background: #fff8e8;
+  color: #352319;
+}
+.lobby-form h3,
+.lobby-hero-choice h3 {
+  margin: 0;
+}
+.lobby-hero-choice {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #91d889;
+  border-radius: 14px;
+  background: #18251c;
+}
+.lobby-terrain {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #78e08f;
+  border-radius: 14px;
+  background: #18251c;
+}
+.lobby-terrain[hidden] {
+  display: none;
+}
+.lobby-terrain h3 {
+  margin: 0;
+}
+.lobby-terrain-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.6rem;
+}
+.lobby-terrain-map {
+  width: 100%;
+  height: min(48vh, 360px);
+  min-height: 260px;
+  overflow: hidden;
+  border: 1px solid #91d889;
+  border-radius: 12px;
+}
+.lobby-terrain-map[hidden],
+.lobby-terrain-actions[hidden] {
+  display: none;
+}
+.lobby-hero-choice label {
+  display: grid;
+  gap: 0.35rem;
+}
+#lobby-code {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.lobby-separator {
+  margin: 0.65rem;
+  text-align: center;
+}
+.lobby-players {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+.lobby-players li {
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: #f4dfb6a8;
+  color: #352319;
+}
+.lobby-players .is-disconnected {
+  opacity: 0.6;
+}
 .setup-screen label {
   display: grid;
   gap: 0.4rem;
@@ -994,7 +1124,13 @@ select {
   background:
     radial-gradient(circle at 50% 0, #fffbe5 0, transparent 42%),
     repeating-linear-gradient(0deg, transparent 0 31px, #8e653710 32px),
-    linear-gradient(110deg, #bd8f5422, transparent 18%, transparent 82%, #8b5a3422),
+    linear-gradient(
+      110deg,
+      #bd8f5422,
+      transparent 18%,
+      transparent 82%,
+      #8b5a3422
+    ),
     linear-gradient(#fff0cc, #dfbc82);
   box-shadow:
     inset 0 0 0 2px #d5ad52,
@@ -2473,10 +2609,6 @@ body {
 @media (min-width: 430px) {
   .army-card__stats {
     grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-  .army-card__stats div {
-    display: grid;
-    gap: 0.12rem;
   }
   .army-card__stats span {
     font-size: 0.66rem;

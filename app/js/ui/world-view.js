@@ -129,12 +129,15 @@ export function renderLocationDetail({
     },
     "Aucun héros ennemi connu",
   );
-  const structures = list(
-    location.defense.structures,
-    (structure) =>
-      `<li><span>${structure.type}</span><strong>Niv. ${value(structure.level)}</strong>${structure.dismantling ? '<small class="structure-dismantling">Démontage en cours</small>' : structure.canDismantle ? `<button type="button" class="structure-remove" data-action="dismantle:${structure.id}" aria-label="Démanteler ${structure.type}" title="Démanteler">×</button>` : ""}</li>`,
-    "Aucune structure défensive",
-  );
+  const structures = location.defense.structures.length
+    ? location.defense.structures
+        .map((structure) => improvementTile(structure, { defensive: true }))
+        .join("")
+    : '<p class="text-muted">Aucune structure défensive</p>';
+  const improvements = location.improvements ?? [];
+  const improvementGallery = improvements.length
+    ? `<section class="location-improvements" aria-labelledby="location-improvements-title"><h3 id="location-improvements-title">Bâtiments et services</h3><div class="improvement-tile-grid">${improvements.map((entry) => improvementTile(entry)).join("")}</div></section>`
+    : "";
   const recruitActions = location.actions.filter((action) =>
     action.id.startsWith("recruit:"),
   );
@@ -189,7 +192,7 @@ export function renderLocationDetail({
       ? value(location.population)
       : `${value(location.population)} / ${value(location.populationCapacity)}`;
   const description = compactLocationDescription(location.description);
-  element.innerHTML = `<section class="location-detail location-detail--compact"><div class="detail-nav"><button type="button" data-back>← Monde</button><span>${index + 1} / ${total}</span><button type="button" data-map>Afficher sur la carte</button></div><header class="location-overview"><div class="location-detail-art" aria-hidden="true"><img src="${LOCATION_ART[artType(location.type)]}" alt=""></div><div class="location-overview-body"><div class="location-heading"><div><p class="eyebrow">${location.nature} · information ${location.knowledgeLevel}/3</p><h2>${location.name}</h2></div><span>${Math.round(location.distance)} m</span></div><div class="location-header-facts"><span>Niv. <strong>${value(location.level)}</strong></span><span>Population <strong>${population}</strong></span><span class="world-owner"><i style="--owner-color:${location.owner.color}"></i><strong>${location.owner.name}</strong></span></div><p class="location-description">${description}</p>${campProgress(location.campDevelopment)}</div></header><section class="location-actions"><h3>Actions</h3><div class="world-actions">${actions}</div>${location.nearby ? recruitMenu + reserveMenu + improvementMenu : ""}</section><section class="location-resources"><h3>Ressources</h3>${resources}</section><section class="location-defense"><h3>Présence et défense</h3>${presences}<h4>Structures défensives</h4>${structures}</section><footer class="detail-pager"><button type="button" data-previous ${index <= 0 ? "disabled" : ""}>← Lieu précédent</button><button type="button" data-next ${index >= total - 1 ? "disabled" : ""}>Lieu suivant →</button></footer></section>`;
+  element.innerHTML = `<section class="location-detail location-detail--compact"><div class="detail-nav"><button type="button" data-back>← Monde</button><span>${index + 1} / ${total}</span><button type="button" data-map>Afficher sur la carte</button></div><header class="location-overview"><div class="location-detail-art" aria-hidden="true"><img src="${LOCATION_ART[artType(location.type)]}" alt=""></div><div class="location-overview-body"><div class="location-heading"><div><p class="eyebrow">${location.nature} · information ${location.knowledgeLevel}/3</p><h2>${location.name}</h2></div><span>${Math.round(location.distance)} m</span></div><div class="location-header-facts"><span>Niv. <strong>${value(location.level)}</strong></span><span>Population <strong>${population}</strong></span><span class="world-owner"><i style="--owner-color:${location.owner.color}"></i><strong>${location.owner.name}</strong></span></div><p class="location-description">${description}</p>${campProgress(location.campDevelopment)}${improvementGallery}</div></header><section class="location-actions"><h3>Actions</h3><div class="world-actions">${actions}</div>${location.nearby ? recruitMenu + reserveMenu + improvementMenu : ""}</section><section class="location-resources"><h3>Ressources</h3>${resources}</section><section class="location-defense"><h3>Présence et défense</h3>${presences}<h4>Structures défensives</h4><div class="improvement-tile-grid improvement-tile-grid--defense">${structures}</div></section><footer class="detail-pager"><button type="button" data-previous ${index <= 0 ? "disabled" : ""}>← Lieu précédent</button><button type="button" data-next ${index >= total - 1 ? "disabled" : ""}>Lieu suivant →</button></footer></section>`;
   element
     .querySelectorAll('[data-action-menu="recruit"] .recruit-option')
     .forEach((card, index) => {
@@ -225,6 +228,7 @@ export function renderLocationDetail({
   element.querySelector("[data-map]").onclick = onShowMap;
   element.querySelector("[data-previous]").onclick = onPrevious;
   element.querySelector("[data-next]").onclick = onNext;
+  bindImprovementInfo(element);
   const detailNav = element.querySelector(".detail-nav");
   const backButton = element.querySelector("[data-back]");
   const mapButton = element.querySelector("[data-map]");
@@ -388,7 +392,51 @@ function card(location) {
   ]
     .filter(Boolean)
     .join(" · ");
-  return `<article class="world-card" data-relation="${location.relation}" data-location-card="${location.id}"><div class="world-illustration" aria-hidden="true">${illustration}</div><div class="world-card__content"><div class="world-card__heading"><p class="eyebrow">${location.nature}</p><span class="world-distance">${Math.round(location.distance)} m</span></div><h3>${location.name}</h3><div class="world-card__meta"><p class="world-owner"><i style="--owner-color:${location.owner.color}"></i>${location.owner.name}</p>${facts ? `<span>${facts}</span>` : ""}</div></div><button type="button" class="world-map-button secondary-button" data-show-map="${location.id}" aria-label="Afficher ${location.name} sur la carte" title="Afficher sur la carte">⌖</button></article>`;
+  const improvementSummary = [...(location.improvements ?? []), ...(location.defense?.structures ?? [])];
+  return `<article class="world-card" data-relation="${location.relation}" data-location-card="${location.id}"><div class="world-illustration" aria-hidden="true">${illustration}</div><div class="world-card__content"><div class="world-card__heading"><p class="eyebrow">${location.nature}</p><span class="world-distance">${Math.round(location.distance)} m</span></div><h3>${location.name}</h3><div class="world-card__meta"><p class="world-owner"><i style="--owner-color:${location.owner.color}"></i>${location.owner.name}</p>${facts ? `<span>${facts}</span>` : ""}</div>${improvementSummary.length ? `<div class="improvement-summary" aria-label="${improvementSummary.length} amélioration(s)">${improvementSummary.slice(0, 8).map((entry) => `<span title="${entry.name}">${improvementIcon(entry.id)}</span>`).join("")}${improvementSummary.length > 8 ? `<small>+${improvementSummary.length - 8}</small>` : ""}</div>` : ""}</div><button type="button" class="world-map-button secondary-button" data-show-map="${location.id}" aria-label="Afficher ${location.name} sur la carte" title="Afficher sur la carte">⌖</button></article>`;
+}
+
+export function improvementIcon(id) {
+  const png = ({
+    farm: "farm.png",
+    forge: "forge.png",
+    barracks: "barracks.png",
+    magic_academy: "magic-academy.png",
+    walls: "walls.png",
+    wall: "walls.png",
+    tavern: "tavern.png",
+  })[id];
+  if (png)
+    return `<img src="assets/improvements/${png}" alt="" loading="lazy">`;
+  return ({
+    housing: "⛺", barricades: "🪵", depot: "📦", trading_post: "⚖️",
+    workshop: "🛠️", watch_post: "🔭", healing_tent: "⚕️", hunting_lodge: "🏹",
+    prospecting_post: "🧭", messenger_relay: "📯", tavern: "🍻", forge: "🔥",
+    stable: "🐎", barracks: "⚔️", magic_academy: "🔮", armorers: "🛡️",
+    archery_range: "🎯", palisades: "🪵", palisade: "🪵", palissade: "🪵",
+    walls: "🧱", wall: "🧱", ramparts: "🏰", chapel: "⛪", habitation: "🏘️",
+    farm: "🌾", field: "🌾", palace: "👑", houses: "🏠", brewery: "🍺",
+    military_school: "🎖️", manor: "🏛️", expanded_granary: "🌽",
+  })[id] ?? "◆";
+}
+
+function improvementTile(entry, { defensive = false } = {}) {
+  const name = entry.name ?? entry.type ?? entry.id;
+  return `<article class="improvement-tile${defensive ? " improvement-tile--defense" : ""}"><button type="button" class="improvement-tile__button" data-improvement-info aria-expanded="false" aria-label="Informations sur ${name}"><span class="improvement-tile__art" aria-hidden="true">${improvementIcon(entry.id)}</span><strong>${name}</strong><small>Niv. ${entry.level}</small></button><div class="improvement-popover" role="dialog" aria-label="${name}" hidden><header><strong>${name}</strong><span>Niveau ${entry.level}</span></header><p>${entry.description ?? "Amélioration du lieu."}</p>${entry.dismantling ? '<small class="structure-dismantling">Démontage en cours</small>' : entry.canDismantle ? `<button type="button" class="structure-remove" data-action="dismantle:${entry.id}">Démanteler</button>` : ""}</div></article>`;
+}
+
+function bindImprovementInfo(element) {
+  element.querySelectorAll("[data-improvement-info]").forEach((button) => {
+    button.onclick = (event) => {
+      event.stopPropagation();
+      const popover = button.nextElementSibling;
+      const willOpen = popover.hidden;
+      element.querySelectorAll(".improvement-popover").forEach((item) => (item.hidden = true));
+      element.querySelectorAll("[data-improvement-info]").forEach((item) => item.setAttribute("aria-expanded", "false"));
+      popover.hidden = !willOpen;
+      button.setAttribute("aria-expanded", String(willOpen));
+    };
+  });
 }
 
 function artType(type) {

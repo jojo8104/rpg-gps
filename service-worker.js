@@ -1,5 +1,5 @@
 /** Ressources minimales nécessaires avant que le cache dynamique prenne le relais. */
-const CACHE = "rpg-gps-field-v123";
+const CACHE = "rpg-gps-field-v136";
 const local = (path) => new URL(path, self.location).href;
 const APP_SHELL = [
   local("./"),
@@ -21,6 +21,12 @@ const APP_SHELL = [
   local("./app/css/battlefield-art.css"),
   local("./app/css/unit-art.css"),
   local("./app/js/main.js"),
+  local("./app/js/core/multiplayer-launch.js"),
+  local("./app/js/multiplayer-client.js"),
+  local("./app/js/core/multiplayer-world-state.js"),
+  local("./app/js/ui/lobby-view.js"),
+  local("./app/js/ui/lobby-terrain-view.js"),
+  local("./app/js/map/AlliedHeroRenderer.js"),
   local("./app/js/gps.js"),
   local("./app/js/orientation.js"),
   local("./app/js/position-adapter.js"),

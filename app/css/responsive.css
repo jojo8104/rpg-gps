@@ -334,6 +334,13 @@
     grid-row: 2;
     padding: 0.45rem 0.15rem 0;
   }
+  .location-detail--compact .location-improvements {
+    max-height: 150px;
+    overflow: auto;
+  }
+  .location-detail--compact .improvement-tile-grid {
+    grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  }
   .location-detail--compact .location-heading h2 {
     font-size: 1rem;
   }
