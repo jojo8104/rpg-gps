@@ -6,6 +6,7 @@ import {
   locationMarkerSvg,
   locationPresentation,
 } from "../app/js/map/LocationRenderer.js";
+import { improvementIcon } from "../app/js/ui/world-view.js";
 import { dynamicSitePresentation, endpointTraces } from "../app/js/ui/map-view.js";
 import { headingDirection } from "../app/js/map/UnitRenderer.js";
 import {
@@ -213,4 +214,10 @@ test("la fiche détaillée raccourcit uniquement les descriptions trop longues",
   );
   assert.ok(result.length <= 55);
   assert.match(result, /…$/);
+});
+
+test("chaque famille d'amélioration possède une icône de résumé", () => {
+  for (const id of ["farm", "forge", "barracks", "magic_academy", "walls", "tavern"])
+    assert.notEqual(improvementIcon(id), "◆");
+  assert.equal(improvementIcon("unknown-improvement"), "◆");
 });

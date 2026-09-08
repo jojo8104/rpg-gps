@@ -5,6 +5,7 @@ APP_ROOT="/opt/rpg-gps"
 SERVICE_NAME="rpg-gps"
 SERVICE_USER="rpggps"
 SERVICE_GROUP="rpggps"
+DATA_ROOT="/var/lib/rpg-gps"
 
 release_id="${1:-}"
 archive_name="${2:-}"
@@ -47,8 +48,13 @@ cleanup() {
 trap cleanup EXIT
 
 echo "Installation dans $release_directory"
+install -d -o "$SERVICE_USER" -g "$SERVICE_GROUP" -m 750 "$DATA_ROOT"
 mkdir -p "$release_directory"
 tar -xzf "$archive_path" -C "$release_directory"
+
+echo "Installation des dependances de production"
+npm ci --omit=dev --prefix "$release_directory"
+
 chown -R root:"$SERVICE_GROUP" "$release_directory"
 find "$release_directory" -type d -exec chmod 750 {} +
 find "$release_directory" -type f -exec chmod 640 {} +

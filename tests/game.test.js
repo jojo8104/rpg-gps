@@ -34,3 +34,22 @@ test("une partie se termine lorsque sa limite de temps est atteinte", () => {
   assert.equal(game.status, "finished");
   assert.equal(game.finishReason, "time_limit");
 });
+
+test("une partie complète est restaurable pour devenir l’état officiel du serveur", () => {
+  let nextId = 0;
+  const game = new Game({
+    setup,
+    heroClasses,
+    now: () => 5_000,
+    idGenerator: (prefix) => `${prefix}-${++nextId}`,
+  });
+  game.chooseHero("player-1", { name: "Aldric", classId: "warrior" });
+  game.chooseHero("player-2", { name: "Nora", classId: "warrior" });
+  game.start();
+  game.getHero("hero-1").addResource("gold", 7);
+  const snapshot = game.toJSON();
+  const restored = Game.fromJSON(snapshot, { now: () => 5_000 });
+  assert.equal(restored.status, "started");
+  assert.equal(restored.getHero("hero-1").resources.gold, 7);
+  assert.deepEqual(restored.toJSON(), snapshot);
+});

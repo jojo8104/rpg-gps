@@ -85,6 +85,41 @@ select,input,textarea { color:var(--parchment-ink)!important;border-color:#71513
   border-color:#9a7347!important;
   background:#f4dfb6e8!important;
 }
+.location-detail .recruit-option,
+.location-detail .deposit-resource,
+.location-detail .reserve-balance,
+.location-detail .stock-container,
+.location-detail .camp-progress{
+  color:var(--parchment-ink)!important;
+  border-color:#9a7347!important;
+  background:linear-gradient(#fff0cc,#dfbd86)!important;
+  box-shadow:inset 0 1px #fff8df!important;
+}
+.location-detail .recruit-option p,
+.location-detail .recruit-option span,
+.location-detail .deposit-resource label,
+.location-detail .deposit-resource output,
+.location-detail .reserve-balance__amounts,
+.location-detail .reserve-balance__amounts output,
+.location-detail .camp-progress span,
+.location-detail .camp-progress small,
+.location-detail .stock-container header{
+  color:var(--parchment-muted)!important;
+}
+.location-detail .stock-slot{
+  color:var(--parchment-ink)!important;
+  border-color:#9a7347!important;
+  background:#f7e4bddd!important;
+}
+.location-detail .recruit-illustration{
+  border-color:#795737!important;
+  background:radial-gradient(circle at 50% 35%,#b98d56,#4b3325 78%)!important;
+}
+.location-detail .garrison-reinforcements i{
+  color:var(--cream)!important;
+  border-color:#2b1d16!important;
+  background:#4a3225!important;
+}
 .location-detail .recruit-capacity{
   color:#2d1c12!important;
   border:1px solid #8f673f;
@@ -101,6 +136,15 @@ select,input,textarea { color:var(--parchment-ink)!important;border-color:#71513
   border-color:#2b1d16!important;
   background:#4b3325!important;
   box-shadow:inset 0 0 0 2px var(--gold)!important;
+}
+
+/* Annuaire : informations secondaires lisibles sur le parchemin clair. */
+.world-card .world-distance,
+.world-card .world-card__meta,
+.world-card .world-card__meta span{
+  color:#3f291c!important;
+  font-weight:800;
+  text-shadow:0 1px #fff3cf;
 }
 
 /* Bottom sheet : contraste explicite sur chaque surface claire ou sombre. */

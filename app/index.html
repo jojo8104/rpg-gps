@@ -51,6 +51,189 @@
     </section>
     <main id="app">
       <section
+        id="lobby-screen"
+        class="lobby-screen"
+        aria-labelledby="lobby-title"
+        hidden
+      >
+        <div id="lobby-choice">
+          <p class="eyebrow">Mode de jeu</p>
+          <h1 id="lobby-title">Choisir une aventure</h1>
+          <section class="lobby-form" aria-labelledby="account-title">
+            <h2 id="account-title">Qui joue ?</h2>
+            <div id="account-list" class="lobby-mode-grid"></div>
+            <form id="account-create-form" class="lobby-form">
+              <label>Nouveau joueur<input id="account-create-name" minlength="2" maxlength="24" autocomplete="off" required /></label>
+              <button type="submit">Créer ce joueur</button>
+            </form>
+            <p id="account-status" class="setup-hint" role="status"></p>
+          </section>
+          <div class="lobby-mode-grid">
+            <button id="choose-solo" type="button" disabled>
+              <strong>Partie locale</strong
+              ><span>Jouer seul sur cet appareil.</span>
+            </button>
+            <button id="choose-multiplayer" type="button" disabled>
+              <strong>Multijoueur</strong
+              ><span>Créer ou rejoindre une partie en ligne.</span>
+            </button>
+          </div>
+        </div>
+        <div id="lobby-connect" hidden>
+          <p class="eyebrow">Multijoueur</p>
+          <h2>Rejoindre l’expédition</h2>
+          <form id="lobby-create-form" class="lobby-form">
+            <label hidden
+              >Pseudonyme<input
+                id="lobby-create-name"
+                maxlength="24"
+                minlength="2"
+                required
+                autocomplete="nickname"
+            /></label>
+            <button type="submit">Créer une partie</button>
+          </form>
+          <p class="lobby-separator">ou</p>
+          <form id="lobby-join-form" class="lobby-form">
+            <label
+              >Code de partie<input
+                id="lobby-code"
+                maxlength="5"
+                minlength="5"
+                required
+                autocapitalize="characters"
+                autocomplete="off"
+            /></label>
+            <label hidden
+              >Pseudonyme<input
+                id="lobby-join-name"
+                maxlength="24"
+                minlength="2"
+                required
+                autocomplete="nickname"
+            /></label>
+            <button type="submit">Rejoindre</button>
+          </form>
+          <button id="lobby-back" class="secondary-button" type="button">
+            Retour
+          </button>
+        </div>
+        <div id="lobby-room" hidden>
+          <p class="eyebrow">Salle d’attente</p>
+          <h2>Partie <strong id="lobby-room-code"></strong></h2>
+          <p>Partage ce code avec les autres joueurs.</p>
+          <section id="lobby-resume-panel" class="lobby-form" hidden>
+            <h3>Reprendre une partie</h3>
+            <p class="setup-hint">Chargez une session terminée, puis laissez chaque joueur rejoindre avec son appareil habituel.</p>
+            <select id="lobby-save-list" aria-label="Sauvegarde à reprendre">
+              <option value="">Aucune sauvegarde chargée</option>
+            </select>
+            <div class="lobby-actions">
+              <button id="lobby-refresh-saves" class="secondary-button" type="button">Actualiser</button>
+              <button id="lobby-load-save" type="button">Charger</button>
+            </div>
+          </section>
+          <form id="lobby-configuration" class="lobby-form">
+            <h3>Configuration de la partie</h3>
+            <p id="lobby-configuration-owner" class="setup-hint"></p>
+            <label
+              >Mode de position
+              <select id="lobby-position-mode">
+                <option value="simulation">Simulation</option>
+                <option value="gps">GPS réel</option>
+              </select>
+            </label>
+            <label
+              >Nombre maximal de joueurs
+              <select id="lobby-max-players">
+                <option value="2">2 joueurs</option>
+                <option value="3">3 joueurs</option>
+                <option value="4">4 joueurs</option>
+              </select>
+            </label>
+            <label
+              >Scénario
+              <select id="lobby-scenario">
+                <option value="chaos">La fuite du royaume</option>
+                <option value="repression">La Répression</option>
+                <option value="granaries_of_the_king">Les greniers du roi</option>
+              </select>
+            </label>
+            <label
+              >Difficulté
+              <select id="lobby-difficulty">
+                <option value="easy">Facile</option>
+                <option value="normal">Normale</option>
+                <option value="hard">Difficile</option>
+              </select>
+            </label>
+            <button id="lobby-save-configuration" type="submit">
+              Enregistrer la configuration
+            </button>
+          </form>
+          <section id="lobby-terrain" class="lobby-terrain" hidden>
+            <h3>Zone de jeu GPS</h3>
+            <p id="lobby-terrain-status" class="setup-hint"></p>
+            <div class="lobby-terrain-actions">
+              <button id="lobby-terrain-open" type="button">
+                Tracer la zone
+              </button>
+              <button
+                id="lobby-terrain-locate"
+                class="secondary-button"
+                type="button"
+              >
+                Ma position
+              </button>
+            </div>
+            <div
+              id="lobby-terrain-map"
+              class="lobby-terrain-map"
+              aria-label="Carte de définition de la zone GPS"
+              hidden
+            ></div>
+            <div id="lobby-terrain-edit-actions" class="lobby-terrain-actions" hidden>
+              <button id="lobby-terrain-undo" class="secondary-button" type="button">
+                Annuler le dernier point
+              </button>
+              <button id="lobby-terrain-clear" class="secondary-button" type="button">
+                Effacer
+              </button>
+              <button id="lobby-terrain-save" type="button">
+                Valider la zone
+              </button>
+            </div>
+          </section>
+          <div class="lobby-hero-choice">
+            <h3>Votre héros</h3>
+            <label
+              >Classe
+              <select id="lobby-hero-class">
+                <option value="">Choisir une classe…</option>
+                <option value="warrior">Guerrier</option>
+                <option value="ranger">Éclaireur</option>
+                <option value="mage">Mage</option>
+              </select>
+            </label>
+          </div>
+          <h3>Joueurs</h3>
+          <ul id="lobby-players" class="lobby-players"></ul>
+          <div class="lobby-actions">
+            <button id="lobby-ready" type="button">Je suis prêt</button>
+            <button id="lobby-start" type="button" hidden>Démarrer</button>
+            <button id="lobby-leave" class="secondary-button" type="button">
+              Quitter
+            </button>
+          </div>
+        </div>
+        <p
+          id="lobby-status"
+          class="setup-hint"
+          role="status"
+          aria-live="polite"
+        ></p>
+      </section>
+      <section
         id="setup-screen"
         class="setup-screen"
         aria-labelledby="setup-title"
@@ -577,6 +760,7 @@
         <p id="cheat-status" role="status"></p>
       </form>
     </dialog>
+    <script src="/socket.io/socket.io.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="js/main.js"></script>
   </body>

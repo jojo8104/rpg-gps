@@ -17,6 +17,8 @@ export class BattleSite {
     visibilityRadius = 500,
     interactionRadius = 100,
     activeExpiresAt = null,
+    expiresAt = activeExpiresAt,
+    status = "ACTIVE",
     searches = {},
     visitedByPlayerIds = [],
     now = () => Date.now(),
@@ -34,8 +36,10 @@ export class BattleSite {
       interactionRadius,
       "Le rayon d'interaction",
     );
-    this.status = "ACTIVE";
-    this.expiresAt = activeExpiresAt;
+    if (!["ACTIVE", "FINISHED"].includes(status))
+      throw new RangeError("Le statut du champ de bataille est invalide.");
+    this.status = status;
+    this.expiresAt = expiresAt;
     this.now = now;
     this.searches = Object.fromEntries(
       BATTLE_SITE_SEARCH_TYPES.map((type) => [

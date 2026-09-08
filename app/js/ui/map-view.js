@@ -5,6 +5,7 @@
  */
 import { MapRenderer } from "../map/MapRenderer.js";
 import { MapLayers, createMapPanes } from "../map/MapLayers.js";
+import { AlliedHeroRenderer } from "../map/AlliedHeroRenderer.js";
 
 const SIMULATION_BOUNDS = [
   [-89, -179],
@@ -45,17 +46,19 @@ export class MapView {
     );
     createMapPanes(this.map);
     if (real) {
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        pane: MapLayers.BASE_MAP,
-        maxZoom: 20,
-        keepBuffer: 6,
-        attribution: "© OpenStreetMap",
-      }).addTo(this.map);
-      this.map.setView(
-        initialPosition ? asLatLng(initialPosition) : [48.8566, 2.3522],
-        17,
-      );
-    } else {
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    pane: MapLayers.BASE_MAP,
+    maxZoom: 19,
+    keepBuffer: 6,
+    attribution:
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+  }).addTo(this.map);
+
+  this.map.setView(
+    initialPosition ? asLatLng(initialPosition) : [48.8566, 2.3522],
+    17,
+  );
+} else {
       this.map.fitBounds(SIMULATION_BOUNDS);
       L.rectangle(SIMULATION_BOUNDS, {
         pane: MapLayers.BASE_MAP,
@@ -74,6 +77,7 @@ export class MapView {
       onHeroMove,
       onLocationSelect,
     });
+    this.alliedHeroes = new AlliedHeroRenderer(this.map);
     const legend = L.control({ position: "bottomleft" });
     legend.onAdd = () => {
       const element = L.DomUtil.create("div", "range-legend");
@@ -397,6 +401,10 @@ export class MapView {
     this.heroHeading = Number.isFinite(heading) ? heading : 0;
     this.renderer.setHeroHeading(this.heroHeading);
     this.#applyBearing();
+  }
+
+  setAlliedHeroes(allies) {
+    this.alliedHeroes.render(allies);
   }
 
   setBearingEnabled(enabled) {

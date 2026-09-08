@@ -6,6 +6,15 @@ export class BattleState {
     aptitudeDefinitions = [],
     config = {},
     now = () => Date.now(),
+    status = "ready",
+    elapsedMs = 0,
+    countdownRemainingMs = 0,
+    startedAt = null,
+    finishedAt = null,
+    winnerTeamId = null,
+    contributions = null,
+    eventLog = [],
+    randomState = null,
   }) {
     if (typeof id !== "string" || id.trim() === "")
       throw new TypeError("L'identifiant de bataille est requis.");
@@ -71,14 +80,26 @@ export class BattleState {
         ]),
       ),
     );
-    this.status = "ready";
-    this.elapsedMs = 0;
-    this.countdownRemainingMs = 0;
-    this.startedAt = null;
-    this.finishedAt = null;
-    this.winnerTeamId = null;
-    this.eventLog = [];
-    this.randomState = this.config.randomSeed >>> 0;
+    if (!["ready", "countdown", "active", "finished"].includes(status))
+      throw new RangeError("Le statut de bataille est invalide.");
+    this.status = status;
+    this.elapsedMs = nonNegative(elapsedMs, "Le temps écoulé");
+    this.countdownRemainingMs = nonNegative(
+      countdownRemainingMs,
+      "Le compte à rebours",
+    );
+    this.startedAt = startedAt;
+    this.finishedAt = finishedAt;
+    this.winnerTeamId = winnerTeamId;
+    if (contributions !== null) this.contributions = structuredClone(contributions);
+    if (!Array.isArray(eventLog))
+      throw new TypeError("Le journal de bataille doit être une liste.");
+    this.eventLog = structuredClone(eventLog);
+    this.randomState = nonNegativeInteger(
+      randomState ?? this.config.randomSeed,
+      "L’état aléatoire",
+    ) >>> 0;
+    restoreRuntimeState(this.teams, teams);
     this.now = now;
   }
 
@@ -118,6 +139,31 @@ export class BattleState {
       randomState: this.randomState,
     };
   }
+}
+
+function restoreRuntimeState(teams, snapshots) {
+  teams.forEach((team, teamIndex) => {
+    const source = snapshots[teamIndex];
+    team.reinforcements = structuredClone(source.reinforcements ?? []);
+    [...team.heroes, ...team.units].forEach((entity) => {
+      const original = [...(source.heroes ?? []), ...(source.units ?? [])].find(
+        (candidate) => candidate.id === entity.id,
+      );
+      if (!original) return;
+      entity.targetId = original.targetId ?? null;
+      entity.attackCooldownMs = nonNegative(
+        original.attackCooldownMs ?? 0,
+        "Le délai d’attaque",
+      );
+      entity.progress = nonNegative(original.progress ?? 0, "La progression");
+      if (entity.kind === "unit" && Number.isInteger(original.lane))
+        entity.lane = original.lane;
+    });
+    team.lines = Array.from({ length: 3 }, (_, index) => ({
+      index,
+      heroId: team.heroes.find((hero) => hero.lane === index)?.id ?? null,
+    }));
+  });
 }
 
 function createLoot(loot) {

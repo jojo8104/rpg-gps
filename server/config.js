@@ -1,10 +1,15 @@
 const DEFAULT_PORT = 3000;
 const DEFAULT_HOST = "127.0.0.1";
+const DEFAULT_DATA_DIRECTORY = "/var/lib/rpg-gps";
 
 export function readServerConfig(environment = process.env) {
   return {
     host: nonEmptyText(environment.RPG_GPS_HOST, DEFAULT_HOST),
     port: portNumber(environment.RPG_GPS_PORT, DEFAULT_PORT),
+    dataDirectory: nonEmptyText(
+      environment.RPG_GPS_DATA_DIR,
+      DEFAULT_DATA_DIRECTORY,
+    ),
   };
 }
 
