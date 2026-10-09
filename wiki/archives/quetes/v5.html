@@ -1,0 +1,188 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Quêtes et coopération — version 5</title><link rel="stylesheet" href="../../wiki.css"></head><body><header><p class="eyebrow">Archive du wiki · Version 5</p><h1>Quêtes et coopération</h1><p>2026-10-09 · Correction du placement des marqueurs de quête dans la préparation de carte</p><a href="../../index.html#quetes">Lire l’article actuel</a></header><main class="archive-content"><h2>Quêtes et coopération</h2><p>Le nouveau moteur à actions propose deux missions à la capitale : Le ravitaillement et Les prospecteurs perdus. Le serveur publie chaque mission uniquement si tous ses lieux existent. Accepter l’une ne masque pas l’autre. Les anciennes quêtes de scénario, de village et de taverne restent désactivées.</p><p>Les prospecteurs perdus se joue en solo : recevez l’ordre du maréchal, rejoignez Valgrise, interrogez Armand, examinez deux indices, fouillez le champ de bataille et récupérez le rapport. Une victoire officielle contre les forces de la mine, obtenue après le déblocage de cet objectif, permet de libérer et transporter le géologue. Présentez-le à Armand puis confiez-le aux intendants de la capitale et remettez le rapport au maréchal. La réussite donne une seule fois 50 XP et 25 pièces d’or.</p><p>Le camp de Valgrise est placé relativement à la capitale dès la préparation, au lieu d’apparaître après une distance de marche. Deux marqueurs de piste sont préparés sur la carte et signalés successivement par les objectifs. Comme les autres lieux placés, ils sont visibles dès la préparation ; leurs actions se débloquent dans l’ordre. La présence, les dialogues, les bagages, les transferts et les preuves de victoire sont validés par le serveur avec les mêmes actions en GPS et sur carte fictive. Les objectifs sont sauvegardés ; l’abandon ne donne aucune récompense et ne republie pas la mission au même héros.</p><p>Le ravitaillement conserve ses quatre collectes parallèles et sa livraison de vingt rations à Rochegarde. Les objets de quête sont réservés à leur instance ; le journal affiche le titre, les actions et le bilan de chaque mission à partir de la projection officielle.</p><p>À proximité d’un héros allié, vous pouvez demander une conversation ou un échange. Les deux joueurs doivent valider la même offre ; toute modification annule les validations. Le serveur vérifie puis applique les transferts ensemble.</p><p>La préparation inclut désormais les marqueurs de quête, même si les bâtiments sont placés manuellement. Les empreintes des prospecteurs et les traces de lutte gardent leurs positions si elles sont dans la zone validée ; sinon elles sont replacées dans cette zone. Elles ne restent plus bloquées en attente de placement. Les objectifs, le combat et les récompenses ne changent pas.</p><p><a href="../../../docs/quest-definition.md">Moteur des quêtes à actions (document de règles)</a></p><p><a href="../../../docs/missing-prospectors.md">Les prospecteurs perdus (document de règles)</a></p><details><summary>Moteur des quêtes à actions — texte conservé pour cette version</summary><pre class="archived-source"># Moteur de quêtes à actions
+
+`Quest` représente une fiche immuable, sérialisable et validée. Le nouveau
+format contient `actions`, `requires`, `prerequisites`, `events`, `outcomes`,
+`publicationCondition`, `accessConditions` et `participationModes`.
+Les sept actions sont Atteindre, Parcourir, Prendre, Donner, Parler,
+Construire et Combattre. Les timers et les pass artificiels sont supprimés.
+Les anciennes phases restent lisibles par Quest, mais ne sont pas exécutées
+par le nouveau moteur. Les composites restent à convertir ou à implémenter.
+
+## Fichiers
+
+- `app/js/core/quest.js` : définition et validation, dont les cycles de requires.
+- `app/js/core/quest-engine.js` : publication, acceptation, progression,
+  événements, récompenses, abandon, compétition et sérialisation.
+- `server/quests/quest-service.js` : adaptateur serveur de Game.
+- `data/quests/royal-fort-supply.json` : ravitaillement avec quatre collectes
+  parallèles, sans timer. Les récompenses vont à l&#39;acteur par défaut ; ajouter
+  `recipient: &quot;participants&quot;` pour récompenser chaque participant.
+- `data/quests/royal-fort-supply-dialogues.json` : dialogue à choix et résultat.
+
+## Utilisation serveur
+
+```js
+const quests = new QuestService({
+  definitions: [ravitaillement],
+  dialogues,
+  getGame: () =&gt; lobby.game,
+  replaceGame: (restored) =&gt; {
+    lobby.game = restored;
+  },
+  now,
+});
+quests.command(player.id, { type: &quot;publish&quot;, questId: ravitaillement.id });
+quests.command(player.id, {
+  type: &quot;accept&quot;,
+  questId: ravitaillement.id,
+  mode: &quot;solo&quot;,
+});
+quests.command(player.id, { type: &quot;act&quot;, instanceId, actionId, choiceId });
+quests.dispatchOfficialEvent(
+  { id: event.id, type: &quot;LocationEntered&quot; },
+  player.id,
+);
+```
+
+L&#39;identité vient de la session authentifiée. Les événements sont produits par
+les services du serveur et ne doivent jamais être exposés comme commandes
+client libres. Les boutons proviennent de
+`engine.interactions(instanceId, player.id, locationId)`.
+
+Le service vérifie présence, quantités, capacités, choix de dialogue et preuves
+officielles de construction ou de victoire. Atteindre, Parcourir, Construire
+et Combattre peuvent être vérifiés à la réception d&#39;un événement officiel.
+Parcourir utilise la distance officielle cumulée depuis le déblocage.
+Une action réussit une fois ; les effets font partie de la transaction.
+Une erreur restaure le monde et le moteur. Game conserve `questEngineState`.
+
+Les pré requis sont créés à `accepted`, `published` ou à un événement nommé.
+Les stocks sont réservés à l&#39;instance dans les données serveur, séparés des
+stocks ordinaires ; `scope: &quot;world&quot;` permet un stock commun. Les lieux créés
+utilisent Location avec une position explicite validée dans la zone de jeu.
+Le placement automatique différé reste à raccorder. Les objets transportables
+créés sont des données de bagages ; les récompenses d&#39;items utilisent le
+catalogue existant. Prendre peut donc représenter l&#39;acquisition d&#39;un indice.
+
+La progression est partagée en équipe ; un membre peut réussir une action,
+ou une action peut déclarer `assignedPlayerId`. La compétition conserve le
+premier gagnant et termine les autres instances concurrentes en échec.
+Les réactions sont uniques par défaut ; `repeat: true` traite chaque id
+d&#39;événement une fois. Les enchaînements publient les quêtes suivantes selon
+le résultat, sans les accepter automatiquement.
+
+## État du raccordement et validation
+
+Le ravitaillement et Les prospecteurs perdus sont raccordés aux commandes authentifiées,
+aux mises à jour de position, aux fiches de lieux, aux dialogues et au journal.
+`QUEST_ENGINE_ENABLED` active ces deux missions ; `QUEST_SYSTEM_ENABLED` reste false
+pour conserver les anciennes quêtes désactivées. Le serveur publie chaque quête
+au démarrage ou à la reprise des mondes contenant tous ses lieux. Les noms
+logiques de la fiche sont associés aux lieux réels par les bindings du scénario.
+Les clients reçoivent seulement leur vue du journal et leurs boutons ;
+les stocks privés et les conversations internes ne sont pas transmis.
+
+La validation des prospecteurs couvre le parcours serveur en GPS et simulation,
+la reprise, les preuves de combat et l’application unique des récompenses.
+Voir `docs/missing-prospectors.md`. Le ravitaillement reste disponible directement
+sans exiger l’ancienne mission d’évacuation.
+# Réutilisation des lieux du scénario
+
+Les fiches à actions peuvent référencer les identifiants de `locationSlots`
+du scénario dans `locationSlotId`, `lieu`, `origine`, `destinataire` et
+`locationId`. Le service serveur `QuestService` résout ces références avec
+`game.scenarioLocationBindings`, y compris dans les dialogues, conditions,
+récompenses et conséquences. Les identifiants officiels de lieux sont aussi acceptés.
+
+Exemple : `{&quot;action&quot;:&quot;Prendre&quot;,&quot;origine&quot;:&quot;royal-gold-mine&quot;, ...}` utilise
+la mine déjà présente dans la partie. La fiche ne fournit ni coordonnées ni
+nouvelle mine. Le catalogue original reste inchangé.
+
+Un lieu référencé absent est refusé avant publication. Le ravitaillement devient
+indisponible si un de ses lieux manque. Les créations de lieux temporaires
+explicitement déclarées dans les prérequis restent possibles ; aucune création
+automatique ne remplace un lieu du scénario manquant.
+
+## Deuxième mission : Les prospecteurs perdus
+
+Le catalogue serveur contient les deux fiches à actions et leurs dialogues.
+La projection sélectionne chaque fiche par questId : une instance acceptée
+n’efface pas l’offre d’une autre mission. Le journal utilise le bilan propre
+à la fiche. Les victoires sont vérifiées avec les batailles officielles à leur
+résolution ; les marqueurs de type quest permettent une fouille sans chef
+de lieu. Les autres lieux conservent leurs contrôles d’accès usuels.
+</pre></details><details><summary>Les prospecteurs perdus — texte conservé pour cette version</summary><pre class="archived-source"># Les prospecteurs perdus
+
+Deuxième mission disponible dans le nouveau moteur à actions, après le pilote
+Le ravitaillement. Elle réutilise les lieux du monde Chaos et ne réactive pas
+l’ancien moteur de phases. Le titre ancien « Les prospecteurs disparus » désigne
+la version historique ; la nouvelle fiche porte le même identifiant logique
+`missing-prospectors`, dans un état de moteur séparé.
+
+## Déroulement disponible
+
+1. Accepter la mission du maréchal à la capitale et confirmer son ordre.
+2. Atteindre Valgrise et questionner Armand.
+3. Atteindre et examiner deux marqueurs de piste dans l’ordre.
+4. Atteindre le champ de bataille et prendre le rapport dans le stock privé.
+5. Atteindre la mine et remporter une bataille contre ses défenseurs.
+6. Ouvrir la porte par le dialogue, puis prendre en charge le géologue.
+7. Retourner à Valgrise et présenter le survivant à Armand.
+8. Retourner à la capitale, déposer le géologue puis remettre le rapport.
+
+La réussite attribue 50 XP et 25 or à l’acteur, une fois. L’abandon ne récompense
+pas le joueur et ne permet pas une nouvelle acceptation par ce même joueur.
+Aucun délai artificiel ni enchaînement vers l’évacuation n’est ajouté. Le mode
+implémenté est solo ; la coopération sur une instance n’est pas proposée pour
+cette mission, afin que le porteur des deux objets reste son participant.
+
+## Lieux, données et autorité
+
+`data/quests/missing-prospectors.json` décrit les 18 actions et leurs dépendances,
+les deux stocks d’objets réservés à l’instance et les signalements successifs.
+`data/quests/missing-prospectors-dialogues.json` fournit les dialogues à choix.
+Les observations des traces sont des scènes narratives de type Parler : elles
+ne transfèrent pas d’objet dans les bagages. La fouille et le sauvetage utilisent
+Prendre ; la remise finale utilise Donner. Le géologue et le rapport occupent
+chacun une place de bagage et sont effectivement déposés à la capitale.
+
+Le camp est désormais placé relativement à la capitale dès la préparation.
+Deux lieux de type quest dans le catalogue et le scénario représentent les
+indices. En simulation, ils se trouvent à (64, 55) et (69, 60), avec une
+portée d’interaction de 3 unités. Les positions définitives sont validées lors de la construction du
+monde officiel ; aucune règle de quête ne dépend du DOM. La publication
+requiert les six lieux : capitale, camp, deux indices, champ de bataille, mine.
+Comme les autres lieux placés, les marqueurs sont visibles dès leur placement ;
+les étapes signalent la prochaine destination et enrichissent sa connaissance
+au niveau 2. Les boutons d’examen restent verrouillés par les dépendances.
+Les scènes sur marqueurs ne nécessitent pas de chef de lieu.
+Les anciennes sauvegardes sans ces indices conservent leurs quêtes disponibles
+mais ne reçoivent pas automatiquement cette mission. Une nouvelle partie est
+nécessaire pour bénéficier de ces lieux.
+
+Le service résout les rôles logiques, y compris `targetLocationId` du combat,
+avec les bindings. Une victoire doit appartenir au héros participant, cibler
+la bonne mine et dater du déblocage de l’action. Les batailles terminées sont
+transmises par le serveur ; inventer un identifiant de bataille ne suffit pas.
+La mine doit être vaincue pendant la mission : une victoire antérieure au
+déblocage ne valide pas son objectif. La sauvegarde conserve la progression
+et les objets ; la reprise ne rejoue ni création, ni récompense.
+
+## Validation
+
+Tests du parcours serveur en GPS et simulation, reprise après victoire, refus
+d’un combat inconnu, mauvaise cible et défaite, dépendances, présence auprès
+du donneur, dialogue hors lieu, abandon et récompense unique. La projection
+conserve l’offre de ravitaillement pendant la mission des prospecteurs et
+masque les instances d’un autre joueur.
+
+## Correction du placement des indices
+
+La préparation traite aussi les lieux de type quest, toujours en placement
+automatique même lorsque les bâtiments sont manuels. Une position d’indice
+valide dans la zone est conservée ; sinon l’indice est replacé dans la zone.
+Le déplacement valide son statut placé, ce qui le rend affichable en GPS et
+simulation. Aucun objectif ni gain n’est modifié. Cette correction concerne
+les mondes préparés avec ces lieux ; elle ne crée pas les indices absents
+d’une ancienne sauvegarde.
+</pre></details></main></body></html>

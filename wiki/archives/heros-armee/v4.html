@@ -1,0 +1,130 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Héros et armée — version 4</title><link rel="stylesheet" href="../../wiki.css"></head><body><header><p class="eyebrow">Archive du wiki · Version 4</p><h1>Héros et armée</h1><p>2026-10-07 · Mage : précision sur les interactions astrales de quête</p><a href="../../index.html#heros-armee">Lire l’article actuel</a></header><main class="archive-content"><h2>Héros et armée</h2><p>Votre classe définit vos caractéristiques de départ et vos capacités. Consultez les fiches ci-dessous pour comparer les classes.</p><p>Les unités possédées et les armées sont des états distincts. Le recrutement exige un héros présent dans un lieu recruteur, les ressources nécessaires et une capacité d’armée suffisante.</p><p>Les équipements apportent leurs bonus au héros. Les bagages et les emplacements portés sont distincts ; le serveur vérifie les compatibilités avant chaque changement.</p><p>Les gains d’XP du héros et ses passages de niveau s’affichent à l’écran à réception de son état officiel. Plusieurs gains reçus ensemble sont regroupés. Une connexion ou un changement de héros ne rejoue pas les gains précédents. Les messages de marche et de quête conservent leur contexte ; cet affichage ne change pas les règles de progression.</p><p>Le voyage astral du Mage affiche un cercle violet vif et un double translucide au-dessus du héros. Glissez ce double vers un lieu connu, un héros visible ou un groupe autonome détecté dans le cercle. Le pouvoir dure au maximum 10 secondes et se termine après une interaction réussie sur la cible ; un refus ne le consomme pas. Le serveur valide la cible et la portée, sans déplacer le héros réel. La recharge reste de 10 minutes.</p><p><a href="../../../docs/hero-items.md">Équipement et obtention des objets (document de règles)</a></p><p><a href="../../../docs/hero-progression-display.md">Affichage de la progression (document de règles)</a></p><p><a href="../../../docs/mage-astral-travel.md">Voyage astral du Mage (document de règles)</a></p><details><summary>Équipement et obtention des objets — texte conservé pour cette version</summary><pre class="archived-source"># Équipements des héros
+
+## Illustrations
+
+Les 75 équipements et les huit reliques royales utilisent les illustrations fournies dans `app/assets/equipment`. L’association explicite se trouve dans `app/js/core/equipment-art.js`. Les noms de fichiers sont techniques : ils ne définissent ni le nom ni l’histoire de l’objet dans le jeu.
+
+Exemples d’adaptation : `vampirerobe.png` illustre la **Robe du seigneur**, `t13catalyst.png` le **Cube de protection**, `tiara.png` la **Couronne du souverain**. Deux arcs deviennent des arbalètes ; la fronde devient un couteau de voyage. Les identifiants sauvegardés, les bonus, les classes, les emplacements et les règles d’obtention sont conservés. Le champ `family: &quot;bow&quot;` comprend ainsi les arcs et les arbalètes.
+
+Les visuels s’affichent dans l’équipement, les bagages, les fiches, les offres, les réserves et le butin. Le cache hors ligne inclut les illustrations utilisées. Les assets non associés sont conservés pour des ajouts futurs.
+
+La page `playtest/equipment-gallery.html` est une galerie statique du catalogue illustré au moment de cette intégration, consultable directement dans un navigateur.
+
+Le catalogue `app/js/core/hero-item-catalog.js` définit 75 équipements, cinq par famille. `item-catalog.js` les expose avec les ressources, objets de quête et huit équipements royaux existants. Les images et identifiants des anciens objets sont conservés.
+
+## Équipement
+
+- Classes : Guerrier (`warrior`), Éclaireur (`ranger`), Mage (`mage`). Les anciens identifiants `fighter` et `scout` correspondent respectivement au Guerrier et à l’Éclaireur. Les héros historiques sans classe restent compatibles.
+- Huit emplacements conservés : tête, cou, torse, main principale, main secondaire, pieds, deux accessoires.
+- Arcs et bâtons : deux mains. Retirer d’abord l’objet incompatible ; le moteur refuse l’action sans modifier l’inventaire.
+- Un seul manteau ; deux anneaux différents, ou un anneau et un manteau.
+- Les bonus s’additionnent aux statistiques du héros. La santé augmente les PV maximum sans soigner ; retirer un objet réduit les PV actuels seulement s’ils dépassent le nouveau maximum.
+- Les noms « arc », « arme de jet » ou « bâton » ne changent pas les règles de portée ou de magie du combat. Ils apportent les bonus chiffrés du catalogue. Aucun système de munitions n’est ajouté.
+
+## Où obtenir les objets
+
+Depuis un lieu accessible où le héros est présent : **Équipements · commerce, forge et découvertes**. La taverne propose également les offres du recéleur. Le héros doit être actif et disponible ; un lieu ennemi ou détruit ne permet pas ces opérations.
+
+| Source                            | Règle                                                                                                                                                                                                    |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Commerce général                  | Trois objets communs ou peu communs : vêtements, bottes, anneaux, colliers.                                                                                                                              |
+| Forge, rayon marchand             | Deux armes de mêlée supplémentaires.                                                                                                                                                                     |
+| Armuriers, rayon marchand         | Deux protections supplémentaires : boucliers, casques, armures lourdes.                                                                                                                                  |
+| Académie de magie, rayon marchand | Deux bâtons, focaliseurs ou robes supplémentaires.                                                                                                                                                       |
+| Champ de tir, rayon marchand      | Deux arcs ou armes de jet supplémentaires.                                                                                                                                                               |
+| Fabrication à la forge            | Trois commandes maximum par lieu ; or, fer et bois consommés. Niveau 1 : commun et peu commun. Niveau 2 : rares également. Familles métalliques uniquement.                                              |
+| Recéleur de taverne               | Deux objets peu communs ou rares, prix majoré de 50 %. Pas de réapprovisionnement.                                                                                                                       |
+| Quête principale                  | Une récompense adaptée à la classe à la fin d’une phase terminale sans choix ni transition. Retrait différé dans le panneau Équipements. Un effet de scénario peut aussi réserver une référence précise. |
+| Quête secondaire                  | La première mission terminée pour chaque couple lieu de remise / source (chef ou taverne) ouvre une récompense. Le renouvellement des missions ne renouvelle pas ce bonus.                               |
+| Objectif d’équipement             | Un contrat par village ou ville commerciale : rapporter un objet commun précis dans les bagages contre un équipement peu commun. L’échange consomme l’objet et se fait une seule fois.                   |
+| Combat                            | La première victoire contre l’équipe ennemie d’un lieu ouvre un trophée pour un héros vainqueur actif. Pas de trophée supplémentaire pour les duels libres.                                              |
+| Trésor                            | Chaque lieu distinct visité apporte un fragment, jusqu’à trois. Le trésor se trouve au troisième lieu visité ; une seule récupération par héros.                                                         |
+| Ruines                            | Une découverte par lieu de type `ruin`, partagée entre tous les joueurs. Cette règle s’applique aux ruines présentes dans un scénario ; elle n’ajoute pas automatiquement de lieux à la carte.           |
+| Prospection                       | La première découverte d’un gisement ouvre une cache sur ce site pour le joueur découvreur. Une seule cache par zone, même après une nouvelle expédition.                                                |
+| Échange entre joueurs             | Utilise les échanges existants, avec validation des deux joueurs : objets transportés ou équipés transférés sans en créer de nouveaux.                                                                   |
+
+Les tirages dépendent des identifiants de lieux et de récompenses. Recharger, rouvrir le panneau, monter un bâtiment de niveau ou le reconstruire ne réinitialise pas les achats et commandes effectués. Chaque rayon marchand a un tirage indépendant : construire un autre bâtiment ne relance pas les rayons existants.
+
+## Quantités et prix
+
+Le nouveau système génère au maximum **6 exemplaires par référence commune, 3 peu communs, 1 rare**, toutes sources confondues. Ces quotas portent sur les nouvelles acquisitions ; ils ne suppriment et ne recomptent pas les équipements de départ ou les objets déjà placés par les scénarios et sauvegardes historiques. Les reliques royales conservent leur distribution existante et ne figurent pas dans les tirages ordinaires.
+
+`unique: true` reste le marqueur historique d’objet individuel. Il ne signifie pas « exemplaire mondial unique ». La rareté, `worldLimit` et l’état du service contrôlent les nouvelles émissions.
+
+Prix : `12 × palier + 3 × somme des bonus positifs`, avec les paliers 1/2/3. Forge : `8 × palier` or, `2 × palier` fer et `palier` bois. Le catalogue conserve ces valeurs modifiables sous forme de données. Les trois commandes par forge représentent son contingent fini de fabrication pour la partie.
+
+Un sac plein ou des ressources insuffisantes ne consomment rien. Une récompense non retirée reste dans l’état sauvegardé ; elle est cependant soumise au quota mondial de sa référence. Un autre joueur peut épuiser ce quota avant son retrait. Les droits sont vérifiés de nouveau au moment de l’action.
+
+## Intégration des scénarios
+
+Réserver un équipement spécifique dans les effets d’un événement :
+
+```json
+{
+  &quot;type&quot;: &quot;unlockItemReward&quot;,
+  &quot;rewardId&quot;: &quot;merci-du-mage&quot;,
+  &quot;itemId&quot;: &quot;archmage_staff&quot;
+}
+```
+
+Le bénéficiaire est le héros acteur de l’événement (`heroId` permet un destinataire explicite). L’objet est à retirer dans le panneau Équipements, sans remplir de force ses bagages. Les références royales ne sont pas admises par cet effet.
+
+Objectif d’acquisition, validé quand le nouveau système remet l’objet :
+
+```json
+{
+  &quot;id&quot;: &quot;obtenir-le-baton&quot;,
+  &quot;text&quot;: &quot;Obtenir le bâton du gardien&quot;,
+  &quot;trigger&quot;: { &quot;type&quot;: &quot;itemAcquired&quot;, &quot;itemId&quot;: &quot;guardian_staff&quot; }
+}
+```
+
+Objectif de remise, associé à une interaction de scénario existante :
+
+```json
+{
+  &quot;id&quot;: &quot;remettre-le-baton&quot;,
+  &quot;text&quot;: &quot;Remettre le bâton au sage&quot;,
+  &quot;trigger&quot;: {
+    &quot;type&quot;: &quot;itemDelivery&quot;,
+    &quot;itemId&quot;: &quot;guardian_staff&quot;,
+    &quot;interactionId&quot;: &quot;give-staff&quot;,
+    &quot;locationSlotId&quot;: &quot;sage-tower&quot;
+  }
+}
+```
+
+La remise exige un exemplaire dans les bagages et la présence au lieu lié ; un objet équipé doit d’abord être retiré. La validation consomme un exemplaire. Les contrats de lieux fonctionnent directement dans le panneau ; ils ne créent pas d’entrée supplémentaire dans le journal des quêtes scénarisées.
+
+## Persistance et tests
+
+`Game.toJSON()` / `Game.fromJSON()` et l’état multijoueur transportent `itemAcquisitionState` (quotas, achats, commandes, récompenses et visites). Les anciens instantanés sans ce champ démarrent avec un état vide. La projection réseau masque les récompenses et visites des autres joueurs.
+
+Tests dédiés : `node --test tests/hero-items.test.js`. Le catalogue et les règles d’acquisition ne dépendent ni du DOM ni du GPS.
+</pre></details><details><summary>Affichage de la progression — texte conservé pour cette version</summary><pre class="archived-source"># Affichage de la progression du héros
+
+Les gains d’XP et les passages de niveau sont affichés par la file d’animations des récompenses. L’interface compare l’expérience totale et le niveau des états officiels successifs du héros : elle n’accorde aucune récompense et ne calcule aucun niveau.
+
+Le premier état reçu sert de référence. Les rafraîchissements identiques ne répètent pas les annonces ; une baisse d’expérience devient la nouvelle référence. Une réinitialisation ou un changement de héros efface cette référence et les animations en attente. Plusieurs gains entre deux affichages sont regroupés en une annonce.
+
+Les messages contextuels de marche et de quête restent présents, mais leur XP est annoncé par cet affichage commun. Le niveau disponible et le choix d’amélioration restent distincts du niveau effectivement atteint. Les règles du moteur et la validation serveur sont inchangées, en GPS comme en simulation.
+</pre></details><details><summary>Voyage astral du Mage — texte conservé pour cette version</summary><pre class="archived-source"># Voyage astral du Mage
+
+Le pouvoir est disponible dans les deux modes de carte, avec les mêmes commandes serveur.
+
+## Activation et ciblage
+
+L’activation affiche un cercle violet vif centré sur la position officielle du Mage et une projection translucide au-dessus de son pion. Le joueur glisse cette projection sur un lieu connu, un héros visible ou un groupe autonome détecté. Aucun lieu n’est choisi automatiquement. Le héros réel ne se déplace pas et ne gagne aucune XP de marche.
+
+Le rayon est celui du grade : capitaine 15, banneret 25, commandant 40, seigneur 60, maréchal 90. Il est exprimé en mètres en GPS et en unités de carte fictive en simulation. Le centre de la cible doit être dans le cercle ; le serveur recalcule cette distance à partir des positions officielles. Les cibles inconnues ou non détectées restent inaccessibles.
+
+## Fin et recharge
+
+Le pouvoir dure 10 secondes à compter de l’activation réussie, ciblage compris. La sélection ouvre la fiche habituelle de la cible ; elle ne consomme pas encore le pouvoir. Une action réussie sur cette cible le consomme immédiatement. Une action refusée conserve le temps restant. L’expiration retire le cercle et la projection ; elle supprime également la portée astrale des validations serveur. La recharge de 10 minutes commence à l’activation et persiste dans les sauvegardes.
+
+Les règles habituelles de propriété, de ressources, d’alliance et de PvP restent applicables. Une conversation ou un échange accepté conserve sa propre session serveur après la disparition de la projection, dans la portée autorisée lors de la demande.
+
+## Architecture
+
+`HeroClassFeatureService` porte la durée et la recharge ; `Game` valide l’activation et les cibles ; `astral-interaction.js` vérifie la portée ciblée et la consommation après commande. `AstralTravelRenderer` affiche l’effet et émet le glissement. Les interactions de quête utilisent aussi la présence et la portée validées par le serveur ; leurs règles de progression restent inchangées. Le navigateur n’applique aucun déplacement ou gain au héros.
+</pre></details></main></body></html>

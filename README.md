@@ -2,6 +2,15 @@
 
 Prototype d'un jeu RPG/stratégie GPS jouable dans le monde réel.
 
+## Wiki du jeu
+
+Le [wiki HTML](wiki/index.html) présente les interactions et les catalogues des
+classes et unités. Il est publié avec le jeu sur GitHub Pages, à l’adresse
+`<URL GitHub Pages du projet>/wiki/`.
+
+Exécuter `npm run wiki:build` après une modification du guide ou des catalogues.
+Voir [la procédure de mise à jour](docs/wiki-maintenance.md).
+
 ## Structure
 
 - `app/` : interface web et adaptateurs navigateur.

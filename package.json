@@ -6,6 +6,7 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "wiki:build": "node scripts/build-wiki.mjs",
     "start": "node server/server.js",
     "server": "node server/server.js",
     "deploy": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy.ps1",

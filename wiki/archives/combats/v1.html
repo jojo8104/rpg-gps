@@ -1,0 +1,208 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Combats — version 1</title><link rel="stylesheet" href="../../wiki.css"></head><body><header><p class="eyebrow">Archive du wiki · Version 1</p><h1>Combats</h1><p>2026-10-06 · Version initiale du wiki</p><a href="../../index.html#combats">Lire l’article actuel</a></header><main class="archive-content"><h2>Combats</h2><p>Les nouveaux combats utilisent un plateau tactique. Les anciennes batailles sauvegardées peuvent conserver le système de duels.</p><p>Préparez les positions de votre armée, puis programmez les ordres de vos cartes. Le commandement du héros détermine le budget d’ordres ; l’autorité limite la composition de l’armée.</p><p>Les déplacements, attaques, défenses, ralliements et charges sont résolus par le serveur. Le terrain, les capacités et l’état des soldats influencent le résultat. Consultez le rapport après la bataille.</p><p><a href="../../../docs/battle-tactics.md">Règles du combat tactique (document de règles)</a></p><p><a href="../../../docs/tactical-bonuses.md">Bonus tactiques (document de règles)</a></p><p><a href="../../../docs/tactical-terrain-effects.md">Effets du terrain (document de règles)</a></p><p><a href="../../../docs/battle-duel-rules.md">Anciennes batailles : duels (document de règles)</a></p><details><summary>Règles du combat tactique — texte conservé pour cette version</summary><pre class="archived-source"># Prototype de combat tactique
+
+Les nouveaux combats créés par le serveur de l&#39;app utilisent le plateau. Les
+batailles sauvegardées avant cette évolution continuent avec les duels existants.
+Le mode GPS et la simulation utilisent le même moteur et les mêmes commandes.
+
+## Essai dans l&#39;app
+
+1. Démarrer le serveur (`npm start`) puis ouvrir `/app/`.
+2. Créer une partie « Test local ».
+3. Dans **Armée**, ouvrir une troupe et choisir Réserve, Gauche, Centre ou Droite.
+4. Sur la carte, ouvrir **Menu → Terrain → Déclencher un combat ici**.
+5. Sélectionner une troupe puis une case accessible ; sélectionner à nouveau la
+   même troupe pour Défense, Ralliement ou Charge.
+6. Ouvrir les cartes de réserve par la poignée du bas ou un glissement vers le haut.
+   Choisir la carte centrale, fermer l&#39;éventail si nécessaire, puis toucher une case
+   libre de la ligne de départ.
+7. Dans **Ordres programmés**, changer les priorités ou annuler des ordres, puis
+   valider. **Lire les étapes** explique la dernière résolution.
+
+## Règles de cette première version
+
+- Plateau de 3 colonnes et 5 rangées, orienté avec son propre camp en bas.
+- Trois positions de départ pour les troupes, persistantes et sans malus de veille.
+  Les unités restantes et le héros sont en réserve. Les commandants des camps
+  sont attaquables à portée derrière leur camp lorsqu&#39;ils sont en réserve ; une fois
+  déployés, ils ne sont attaquables que sur leur case.
+- Cinq cartes déployées au maximum, héros compris.
+- Budget d&#39;ordres : Commandement final du héros, arrondi à l&#39;entier inférieur,
+  avec un minimum de 2 et un maximum de 5. L&#39;Autorité continue de limiter l&#39;armée.
+- Un ordre par carte par tour. Déployer, déplacer, attaquer, rallier, défendre ou
+  charger coûte un ordre. Une carte sans ordre se défend sur place.
+- Déplacement orthogonal d&#39;une case. La cavalerie peut charger de deux cases
+  en ligne droite ; aucune unité ne peut être traversée.
+- Portée d&#39;attaque en distance orthogonale, issue du type d&#39;unité. Le héros a
+  une portée de 1. Les archers tirent sans déplacement ni riposte gratuite à distance.
+- Un déploiement utilise une case libre de sa propre rangée de départ.
+- Chaque priorité exécute les ordres des deux camps simultanément. Les mouvements
+  précèdent les attaques de cette priorité. Les dégâts sont calculés avant d&#39;être
+  appliqués ensemble. Une unité neutralisée perd son ordre des priorités suivantes.
+- Deux ennemis visant la même case ou se croisant sont bloqués et s&#39;affrontent.
+  Entrer sur une case ennemie provoque également un affrontement. Un passage allié
+  bloqué bloque les mouvements qui en dépendent. Pas de choix aléatoire de priorité.
+- Une attaque dont la cible est sortie de portée échoue sans nouvelle cible.
+- Défense consacre la vitesse à la défense ; Charge à l&#39;attaque de sa rencontre.
+  Ralliement rend 2 points de moral à la troupe, jusqu&#39;à 10, sans diminuer un moral
+  déjà supérieur à 10. Les PV individuels, blessures, morts et bonus d&#39;embuscade
+  utilisent les modules de combat existants.
+- Terrain et météo fixes durant la bataille. Pas de règle aléatoire ni récompense
+  intermédiaire dans ce prototype ; les conséquences finales restent officielles.
+- Un camp commence avec 20 points de cohésion. Chaque ennemi restant dans sa rangée
+  de départ retire 1 point en fin de tour, avec un maximum de 2 par tour.
+- Victoire quand le commandant tombe ou quand la cohésion du camp atteint zéro.
+  Fuir concède la victoire en conservant les blessures déjà subies.
+- Limite de 25 tours pour éviter les blocages : comparaison de la cohésion restante
+  plus 20 fois la proportion de PV du commandant. Égalité possible.
+- 30 secondes pour la première programmation, puis 34 secondes par tour
+  (4 de lecture + 30 de programmation). Aucun délai imposé après validation si
+  l&#39;adversaire a déjà validé. À l&#39;échéance, le serveur utilise le dernier brouillon
+  reçu, ou fait tenir les positions s&#39;il n&#39;y en a pas.
+
+## Autorité et confidentialité
+
+La préparation est validée par `setArmyFormation` ; les ordres utilisent les
+commandes de combat existantes avec un numéro de tour obligatoire. Le serveur
+calcule aussi les cases/cibles autorisées présentées par la vue. Les réserves et
+les ordres adverses restent secrets ; seules les cartes déployées sont visibles.
+Le navigateur conserve uniquement ses brouillons et ne calcule aucun dégât,
+déplacement officiel ni gain de secours.
+</pre></details><details><summary>Bonus tactiques — texte conservé pour cette version</summary><pre class="archived-source"># Bonus centraux — essai
+
+Le serveur crée un bonus dès le premier tour, puis tente une apparition aux tours 4, 7, 10, etc. Un bonus non capturé reste présent et empêche toute nouvelle apparition. La case est libre, dans les trois rangées centrales ; l’eau sans pont est exclue. Les apparitions sont reproductibles à partir de la graine du combat et du tour, sans tirage dans le navigateur.
+
+| Bonus | Effet |
+| --- | --- |
+| Attaque | Statistique d’attaque ×1,20 jusqu’à la fin du tour suivant. |
+| Défense | Défense totale ×1,20 jusqu’à la fin du tour suivant. |
+| Moral | +2 pour la troupe, maximum 10 ; pour un héros, +2 de cohésion du camp, maximum 20. |
+| XP | 10 XP pour le héros du camp qui capture, attribués à la fin du combat. |
+| Objet | Une épée de fer ajoutée au circuit de butin si le camp ayant capturé gagne. |
+
+XP et objets n’apparaissent que lorsqu’un seul camp contient un joueur humain. Les combats entre joueurs proposent uniquement attaque, défense et moral. Lors d’une apparition éligible, l’objet a 5 % de chances, l’XP 15 % ; le reste se répartit entre les effets temporaires et le moral. Une seule apparition d’objet par bataille.
+
+Une capture requiert un déplacement ou une prise de case officiels : l’unité doit être vivante, encore opérationnelle et rester sur la case à la fin de son ordre. Un passage pendant le harcèlement ne capture rien. Les effets identiques ne se cumulent pas ; une nouvelle capture renouvelle leur durée.
+
+Le ramassage figure dans les étapes de résolution, avec une indication sur la carte. Les effets actifs sont visibles lorsqu’on sélectionne l’unité. Les récompenses permanentes passent par le traitement serveur de fin de combat, protégé contre une seconde attribution.
+</pre></details><details><summary>Effets du terrain — texte conservé pour cette version</summary><pre class="archived-source"># Effets tactiques — première version ajustable
+
+Règles exécutées sur le serveur. Les pourcentages modifient les statistiques avant le calcul des dégâts ; ils ne promettent pas une variation identique des dégâts finaux. Les effets de terrain et de structure se multiplient. La météo et les techniques existantes restent appliquées. Les anciennes cartes dont `terrainEffectsEnabled` est faux conservent leur comportement antérieur.
+
+| Terrain / structure | Effet appliqué |
+| --- | --- |
+| Plaine | Aucun modificateur ; charges et harcèlement autorisés. |
+| Forêt | Défense ×1,25 ; attaque de la cavalerie située en forêt ×0,75 ; vitesse pendant le déplacement ×0,75 ; déplacements d’une case ; charge et harcèlement interdits. |
+| Colline | Défense ×1,15 ; attaque des archers situés sur la colline ×1,15 ; vitesse pendant le déplacement ×0,75 ; déplacements d’une case ; charge et harcèlement interdits. |
+| Rochers | Défense ×1,30 ; attaque de la cavalerie située sur les rochers ×0,70 ; vitesse pendant le déplacement ×0,75 ; déplacements d’une case ; charge et harcèlement interdits. |
+| Eau | Franchissable ; défense totale (technique incluse) ×0,25, soit −75 %. |
+| Pont | Permet de franchir l’eau sans le malus défensif de l’eau ; ne permet pas un trajet de charge ou de harcèlement. |
+| Tour | Défense ×1,20 ; portée des archers +1 ; charge et harcèlement interdits. |
+| Barricade | Défense ×1,25 ; charge et harcèlement interdits. |
+| Village | Défense ×1,10 ; charge et harcèlement autorisés si le terrain est une plaine. |
+
+Les cartes sont générées avec ou sans rivière (50 % chacune), avec départs libres et pont central lorsqu’il y a une rivière.
+
+| Type d’unité | Règle appliquée |
+| --- | --- |
+| Infanterie / héros | Déplacement d’une case orthogonale ; une victoire de mêlée permet d’occuper la case du défenseur neutralisé. |
+| Lanciers | Défense ×1,50 contre les cavaleries, cumulable avec le terrain. |
+| Mur de lances (lanciers) | Défense ×2 au total contre la cavalerie (remplace ×1,50), dégâts finaux ×1,50 contre elle et bonus de technique défensive égal à la vitesse. Riposte automatique à une attaque de cavalerie au contact. Immobilisation après activation jusqu’à la fin du tour : aucune prise de case, même après une victoire. |
+| Infanterie lourde | Défense ×1,50 contre les archers, y compris montés. Entrée dans l’eau interdite, même après une victoire ; passage sur un pont autorisé. |
+| Épéistes | Déplacements d’une case dans les huit directions. Attaque ×1,25 contre une cible en village, barricade ou tour. |
+| Archers | Portée de la fiche ; restent en place après destruction de leur cible. |
+| Cavaleries | Déplacement d’une case dans les huit directions ; charge rectiligne de deux cases maximum sur terrain plat, sans sauter une unité. |
+| Cavalerie légère | Charge : attaque ×1,15 ; harcèlement : aller de deux cases maximum sur plaine, mêlée avec riposte, puis retour si elle survit. |
+| Cavalerie lourde | Charge : attaque ×1,25 ; aucun harcèlement. |
+| Archers montés | Harcèlement : aller de deux cases maximum sur plaine, tir à la portée de leur fiche en restant à deux cases minimum de la cible, puis retour ; aucune riposte de mêlée automatique. |
+
+Le bonus de charge s’ajoute à la technique de charge existante. Le harcèlement consomme un seul ordre, son trajet est calculé et revérifié par le serveur et sa case de départ reste réservée pendant l’excursion. Si le trajet ou la cible devient inaccessible, l’action est annulée. Les archers montés restent soumis aux tirs adverses et aux autres attaques programmées.
+
+Une case alliée n’est accessible que si son occupant a un ordre MOVE ou CHARGE exécuté plus tôt. Si cet ordre est bloqué, le mouvement suivant est annulé à son tour, même si une contre-attaque libère ensuite la case.
+
+La prise de case concerne un attaquant de mêlée survivant adjacent, hors harcèlement. En cas de plusieurs prétendants simultanés à la même case, personne n’avance. Une unité mise en déroute ou rendue inapte libère également sa case.
+
+La présentation rejoue les positions officielles : aller, projectiles / impacts et dégâts, puis retours de harcèlement et prises de case. Elle ne recalcule pas les combats.
+
+La réduction de vitesse en forêt, sur colline et sur rochers est provisoirement de 25 %. Elle affecte les bonus de technique uniquement à l’étape où l’unité entre sur cette case, sans modifier sa statistique permanente ni la priorité de son ordre. Une unité déjà installée, y compris au sommet d’une colline ou sur des rochers, utilise toute sa vitesse dès l’étape suivante. Elle ne change pas la durée des animations.
+
+Le mur de lances ne protège qu’après son numéro d’ordre ; ses effets expirent à la fin du tour. La riposte ne vise pas un tir à distance. Les valeurs des nouvelles spécialités sont provisoires et ajustables.
+
+## Destination contestée
+
+À priorité égale, deux déplacements adverses valides vers la même case libre provoquent un échange simultané sur le terrain de destination. Les effets du terrain, les spécialités et le ralentissement de déplacement s’appliquent aux deux combattants. Un seul survivant opérationnel occupe la case, y compris si son unité est un archer puisqu’il avait un ordre de déplacement. Deux survivants restent à leurs positions de départ ; deux unités neutralisées laissent la case vide. Le bonus n’est capturé qu’après l’occupation effective. Une charge bloquée avant la destination ne la conteste pas. Les échanges de positions adverses restent traités comme des engagements distincts.
+</pre></details><details><summary>Anciennes batailles : duels — texte conservé pour cette version</summary><pre class="archived-source"># Combat par duels : PV et passes
+
+Un choix de cartes déclenche au plus trois passes automatiques simultanées.
+Les attaques d&#39;une passe utilisent les effectifs et le moral au début de cette
+passe. Les conséquences sont appliquées avant la suivante. Si un héros tombe
+ou qu&#39;un camp ayant joué des cartes n&#39;a plus de carte engagée apte, l&#39;échange
+s&#39;arrête, sans reporter les attaques restantes sur son héros. Passer volontairement
+expose toujours le héros. La règle spéciale existante « Duel à mort » prolonge
+les passes jusqu&#39;à neutralisation, avec une limite de 200 passes.
+
+## Calcul
+
+Le budget est la **vitesse effective entière**, bonus du commandant compris.
+
+- Normale : moitié en attaque, moitié en défense.
+- Défense : tout en défense.
+- Charge de cavalerie : tout en attaque à la première passe normale, puis Normale.
+- Mur de lances : même répartition que Défense pour les lanciers.
+
+« Techniques sans effet » impose Normale aux deux camps.
+
+Pour une troupe :
+
+```
+puissance = (attaque + bonus de récompense + bonus de vitesse offensif)
+            × effectif apte × (0,65 + moral / 20)
+dégâts = max(1, plancher(2 × puissance / (défense effective adverse + 5)))
+```
+
+Les statistiques des troupes incluent déjà les bonus du commandant et du lieu.
+Les modificateurs de terrain, météo et défense du camp restent appliqués.
+Un héros n&#39;a ni facteur d&#39;effectif ni facteur de moral. Contre un héros, le
+dénominateur utilise +3 au lieu de +5 ; le bonus existant ×3 entre héros reste actif.
+
+## Volée d&#39;ouverture
+
+Avant la passe 1, les troupes de portée supérieure à 1 tirent gratuitement.
+Les troupes de mêlée ne ripostent pas ; deux tireurs frappent simultanément.
+Pendant cette volée, les tireurs reçoivent deux fois leur vitesse en attaque,
+sans bonus défensif de vitesse. Les dégâts sont multipliés par
+`vitesse du tireur / vitesse de la cible`, **sans plafond**, avant l&#39;arrondi.
+Les vitesses absentes ou nulles utilisent un minimum technique de 0,1 pour
+éviter une division par zéro. Les interdictions de tir s&#39;appliquent à la volée.
+
+## PV, blessures et moral
+
+Chaque soldat conserve ses PV. Au-dessus du seuil de son type, il combat.
+Entre 1 PV et le seuil inclus, il est blessé hors combat ; à zéro, il est mort.
+Chaque attaque est un paquet de PV, distribué par rotation des cibles avec
+report des dégâts excédentaires sur les soldats suivants.
+Un dernier soldat encore apte reste jouable.
+
+```
+perte de moral = plafond(6 × nouveaux soldats hors combat ou morts
+                         / effectif apte avant la passe)
+```
+
+Seules de nouvelles incapacités diminuent le moral. À zéro de moral, la troupe
+déroute. Les blessures, PV résiduels et morts sont sauvegardés et transférés au
+monde à la fin de la bataille, y compris en cas de fuite.
+
+## Embuscade
+
+Les multiplicateurs d’embuscade s’appliquent aux statistiques de base des troupes
+pendant les passes du premier duel, avant les bonus de technique. Ils expirent au
+duel suivant et ne modifient pas les statistiques persistantes ni celles des héros.
+
+## Rythme et validation
+
+La première décision dispose de 15 secondes. Les suivantes disposent de
+19 secondes : 4 secondes de lecture du résultat puis 15 secondes de choix.
+Le bouton Continuer permet de passer la lecture sans changer l&#39;échéance commune.
+La validation transmet le choix final et le verrouille en une commande serveur.
+Les commandes du navigateur portent le numéro de manche ; un choix périmé est
+refusé. Les brouillons déjà reçus restent utilisables à l&#39;échéance.
+</pre></details></main></body></html>

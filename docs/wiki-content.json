@@ -1,0 +1,198 @@
+{
+  "title": "Le guide de RPG GPS",
+  "intro": "Explorez le monde réel, développez votre héros et dirigez votre armée. Ce wiki décrit le prototype actuel ; les règles peuvent évoluer avec le jeu.",
+  "sections": [
+    {
+      "id": "premiers-pas",
+      "title": "Premiers pas",
+      "paragraphs": [
+        "Après l’accueil, choisissez Jeu rapide, Planifier une partie, Rejoindre une partie ou Partie test, puis votre joueur. Jeu rapide conserve les réglages par défaut. Planifier une partie ouvre d’abord la grande carte de playarea, puis les fiches du scénario, des quêtes et de leurs lieux. La validation du terrain reste visible sans défiler. Le parcours détaillé concerne uniquement le mode IRL.",
+        "Les nouvelles parties sont configurées par défaut pour 1 joueur en GPS réel. Validez la zone GPS avant de vous déclarer prêt ; augmentez la capacité dans les réglages pour accueillir d’autres joueurs. Le duel reste à deux joueurs. Partie test utilise explicitement la simulation et les sauvegardes conservent leurs paramètres. En mode GPS, le navigateur transmet vos mesures de position. En test sur carte fictive, vous déplacez le héros sur la carte. Les interactions et les actions passent dans les deux cas par les mêmes commandes du serveur.",
+        "Le serveur valide la position, les actions et leurs conséquences. Une page hébergée sur GitHub Pages permet de consulter ce guide ; une partie nécessite aussi un backend accessible.",
+        "En jeu, le menu conserve le code de partie et regroupe les outils Cheat, Debug, Heatmap et Brouillard de guerre sous Développement. L’organisateur peut Sauvegarder et quitter ou Quitter sans sauvegarde en détruisant la partie, après confirmation. Ces deux actions ferment la session pour tous les joueurs. La destruction invalide le code et les sessions sans créer de sauvegarde ; les anciennes sauvegardes restent disponibles. Le serveur contrôle cette permission.",
+        "Les boutons des pouvoirs de carte sont affichés en haut de l’écran, en portrait comme en paysage, pour laisser libre le bas où s’ouvrent les lieux. En portrait, le suivi de quête est placé sous les pouvoirs. Ce changement de présentation ne modifie ni les effets, ni les recharges, ni la validation des pouvoirs par le serveur.",
+        "La préparation détaillée permet de retirer les offres de quêtes indépendantes ; une quête définie comme linéaire et les dépendances nécessaires restent obligatoires. Le ravitaillement et Les prospecteurs perdus utilisent le moteur de quêtes actuel. L’ancien scénario à phases reste désactivé. Les lieux partagés gardent une configuration unique et proposent seulement les visibilités et placements permis par leur définition.",
+        "L’organisateur choisit joueur avancé (avec héros), absent, maître du jeu ou PNJ suprême (sans héros, avec un personnage de scénario à incarner). Les rôles sans héros exigent un autre joueur. La console des organisateurs présents permet actuellement d’installer ou déplacer les QR ; les autres outils narratifs restent prévus.",
+        "Le placement QR produit un document HTML autonome prêt à imprimer ou enregistrer en PDF : plusieurs fiches A4 avec code, nom du lieu, date, RPG GPS, illustration, notice et repères de découpe. Découpez et protégez chaque fiche contre la pluie, posez-la puis restez à côté pour enregistrer sa position au smartphone. Le serveur refuse les mesures de plus de 50 m de précision, les positions hors zone et les chevauchements de lieux. Récupérez les fiches après la partie.",
+        "En jeu, Scanner un QR ouvre la fiche du lieu après validation serveur : bon code de partie, lieu accessible, position officielle de moins de 30 secondes et proximité dans le même rayon que l’interaction du lieu. Le scan découvre le lieu sans attribuer de récompense. Les QR restent localisés dans ce parcours IRL ; le mode intérieur et les outils narratifs supplémentaires sont distincts et restent à développer."
+      ],
+      "references": [
+        {
+          "label": "Menu et démarrage",
+          "file": "startup-menu.md"
+        },
+        {
+          "label": "Préparation détaillée IRL et QR codes",
+          "file": "party-preparation.md"
+        }
+      ]
+    },
+    {
+      "id": "heros-armee",
+      "title": "Héros et armée",
+      "paragraphs": [
+        "Dans une nouvelle partie, les héros joueurs commencent au niveau 1 avec 0 XP, en GPS comme en simulation. Le lancement ne donne plus de cavaliers d’essai ni de niveaux supplémentaires pour les commander. Les forces de départ restent celles de la classe et du scénario. Une reprise de sauvegarde conserve la progression acquise ; les personnages non joueurs du scénario peuvent avoir un niveau supérieur.",
+        "Votre classe définit vos caractéristiques de départ et vos capacités. Consultez les fiches ci-dessous pour comparer les classes.",
+        "Les unités possédées et les armées sont des états distincts. Le recrutement exige un héros présent dans un lieu recruteur, les ressources nécessaires et une capacité d’armée suffisante.",
+        "Les équipements apportent leurs bonus au héros. Les bagages et les emplacements portés sont distincts ; le serveur vérifie les compatibilités avant chaque changement.",
+        "Les gains d’XP du héros et ses passages de niveau s’affichent à l’écran à réception de son état officiel. Plusieurs gains reçus ensemble sont regroupés. Une connexion ou un changement de héros ne rejoue pas les gains précédents. Le message de marche affiche « Distance parcourue », le palier en mètres et, le cas échéant, le bonus kilométrique ; il ne répète pas l’annonce d’XP issue des états officiels. Les messages de quête conservent aussi leur contexte. La correction du test de cet affichage ne change pas les règles de progression ni de récompense.",
+        "Le voyage astral du Mage affiche un cercle violet vif et un double translucide au-dessus du héros. Maintenez le doigt ou le bouton gauche sur la grande poignée « Glisser » du fantôme, puis glissez-le vers un lieu connu, un héros visible ou un groupe autonome détecté dans le cercle. Le pouvoir dure au maximum 10 secondes et se termine après une interaction réussie sur la cible ; un refus ne le consomme pas. Le serveur valide la cible et la portée, sans déplacer le héros réel. La recharge reste de 10 minutes.",
+        "La carte affiche un sprite JRPG propre à la classe : aventurier, mage ou éclaireuse. La marche possède huit orientations relatives à la caméra ; les trois vues ouest sont les miroirs des vues est. Les accessoires peuvent changer de côté visuellement, sans modifier les équipements, les capacités ou les déplacements validés par le serveur.",
+        "Un étendard derrière le héros indique la taille de son armée connue : fanion pour 1 à 9 soldats, bannière verticale inspirée du sashimono pour 10 à 29, longue oriflamme verticale à deux pointes dès 30. Sans armée, aucun étendard. Pour les autres joueurs, il reste masqué tant que les effectifs ne sont pas connus au niveau d’information 3. Les couleurs reprennent celles des relations sur la carte ; ces seuils et cette animation ne changent aucune règle de jeu.",
+        "Les balises de vigie de l’Éclaireur prennent l’apparence d’un petit guetteur immobile et camouflé dans les herbes, avec une capuche et un masque de tissu. Une seule vue de face reste droite lors des rotations de carte. Le sprite mesure environ 40 pixels de haut à l’échelle normale, contre 64 pour un héros. Cette apparence ne modifie ni surveillance, ni détection, ni visibilité validées par le serveur.",
+        "Le glissement du fantôme astral est limité au cercle affiché : il s’arrête au bord même si le doigt ou la souris continue au-delà. Les héros déjà visibles, locaux ou distants, sont dessinés au-dessus des lieux, groupes et décors ; cette priorité d’affichage ne change pas les règles de visibilité ni de jeu."
+      ],
+      "references": [
+        {
+          "label": "Équipement et obtention des objets",
+          "file": "hero-items.md"
+        },
+        {
+          "label": "Affichage de la progression",
+          "file": "hero-progression-display.md"
+        },
+        {
+          "label": "Voyage astral du Mage",
+          "file": "mage-astral-travel.md"
+        },
+        {
+          "label": "Apparence du héros sur la carte",
+          "file": "hero-map-sprites.md"
+        },
+        {
+          "label": "Étendards et taille des armées",
+          "file": "army-map-banners.md"
+        },
+        {
+          "label": "Apparence de la vigie",
+          "file": "watch-lookout-sprite.md"
+        },
+        {
+          "label": "Calques et sprites des héros",
+          "file": "hero-sprite-art.md"
+        }
+      ]
+    },
+    {
+      "id": "lieux",
+      "title": "Lieux, économie et territoires",
+      "paragraphs": [
+        "Les lieux donnent accès à des interactions selon leur type, leurs bâtiments et vos permissions : recrutement, commerce, stockage, garnison ou missions.",
+        "Les tests de carte et de réseau vérifient la visibilité des lieux placés, le masquage des emplacements en attente et leur retrait avec leurs liens. Les fixtures de dialogue utilisent des positions et une zone cohérentes avec leur mode ; les tests à deux clients configurent explicitement deux places. Cette maintenance des tests ne change aucune règle de visibilité, de placement ou d’interaction.",
+        "La fiche du scénario distingue le point de départ, le monde connu, les lieux durables à découvrir et les éléments éphémères de quête. La capitale est placée, durable et visible dès le départ. Les lieux du monde connu sont visibles dès placement. Un lieu durable inconnu peut déjà être placé sans être affiché : la proximité du héros ou une révélation officielle l’ajoute à la carte du joueur qui le découvre, et il y reste. Les éléments de quête s’activent lors de leur étape puis sont retirés pour les participants concernés après l’interaction prévue ou à la fin de la quête. Ces règles sont indépendantes des coordonnées et des permissions d’interaction.",
+        "Les améliorations débloquent des services et des bonus. Les stocks, la production et les paiements sont calculés par le serveur.",
+        "Dans le scénario Chaos, les lieux contrôlés contribuent à l’influence territoriale. Les frontières affichées proviennent de l’état officiel du serveur.",
+        "Le placement de l’économie de la capitale ignore les positions candidates hors des limites de coordonnées et poursuit sa recherche dans la zone autorisée. Cette correction du démarrage en simulation ne change pas les ressources, les coûts ni les rythmes économiques. Le contrat de génération reste validé par le serveur sur le monde complet ; il est retiré de la vue partielle du joueur pour permettre sa lecture malgré les emplacements encore en attente de création.",
+        "Les frontières sont affichées avec des angles arrondis, une ligne en surbrillance et un dégradé coloré qui s’efface vers l’intérieur du territoire. Le centre de la zone reste transparent. Les cercles d’interaction des lieux sont plus opaques pour mieux distinguer leur portée. Ces effets sont uniquement visuels : ils ne changent ni les frontières calculées par le serveur, ni les distances d’interaction, ni les délais de conquête.",
+        "Les convois autonomes sont représentés par une caravane animée : un âne tire une charrette chargée et son marchand. Les huit vues suivent la rotation de la caméra. Ce visuel générique ne révèle pas la cargaison exacte et ne modifie ni commerce, ni déplacement, ni détection. La caravane ne porte plus la petite ombre centrale des personnages, qui donnait une impression de lévitation ; cette correction est uniquement visuelle.",
+        "Les éclaireurs autonomes apparaissent seuls, avec une capuche verte et un arc. Les groupes de la faction des bandits utilisent trois brigands animés, sans représenter leur effectif réel. Huit orientations suivent la caméra, avec les vues ouest par miroir. Les déserteurs conservent leur marqueur distinct. Ces dessins ne changent ni détection, ni mouvement, ni combat.",
+        "Les lieux permanents respectent une distance minimale entre leurs centres : somme des deux rayons normaux d’interaction plus 1 mètre en GPS, ou une unité sur la carte fictive. Deux lieux de rayon 25 m exigent donc au moins 51 m. Le serveur refuse un placement trop proche ; le placement automatique et le réseau économique de la capitale suivent la même règle sans réduire le seuil lorsque le terrain est trop petit. Les bonus personnels du héros ne changent pas cet écart. Les marqueurs de quête ou d’événement, les convois, les lieux détruits et les emplacements en attente ne bloquent pas le placement. Les anciennes sauvegardes ne sont pas déplacées automatiquement.",
+        "Le placement peut être aléatoire, fixé en configuration, validé après une distance parcourue ou calculé depuis un point par distance et direction. Le moteur distingue ces stratégies de la visibilité et du cycle de vie ; elles ne sont pas encore toutes proposées dans le formulaire. L’exploration préalable reste à implémenter en deux temps : confirmer une zone accessible sans lui attribuer de lieu, puis l’allouer plus tard à un lieu après une nouvelle validation de l’espacement. Les lieux construits par les joueurs sont hors de ce contrat."
+      ],
+      "references": [
+        {
+          "label": "Bâtiments et améliorations",
+          "file": "location-improvements.md"
+        },
+        {
+          "label": "Taxes des lieux",
+          "file": "location-taxes.md"
+        },
+        {
+          "label": "Frontières et conquête",
+          "file": "territories.md"
+        },
+        {
+          "label": "Capitale royale",
+          "file": "capital-ai.md"
+        },
+        {
+          "label": "Apparence des caravanes",
+          "file": "caravan-map-sprites.md"
+        },
+        {
+          "label": "Éclaireurs et brigands sur la carte",
+          "file": "autonomous-group-map-sprites.md"
+        },
+        {
+          "label": "Carte et catégories de lieux du scénario",
+          "file": "scenario-map-definition.md"
+        }
+      ]
+    },
+    {
+      "id": "quetes",
+      "title": "Quêtes et coopération",
+      "paragraphs": [
+        "Le test du briefing historique du maréchal vérifie le rôle mondial actuel de Valgrise : ce lieu durable et connu est visible dans la projection et le journal indépendamment de l’acceptation de la quête. Les marqueurs configurés avec une visibilité de quête attendent toujours leur déclencheur. Cette correction du test ne change aucune règle ni récompense.",
+        "Le nouveau moteur à actions propose deux missions à la capitale : Le ravitaillement et Les prospecteurs perdus. Le serveur publie chaque mission uniquement si tous ses lieux existent. Accepter l’une ne masque pas l’autre. Les anciennes quêtes de scénario, de village et de taverne restent désactivées.",
+        "Les prospecteurs perdus se joue en solo : recevez l’ordre du maréchal, rejoignez Valgrise, interrogez Armand, examinez deux indices, fouillez le champ de bataille et récupérez le rapport. Les indices sont représentés par des traces de pas sur la carte ; ce visuel ne change pas leurs règles d’apparition ou d’examen. Une victoire officielle contre les forces de la mine, obtenue après le déblocage de cet objectif, permet de libérer et transporter le géologue. Présentez-le à Armand puis confiez-le aux intendants de la capitale et remettez le rapport au maréchal. La réussite donne une seule fois 50 XP et 25 pièces d’or.",
+        "Le camp de Valgrise est placé relativement à la capitale dès la préparation, au lieu d’apparaître après une distance de marche. Les lieux sont placés dès la préparation mais leur apparition est définie dans le scénario : le camp à l’acceptation, puis le premier indice après la discussion avec Armand, le deuxième après l’examen du premier, le champ de bataille après le deuxième et la mine après la fouille. Seuls les participants les voient ; la proximité ou la simple lecture du dialogue ne les révèle pas. La présence, les dialogues, les bagages, les transferts et les preuves de victoire sont validés par le serveur avec les mêmes actions en GPS et sur carte fictive. Les objectifs sont sauvegardés ; l’abandon ne donne aucune récompense et ne republie pas la mission au même héros.",
+        "Le ravitaillement conserve ses quatre collectes parallèles et sa livraison de vingt rations à Rochegarde. Les objets de quête sont réservés à leur instance ; le journal affiche le titre, les actions et le bilan de chaque mission à partir de la projection officielle.",
+        "À proximité d’un héros allié, vous pouvez demander une conversation ou un échange. Les deux joueurs doivent valider la même offre ; toute modification annule les validations. Le serveur vérifie puis applique les transferts ensemble.",
+        "La préparation inclut les marqueurs de quête, même avec des bâtiments placés manuellement. Les indices portant le rôle clue réservent leur espace même cachés : somme des rayons d’interaction plus 8 unités fictives ou 20 mètres GPS. Une position préférée trop proche est recalculée. Le serveur reconstruit les apparitions et disparitions depuis les instances officielles de quête ; un ancien état de visibilité du monde ne valide aucune action. Le premier indice apparaît après question-chief, le deuxième après inspect-first-trace ; chacun disparaît après son examen. Les objectifs, le combat et les récompenses ne changent pas.",
+        "Le champ appearance d’un lieu de scénario distingue placement et apparition : immédiate, à l’acceptation d’une quête ou après une action précise accomplie. Le serveur vérifie le déclencheur, conserve l’état d’apparition dans la sauvegarde et ne transmet pas les lieux ni leurs positions aux joueurs qui ne les ont pas débloqués. Sans ce champ, les lieux placés restent visibles selon la règle habituelle.",
+        "Les fiches de quête réutilisent les lieux du scénario et respectent leur placement, leur visibilité et leur cycle de vie. Les conditions locationPlaced et locationVisible permettent d’exiger séparément un emplacement confirmé ou un lieu visible pour le participant. Ravitaillement exige la capitale, le fort et les quatre villages placés avant acceptation. Le serveur refuse une interaction sur un emplacement non confirmé, un lieu encore inconnu ou un élément de quête retiré. Une quête de découverte peut cibler un lieu inconnu sans exiger sa visibilité au départ. Les créations libres de lieux par prerequisites restent à raccorder aux placements différés et à ce contrat ; l’exploration préalable reste prévue."
+      ],
+      "references": [
+        {
+          "label": "Moteur des quêtes à actions",
+          "file": "quest-definition.md"
+        },
+        {
+          "label": "Les prospecteurs perdus",
+          "file": "missing-prospectors.md"
+        }
+      ]
+    },
+    {
+      "id": "combats",
+      "title": "Combats",
+      "paragraphs": [
+        "Les nouveaux combats utilisent un plateau tactique. Les anciennes batailles sauvegardées peuvent conserver le système de duels.",
+        "Préparez les positions de votre armée, puis programmez les ordres de vos cartes. Le commandement du héros détermine le budget d’ordres ; l’autorité limite la composition de l’armée.",
+        "Les déplacements, attaques, défenses, ralliements et charges sont résolus par le serveur. Le terrain, les capacités et l’état des soldats influencent le résultat. Consultez le rapport après la bataille.",
+        "Prévu, non encore disponible : le combat à distance doit ouvrir la bataille sans déplacer le héros réel. Le fantôme astral du Mage combattra seul, infligera des dégâts physiques et réduira le moral adverse. Sa destruction terminera la projection sans blesser le Mage réel. En embuscade, seuls les cavaliers légers et archers montés spécialisés pourront se déployer ; les archers donneront accès à une Volée de flèches et le défenseur ne jouera pas le premier tour. Des sorts de carte pour le Mage et un Tir de précision pour l’Éclaireur sont envisagés. Aucune mana n’est prévue : les pouvoirs utiliseront un cooldown depuis la carte et un coût en Commandement dans une bataille normale, pris sur le budget du tour. Les effets précis, portées, durées de recharge, coûts chiffrés et articulation entre carte et bataille restent à définir ; les règles actuellement disponibles ne sont pas modifiées.",
+        "L’écran tactique privilégie la carte : sa hauteur reste stable lorsque les techniques ou la main s’ouvrent. La validation ✓ et le budget d’ordres sont en haut, séparés de la poignée des réserves ; valider sans ordre fait tenir les positions et passe le tour. Le bouton i ouvre une notice. Les panneaux de résolution et les textes des ordres sont remplacés par les numéros et flèches sur les cases. Les petits socles dégagent les sprites. Les PV perdus, nouveaux blessés et morts apparaissent au-dessus des unités, respectivement en blanc, orange et rouge, à partir des événements officiels du serveur. L’ancien libellé de terrain global est retiré pour éviter une contradiction avec les cases visibles ; la météo reste indiquée. Ce changement de présentation ne modifie pas les règles de combat ni de santé."
+      ],
+      "references": [
+        {
+          "label": "Règles du combat tactique",
+          "file": "battle-tactics.md"
+        },
+        {
+          "label": "Bonus tactiques",
+          "file": "tactical-bonuses.md"
+        },
+        {
+          "label": "Effets du terrain",
+          "file": "tactical-terrain-effects.md"
+        },
+        {
+          "label": "Anciennes batailles : duels",
+          "file": "battle-duel-rules.md"
+        },
+        {
+          "label": "Combat à distance — concept prévu",
+          "file": "ranged-combat.md"
+        }
+      ]
+    },
+    {
+      "id": "dashboard-monitoring",
+      "title": "Dashboard et suivi historique",
+      "paragraphs": [
+        "Le Dashboard administrateur affiche la carte et les informations des parties, avec un onglet par partie. Il enregistre sur disque un relevé compact du monde toutes les 4 secondes pendant les périodes où un joueur est connecté ; les 2 000 derniers relevés sont consultables, soit environ 2 h 13 min de jeu continu. Sans joueur, les relevés et la simulation sont arrêtés.",
+        "Les graphiques comparent la puissance de tous les héros et les totaux par équipe. Un sélecteur de héros affiche les effectifs par type, armée et garnisons côte à côte, autorité et marqueurs de victoire ou défaite. Un sélecteur de lieu affiche population, niveau et production par cycle.",
+        "Le score indicatif additionne attaque finale, défense finale et PV actuels du héros, puis les effectifs pondérés par qualité du type et mobilité pour les unités mobiles. Les garnisons sont comptées une seule fois, rattachées au premier héros du propriétaire par identifiant stable. Ces coefficients de supervision ne changent pas les règles ni les combats.",
+        "Les relevés sont des mesures compactes, pas des sauvegardes complètes restaurables. Le stockage tourne sur 11 segments de 200 lignes au maximum et expose les 2 000 derniers relevés. La heatmap conserve séparément les 2 000 dernières mesures de position de tous les joueurs. Aucun historique ancien n’est reconstitué."
+      ],
+      "references": [
+        {
+          "label": "Relevés, graphiques et formule de puissance",
+          "file": "dashboard-monitoring.md"
+        }
+      ]
+    }
+  ]
+}

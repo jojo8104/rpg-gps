@@ -1,0 +1,247 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lieux, économie et territoires — version 7</title><link rel="stylesheet" href="../../wiki.css"></head><body><header><p class="eyebrow">Archive du wiki · Version 7</p><h1>Lieux, économie et territoires</h1><p>2026-10-08 · Distance minimale entre lieux fondée sur les rayons d’interaction</p><a href="../../index.html#lieux">Lire l’article actuel</a></header><main class="archive-content"><h2>Lieux, économie et territoires</h2><p>Les lieux donnent accès à des interactions selon leur type, leurs bâtiments et vos permissions : recrutement, commerce, stockage, garnison ou missions.</p><p>Les améliorations débloquent des services et des bonus. Les stocks, la production et les paiements sont calculés par le serveur.</p><p>Dans le scénario Chaos, les lieux contrôlés contribuent à l’influence territoriale. Les frontières affichées proviennent de l’état officiel du serveur.</p><p>Le placement de l’économie de la capitale ignore les positions candidates hors des limites de coordonnées et poursuit sa recherche dans la zone autorisée. Cette correction du démarrage en simulation ne change pas les ressources, les coûts ni les rythmes économiques. Le contrat de génération reste validé par le serveur sur le monde complet ; il est retiré de la vue partielle du joueur pour permettre sa lecture malgré les lieux masqués, sans changer les règles de découverte.</p><p>Les frontières sont affichées avec des angles arrondis, une ligne en surbrillance et un dégradé coloré qui s’efface vers l’intérieur du territoire. Le centre de la zone reste transparent. Les cercles d’interaction des lieux sont plus opaques pour mieux distinguer leur portée. Ces effets sont uniquement visuels : ils ne changent ni les frontières calculées par le serveur, ni les distances d’interaction, ni les délais de conquête.</p><p>Les convois autonomes sont représentés par une caravane animée : un âne tire une charrette chargée et son marchand. Les huit vues suivent la rotation de la caméra. Ce visuel générique ne révèle pas la cargaison exacte et ne modifie ni commerce, ni déplacement, ni détection. La caravane ne porte plus la petite ombre centrale des personnages, qui donnait une impression de lévitation ; cette correction est uniquement visuelle.</p><p>Les éclaireurs autonomes apparaissent seuls, avec une capuche verte et un arc. Les groupes de la faction des bandits utilisent trois brigands animés, sans représenter leur effectif réel. Huit orientations suivent la caméra, avec les vues ouest par miroir. Les déserteurs conservent leur marqueur distinct. Ces dessins ne changent ni détection, ni mouvement, ni combat.</p><p>Les lieux permanents respectent une distance minimale entre leurs centres : somme des deux rayons normaux d’interaction plus 1 mètre en GPS, ou une unité sur la carte fictive. Deux lieux de rayon 25 m exigent donc au moins 51 m. Le serveur refuse un placement trop proche ; le placement automatique et le réseau économique de la capitale suivent la même règle sans réduire le seuil lorsque le terrain est trop petit. Les bonus personnels du héros ne changent pas cet écart. Les marqueurs de quête ou d’événement, les convois, les lieux détruits et les emplacements en attente ne bloquent pas le placement. Les anciennes sauvegardes ne sont pas déplacées automatiquement.</p><p><a href="../../../docs/location-improvements.md">Bâtiments et améliorations (document de règles)</a></p><p><a href="../../../docs/location-taxes.md">Taxes des lieux (document de règles)</a></p><p><a href="../../../docs/territories.md">Frontières et conquête (document de règles)</a></p><p><a href="../../../docs/capital-ai.md">Capitale royale (document de règles)</a></p><p><a href="../../../docs/caravan-map-sprites.md">Apparence des caravanes (document de règles)</a></p><p><a href="../../../docs/autonomous-group-map-sprites.md">Éclaireurs et brigands sur la carte (document de règles)</a></p><details><summary>Bâtiments et améliorations — texte conservé pour cette version</summary><pre class="archived-source"># Améliorations des lieux
+
+Les effets d’une infrastructure présente sont appliqués quel que soit le type du lieu. Les restrictions de construction existantes restent en place : le camp construit ses installations temporaires, puis débloque les bâtiments permanents en évoluant. Les bonus du niveau courant remplacent ceux des niveaux précédents.
+
+La capitale royale commence les nouvelles parties avec toutes les améliorations au niveau maximal. Les maisons remplacent les tentes et habitations, et les murailles remplacent les enceintes précédentes. Les sauvegardes existantes conservent leurs bâtiments et leurs destructions.
+
+## Effets et descriptions
+
+Les bâtiments requis pour les évolutions du camp disposent chacun d’un emplacement réservé : Comptoir de commerce, Tente de soins et Poste de guet. Ces trois emplacements s’ajoutent aux emplacements libres de développement (camp : 2/3/4, village : 4, ville : 6, capitale : 17, fort : 5), et restent réservés après évolution. Les bâtiments déjà présents dans les sauvegardes bénéficient automatiquement de cette séparation. Les restrictions de niveau restent applicables. Ces bâtiments comptent toujours pour les catégories de développement exigées lors des montées de niveau. Les habitations et enceintes conservent leurs règles distinctes.
+
+| Bâtiment                       | Effet                                                                                                                                                                                                                            |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tentes / habitations / maisons | Capacité de population : +4/8, +4/8/14 et +6/12/20. Ces trois branches se remplacent. Les bonus démographiques des habitations et maisons sont actifs dans tous les lieux.                                                       |
+| Ferme                          | +2/4/7 nourritures par cycle ; croissance +1/2/3 points par cycle.                                                                                                                                                               |
+| Palais                         | +10 places ; croissance +2 points par cycle.                                                                                                                                                                                     |
+| Brasserie                      | 1/2 bières par cycle ; croissance +0,5/1 point par cycle.                                                                                                                                                                        |
+| Relais de chasse               | +1/2 nourritures et production de 1/2 recrues archères par cycle avant modificateurs et limites.                                                                                                                                 |
+| Dépôt                          | +4/8/14 emplacements universels, dans la limite globale du stockage.                                                                                                                                                             |
+| Comptoir N1                    | Commerce et convois automatiques entre lieux possédés.                                                                                                                                                                           |
+| Comptoir N2                    | Jusqu’à trois ressources importées non produites localement ; deux lots par ressource ; achat au double du prix courant. Sélection et stocks renouvelés toutes les dix minutes. Les stocks ordinaires sont utilisés en priorité. |
+| Taverne N1/N2                  | Croissance +1/+2 points par cycle, moral du héros et de son armée +1/+2 avant bataille, PNJ et missions. N2 ajoute une place potentielle de PNJ.                                                                                 |
+| Tente N1/N2                    | Héros : 1/2 PV par cycle. Soins des soldats disponibles pour 1 or par blessé. N2 : +1 moral avant la prochaine bataille, sans cumul entre visites.                                                                               |
+| Chapelle N1/N2                 | Héros : 1/2 PV par cycle, cumulés avec la tente. Résurrection à 50/75 % des PV. Croissance +0,5/1 point par cycle.                                                                                                               |
+| Forge N1/N2                    | Armes, outils d’exploration à 2 or, trois fabrications par forge. N2 ouvre les recettes rares.                                                                                                                                   |
+| Armuriers N1/N2                | Armures, boucliers et casques, recrutement lourd et réserves d’infanterie. N2 : +1 aux bonus positifs d’attaque/défense des articles du rayon armurerie.                                                                         |
+| Écurie                         | +1/2 chevaux par cycle ; participe aux recrutements montés.                                                                                                                                                                      |
+| Champ de tir                   | Réserves d’archers, archers montés avec écurie, armes à distance dans le commerce.                                                                                                                                               |
+| Caserne                        | +1 attaque et défense au héros, une fois par lieu ; +1 emplacement de garnison. Conserve ses combinaisons et plafonds de recrutement, renforcés au N2.                                                                           |
+| École militaire                | Une formation par niveau, au maximum deux par héros et par lieu : +1 attaque, +1 défense et une aptitude admissible encore inconnue, s’il en reste.                                                                              |
+| Académie de magie              | Même nombre de formations pour les mages. Toute classe peut payer 50 or pour une divination d’une minute autour de l’académie.                                                                                                   |
+| Barricades                     | Défense +1/+2/+3.                                                                                                                                                                                                                |
+| Palissades                     | Défense +4/+5.                                                                                                                                                                                                                   |
+| Murs                           | Défense +5/+6 ; attaque +1/+2.                                                                                                                                                                                                   |
+| Murailles                      | Défense +7 ; attaque +3.                                                                                                                                                                                                         |
+| Tour                           | Attaque +2/+4, cumulée avec l’enceinte.                                                                                                                                                                                          |
+| Poste de prospection           | Requis pour toute expédition : voir ci-dessous.                                                                                                                                                                                  |
+| Poste de guet N1               | Visibilité autour du lieu : 250 m, ou 35 unités en simulation.                                                                                                                                                                   |
+| Poste de guet N2               | Ajoute un éclaireur autonome patrouillant jusqu’à 450 m, ou 60 unités en simulation, avec la même portée de détection autour de lui.                                                                                             |
+| Relais de messagers            | Groupes messagers pour les alertes d’attaque, les mouvements détectés par le guet, et les messages entre joueurs.                                                                                                                |
+| Atelier de chantier            | Supprimé du catalogue, des prérequis du fort et des infrastructures chargées depuis une sauvegarde.                                                                                                                              |
+
+## Prospection
+
+- Départ : exactement 5 nourritures, 5 habitants, 1 spécialiste et 1 outil d’exploration. Pas de bière ni de cheval obligatoire.
+- Bière facultative : 0/1/2 unités pour une portée ×1/×2/×4.
+- Chevaux facultatifs : 0 à 10 ; multiplicateur de vitesse `1 + chevaux / 5`, soit ×3 au maximum.
+- Les cinq habitants quittent temporairement la population du lieu. Le spécialiste et les habitants reviennent une seule fois à l’arrivée ; les provisions sont consommées.
+- La croissance du lieu est suspendue tant qu’une expédition emporte ses habitants, y compris en cas de suspension de la mission. Après destruction de l’expédition, les habitants sont perdus et la croissance reprend. Plusieurs expéditions sont possibles si les ressources et habitants sont disponibles.
+- Les compteurs et les missions survivent à la sauvegarde. Les valeurs invalides sont refusées avant tout prélèvement.
+
+## Formations et divination
+
+Les formations sont accordées lors des visites, avec présence du héros et accès au lieu requis. Les anciennes sauvegardes marquées « déjà formé » comptent comme une formation effectuée. Un niveau supérieur ouvre une formation supplémentaire, pas une boucle de formations illimitées.
+
+La divination payante couvre 450 m, ou 60 unités en simulation, pendant une minute. Elle ne débloque pas définitivement le pouvoir de classe et n’utilise pas sa recharge. Les 50 or sont prélevés seulement après validation de l’accès et de la présence.
+
+Les articles renforcés sont des variantes identifiables, sans mutation du catalogue de base : achat, équipement, retrait, transfert et sauvegarde conservent leurs caractéristiques.
+
+## Surveillance et courrier
+
+La visibilité du guet est utilisée par la carte et par la projection serveur. Un éclaireur utilise les mouvements, traces et interceptions des groupes autonomes. Il est retiré si le poste est détruit, perdu ou redescend sous le N2.
+
+Les alertes du guet portent sur une nouvelle détection ou un déplacement significatif (20 m, ou 3 unités en simulation), avec un intervalle minimal d’une minute par cible et par lieu. Une attaque produit un courrier distinct. Les messagers suivent le héros destinataire et livrent seulement après l’avoir rejoint. Ils peuvent être interceptés.
+
+Le bouton **Courrier** présente les messages reçus. L’action **Envoyer un messager** se trouve dans le lieu possédé disposant d’un relais. Messages limités à 500 caractères et affichés comme texte. Leur contenu n’est pas exposé dans les marqueurs des autres joueurs avant livraison ou interception.
+
+## Validation
+
+`node --test tests/*.test.js` vérifie les règles du moteur et les régressions. `tests/location-improvement-rules.test.js` couvre notamment les niveaux de fortification, les soins cumulés, les formations, les stocks d’importation, les objets renforcés, les habitants en expédition, les sauvegardes, le guet et la livraison des courriers.
+</pre></details><details><summary>Taxes des lieux — texte conservé pour cette version</summary><pre class="archived-source"># Impôts des lieux
+
+Les villages, villes et capitales actifs et peuplés accumulent une réserve fiscale
+à chaque cycle de production. Les pauses de production suspendent les impôts.
+
+Plafond en or : `population + 2 × somme des niveaux des améliorations économiques`.
+Le résultat est arrondi à l&#39;entier inférieur.
+
+Les bâtiments économiques du catalogue sont le comptoir, le relais de chasse,
+la ferme et la brasserie. Chaque niveau apporte 2 or au plafond. Les habitations
+agissent indirectement par la population accueillie. Le niveau du lieu ne donne
+plus de multiplicateur supplémentaire.
+
+Le revenu par cycle vaut **1 % du plafond**. Avec 20 habitants et une ferme de
+niveau 2 : plafond de 24 or, revenu de 0,24 or par cycle. La réserve vide se remplit
+en 100 cycles à situation constante. La production s&#39;arrête au plafond et reprend
+après la collecte.
+
+Le bouton affiche « collecter impôts : xx gold », avec le montant entier disponible.
+Le joueur qui contrôle le lieu collecte sur place avec
+son héros. Les fractions restent dans la réserve, sauvegardée avec le lieu.
+
+En mode expert, chaque collecte réussie diminue le moral (contentement) de la
+population de 1 point par tranche de 10 gold entamée, jusqu&#39;à 5 points par collecte.
+Le moral reste au minimum à zéro. Un moral non renseigné est initialisé à 50 avant
+la pénalité. La collecte n&#39;affecte pas le moral en mode casual, ni en cas d&#39;échec.
+
+Si le plafond diminue, la réserve est limitée au nouveau plafond lors du prochain
+cycle ou de la collecte. Cette limite vaut aussi pour les anciennes sauvegardes.
+
+Les règles sont dans `app/js/core/location-tax-service.js`.
+</pre></details><details><summary>Frontières et conquête — texte conservé pour cette version</summary><pre class="archived-source"># Frontières et conquête territoriale
+
+Le module `app/js/core/territory-service.js` est appelé par le serveur pour
+calculer les territoires. Le navigateur affiche uniquement les contours et les
+indicateurs reçus. Le scénario Chaos active cette première version avec
+`worldState.flags.territory.enabled`.
+
+## Influence et frontières
+
+Les capitales, forts, villes, villages, camps et exploitations créent une
+influence selon leur type, proportionnelle à la surface de la playarea.
+Les lieux détruits, non placés ou hors zone ne créent pas d’influence.
+L’équipe est déterminée par le contrôleur du lieu, les participants et les
+factions de la configuration.
+
+Dans un chevauchement adverse, le lieu le plus proche du centre de chaque
+cellule l’emporte. Une égalité exacte entre équipes laisse la cellule neutre.
+Les cellules alliées voisines fusionnent sans contour interne. Seules les
+limites sont dessinées, avec un trait coloré et une animation de surveillance
+respectant la réduction des mouvements. Cette animation n’accorde pas de
+vision GPS supplémentaire.
+
+Le découpage est approximatif : au plus environ 48 cellules sur le plus grand
+axe, avec une taille minimale GPS de 15 mètres (`cellSizeMeters`). La simulation
+utilise les unités planes de sa carte. Les cellules dont le centre est exclu
+ou hors playarea sont ignorées ; les contours ne sont pas encore des polygones
+géométriquement découpés aux limites exactes du terrain.
+
+## Conquête et connexion
+
+- Une présence continue pendant `captureSeconds` (60 secondes par défaut)
+  conquiert la cellule occupée, neutre ou adverse.
+- Un départ, une déconnexion, un relevé imprécis ou un intervalle de mesures
+  supérieur à 15 secondes interrompt la tentative. Le GPS exige une précision
+  renseignée d’au plus `maximumAccuracyMeters` (30 mètres par défaut).
+- Une présence simultanée de deux équipes bloque la conquête. Plusieurs alliés
+  n’accélèrent pas le délai.
+- En simulation, la position officielle reste valide tant que le joueur est
+  connecté et son héros actif ; aucun faux relevé GPS n’est généré.
+- La base principale est le premier lieu contrôlé de l’équipe, avec priorité
+  capitale, fort, ville, village, camp, puis identifiant pour départager.
+- Une conquête non reliée à cette base par des cellules voisines sur leurs
+  côtés est perdue après `isolationSeconds` (120 secondes par défaut). Elle
+  reprend l’influence précédente, ou redevient neutre. Les influences naturelles
+  des bâtiments éloignés subsistent ; la perte automatique concerne les
+  cellules conquises par présence.
+- Conquérir une cellule ne transfère pas la propriété de son bâtiment.
+
+Les conquêtes, tentatives et mesures sont sauvegardées sur le serveur. Les
+clients reçoivent les frontières publiques, les taux d’occupation et uniquement
+leur propre progression. Un instantané de configuration envoyé par le navigateur
+ne peut pas attribuer de territoire lors du lancement.
+
+## Quêtes, victoire et combat
+
+Les conditions des fiches à actions peuvent utiliser
+`{&quot;type&quot;:&quot;territoryOccupation&quot;,&quot;minimumRatio&quot;:0.4}`. Cette condition est
+évaluée par le service serveur des quêtes pour l’équipe du joueur.
+
+`victoryOccupationRatio`, optionnel et absent par défaut, termine la partie
+quand une équipe de joueurs atteint le taux configuré entre 0 et 1.
+`territory.winnerTeamId` conserve le vainqueur. Les taux correspondent au nombre
+de cellules occupées rapporté aux cellules valides : il s’agit d’une estimation
+de surface, incluant les conquêtes provisoirement isolées.
+
+Les événements `territory_captured` et `territory_lost` figurent dans le journal
+serveur. Il reste à écrire les quêtes de conquête dédiées, à raccorder ces
+événements à leurs objectifs et à choisir puis appliquer les bonus de combat.
+
+## Affichage des frontières et des lieux
+
+Les segments reçus du serveur sont assemblés en contours continus, puis leurs
+angles sont arrondis pour l’affichage. Une ligne lumineuse souligne la limite,
+et un dégradé coloré s’efface vers l’intérieur uniquement : un masque évite
+sa propagation hors du territoire et dans les trous neutres. Le centre reste
+transparent. L’animation de surveillance respecte la réduction des mouvements.
+
+Les cercles d’interaction des lieux ont une opacité de remplissage de 18 %
+(auparavant 9 %) et un contour à 55 % (auparavant 35 %). Leurs rayons restent
+ceux de l’état officiel. Ces changements graphiques ne modifient ni la
+conquête, ni la connexion des cellules, ni les portées ou permissions.
+</pre></details><details><summary>Capitale royale — texte conservé pour cette version</summary><pre class="archived-source"># Capitale royale et reconquête
+
+La campagne `chaos` initialise la capitale au démarrage d’une nouvelle partie. Les règles sont dans `app/js/core/capital-ai-service.js`, sans DOM. L’état de décision est sauvegardé dans `WorldState.flags.capitalAi` ; les héros, garnisons, équipements et convois utilisent les entités persistantes du moteur.
+
+- Garnison fixe : une cavalerie lourde et deux infanteries lourdes, toutes adjudant, soit 18 soldats par unité et 54 soldats au total.
+- Aldren : guerrier niveau 15, grade Seigneur, huit équipements royaux. La composition retenue pour « une unité de chaque » est une cavalerie lourde et une infanterie lourde. La progression et les promotions utilisent les règles existantes : capacité de six unités, autorité maximale 19, coût total 17 pour deux unités lieutenant de 24 soldats chacune. L’armée personnelle compte donc 48 soldats. Le niveau ne multiplie pas directement l’effectif d’une unité.
+- Quatre exploitations dédiées (or, fer, bois, pierre), chacune accompagnée d’un village. Elles sont placées autour de la capitale réellement choisie, dans la zone autorisée, en GPS comme en simulation.
+- Le placement automatique privilégie une capitale centrale. Le rayon économique correspond à 50 % du rayon équivalent de la surface utile, plafonné à 600 m en GPS. La simulation applique la même proportion en unités de carte. Tous les lieux permanents, capitale comprise, respectent un écart entre centres égal au moins à la somme des rayons d’interaction plus un mètre (une unité en simulation). Le réseau est validé en groupe avant déplacement ; un terrain trop étroit provoque un refus sans réduire l’écart minimal.
+- Les convois payés et escortés collectent le stock de production et le déposent physiquement à la capitale. Leur capacité et leurs déplacements suivent le service de commerce existant. Capturer une exploitation suspend sa liaison ; les convois détruits peuvent être remplacés si le trésor le permet.
+- Après les missions royales, à la fin des **Greniers du roi**, la capitale et son réseau passent au Chaos. La reconquête démarre automatiquement, sans dialogue avec le maréchal devenu hostile. Ce point sépare la phase de missions royales de la phase stratégique finale.
+- Toutes les 30 secondes de jeu, l’IA alterne défense et recrutement, sans rattrapage massif au rechargement. Elle paie les travaux avec du bois, de la pierre et du fer réellement présents dans le trésor ; chaque lieu reçoit au plus trois ouvrages (+2 défense chacun). Les recrutements paient le héros et les soldats selon les coûts du catalogue.
+- Quatre GA militaires actifs au maximum. Les classes alternent guerrier, éclaireur, mage ; leur niveau correspond à la moyenne arrondie des héros joueurs actifs. Les armées recherchent la cible la plus proche parmi les héros joueurs et leurs lieux capturables. Elles utilisent les déplacements, interceptions et batailles existants, puis déposent des unités dans les lieux conquis.
+- Reprendre la capitale après la bataille finale achève la campagne. Un combat gagné sur place sans prise de contrôle ne valide pas la victoire.
+
+Les effectifs, coûts et rythmes constituent un premier équilibrage. Les anciens instantanés sans configuration `capitalAi` conservent leur état ; commencer une nouvelle partie pour obtenir tout le réseau.
+
+Le placement ignore les positions candidates hors des limites de coordonnées acceptées par la zone, puis cherche dans une autre direction ou avec un rayon réduit. Cette correction évite un arrêt du démarrage en simulation sans modifier les ressources, les coûts ni les rythmes de l’IA. Les positions retenues restent validées par la zone et ses exclusions.
+
+Le contrat de génération de carte reste validé dans le monde complet du serveur. Il est retiré de la vue partielle envoyée au joueur, car les lieux inconnus y sont masqués ; cette vue peut ainsi être reconstruite sans exiger des lieux invisibles. Le brouillard et les règles de découverte restent inchangés.
+
+Vérification : `node --test tests/capital-ai.test.js`, puis `npm test`.
+</pre></details><details><summary>Apparence des caravanes — texte conservé pour cette version</summary><pre class="archived-source"># Sprite de caravane
+
+Les groupes autonomes de type `convoy` sont affichés par une caravane JRPG : un âne brun tire une charrette de bois chargée de caisses, de sacs et de toile, avec un marchand au bonnet vert. Cette apparence générique ne représente pas le contenu exact du chargement ni l&#39;effectif de l&#39;escorte.
+
+Le sprite reste droit lorsque la carte s&#39;incline et suit l&#39;échelle du zoom. Ses huit orientations sont relatives à la caméra ; SW, W et NW reprennent SE, E et NE par miroir. Trois poses donnent un pas simple à l&#39;âne lorsque l&#39;état officiel du convoi indique un déplacement. La petite ombre ovale commune aux personnages est retirée pour éviter de donner l’impression que la charrette flotte ; les roues et les sabots constituent son contact visuel avec le sol. Le marqueur reste sélectionnable pour ouvrir les interactions existantes.
+
+L&#39;affichage interpole la trajectoire reçue du serveur. Il ne modifie ni position officielle, ni vitesse, ni commerce, ni combat, ni détection. Les éclaireurs et les bandits disposent aussi de sprites dédiés (voir autonomous-group-map-sprites.md). Les autres types conservent leurs marqueurs existants.
+
+## Création du visuel
+
+Outil intégré imagegen, alpha transparent, fichier `app/assets/groups/caravan-jrpg-walk-v1.png`. Les pixels de la planche sont conservés ; seuls les rectangles de présentation sont mesurés.
+
+Prompt :
+
+&gt; Production transparent sprite sheet, 16-bit JRPG chunky pixel art matching small chibi heroes. Medieval trading caravan: one small brown pack donkey pulling one compact two-wheel wooden cart loaded with crates, sacks and rolled cream canvas; a tiny green-capped merchant seated on cart. Exactly three columns by five rows: idle, walking left leg forward, walking right leg forward; orientations north, north-east, east, south-east, south. Western views mirrored in code. Same scale and central anchor. No text, labels, grid, scenery or ground shadows; truly transparent background. Compact slightly elevated orthographic view, hard square pixels, dark outlines.
+
+Une correction imagegen a ajouté de la marge transparente pour rendre les oreilles de l&#39;âne entièrement visibles sur la première ligne.
+</pre></details><details><summary>Éclaireurs et brigands sur la carte — texte conservé pour cette version</summary><pre class="archived-source"># Éclaireur et brigands sur la carte
+
+L&#39;éclaireur autonome est une seule silhouette : capuche et cape vertes, arc, carquois et équipement léger. Les armées de bandits sont représentées par trois brigands : deux personnages encapuchonnés et un combattant roux, avec des armes différentes. Ces trois personnages sont décoratifs et ne révèlent pas l&#39;effectif réel.
+
+Chaque planche comporte cinq orientations dessinées (N, NE, E, SE, S) et trois poses. Les vues SW, W et NW sont obtenues par miroir. La marche suit l&#39;état officiel de déplacement ; les sprites restent droits sous l&#39;inclinaison de la carte et leur orientation tient compte de sa rotation. L&#39;ancrage des pieds est fixe.
+
+Les sprites s&#39;appliquent aux groupes visibles de type `scout` et aux groupes `army` ou `rogue` identifiés comme bandits par leur faction ou propriétaire. Les déserteurs ne sont pas assimilés aux brigands. La sélection ouvre les interactions existantes. Aucune règle de détection, de déplacement ou de combat n&#39;est changée ; le serveur conserve son autorité.
+
+## Création des images
+
+Mode utilisé : outil intégré imagegen, fond transparent. Les pixels générés sont conservés ; les rectangles des poses sont mesurés pour l&#39;affichage.
+
+Fichiers : `app/assets/groups/scout-jrpg-walk-v1.png` et `app/assets/groups/brigands-jrpg-walk-v1.png`. Aperçu : `playtest/autonomous-group-sprites.html`.
+
+Prompt commun :
+
+&gt; Transparent production sprite sheet, chunky 16-bit JRPG pixel art, chibi proportions, dark outlines. Exactly three columns and five rows. Columns: idle, left-foot walking, right-foot walking. Rows: north showing back, north-east showing back/right, east looking right, south-east showing front/right, south showing front. Same scale and anchor across poses. Western views mirrored in code. No labels, grid, scenery, background glow or ground shadows. Generous transparent gaps between complete poses.
+
+Sujet éclaireur :
+
+&gt; One medieval male scout, green hood and short green cloak, light tan leather equipment, bow and quiver. One silhouette only.
+
+Sujet brigands :
+
+&gt; A compact group of three medieval brigands: brown hood with short sword, grey hood with dagger, red-haired fighter with axe. Coherent formation, distinct silhouettes, same three characters in every pose.
+
+Les corrections imagegen ont retiré le fond de l&#39;éclaireur et précisé les orientations et les proportions JRPG des brigands.
+</pre></details></main></body></html>

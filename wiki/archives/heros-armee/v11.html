@@ -1,0 +1,165 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Héros et armée — version 11</title><link rel="stylesheet" href="../../wiki.css"></head><body><header><p class="eyebrow">Archive du wiki · Version 11</p><h1>Héros et armée</h1><p>2026-10-08 · Vigie camouflée de l’Éclaireur : sprite statique plus petit que le héros, sans changement de règles</p><a href="../../index.html#heros-armee">Lire l’article actuel</a></header><main class="archive-content"><h2>Héros et armée</h2><p>Votre classe définit vos caractéristiques de départ et vos capacités. Consultez les fiches ci-dessous pour comparer les classes.</p><p>Les unités possédées et les armées sont des états distincts. Le recrutement exige un héros présent dans un lieu recruteur, les ressources nécessaires et une capacité d’armée suffisante.</p><p>Les équipements apportent leurs bonus au héros. Les bagages et les emplacements portés sont distincts ; le serveur vérifie les compatibilités avant chaque changement.</p><p>Les gains d’XP du héros et ses passages de niveau s’affichent à l’écran à réception de son état officiel. Plusieurs gains reçus ensemble sont regroupés. Une connexion ou un changement de héros ne rejoue pas les gains précédents. Le message de marche affiche « Distance parcourue », le palier en mètres et, le cas échéant, le bonus kilométrique ; il ne répète pas l’annonce d’XP issue des états officiels. Les messages de quête conservent aussi leur contexte. La correction du test de cet affichage ne change pas les règles de progression ni de récompense.</p><p>Le voyage astral du Mage affiche un cercle violet vif et un double translucide au-dessus du héros. Maintenez le doigt ou le bouton gauche sur la grande poignée « Glisser » du fantôme, puis glissez-le vers un lieu connu, un héros visible ou un groupe autonome détecté dans le cercle. Le pouvoir dure au maximum 10 secondes et se termine après une interaction réussie sur la cible ; un refus ne le consomme pas. Le serveur valide la cible et la portée, sans déplacer le héros réel. La recharge reste de 10 minutes.</p><p>La carte affiche un sprite JRPG propre à la classe : aventurier, mage ou éclaireuse. La marche possède huit orientations relatives à la caméra ; les trois vues ouest sont les miroirs des vues est. Les accessoires peuvent changer de côté visuellement, sans modifier les équipements, les capacités ou les déplacements validés par le serveur.</p><p>Un étendard derrière le héros indique la taille de son armée connue : fanion pour 1 à 9 soldats, bannière verticale inspirée du sashimono pour 10 à 29, longue oriflamme verticale à deux pointes dès 30. Sans armée, aucun étendard. Pour les autres joueurs, il reste masqué tant que les effectifs ne sont pas connus au niveau d’information 3. Les couleurs reprennent celles des relations sur la carte ; ces seuils et cette animation ne changent aucune règle de jeu.</p><p>Les balises de vigie de l’Éclaireur prennent l’apparence d’un petit guetteur immobile et camouflé dans les herbes, avec une capuche et un masque de tissu. Une seule vue de face reste droite lors des rotations de carte. Le sprite mesure environ 40 pixels de haut à l’échelle normale, contre 64 pour un héros. Cette apparence ne modifie ni surveillance, ni détection, ni visibilité validées par le serveur.</p><p><a href="../../../docs/hero-items.md">Équipement et obtention des objets (document de règles)</a></p><p><a href="../../../docs/hero-progression-display.md">Affichage de la progression (document de règles)</a></p><p><a href="../../../docs/mage-astral-travel.md">Voyage astral du Mage (document de règles)</a></p><p><a href="../../../docs/hero-map-sprites.md">Apparence du héros sur la carte (document de règles)</a></p><p><a href="../../../docs/army-map-banners.md">Étendards et taille des armées (document de règles)</a></p><p><a href="../../../docs/watch-lookout-sprite.md">Apparence de la vigie (document de règles)</a></p><details><summary>Équipement et obtention des objets — texte conservé pour cette version</summary><pre class="archived-source"># Équipements des héros
+
+## Illustrations
+
+Les 75 équipements et les huit reliques royales utilisent les illustrations fournies dans `app/assets/equipment`. L’association explicite se trouve dans `app/js/core/equipment-art.js`. Les noms de fichiers sont techniques : ils ne définissent ni le nom ni l’histoire de l’objet dans le jeu.
+
+Exemples d’adaptation : `vampirerobe.png` illustre la **Robe du seigneur**, `t13catalyst.png` le **Cube de protection**, `tiara.png` la **Couronne du souverain**. Deux arcs deviennent des arbalètes ; la fronde devient un couteau de voyage. Les identifiants sauvegardés, les bonus, les classes, les emplacements et les règles d’obtention sont conservés. Le champ `family: &quot;bow&quot;` comprend ainsi les arcs et les arbalètes.
+
+Les visuels s’affichent dans l’équipement, les bagages, les fiches, les offres, les réserves et le butin. Le cache hors ligne inclut les illustrations utilisées. Les assets non associés sont conservés pour des ajouts futurs.
+
+La page `playtest/equipment-gallery.html` est une galerie statique du catalogue illustré au moment de cette intégration, consultable directement dans un navigateur.
+
+Le catalogue `app/js/core/hero-item-catalog.js` définit 75 équipements, cinq par famille. `item-catalog.js` les expose avec les ressources, objets de quête et huit équipements royaux existants. Les images et identifiants des anciens objets sont conservés.
+
+## Équipement
+
+- Classes : Guerrier (`warrior`), Éclaireur (`ranger`), Mage (`mage`). Les anciens identifiants `fighter` et `scout` correspondent respectivement au Guerrier et à l’Éclaireur. Les héros historiques sans classe restent compatibles.
+- Huit emplacements conservés : tête, cou, torse, main principale, main secondaire, pieds, deux accessoires.
+- Arcs et bâtons : deux mains. Retirer d’abord l’objet incompatible ; le moteur refuse l’action sans modifier l’inventaire.
+- Un seul manteau ; deux anneaux différents, ou un anneau et un manteau.
+- Les bonus s’additionnent aux statistiques du héros. La santé augmente les PV maximum sans soigner ; retirer un objet réduit les PV actuels seulement s’ils dépassent le nouveau maximum.
+- Les noms « arc », « arme de jet » ou « bâton » ne changent pas les règles de portée ou de magie du combat. Ils apportent les bonus chiffrés du catalogue. Aucun système de munitions n’est ajouté.
+
+## Où obtenir les objets
+
+Depuis un lieu accessible où le héros est présent : **Équipements · commerce, forge et découvertes**. La taverne propose également les offres du recéleur. Le héros doit être actif et disponible ; un lieu ennemi ou détruit ne permet pas ces opérations.
+
+| Source                            | Règle                                                                                                                                                                                                    |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Commerce général                  | Trois objets communs ou peu communs : vêtements, bottes, anneaux, colliers.                                                                                                                              |
+| Forge, rayon marchand             | Deux armes de mêlée supplémentaires.                                                                                                                                                                     |
+| Armuriers, rayon marchand         | Deux protections supplémentaires : boucliers, casques, armures lourdes.                                                                                                                                  |
+| Académie de magie, rayon marchand | Deux bâtons, focaliseurs ou robes supplémentaires.                                                                                                                                                       |
+| Champ de tir, rayon marchand      | Deux arcs ou armes de jet supplémentaires.                                                                                                                                                               |
+| Fabrication à la forge            | Trois commandes maximum par lieu ; or, fer et bois consommés. Niveau 1 : commun et peu commun. Niveau 2 : rares également. Familles métalliques uniquement.                                              |
+| Recéleur de taverne               | Deux objets peu communs ou rares, prix majoré de 50 %. Pas de réapprovisionnement.                                                                                                                       |
+| Quête principale                  | Une récompense adaptée à la classe à la fin d’une phase terminale sans choix ni transition. Retrait différé dans le panneau Équipements. Un effet de scénario peut aussi réserver une référence précise. |
+| Quête secondaire                  | La première mission terminée pour chaque couple lieu de remise / source (chef ou taverne) ouvre une récompense. Le renouvellement des missions ne renouvelle pas ce bonus.                               |
+| Objectif d’équipement             | Un contrat par village ou ville commerciale : rapporter un objet commun précis dans les bagages contre un équipement peu commun. L’échange consomme l’objet et se fait une seule fois.                   |
+| Combat                            | La première victoire contre l’équipe ennemie d’un lieu ouvre un trophée pour un héros vainqueur actif. Pas de trophée supplémentaire pour les duels libres.                                              |
+| Trésor                            | Chaque lieu distinct visité apporte un fragment, jusqu’à trois. Le trésor se trouve au troisième lieu visité ; une seule récupération par héros.                                                         |
+| Ruines                            | Une découverte par lieu de type `ruin`, partagée entre tous les joueurs. Cette règle s’applique aux ruines présentes dans un scénario ; elle n’ajoute pas automatiquement de lieux à la carte.           |
+| Prospection                       | La première découverte d’un gisement ouvre une cache sur ce site pour le joueur découvreur. Une seule cache par zone, même après une nouvelle expédition.                                                |
+| Échange entre joueurs             | Utilise les échanges existants, avec validation des deux joueurs : objets transportés ou équipés transférés sans en créer de nouveaux.                                                                   |
+
+Les tirages dépendent des identifiants de lieux et de récompenses. Recharger, rouvrir le panneau, monter un bâtiment de niveau ou le reconstruire ne réinitialise pas les achats et commandes effectués. Chaque rayon marchand a un tirage indépendant : construire un autre bâtiment ne relance pas les rayons existants.
+
+## Quantités et prix
+
+Le nouveau système génère au maximum **6 exemplaires par référence commune, 3 peu communs, 1 rare**, toutes sources confondues. Ces quotas portent sur les nouvelles acquisitions ; ils ne suppriment et ne recomptent pas les équipements de départ ou les objets déjà placés par les scénarios et sauvegardes historiques. Les reliques royales conservent leur distribution existante et ne figurent pas dans les tirages ordinaires.
+
+`unique: true` reste le marqueur historique d’objet individuel. Il ne signifie pas « exemplaire mondial unique ». La rareté, `worldLimit` et l’état du service contrôlent les nouvelles émissions.
+
+Prix : `12 × palier + 3 × somme des bonus positifs`, avec les paliers 1/2/3. Forge : `8 × palier` or, `2 × palier` fer et `palier` bois. Le catalogue conserve ces valeurs modifiables sous forme de données. Les trois commandes par forge représentent son contingent fini de fabrication pour la partie.
+
+Un sac plein ou des ressources insuffisantes ne consomment rien. Une récompense non retirée reste dans l’état sauvegardé ; elle est cependant soumise au quota mondial de sa référence. Un autre joueur peut épuiser ce quota avant son retrait. Les droits sont vérifiés de nouveau au moment de l’action.
+
+## Intégration des scénarios
+
+Réserver un équipement spécifique dans les effets d’un événement :
+
+```json
+{
+  &quot;type&quot;: &quot;unlockItemReward&quot;,
+  &quot;rewardId&quot;: &quot;merci-du-mage&quot;,
+  &quot;itemId&quot;: &quot;archmage_staff&quot;
+}
+```
+
+Le bénéficiaire est le héros acteur de l’événement (`heroId` permet un destinataire explicite). L’objet est à retirer dans le panneau Équipements, sans remplir de force ses bagages. Les références royales ne sont pas admises par cet effet.
+
+Objectif d’acquisition, validé quand le nouveau système remet l’objet :
+
+```json
+{
+  &quot;id&quot;: &quot;obtenir-le-baton&quot;,
+  &quot;text&quot;: &quot;Obtenir le bâton du gardien&quot;,
+  &quot;trigger&quot;: { &quot;type&quot;: &quot;itemAcquired&quot;, &quot;itemId&quot;: &quot;guardian_staff&quot; }
+}
+```
+
+Objectif de remise, associé à une interaction de scénario existante :
+
+```json
+{
+  &quot;id&quot;: &quot;remettre-le-baton&quot;,
+  &quot;text&quot;: &quot;Remettre le bâton au sage&quot;,
+  &quot;trigger&quot;: {
+    &quot;type&quot;: &quot;itemDelivery&quot;,
+    &quot;itemId&quot;: &quot;guardian_staff&quot;,
+    &quot;interactionId&quot;: &quot;give-staff&quot;,
+    &quot;locationSlotId&quot;: &quot;sage-tower&quot;
+  }
+}
+```
+
+La remise exige un exemplaire dans les bagages et la présence au lieu lié ; un objet équipé doit d’abord être retiré. La validation consomme un exemplaire. Les contrats de lieux fonctionnent directement dans le panneau ; ils ne créent pas d’entrée supplémentaire dans le journal des quêtes scénarisées.
+
+## Persistance et tests
+
+`Game.toJSON()` / `Game.fromJSON()` et l’état multijoueur transportent `itemAcquisitionState` (quotas, achats, commandes, récompenses et visites). Les anciens instantanés sans ce champ démarrent avec un état vide. La projection réseau masque les récompenses et visites des autres joueurs.
+
+Tests dédiés : `node --test tests/hero-items.test.js`. Le catalogue et les règles d’acquisition ne dépendent ni du DOM ni du GPS.
+</pre></details><details><summary>Affichage de la progression — texte conservé pour cette version</summary><pre class="archived-source"># Affichage de la progression du héros
+
+Les gains d’XP et les passages de niveau sont affichés par la file d’animations des récompenses. L’interface compare l’expérience totale et le niveau des états officiels successifs du héros : elle n’accorde aucune récompense et ne calcule aucun niveau.
+
+Le premier état reçu sert de référence. Les rafraîchissements identiques ne répètent pas les annonces ; une baisse d’expérience devient la nouvelle référence. Une réinitialisation ou un changement de héros efface cette référence et les animations en attente. Plusieurs gains entre deux affichages sont regroupés en une annonce.
+
+Les messages contextuels de marche et de quête restent présents, mais leur XP est annoncé par cet affichage commun. Le niveau disponible et le choix d’amélioration restent distincts du niveau effectivement atteint. Les règles du moteur et la validation serveur sont inchangées, en GPS comme en simulation.
+
+Le message de marche porte le titre « Distance parcourue » et indique le palier en mètres, avec la mention du bonus kilométrique lorsqu’il est atteint. Il ne répète pas le gain d’XP du résultat de déplacement : l’annonce d’XP provient uniquement de la comparaison des états officiels. La correction du test de ce message ne modifie aucune règle de récompense.
+</pre></details><details><summary>Voyage astral du Mage — texte conservé pour cette version</summary><pre class="archived-source"># Voyage astral du Mage
+
+Le pouvoir est disponible dans les deux modes de carte, avec les mêmes commandes serveur.
+
+## Activation et ciblage
+
+L’activation affiche un cercle violet vif centré sur la position officielle du Mage et une projection translucide au-dessus de son pion. Le joueur glisse cette projection sur un lieu connu, un héros visible ou un groupe autonome détecté. Le fantôme dispose d’une grande poignée « Glisser » au-dessus des illustrations : maintenez le doigt ou le bouton gauche sur celle-ci puis déplacez-le sans relâcher. Il suit le geste même sur une carte tournée ou inclinée. La sélection utilise le point où le doigt ou la souris est relâché, plutôt que le socle décalé sous le fantôme. Relâcher près d’une cible envoie la sélection ; un geste annulé ne sélectionne rien. Aucun lieu n’est choisi automatiquement. Le héros réel ne se déplace pas et ne gagne aucune XP de marche.
+
+Le rayon est celui du grade : capitaine 15, banneret 25, commandant 40, seigneur 60, maréchal 90. Il est exprimé en mètres en GPS et en unités de carte fictive en simulation. Le centre de la cible doit être dans le cercle ; le serveur recalcule cette distance à partir des positions officielles. Les cibles inconnues ou non détectées restent inaccessibles.
+
+## Fin et recharge
+
+Le pouvoir dure 10 secondes à compter de l’activation réussie, ciblage compris. La sélection ouvre la fiche habituelle de la cible ; elle ne consomme pas encore le pouvoir. Une action réussie sur cette cible le consomme immédiatement. Une action refusée conserve le temps restant. L’expiration retire le cercle et la projection ; elle supprime également la portée astrale des validations serveur. La recharge de 10 minutes commence à l’activation et persiste dans les sauvegardes.
+
+Les règles habituelles de propriété, de ressources, d’alliance et de PvP restent applicables. Une conversation ou un échange accepté conserve sa propre session serveur après la disparition de la projection, dans la portée autorisée lors de la demande.
+
+## Architecture
+
+`HeroClassFeatureService` porte la durée et la recharge ; `Game` valide l’activation et les cibles ; `astral-interaction.js` vérifie la portée ciblée et la consommation après commande. `AstralTravelRenderer` affiche l’effet et `AstralGhostDrag` gère la capture du pointeur et la projection écran du glissement. Les modules d’affichage sont également inclus dans le cache de démarrage de l’application. Cette correction de manipulation ne change ni la durée, ni la portée, ni la recharge ou les règles d’interaction. Les interactions de quête utilisent aussi la présence et la portée validées par le serveur ; leurs règles de progression restent inchangées. Le navigateur n’applique aucun déplacement ou gain au héros.
+</pre></details><details><summary>Apparence du héros sur la carte — texte conservé pour cette version</summary><pre class="archived-source"># Apparence du héros sur la carte
+
+La carte choisit l&#39;apparence à partir de la classe officielle du héros : aventurier à cape turquoise pour le Guerrier, mage aux cheveux roux avec robe violette et bâton, éclaireuse à cape verte avec queue de cheval et carquois. Le double du voyage astral utilise aussi l&#39;apparence de la mage. Les silhouettes des alliés utilisent leur classe connue.
+
+Chaque personnage dispose de huit orientations relatives à la caméra et de trois poses pour une marche simple : immobile, pas gauche, pas droit. Les cinq vues dessinées sont N, NE, E, SE et S. NW, W et SW reprennent respectivement NE, E et SE par miroir horizontal. Les accessoires changent donc de côté selon la direction ; cela n&#39;a aucun effet sur l&#39;équipement ou les capacités.
+
+Les poses sont alignées sur un axe vertical et une ligne de pieds commune. Le cycle de marche dure 560 ms et accompagne l&#39;interpolation visuelle des positions officielles. Les sprites ne calculent ni déplacement, ni vitesse, ni portée, ni récompense. Les règles restent validées exclusivement par le serveur, en GPS et sur carte fictive.
+
+Les planches transparentes sont conservées dans `app/assets/heroes/`. Les rectangles des poses et les échelles sont définis dans `hero-sprite-atlas.js` et `hero-class-sheets.js`.
+</pre></details><details><summary>Étendards et taille des armées — texte conservé pour cette version</summary><pre class="archived-source"># Étendards sur la carte
+
+Un étendard derrière le héros indique la taille de son armée connue : fanion triangulaire pour 1 à 9 soldats, bannière rectangulaire verticale inspirée du sashimono japonais pour 10 à 29, longue oriflamme verticale à deux pointes à partir de 30. Sans soldats, aucun étendard. Ces seuils sont uniquement visuels, sans effet sur la composition, le commandement ou les combats.
+
+Le héros local porte du bleu ; les héros alliés du vert et les adversaires du rouge, selon les couleurs de relation utilisées actuellement sur la carte. Il ne s&#39;agit pas d&#39;un blason permanent propre à chaque équipe.
+
+Pour les autres joueurs, l&#39;étendard n&#39;apparaît que lorsque le niveau d&#39;information permet déjà de connaître les effectifs (niveau 3). Une armée inconnue ne reçoit pas de forme estimée. Le calcul utilise exclusivement les effectifs reçus ; il ne révèle aucune nouvelle information et ne modifie aucun état du serveur.
+
+La hampe et le tissu sont dessinés en CSS dans le style pixel art. Le tissu bouge discrètement et reste immobile lorsque l&#39;utilisateur préfère réduire les animations. L&#39;étendard suit la taille du sprite au zoom. Les règles de déplacement et de combat restent inchangées.
+</pre></details><details><summary>Apparence de la vigie — texte conservé pour cette version</summary><pre class="archived-source"># Apparence de la vigie
+
+La balise de vigie de l’Éclaireur est représentée par un guetteur accroupi dans les herbes. Capuche vert mousse et brune, masque de tissu et silhouette basse évoquent une tenue furtive inspirée d’un ninja médiéval.
+
+Une seule pose de face suffit : la vigie est immobile et reste face à l’écran, sans animation de marche. Son dessin mesure 40 pixels de haut à l’échelle normale, contre environ 64 pour un héros. Les herbes servent de contact visuel avec le sol ; aucune ombre ovale n’est ajoutée. Le zoom adapte sa taille comme les autres illustrations de carte.
+
+Le sprite remplace uniquement le symbole de balise déjà affiché. Le cercle de surveillance conserve son rayon officiel. Les positions, alertes, conditions de visibilité et règles de détection restent contrôlées par le serveur. L’apparence camouflée ne constitue pas un nouveau bonus de furtivité.
+
+## Création
+
+Mode : outil intégré imagegen, fond transparent. Asset : `app/assets/groups/watch-lookout-v1.png`. Le PNG original est conservé, sans retouche des pixels ; le module mesure le rectangle occupé pour afficher le sprite à petite échelle.
+
+Prompt utilisé :
+
+&gt; Single front-facing stationary stealth lookout game sprite, transparent background. 16-bit JRPG chunky pixel art, compact chibi proportions, crisp square pixels and dark restrained outlines, matching medieval map characters. One small crouching ranger concealed behind a low tuft of wild grasses, muted moss green and brown hooded camouflage clothes inspired by a medieval ninja, cloth mask covers nose and mouth, only watchful eyes visible. No modern military gear, no gun, no bright accents. Kneeling very low, shoulders huddled, one hand quietly parting grass, grasses partly obscure torso and legs. Very compact low silhouette, character and grass one connected sprite. Slightly elevated front orthographic view. One pose only centered with generous transparent margins, no environment, no ground plane, no oval shadow, no text, no sheet, no glow. Readable at 40 pixels tall, visually smaller than a hero.
+</pre></details></main></body></html>

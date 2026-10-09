@@ -1,0 +1,167 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  color: #e8edf1;
+  background: #111a21;
+  line-height: 1.65;
+  scroll-behavior: smooth;
+}
+.article-history {
+  margin-top: 2rem;
+  padding: 1rem;
+  border-top: 1px solid #36434b;
+  color: #aab7bf;
+  font-size: 0.9rem;
+}
+.article-history summary {
+  cursor: pointer;
+}
+.archive-content {
+  max-width: 1000px;
+  padding: 2rem;
+  margin: auto;
+}
+.archived-source {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: inherit;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+a {
+  color: #b9dca6;
+  text-underline-offset: 0.2em;
+}
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #ecd194;
+  outline-offset: 5px;
+}
+header,
+.layout,
+footer {
+  max-width: 1200px;
+  margin: auto;
+  padding: 2rem;
+}
+header {
+  padding-top: 4rem;
+  border-bottom: 1px solid #36434b;
+}
+h1 {
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.15;
+  margin: 0.5rem 0 1.5rem;
+}
+h2 {
+  color: #ecd194;
+  line-height: 1.3;
+}
+.eyebrow {
+  color: #b9dca6;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+.layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 3rem;
+}
+nav {
+  align-self: start;
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 0.8rem;
+}
+nav a {
+  padding: 0.25rem 0;
+}
+section {
+  scroll-margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+article {
+  padding: 1.25rem;
+  border: 1px solid #36434b;
+  border-radius: 0.75rem;
+  background: #1a2730;
+}
+article h3 {
+  margin-top: 0;
+}
+dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+dd {
+  margin: 0;
+  font-weight: bold;
+}
+.table-scroll {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+th,
+td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #36434b;
+  text-align: left;
+}
+th {
+  background: #1a2730;
+}
+caption {
+  text-align: left;
+  padding-bottom: 0.75rem;
+}
+footer {
+  color: #aab7bf;
+  border-top: 1px solid #36434b;
+}
+.skip {
+  position: absolute;
+  left: 1rem;
+  top: -100px;
+  background: #111a21;
+  padding: 0.5rem;
+}
+.skip:focus {
+  top: 1rem;
+}
+@media (max-width: 760px) {
+  header,
+  .layout,
+  footer {
+    padding: 1.25rem;
+  }
+  .layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  nav {
+    position: static;
+    border-bottom: 1px solid #36434b;
+    padding-bottom: 1.5rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,389 @@
+{
+  "premiers-pas": [
+    {
+      "version": 1,
+      "date": "2026-10-06T23:43:13.209Z",
+      "note": "Version initiale du wiki",
+      "hash": "fa9e5ab95bdd74d94e3c5dceade4b24875746f6f556ca0dd25702c9c9100da89",
+      "file": "archives/premiers-pas/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-08T15:39:58.479Z",
+      "note": "Menu des aventures avant le joueur : jeu rapide, planification, rejoindre et test",
+      "hash": "c8e37d3bb1eacad83c593befbbae37f8357a237d83c2e3eb2aef1307844e2736",
+      "file": "archives/premiers-pas/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-08T15:46:58.367Z",
+      "note": "Menu en jeu : outils en sous-menu et fermeture avec sauvegarde ou destruction serveur",
+      "hash": "55a96b20783b06102785add844f1122718165c9219a0a7c123a57f74f0447ee7",
+      "file": "archives/premiers-pas/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-08T23:04:15.553Z",
+      "note": "Nouvelles parties par défaut : 1 joueur et GPS réel, test en simulation explicite",
+      "hash": "066e8cf7d7a22fb9ca2100ebcc31d505c3952081e85b7a07e7dbe632d086f8ce",
+      "file": "archives/premiers-pas/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-09T21:22:10.418Z",
+      "note": "Pouvoirs de carte en haut de l’écran pour dégager les lieux",
+      "hash": "561b2607dd602bca987dc2e4068928781f2888c0d66692d40102181faf984246",
+      "file": "archives/premiers-pas/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-09T21:38:02.274Z",
+      "note": "Actualisation du guide et des documents de règles avant publication sur GitHub",
+      "hash": "25c5f3e82c5765a57bc2ce9fe78b4cd1548181f6a164550f36e0306f5de5ac9a",
+      "file": "archives/premiers-pas/v6.html"
+    }
+  ],
+  "heros-armee": [
+    {
+      "version": 1,
+      "date": "2026-10-06T23:43:13.209Z",
+      "note": "Version initiale du wiki",
+      "hash": "2cbb9909795db78283605b3521070cfc8c8cb444afe4c41f12475b960a963529",
+      "file": "archives/heros-armee/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-07T10:34:54.427Z",
+      "note": "Affichage commun des gains d’XP et des passages de niveau du héros",
+      "hash": "09125e45872c99652aad9d9cd368cad3bc93e2933e2df7d4e1e02d3d144ad4f3",
+      "file": "archives/heros-armee/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-07T10:40:03.815Z",
+      "note": "Mage : projection astrale déplaçable, portée visible et une interaction pendant 10 secondes",
+      "hash": "94855b5a64261b3f649469cde89c8e40f1be97c83edb5a5a7e610a014dafd87c",
+      "file": "archives/heros-armee/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-07T10:48:00.538Z",
+      "note": "Mage : précision sur les interactions astrales de quête",
+      "hash": "b4374dedc04dafe593e3ce99a8af5aa9ba3ad04dc290c441fa77ce54fffcb39a",
+      "file": "archives/heros-armee/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-07T10:56:38.080Z",
+      "note": "Sprites de classe Mage et Éclaireuse, marche en huit directions et correction du sud-ouest par miroir",
+      "hash": "aeb5a5234692fc9af8178c6eedc40747122a7183b3ebe5d1fb82f6f6f44f070b",
+      "file": "archives/heros-armee/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-07T14:15:02.440Z",
+      "note": "Étendards de taille d’armée sur les héros, avec respect du niveau d’information",
+      "hash": "12772c6ee253cc3c06f798a44280e3028d1be7184cd66876d36674861d37b1ae",
+      "file": "archives/heros-armee/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-07T14:28:33.635Z",
+      "note": "Bannière moyenne verticale et grande oriflamme, petit fanion inchangé",
+      "hash": "63b9404e0a5d97194fefbc504b26488cbf5d6b1e7f852b7fe3f8b6295de5d32b",
+      "file": "archives/heros-armee/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-07T15:08:03.805Z",
+      "note": "Correction du test du message de marche : distance contextuelle et annonce d’XP centralisée, sans changement des règles",
+      "hash": "03276fea3754f66205e2c6dcbafd0250d0979e983064559f9a1aa2da60060295",
+      "file": "archives/heros-armee/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-08T11:06:23.056Z",
+      "note": "Fantôme astral : poignée tactile et glissement continu avec rotation de la carte",
+      "hash": "b6fd3134809fa37030542a979f5c4d6424ec7f6617e34426c2fd719360884d21",
+      "file": "archives/heros-armee/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-08T11:11:00.653Z",
+      "note": "Fantôme astral : relâchement sur la cible et cache des modules de glissement",
+      "hash": "cae3b7cdf750fabd4e73183c4d5da0d583d9338a6b7b73eabfe303390214e04a",
+      "file": "archives/heros-armee/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-08T15:52:24.688Z",
+      "note": "Vigie camouflée de l’Éclaireur : sprite statique plus petit que le héros, sans changement de règles",
+      "hash": "1a162983f6b5b386ca52ab69cff5401e2bff2b1307f72e2426d37f85d0d49e98",
+      "file": "archives/heros-armee/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-08T22:30:42.395Z",
+      "note": "Fantôme borné au cercle astral et héros au-dessus du monde",
+      "hash": "226ca69630c231321776996d32e48dbf7c370031838556a9c2d567ff39c1df57",
+      "file": "archives/heros-armee/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-08T23:50:32.723Z",
+      "note": "Suppression des cavaliers d’essai et de la montée de niveau automatique au démarrage des héros joueurs",
+      "hash": "f2e11108d87242ca301c06665ee68c1af2867195707afc87be8d9ebd5ea8abd0",
+      "file": "archives/heros-armee/v13.html"
+    }
+  ],
+  "lieux": [
+    {
+      "version": 1,
+      "date": "2026-10-06T23:43:13.209Z",
+      "note": "Version initiale du wiki",
+      "hash": "b782c5679d0a72ab6b849b96bd4c1d3b55e1c116f64bdc31fa06ceb9a797d596",
+      "file": "archives/lieux/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-06T23:47:06.949Z",
+      "note": "Correction du placement de la capitale en simulation et de la lecture des vues partielles ; actualisation des fixtures de préparation.",
+      "hash": "de016cb9d7e3121c121e699e6335c9c56a702594d9225db15b329842fc9ea3a5",
+      "file": "archives/lieux/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-07T10:47:00.880Z",
+      "note": "Frontières arrondies, surbrillance et dégradé intérieur ; zones d’interaction plus opaques, règles inchangées",
+      "hash": "f0a18df1f4d732d6f32f29b6b05d125d4cab4e0206b3139446429f1947ba4e11",
+      "file": "archives/lieux/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-07T14:04:49.420Z",
+      "note": "Caravane JRPG animée pour les convois autonomes, huit orientations, règles inchangées",
+      "hash": "9b087738d013c52b8d5938e6db1eecb97d659fa036e61a9d8e28c7311e5d88c6",
+      "file": "archives/lieux/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-07T15:04:40.093Z",
+      "note": "Sprites JRPG animés de l’éclaireur et des brigands, huit orientations sans changement de règles",
+      "hash": "bae8700a989f00b90b4d259241b4eff0e7dbe2c8873e48bb53c979a83f9d23a5",
+      "file": "archives/lieux/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-08T11:01:53.328Z",
+      "note": "Retrait de l’ombre centrale de la caravane pour corriger son apparence flottante",
+      "hash": "26f5a73844460ba70b58af8759346aa4c3334dad6af149bc88c6bd2fab50493b",
+      "file": "archives/lieux/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-08T23:55:49.689Z",
+      "note": "Distance minimale entre lieux fondée sur les rayons d’interaction",
+      "hash": "88179db9215eccb3397374ed596ba7b23c3b35f53505d884b2db827772afd122",
+      "file": "archives/lieux/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-09T00:02:50.119Z",
+      "note": "Affichage immédiat des lieux placés, indépendant des quêtes",
+      "hash": "235eccbd9ee66ee172cb840c34f3d4a395b89f58e6246fc05c486fe85858ba76",
+      "file": "archives/lieux/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-09T07:40:44.610Z",
+      "note": "Actualisation des tests de visibilité des lieux, du briefing GPS et des fixtures réseau, sans changement des règles",
+      "hash": "c56552ff5540973135533b3d7128d6cf501a9b66a2984dc04be36bbd54708246",
+      "file": "archives/lieux/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-09T12:10:15.157Z",
+      "note": "Carte de scénario : monde connu, découverte individuelle et éléments éphémères",
+      "hash": "cc18bb6cc87d64b1e55f093e247750dd294db3bb37ffa53ddd755a2d819d87ea",
+      "file": "archives/lieux/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-09T16:58:06.963Z",
+      "note": "Actualisation du test du briefing : Valgrise est un lieu mondial connu et durable, sans changement des règles",
+      "hash": "74416c3a752dbd1b0047076e4303585029412307cde07e3fafb6b7280ec35e30",
+      "file": "archives/lieux/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-09T21:00:59.247Z",
+      "note": "Indices : espacement lisible et apparitions reconstruites depuis la progression officielle",
+      "hash": "1f96d51d22ab1391cfe8f322c1ff96d9a219208ac9fcb90e5e2675f25e0a37fa",
+      "file": "archives/lieux/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-09T21:01:36.524Z",
+      "note": "Précisions sur les positions préférées et la visibilité des lieux durables",
+      "hash": "84f5da9c80cff0e3345b7ce27fe060209d14df8f8d6b23e1e8ebe5113bf2f673",
+      "file": "archives/lieux/v13.html"
+    }
+  ],
+  "quetes": [
+    {
+      "version": 1,
+      "date": "2026-10-06T23:43:13.209Z",
+      "note": "Version initiale du wiki",
+      "hash": "f90bbeccc0d0a4a01b56a8658edcbf29fafb539d777320542fd098d31eb67fe6",
+      "file": "archives/quetes/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-09T00:03:49.197Z",
+      "note": "Ajout des prospecteurs perdus au moteur de quêtes à actions",
+      "hash": "e7a7f042146bc803655c949de9d6dec097cfdef8e742207e553980522e239b9c",
+      "file": "archives/quetes/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-09T00:06:46.000Z",
+      "note": "Ajout des prospecteurs perdus au moteur de quêtes à actions",
+      "hash": "3d6028ea5c6277d339b51828e2321a23c48ec743bc59c71ec2ea7c72f4afb5fe",
+      "file": "archives/quetes/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-09T00:08:35.620Z",
+      "note": "Ajout des prospecteurs perdus au moteur de quêtes à actions",
+      "hash": "f90c9f3d142abc7a529af4da15c9fdf3cd53f3fadd9556b408dbebca489adfa3",
+      "file": "archives/quetes/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-09T11:20:45.934Z",
+      "note": "Correction du placement des marqueurs de quête dans la préparation de carte",
+      "hash": "a27d6539f321d6a7c3300818e1b0c04b6b9ecfc20684d6a1441913141c6b714e",
+      "file": "archives/quetes/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-09T11:37:01.711Z",
+      "note": "Apparition progressive des lieux déclarée dans le scénario et validée par le serveur",
+      "hash": "c268fe357012281d8e956c0b83eebd14d83919bd1c5d5e34676f3c4cefc47177",
+      "file": "archives/quetes/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-09T11:38:15.747Z",
+      "note": "Correction du test du briefing historique : distinguer placement de Valgrise et apparition validée par le moteur de quêtes",
+      "hash": "9e229749da0a649777338d96262d86447be49111c1e38702fd0a8ff8f9cd9d71",
+      "file": "archives/quetes/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-09T12:10:15.157Z",
+      "note": "Carte de scénario : monde connu, découverte individuelle et éléments éphémères",
+      "hash": "298c3dfdbf364c1078fb025a630d2575bdc8bf8037f8ca6dc30c89dee5d5e35a",
+      "file": "archives/quetes/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-09T16:44:55.690Z",
+      "note": "Fiches et moteur de quêtes : placement confirmé, visibilité et cycle de vie des lieux",
+      "hash": "1357fccce30813bebbdce3057660778c5fe47634d6b15b066c3c40ae96337d44",
+      "file": "archives/quetes/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-09T16:58:06.963Z",
+      "note": "Actualisation du test du briefing : Valgrise est un lieu mondial connu et durable, sans changement des règles",
+      "hash": "86243f27ad454077464d23251fa1c825790383a858485be9ca9c8c4af3533aa0",
+      "file": "archives/quetes/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-09T21:00:59.247Z",
+      "note": "Indices : espacement lisible et apparitions reconstruites depuis la progression officielle",
+      "hash": "11d75afd0a72cf7155f31fa461b73b4710a8b8d86f316e673806af6651b7cd4e",
+      "file": "archives/quetes/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-09T21:01:36.524Z",
+      "note": "Précisions sur les positions préférées et la visibilité des lieux durables",
+      "hash": "2221001018687085fbeb7f7db3bb5dfdde515bf4e16b53f89bda2f3625692f48",
+      "file": "archives/quetes/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-09T21:20:01.818Z",
+      "note": "Traces de pas pour les indices des prospecteurs sur la carte",
+      "hash": "4c3fb2cce05017bf2146663a67d25062454c4ecb14146ede3e25041dbb3cd471",
+      "file": "archives/quetes/v13.html"
+    }
+  ],
+  "combats": [
+    {
+      "version": 1,
+      "date": "2026-10-06T23:43:13.209Z",
+      "note": "Version initiale du wiki",
+      "hash": "c78cadd3ae2ba184dfc57fd2526b82e633576ca0552a63fea3b091553f1b6a67",
+      "file": "archives/combats/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-08T22:46:15.525Z",
+      "note": "Concept prévu du combat à distance : projection astrale, embuscade et pouvoirs de carte",
+      "hash": "efaf3e1ded662dc03e2c50a90dc6956e51a25a7f64929f2ceec52a354c41aebd",
+      "file": "archives/combats/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-08T22:47:03.248Z",
+      "note": "Précision du concept astral : dégâts physiques et moraux, corps réel protégé",
+      "hash": "683990e07fbd8cd04bf9ea7958200f0bc262b496710cf5cc0de2adca3a5b502f",
+      "file": "archives/combats/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-08T22:50:09.298Z",
+      "note": "Pouvoirs à distance prévus sans mana : cooldown sur la carte et coût en Commandement en bataille",
+      "hash": "9c204e5de38cecdb6582e8e14651783b2673568da487dc632d041e9de6b198f8",
+      "file": "archives/combats/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-08T23:49:45.814Z",
+      "note": "Combat compact : carte stable, notice, validation séparée et pertes visuelles officielles",
+      "hash": "ec367603368cb8775a18de5090a5e583ce3482d8fc0f23ca194c16ba2c66cb99",
+      "file": "archives/combats/v5.html"
+    }
+  ],
+  "classes": [
+    {
+      "version": 1,
+      "date": "2026-10-06T23:43:13.209Z",
+      "note": "Version initiale du wiki",
+      "hash": "d58ad2efdef52fa6d9ce3ce303c865e2d17eaf9277c3df58043d6cd13bcb8333",
+      "file": "archives/classes/v1.html"
+    }
+  ],
+  "unites": [
+    {
+      "version": 1,
+      "date": "2026-10-06T23:43:13.209Z",
+      "note": "Version initiale du wiki",
+      "hash": "87f132270b6305fe6a8bb8eed6fd7baeae3431732fa08623c6966de7c13bab4b",
+      "file": "archives/unites/v1.html"
+    }
+  ],
+  "dashboard-monitoring": [
+    {
+      "version": 1,
+      "date": "2026-10-08T11:40:15.989Z",
+      "note": "Dashboard : relevés du monde et graphiques militaires et économiques",
+      "hash": "de0a020ba5f3558d6876758ac00d926b624465f95eceb410a1dfd944c32f09c8",
+      "file": "archives/dashboard-monitoring/v1.html"
+    }
+  ]
+}
