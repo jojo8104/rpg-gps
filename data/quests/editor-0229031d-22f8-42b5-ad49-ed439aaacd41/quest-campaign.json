@@ -1,0 +1,9 @@
+{
+  "scenarioId": "Kindom1",
+  "initialQuestIds": [
+    "excalibure"
+  ],
+  "questIds": [
+    "excalibure"
+  ]
+}

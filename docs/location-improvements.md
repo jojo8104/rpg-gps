@@ -1,5 +1,9 @@
 # Améliorations des lieux
 
+## Icônes des bâtiments — 25 octobre 2026
+
+Les 27 bâtiments et installations du catalogue disposent d’une icône PNG : les 21 visuels manquants remplacent les émojis dans les fiches et les résumés des lieux. Les six illustrations existantes sont conservées. Les nouveaux bâtiments sont représentés en vue de trois quarts sur fond transparent et leurs images sont incluses dans le préchargement. Ce changement concerne uniquement la présentation : les coûts, niveaux, services et effets restent calculés et validés par le serveur.
+
 Les effets d’une infrastructure présente sont appliqués quel que soit le type du lieu. Les restrictions de construction existantes restent en place : le camp construit ses installations temporaires, puis débloque les bâtiments permanents en évoluant. Les bonus du niveau courant remplacent ceux des niveaux précédents.
 
 La capitale royale commence les nouvelles parties avec toutes les améliorations au niveau maximal. Les maisons remplacent les tentes et habitations, et les murailles remplacent les enceintes précédentes. Les sauvegardes existantes conservent leurs bâtiments et leurs destructions.
@@ -67,3 +71,17 @@ Le bouton **Courrier** présente les messages reçus. L’action **Envoyer un me
 ## Validation
 
 `node --test tests/*.test.js` vérifie les règles du moteur et les régressions. `tests/location-improvement-rules.test.js` couvre notamment les niveaux de fortification, les soins cumulés, les formations, les stocks d’importation, les objets renforcés, les habitants en expédition, les sauvegardes, le guet et la livraison des courriers.
+
+
+## PNJ et marché
+
+Les PNJ ne sont pas des marchandises : spécialistes (géologue, cartographe, ouvriers, etc.), officiers, personnages de quête et populations sont exclus des offres du marché. Le serveur refuse leur achat et leur vente, même par commande directe, sans modifier les stocks ni l’or. Leur recrutement et leurs interactions dédiées restent inchangés.
+
+## Défilement des conversations (21 octobre 2026)
+
+Dans la taverne et toutes les conversations utilisant la fenêtre commune, le texte, les messages et les boutons de réponse défilent ensemble si leur contenu dépasse la hauteur disponible du panneau. Le défilement fonctionne au toucher, à la molette et par déplacement du focus entre les boutons. La croix pour quitter la conversation reste en dehors du panneau défilant. La marge inférieure de sécurité du téléphone est conservée ; aucune option n’est supprimée pour tenir à l’écran. Cette correction de présentation ne modifie ni les choix proposés, ni leurs coûts, ni les validations serveur.
+
+
+## Fondation et terrain — 1er novembre 2026
+
+La [fondation des camps et leurs évolutions selon le terrain](camp-foundation-and-terrain.md) est disponible sur place ou par expédition depuis un poste de prospection. Les positions, coûts, disponibilités et évolutions sont validés par le serveur. La prospection révèle aussi les cases vides. Le camp conserve son gisement d’origine ; son influence neutralise les cellules voisines et ferme les sites exceptionnels encore actifs couverts, sans attribuer leur butin. Les lieux historiques conservent leurs règles. Les possibilités des nouveaux camps sont transmises comme état officiel, sans nouveau calcul de règles dans l’interface.

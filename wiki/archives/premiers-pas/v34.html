@@ -1,0 +1,276 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Premiers pas — version 34</title><link rel="stylesheet" href="../../wiki.css"></head><body><header><p class="eyebrow">Archive du wiki · Version 34</p><h1>Premiers pas</h1><p>2026-10-19 · Correction de la validation initiale du scénario et des marges système sur téléphone</p><a href="../../index.html#premiers-pas">Lire l’article actuel</a></header><main class="archive-content"><h2>Premiers pas</h2><p>Une mise à jour serveur en arrière-plan conserve les panneaux de gestion ouverts : elle actualise les ressources et l’affichage des quêtes sans reconstruire la carte ni ces panneaux. Le test de ce comportement fournit désormais explicitement le contrôleur de quêtes ; cette correction de fixture ne change aucune règle ni aucun calcul serveur.</p><p>Pendant une partie, l’accès Organisateur se trouve dans le menu de la partie, avec les mêmes conditions de rôle qu’auparavant. Il ferme le menu puis ouvre la console. Le bouton Retour au jeu de la console masque le lobby, les pages de configuration et l’écran de préparation, ferme les fenêtres de placement ou de scan encore ouvertes et retire les styles de l’éditeur pour laisser le jeu visible. Le lecteur QR libère aussi la caméra lorsqu’une fenêtre est fermée de cette manière. Ce changement concerne uniquement l’interface et ne modifie aucune permission ni règle serveur.</p><p>Le démarrage accepte un catalogue sans l’ancien camp de brigands : il ne tente plus d’y ajouter un héros lorsque le lieu est absent. Cette correction évite une erreur de lancement sans créer de lieu ni de récompense.</p><p>En partie rapide, le parcours est Terrain → Réglages → Joueurs. La zone GPS doit être validée avant de continuer et les réglages sont enregistrés par le serveur avant l’accès aux joueurs. Le scénario et sa préparation détaillée sont accessibles à titre facultatif ; ils ne sont pas une étape imposée du parcours rapide. La rubrique Reprise reste accessible depuis le parcours de reprise à l’accueil et ne figure plus dans une nouvelle partie rapide. Les réglages rapides utilisent des choix compacts, sans textes d’explication ni grands espaces. Ces changements concernent la navigation et la présentation ; les règles et validations serveur des parties restent identiques.</p><p>La préparation détaillée IRL se valide étape par étape : terrain, scénario et quêtes, lieux, puis vérification. Les étapes suivantes restent verrouillées tant que les étapes précédentes ne sont pas validées ; les erreurs officielles du serveur empêchent de continuer. Les lieux se configurent une fiche à la fois et les actions restent visibles en bas ; seul le contenu central défile si la hauteur disponible ne suffit pas. La date, l’impression et l’installation apparaissent uniquement lorsqu’au moins un lieu utilise un QR code. La date est alors obligatoire pour les fiches ; imprimer reste facultatif. Sans QR, aucune date ne bloque le lancement. La carte de placement montre les autres positions déjà enregistrées avec une icône et le cercle du rayon d’interaction. Toucher un repère affiche son nom pendant deux secondes, ou jusqu’à une autre action sur la carte. Les positions restent validées par le serveur ; les placements automatiques futurs ne sont pas affichés avant leur génération.</p><p>Les écrans de préparation reprennent les pages et cartes de choix du test local. Les réglages de type de partie, de position, de difficulté et de rythme utilisent des cartes radio. La progression est cliquable, avec le nom de l’étape courante visible et les autres noms au survol ou au focus clavier ; les étapes disponibles du test local sont aussi accessibles au clavier. Sur le terrain, Ma position et Choisir un lieu sont regroupés dans un panneau. Le statut affiche le périmètre extérieur approximatif et les dimensions est–ouest × nord–sud du rectangle englobant, en plus de la surface. Les exclusions ne sont pas comptées dans le périmètre extérieur. Ces indications visuelles ne changent aucune règle ni validation serveur.</p><p>Le retour au menu des aventures masque le pied de la salle et retire la présentation de l’éditeur de terrain. Les tests des quatre parcours vérifient ce nettoyage ; la correction de leur DOM simulé ne change aucun parcours, aucune permission ni règle de jeu.</p><p>La préparation utilise des panneaux clairs avec des textes contrastés. Les boutons de profils ont une hauteur uniforme et une petite croix de suppression avec confirmation. Les rubriques organisateur et les étapes du scénario sont ordonnées dans une progression cliquable ; Retour et Continuer sont regroupés en bas, avec Enregistrer dans les réglages. Les sélecteurs restent dans leurs fiches, et la recherche du terrain comme les lieux du scénario utilisent des fonds clairs. Cette harmonisation visuelle ne change aucune règle ni validation serveur.</p><p>Après l’accueil, choisissez Jeu rapide, Planifier une partie, Rejoindre une partie ou Partie test, puis votre joueur. Jeu rapide ouvre le terrain, puis les réglages et les joueurs. Planifier une partie ouvre d’abord la grande carte de playarea, puis les fiches du scénario, des quêtes et de leurs lieux. La validation du terrain reste visible sans défiler. Le parcours détaillé concerne uniquement le mode IRL.</p><p>Les nouvelles parties sont configurées par défaut pour 1 joueur en GPS réel. Validez la zone GPS avant de vous déclarer prêt ; augmentez la capacité dans les réglages pour accueillir d’autres joueurs. Le duel reste à deux joueurs. Partie test utilise explicitement la simulation et les sauvegardes conservent leurs paramètres. En mode GPS, le navigateur transmet vos mesures de position. En test sur carte fictive, vous déplacez le héros sur la carte. Les interactions et les actions passent dans les deux cas par les mêmes commandes du serveur.</p><p>Le serveur valide la position, les actions et leurs conséquences. Une page hébergée sur GitHub Pages permet de consulter ce guide ; une partie nécessite aussi un backend accessible.</p><p>En jeu, le menu conserve le code de partie et regroupe les outils Cheat, Debug, Heatmap et Brouillard de guerre sous Développement. L’organisateur peut Sauvegarder et quitter ou Quitter sans sauvegarde en détruisant la partie, après confirmation. Ces deux actions ferment la session pour tous les joueurs. La destruction invalide le code et les sessions sans créer de sauvegarde ; les anciennes sauvegardes restent disponibles. Le serveur contrôle cette permission.</p><p>La préparation détaillée permet de retirer les offres de quêtes indépendantes ; une quête définie comme linéaire et les dépendances nécessaires restent obligatoires. Le ravitaillement utilise le moteur de quêtes actuel. Les prospecteurs perdus reste défini au catalogue mais indisponible dans le monde initial minimal, en attendant la création de ses lieux par quête. L’ancien scénario à phases reste désactivé. Les lieux partagés gardent une configuration unique et proposent seulement les visibilités et placements permis par leur définition.</p><p>L’organisateur choisit joueur avancé (avec héros), absent, maître du jeu ou PNJ suprême (sans héros, avec un personnage de scénario à incarner). Les rôles sans héros exigent un autre joueur. La console des organisateurs présents permet actuellement d’installer ou déplacer les QR ; les autres outils narratifs restent prévus.</p><p>Le placement QR produit un document HTML autonome prêt à imprimer ou enregistrer en PDF : plusieurs fiches A4 avec code, nom du lieu, date, RPG GPS, illustration, notice et repères de découpe. Découpez et protégez chaque fiche contre la pluie, posez-la puis restez à côté pour enregistrer sa position au smartphone. Le serveur refuse les mesures de plus de 50 m de précision, les positions hors zone et les chevauchements de lieux. Récupérez les fiches après la partie.</p><p>Les fiches QR utilisent des écus SVG en noir et blanc adaptés au lieu : capitale, ville, village, camp, mine de fer, mine d’or, carrière, forêt de bûcherons et fort. La mine d’or porte une pioche et une pelle croisées, lame vers le haut, avec des pépites et un éclat. Les dessins sont inclus dans le document autonome, à 18 mm de haut et séparés du QR de 52 mm et de sa marge blanche. Les lieux particuliers sans illustration dédiée portent un écu neutre. Ce changement visuel ne modifie ni le contenu des codes, ni les contrôles de proximité, ni les règles serveur.</p><p>Sur la carte, le bouton caméra Scanner un QR se trouve au-dessus du centrage du joueur et apparaît uniquement dans les parties avec QR pour les joueurs avec héros. La validation temporaire des interactions par visite reste à développer. En jeu, Scanner un QR ouvre la fiche du lieu après validation serveur : bon code de partie, lieu accessible, position officielle de moins de 30 secondes et proximité dans le même rayon que l’interaction du lieu. Le scan découvre le lieu sans attribuer de récompense. Les QR restent localisés dans ce parcours IRL ; le mode intérieur et les outils narratifs supplémentaires sont distincts et restent à développer.</p><p>Ce guide est également publié dans le dépôt dédié rpg-gps-wiki. La note en fin de chaque article permet de consulter ses versions précédentes archivées. Cette séparation de la documentation ne modifie aucune règle du jeu.</p><p>Sur la carte, le menu et le résumé de la quête active restent en haut. Le nouveau moteur de quêtes affiche désormais son objectif officiel dans ce résumé, avec les détails accessibles au toucher. Les pouvoirs utilisent des boutons fixes de 48 × 48 pixels dans un conteneur transparent ; ils sont centrés en bas avec le recentrage à gauche sur la même rangée. En portrait, ils remontent au-dessus de la languette visible ; en paysage, ils restent bas puisque la fiche de lieu est latérale. Les boutons de zoom en portrait sont placés sous le menu pour rester accessibles. Sans languette, la rangée descend au-dessus de la navigation. La navigation des écrans reste permanente en bas. Une seule languette de lieu apparaît au-dessus, uniquement lorsqu’un lieu est atteint ou sélectionné ; sans sélection ni lieu atteint, aucune languette. Un lieu cliqué à distance reste consultable en paysage, mais les interactions exigent toujours la proximité validée par le serveur. Ces changements de présentation ne modifient pas les règles.</p><p>Le bouton du menu sur la carte affiche uniquement les trois barres ☰. Son libellé accessible reste « Menu du jeu » ; cette simplification visuelle ne change ni le contenu du menu ni les règles.</p><p>Dans la préparation détaillée IRL, retirer une quête retire aussi ses lieux exclusifs avant leur placement côté serveur, ainsi que leurs réglages et QR. Les lieux partagés avec une quête retenue restent présents. La capitale et ses lieux économiques sont permanents : les quatre villages existants utilisés par le ravitaillement restent avec leurs réglages et QR même si cette offre est retirée. Les préparations anciennes sont également filtrées au lancement. Le principe est d’associer les quêtes aux lieux compatibles du monde, selon leur fonction, faction et ressources ; l’affectation automatique générale reste à développer et le fort de ravitaillement reste actuellement spécifique à sa mission.</p><p>Prévu : après validation du terrain, proposer les scénarios compatibles et leurs variantes petit, normal et grand. Les repères proposés de périmètre extérieur sont 500 à moins de 1 300 m, 1 300 à 2 000 m et plus de 2 000 jusqu’à 5 000 m. Ces formats ne sont pas encore disponibles. Le périmètre diffère du parcours total ; la compatibilité devra vérifier aussi la forme, les exclusions et les écarts entre lieux. Une erreur de placement indique actuellement qu’aucun des emplacements testés ne respecte les contraintes, sans prouver que toute la zone est inutilisable.</p><p>Les lieux compatibles proposent deux placements différés : par un joueur après une marche, ou dans une case validée. Ils restent absents de la carte jusqu’à leur placement et ne bloquent pas le lancement. Le point de départ et les lieux de l’économie initiale restent préparés avant de jouer. La marche est lancée dans le menu Placement et repérage ; le joueur choisit ensuite Placer ici lorsque la distance configurée est atteinte (300 m par défaut, de 10 à 10 000 m). Le serveur cumule les segments fiables après le départ de la marche et contrôle le terrain et l’écart entre lieux. Une position de moins de 30 secondes avec une précision connue de 50 m ou moins est nécessaire ; les sauts de plus de 250 m et les déplacements GPS dépassant 8 m/s ne sont pas comptés.</p><p>Les missions secondaires de repérage du menu Placement et repérage désignent une autre case compatible du terrain. Le joueur la rejoint puis valide sa position pour alimenter le stock de son équipe. Chaque case ne peut être validée qu’une fois et sert à placer un seul lieu, au centre de la case. Le joueur choisit une case du stock ; le serveur recontrôle sa disponibilité et l’espacement avant de la consommer. Les marches, missions et cases sont conservées dans les sauvegardes ; chaque joueur reçoit uniquement sa marche et le stock de son équipe. Ces missions sont disponibles indépendamment de l’ancien système de quêtes. En simulation, les mêmes intentions et contrôles de placement sont exécutés par le serveur ; un pas de coordonnée vaut 10 m de marche et la précision GPS ne s’applique pas.</p><p>14 octobre 2026 : la liste Scénario des réglages de salle est fournie par le serveur. Les scénarios enregistrés dans le jeu depuis l’atelier apparaissent après redémarrage du serveur ; sélectionner leur nom avant de préparer et lancer une nouvelle partie.</p><p>La création de partie suit un parcours guidé : Terrain → Réglages → Scénario et préparation → Joueurs. En partie rapide, le scénario reste facultatif et les réglages conduisent directement aux joueurs. Les étapes portent un nom visible et l’écran indique la progression avec une courte consigne. Enregistrer et continuer valide les réglages avant de poursuivre ; Retour remonte à l’étape précédente. Les options de position, de difficulté et de rythme sont regroupées dans Options avancées. Les actions principales restent accessibles sans imposer d’ouvrir ces options. La reprise d’une sauvegarde reste accessible dans les options avancées hors partie rapide, sans ajouter une étape au parcours de création.</p><p>Le terrain se dessine dans une fenêtre cartographique qui occupe presque tout l’écran, et tout l’écran sur téléphone. La recherche, Ma position, Annuler le dernier point et Valider la zone restent accessibles ; les exclusions et l’effacement se trouvent dans Options du tracé. Fermer conserve le brouillon et permet de rouvrir la carte ; une validation réussie ferme la fenêtre. Les boutons gardent une hauteur tactile minimale de 44 px. Cette réorganisation concerne la présentation : elle ne modifie ni les règles du moteur ni les contrôles serveur, et n’ajoute pas encore le mode intérieur sans GPS.</p><p>Pendant le tracé, l’organisateur peut faire glisser les points du contour et des exclusions, à la souris ou au doigt. Au relâchement, le brouillon, la surface et le quadrillage sont actualisés. Les poignées ont une zone de saisie de 44 px ; déplacer un point ne crée pas un nouveau sommet. Le changement reste local au brouillon jusqu’à Valider la zone, puis le serveur contrôle le terrain comme auparavant. Les joueurs en consultation ne peuvent pas déplacer ces points.</p><p>Le choix du personnage dans les parties rapides, planifiées et rejointes utilise les mêmes fiches que la partie test : portrait, nom, spécialité et caractéristiques de la classe sélectionnée. Le catalogue et le composant de présentation sont partagés entre les parcours. Chaque joueur sélectionne une fiche ; le serveur confirme le choix et les conditions de disponibilité. Aucune classe n’est choisie automatiquement dans le lobby si le joueur n’en a pas encore choisi. Les fiches sont verrouillées pendant la partie et lors de la reprise d’une sauvegarde ; les rôles organisateurs sans héros restent sans sélection de personnage. Ce changement ne modifie ni les statistiques, ni les règles de création des héros, ni les validations de démarrage.</p><p>Les écrans Quelle aventure ? et Qui joue ? réservent désormais une marge extérieure correspondant aux zones de sécurité du téléphone (barre d’état, encoche et zone du geste d’accueil). Leur hauteur maximale est limitée à l’espace restant ; le contenu peut défiler sur les petits écrans sans masquer le titre. Le choix d’aventure utilise des espacements réduits. La suppression d’un joueur est présentée par une icône de corbeille dans un bouton discret de 44 × 44 px, avec un libellé accessible portant le nom du joueur. La confirmation et les contrôles serveur de suppression restent identiques. Ces corrections visuelles ne changent aucune règle du jeu.</p><p>La fenêtre de préparation du scénario respecte les zones de sécurité du téléphone en haut et en bas. Sa hauteur est limitée à l’espace restant, tandis que le contenu central peut défiler et que les actions de validation restent accessibles. Valider et continuer initialise correctement une préparation encore absente : il n’est plus nécessaire de retirer puis remettre une quête. Le passage à l’étape suivante attend la confirmation de l’enregistrement serveur ; en cas de refus ou d’enregistrement non confirmé, l’étape reste affichée avec un message. Cette correction d’interface ne modifie ni la sélection des quêtes, ni leurs règles, ni les validations du moteur.</p><p><a href="../../../docs/startup-menu.md">Menu et démarrage (document de règles)</a></p><p><a href="../../../docs/party-preparation.md">Préparation détaillée IRL et QR codes (document de règles)</a></p><details><summary>Menu et démarrage — texte conservé pour cette version</summary><pre class="archived-source"># Menu et démarrage
+
+Lorsqu’un panneau de gestion est ouvert, le rendu serveur en arrière-plan
+actualise les ressources ouvertes et l’affichage des quêtes sans reconstruire
+la carte ni les panneaux de gestion. Le test de ce comportement fournit
+explicitement le contrôleur de quêtes et vérifie son appel. Cette correction
+de fixture ne change aucune règle ni aucun calcul serveur.
+
+Le démarrage accepte un catalogue sans l’ancien camp de brigands : il ne tente
+plus d’y ajouter un héros si ce lieu est absent. Le test de remplacement de la
+session reste actif et vérifie le lancement GPS avec le catalogue actuel. Cette
+correction évite une erreur d’interface ; elle ne crée aucun lieu ni récompense.
+
+Après la page de titre, le menu propose quatre choix avant la sélection du joueur :
+
+- **Jeu rapide** : création d’une salle avec les réglages par défaut du serveur (1 joueur, GPS réel), puis affichage de la page Joueurs pour choisir le héros et se déclarer prêt. La zone GPS doit être validée avant de se déclarer prêt. Les réglages restent accessibles.
+- **Planifier une partie** : création d’une salle, puis ouverture directe de la grande carte de playarea. Après validation, présentation du scénario et des quêtes, préparation des lieux, impression et installation des QR codes, puis vérification avant ouverture. Voir [Préparation détaillée IRL](party-preparation.md).
+- **Rejoindre une partie** : ouverture du formulaire de code après le choix du joueur. Le serveur valide l’inscription.
+- **Partie test** : préparation existante sur carte fictive.
+
+Le retour depuis le choix du joueur ou le formulaire de connexion ramène au menu des aventures. Le retour depuis ce menu ramène à la page de titre. La reprise enregistrée reste disponible depuis l’accueil.
+
+Le retour au menu masque aussi le pied de la salle et retire la présentation de
+l’éditeur de terrain. Les tests des quatre parcours simulent les classes du DOM
+et vérifient ce nettoyage. Cette correction de la fixture ne modifie aucun
+parcours, aucune permission ni règle de jeu.
+
+Identité, création, inscription, configuration et démarrage restent validés par le serveur. La préparation détaillée ajoute la sélection des quêtes indépendantes, les rôles organisateur et les placements QR officiels. Jeu rapide ne choisit pas automatiquement le héros et ne lance pas automatiquement la partie.
+
+Les nouvelles parties utilisent par défaut **1 joueur** et **GPS réel**. L’organisateur peut augmenter la capacité avant d’inviter d’autres joueurs ou choisir la simulation. Le duel exige toujours deux joueurs. Partie test demande explicitement la simulation ; une reprise garde les paramètres enregistrés dans la sauvegarde.
+
+## Présentation de la préparation
+
+Le lobby conserve le fond extérieur boisé, avec des panneaux clairs et des textes bruns contrastés. Les profils ont des boutons de même hauteur (64 pixels) et une croix de suppression distincte (44 pixels), avec libellé accessible et confirmation avant effacement. Les champs et sélecteurs restent contenus dans leurs fiches.
+
+Les étapes Scénario, Impression, Installation et Vérification suivent leur ordre dans la progression. Les actions Retour et Continuer sont regroupées en bas ; les réglages proposent aussi Enregistrer dans cette barre. Les panneaux de recherche du terrain et les fiches de lieux utilisent les mêmes couleurs claires. Ces changements concernent uniquement la présentation et la navigation : toutes les validations restent effectuées par le serveur.
+
+La préparation reprend maintenant les pages et les cartes de choix du test local : type de partie, mode de position, difficulté et rythme se sélectionnent par cartes radio. La progression affiche des traits cliquables, avec le nom de l’étape courante et les autres noms au survol ou au focus clavier. Les étapes disponibles du test local sont également accessibles au clic et au clavier. Les commandes continuent de passer par les formulaires et validations existants.
+
+Sur le terrain, Ma position et Choisir un lieu partagent le même panneau ; le titre Zone de jeu GPS est retiré. Dès qu’un contour valide est tracé, le statut indique sa surface, son périmètre extérieur approximatif et les dimensions est–ouest × nord–sud du rectangle englobant. Les exclusions ne s’ajoutent pas au périmètre extérieur. Ces mesures sont des indications de dessin, sans effet sur les permissions, les distances d’interaction ou la validation officielle de la zone par le serveur.
+
+## Menu pendant la partie
+
+Le code de partie reste affiché en haut. Un sous-menu **Développement**, fermé par défaut, regroupe Cheat / Triche, Debug (terrain, quêtes et pause), Heatmap, Brouillard de guerre et les filtres de traces. Il organise les outils existants ; il ne constitue pas une nouvelle permission administrateur.
+
+L’organisateur dispose de deux actions distinctes, en solo serveur comme en multijoueur :
+
+- **Sauvegarder et quitter** demande un nom et conserve la partie dans les sauvegardes serveur, puis ferme la session pour tous les joueurs.
+- **Quitter sans sauvegarde — Détruire la partie** demande une confirmation explicite. Le serveur vérifie que le demandeur est l’organisateur, supprime la partie active et invalide toutes ses sessions. Tous les joueurs reviennent au menu ; le code ne permet plus de rejoindre cette partie. Aucune nouvelle sauvegarde n’est créée et les anciennes sauvegardes sont conservées.
+
+Un autre joueur ne peut pas fermer la partie pour tout le groupe. En cas de refus serveur ou d’échec réseau, l’interface affiche l’erreur sans quitter localement la partie.
+
+## Commandes de la carte
+
+Le menu et le résumé de quête occupent le haut de l’écran. Le résumé est alimenté par la mission active et les actions reçues du serveur, y compris avec le nouveau moteur de quêtes ; il ne calcule aucune progression locale. En présence de plusieurs missions actives, la première dans la vue officielle est affichée. Le toucher ouvre les détails. Sans mission active, le résumé est masqué.
+
+Les pouvoirs ont une taille fixe de 48 × 48 pixels, sans réduction selon le texte. Leur conteneur est transparent, sans bordure, ombre ni flou ; les textes peuvent dépasser en attendant les icônes. Les pouvoirs sont centrés en bas, sur une rangée au-dessus de la languette de lieu lorsqu’elle est visible. Sans languette, cette rangée descend juste au-dessus de la navigation permanente. Le bouton de recentrage, réduit à 44 pixels, est placé à gauche à la même hauteur. En portrait, la rangée remonte au-dessus de la languette pleine largeur. En paysage, la fiche de lieu reste latérale à droite et la rangée reste basse, centrée au-dessus de la navigation.
+
+La navigation des écrans reste permanente en bas sur la carte. Une seule languette s’affiche au-dessus de la navigation pour le lieu atteint ou sélectionné par clic. Sans lieu sélectionné ou atteint, aucune languette ne doit être visible. Cliquer sur la carte pour fermer la fiche efface la sélection ; quitter le lieu atteint ferme également son aperçu. Les lieux distants cliqués restent consultables dans les deux orientations ; leurs interactions demeurent bloquées sans proximité officielle. Les fiches ouvertes restent au-dessus de la navigation basse.
+
+Ces modifications concernent uniquement la présentation : les effets, recharges, quêtes, déplacements et interactions restent calculés et validés par le serveur.
+
+Le bouton du menu de jeu affiche uniquement les trois barres ☰, sans texte visible. Le libellé accessible « Menu du jeu » reste présent pour les lecteurs d’écran. Le contenu et le fonctionnement du menu sont inchangés.
+
+En portrait, les boutons de zoom de la carte sont décalés sous le bouton de menu pour rester accessibles. Leur disposition paysage ne change pas. Ces réglages ne modifient aucune règle de jeu.
+
+## Validation du parcours et carte de placement (11 octobre 2026)
+
+La préparation détaillée IRL se valide étape par étape : terrain, scénario et quêtes, lieux, puis vérification. Les étapes suivantes restent verrouillées tant que les étapes précédentes ne sont pas validées ; les erreurs officielles du serveur empêchent de continuer. Les lieux se configurent une fiche à la fois et les actions restent visibles en bas ; seul le contenu central défile si la hauteur disponible ne suffit pas. La date, l’impression et l’installation apparaissent uniquement lorsqu’au moins un lieu utilise un QR code. La date est alors obligatoire pour les fiches ; imprimer reste facultatif. Sans QR, aucune date ne bloque le lancement. La carte de placement montre les autres positions déjà enregistrées avec une icône et le cercle du rayon d’interaction. Toucher un repère affiche son nom pendant deux secondes, ou jusqu’à une autre action sur la carte. Les positions restent validées par le serveur ; les placements automatiques futurs ne sont pas affichés avant leur génération.
+
+Les boutons des joueurs ont une largeur uniforme (260 px, limitée à la largeur disponible), une hauteur de 60 px et une suppression compacte. Les fiches, indications et informations du lobby utilisent des textes bruns sur fond clair. Les sélecteurs restent dans leurs contenants. Ces corrections visuelles ne changent aucune règle de jeu.
+
+## Parcours rapide (11 octobre 2026)
+
+En partie rapide, le parcours est Terrain → Réglages → Joueurs. La zone GPS doit être validée avant de continuer et les réglages sont enregistrés par le serveur avant l’accès aux joueurs. Le scénario et sa préparation détaillée sont accessibles à titre facultatif ; ils ne sont pas une étape imposée du parcours rapide. La rubrique Reprise reste accessible depuis le parcours de reprise à l’accueil et ne figure plus dans une nouvelle partie rapide. Les réglages rapides utilisent des choix compacts, sans textes d’explication ni grands espaces. Ces changements concernent la navigation et la présentation ; les règles et validations serveur des parties restent identiques.
+
+## Console organisateur et retour au jeu (11 octobre 2026)
+
+Pendant une partie, l’accès Organisateur se trouve dans le menu de la partie, avec les mêmes conditions de rôle qu’auparavant. Il ferme le menu puis ouvre la console. Le bouton Retour au jeu de la console masque le lobby, les pages de configuration et l’écran de préparation, ferme les fenêtres de placement ou de scan encore ouvertes et retire les styles de l’éditeur pour laisser le jeu visible. Le lecteur QR libère aussi la caméra lorsqu’une fenêtre est fermée de cette manière. Ce changement concerne uniquement l’interface et ne modifie aucune permission ni règle serveur.
+
+## Parcours guidé et carte agrandie (14 octobre 2026)
+
+La création de partie suit un parcours guidé : Terrain → Réglages → Scénario et préparation → Joueurs. En partie rapide, le scénario reste facultatif et les réglages conduisent directement aux joueurs. Les étapes portent un nom visible et l’écran indique la progression avec une courte consigne. Enregistrer et continuer valide les réglages avant de poursuivre ; Retour remonte à l’étape précédente. Les options de position, de difficulté et de rythme sont regroupées dans Options avancées. Les actions principales restent accessibles sans imposer d’ouvrir ces options.
+
+Le terrain se dessine dans une fenêtre cartographique qui occupe presque tout l’écran, et tout l’écran sur téléphone. La recherche, Ma position, Annuler le dernier point et Valider la zone restent accessibles ; les exclusions et l’effacement se trouvent dans Options du tracé. Fermer conserve le brouillon et permet de rouvrir la carte ; une validation réussie ferme la fenêtre. Les boutons gardent une hauteur tactile minimale de 44 px. Cette réorganisation concerne la présentation : elle ne modifie ni les règles du moteur ni les contrôles serveur, et n’ajoute pas encore le mode intérieur sans GPS.
+
+La reprise reste accessible dans Options avancées hors partie rapide ; elle n’apparaît plus comme onglet de création. Les réglages doivent être enregistrés avant d’accéder au scénario ou aux joueurs, y compris dans le parcours détaillé.
+
+## Déplacer les points du terrain (14 octobre 2026)
+
+Pendant le tracé, l’organisateur peut faire glisser les points du contour et des exclusions, à la souris ou au doigt. Au relâchement, le brouillon, la surface et le quadrillage sont actualisés. Les poignées ont une zone de saisie de 44 px ; déplacer un point ne crée pas un nouveau sommet. Le changement reste local au brouillon jusqu’à Valider la zone, puis le serveur contrôle le terrain comme auparavant. Les joueurs en consultation ne peuvent pas déplacer ces points.
+
+## Fiches de personnage communes (16 octobre 2026)
+
+Le choix du personnage dans les parties rapides, planifiées et rejointes utilise les mêmes fiches que la partie test : portrait, nom, spécialité et caractéristiques de la classe sélectionnée. Le catalogue et le composant de présentation sont partagés entre les parcours. Chaque joueur sélectionne une fiche ; le serveur confirme le choix et les conditions de disponibilité. Aucune classe n’est choisie automatiquement dans le lobby si le joueur n’en a pas encore choisi. Les fiches sont verrouillées pendant la partie et lors de la reprise d’une sauvegarde ; les rôles organisateurs sans héros restent sans sélection de personnage. Ce changement ne modifie ni les statistiques, ni les règles de création des héros, ni les validations de démarrage.
+
+## Zone système du téléphone et suppression des profils (18 octobre 2026)
+
+Les écrans Quelle aventure ? et Qui joue ? réservent désormais une marge extérieure correspondant aux zones de sécurité du téléphone (barre d’état, encoche et zone du geste d’accueil). Leur hauteur maximale est limitée à l’espace restant ; le contenu peut défiler sur les petits écrans sans masquer le titre. Le choix d’aventure utilise des espacements réduits. La suppression d’un joueur est présentée par une icône de corbeille dans un bouton discret de 44 × 44 px, avec un libellé accessible portant le nom du joueur. La confirmation et les contrôles serveur de suppression restent identiques. Ces corrections visuelles ne changent aucune règle du jeu.
+
+## Validation initiale et zones de sécurité du scénario (19 octobre 2026)
+
+La fenêtre de préparation du scénario respecte les zones de sécurité du téléphone en haut et en bas. Sa hauteur est limitée à l’espace restant, tandis que le contenu central peut défiler et que les actions de validation restent accessibles. Valider et continuer initialise correctement une préparation encore absente : il n’est plus nécessaire de retirer puis remettre une quête. Le passage à l’étape suivante attend la confirmation de l’enregistrement serveur ; en cas de refus ou d’enregistrement non confirmé, l’étape reste affichée avec un message. Cette correction d’interface ne modifie ni la sélection des quêtes, ni leurs règles, ni les validations du moteur.
+</pre></details><details><summary>Préparation détaillée IRL et QR codes — texte conservé pour cette version</summary><pre class="archived-source"># Préparation détaillée IRL
+
+14 octobre 2026 : le scénario des réglages de salle provient du catalogue serveur.
+Les scénarios installés depuis l’éditeur apparaissent après redémarrage. Leur
+préparation propose uniquement leurs quêtes et lieux, sans ajouter ceux du monde initial.
+Changer de scénario réinitialise les placements et exclusions ; le terrain et
+les règles de validation restent identiques. Une nouvelle partie est nécessaire
+pour utiliser un scénario nouvellement installé.
+
+Le parcours « Planifier une partie » concerne le terrain réel. Le mode intérieur
+reste un parcours distinct, non implémenté ici. Le serveur conserve et valide
+la préparation ; le navigateur présente les fiches et transmet les intentions.
+
+## Parcours disponible
+
+1. **Playarea** : la carte occupe l’espace disponible, avec recherche d’adresse,
+   recentrage volontaire, tracé, annulation et exclusions. La validation reste
+   accessible sans défiler. Le terrain doit être validé avant la suite.
+2. **Scénario et quêtes** : présentation issue de la fiche « La fuite du royaume ».
+   Les deux quêtes du moteur actuel sont présentées depuis leurs fiches :
+   Le ravitaillement et Les prospecteurs perdus. Ce sont deux offres indépendantes,
+   retirables séparément ; les actions internes de chaque quête restent intactes.
+   Le contrat de préparation interdit le retrait d’une quête marquée linéaire et
+   vérifie les dépendances entre offres. L’ancien scénario à phases reste désactivé.
+3. **Lieux** : chaque fiche de quête affiche ses lieux nécessaires. Un lieu partagé
+   garde une seule configuration. Les autres lieux restent accessibles dans une
+   rubrique repliable. Les options sont limitées par leur définition : visibilité
+   connue, découverte, activation à l’ouverture de la partie, ou apparition selon
+   la quête ; placement prévu par le scénario, aléatoire, carte ou QR code.
+   Les placements différés imposés par le scénario ne sont pas librement modifiables.
+4. **Impression** : télécharger un fichier HTML autonome, puis l’ouvrir pour
+   imprimer ou enregistrer en PDF. Deux fiches peuvent tenir sur une feuille A4.
+   Chaque fiche contient le QR, le nom du lieu, la date, le nom RPG GPS, une petite
+   illustration médiévale vectorielle, des repères de découpe et une notice.
+5. **Installation** : découper, protéger contre les intempéries, poser la fiche,
+   puis rester à côté avec son smartphone. Scanner dans Installation ou choisir
+   le lieu et « Enregistrer ici ». Une carte montre la mesure et sa précision ;
+   confirmer pour transmettre la position au serveur. Une précision supérieure
+   à 50 m, une position hors playarea ou dans une exclusion sont refusées.
+6. **Vérification et ouverture** : date, personnage éventuel et positions manuelles
+   doivent être renseignés. Tous les joueurs doivent être prêts. Le serveur crée
+   le monde officiel, applique les placements et publie uniquement les quêtes retenues.
+
+## Sélection des lieux et taille du terrain
+
+Retirer une offre de quête retire aussi ses lieux exclusifs du catalogue de
+préparation et du monde créé par le serveur, avant tout calcul de placement.
+Ces lieux ne sont plus proposés dans « Autres lieux », n’exigent plus d’installation
+et leurs réglages et QR sont retirés de la préparation. Les lieux partagés restent
+si une autre quête retenue les utilise ; la capitale, point de départ, reste
+permanente même sans offre de quête. Les lieux économiques de la capitale restent
+aussi permanents : le ravitaillement utilise leurs quatre villages existants,
+sans créer quatre villages supplémentaires. Retirer cette offre conserve ces
+villages, leurs réglages et leurs QR ; cela retire les objectifs de la quête.
+Une ancienne préparation est également
+filtrée au lancement. La sélection ne modifie pas les récompenses des quêtes retenues.
+
+Le principe de conception est de générer les lieux du monde puis d’y associer
+les besoins des quêtes. Une association doit vérifier la fonction du lieu,
+sa faction, ses ressources, son placement et les besoins de distance ou de
+lieux distincts. Un même lieu peut servir plusieurs quêtes. Le type seul ne
+suffit pas : une mine de fer ne remplace pas une mine d’or. Seuls les éléments
+spécifiques tels que les indices temporaires doivent dépendre exclusivement
+d’une quête. L’affectation automatique générale reste à développer ; actuellement
+les associations sont définies par les catalogues et le fort de ravitaillement
+reste spécifique à cette mission.
+
+Le parcours commence déjà par la validation du terrain. Le filtrage des scénarios
+compatibles et leurs variantes de taille sont **prévus**, pas encore disponibles.
+Les repères proposés pour le périmètre extérieur sont : petit de 500 à moins de
+1 300 m, normal de 1 300 à 2 000 m, grand au-delà de 2 000 jusqu’à 5 000 m.
+Le grand format serait exceptionnel et destiné à un public pouvant parcourir
+de longues distances. Le périmètre n’est pas la longueur totale du parcours.
+La compatibilité devra également vérifier la forme, la surface utilisable,
+les exclusions, les écarts entre lieux et les dépendances des quêtes côté serveur.
+Les variantes devront définir les lieux et distances nécessaires à chaque quête.
+
+L’erreur de placement d’un objectif signifie qu’aucun emplacement **testé**
+ne respecte les contraintes : zone autorisée, exclusions et écarts avec les
+autres lieux. Le générateur teste un échantillon de points ; cette erreur ne
+prouve pas que chaque point de la zone est inutilisable.
+
+## Rôles de l’organisateur
+
+- **Joueur avancé** : héros jouable et console organisateur accessible pendant le jeu.
+- **Absent** : aucun héros ; préparation puis partie autonome. Pas de déplacement
+  de QR autorisé après l’ouverture.
+- **Maître du jeu** : aucun héros ; conserve sa console sur le terrain.
+- **PNJ suprême** : aucun héros ; nomme un personnage de scénario à incarner et
+  conserve sa console. Le roleplay se déroule sur le terrain.
+
+Un rôle sans héros exige au moins un autre joueur. La capacité inclut actuellement
+la place de l’organisateur ; elle passe au minimum à deux pour ces rôles.
+La console permet actuellement l’installation et le déplacement des QR codes.
+Les outils supplémentaires d’arbitrage, de dialogues incarnés et de déclenchement
+libre d’événements restent à définir et ne sont pas ajoutés à cette version.
+
+## Utilisation des QR en jeu
+
+Sur la carte, le bouton caméra « Scanner un QR » se trouve juste au-dessus du
+centrage du joueur. Il apparaît uniquement dans les parties avec QR, pour les
+joueurs avec héros, et demande l’accès à la caméra au clic. Ce déplacement du
+bouton ne modifie pas les règles : la validation temporaire des interactions
+pour chaque visite, annulée à la sortie du lieu, reste à développer.
+
+Le QR identifie un lieu dans une partie. Son identifiant reste stable lors d’un
+déplacement : la fiche ne doit pas être réimprimée. Le serveur vérifie l’identité
+de la partie, l’apparition du lieu et une mesure GPS officielle récente (30 s).
+Le rayon est celui de l’interaction du lieu, avec les mêmes modificateurs du héros.
+Un scan valide découvre le lieu au niveau 3 et ouvre sa fiche ; il n’attribue
+aucune récompense et ne termine pas une quête à lui seul.
+
+Le scan caméra utilise jsQR fourni localement. Si la caméra est indisponible,
+le code texte imprimé peut être saisi. La caméra est arrêtée à la fermeture.
+En IRL les QR restent localisés ; le retrait de la contrainte GPS appartient au
+futur parcours intérieur. Les déplacements en cours de partie sont réservés à
+l’organisateur présent, contrôlés et consignés par le serveur.
+
+Récupérer les fiches après la partie. Les précédentes règles de combat, de
+production et de récompense restent inchangées.
+
+## Vérification
+
+`tests/party-preparation.test.js` couvre sélection, permissions, rôles sans héros,
+installation, persistance et document imprimable. Le document est décodé avec
+le même lecteur que le smartphone pour vérifier les QR produits. Les suites
+multijoueur, projection et placement couvrent les raccordements existants.
+
+## Validation du parcours et carte de placement (11 octobre 2026)
+
+La préparation détaillée IRL se valide étape par étape : terrain, scénario et quêtes, lieux, puis vérification. Les étapes suivantes restent verrouillées tant que les étapes précédentes ne sont pas validées ; les erreurs officielles du serveur empêchent de continuer. Les lieux se configurent une fiche à la fois et les actions restent visibles en bas ; seul le contenu central défile si la hauteur disponible ne suffit pas. La date, l’impression et l’installation apparaissent uniquement lorsqu’au moins un lieu utilise un QR code. La date est alors obligatoire pour les fiches ; imprimer reste facultatif. Sans QR, aucune date ne bloque le lancement. La carte de placement montre les autres positions déjà enregistrées avec une icône et le cercle du rayon d’interaction. Toucher un repère affiche son nom pendant deux secondes, ou jusqu’à une autre action sur la carte. Les positions restent validées par le serveur ; les placements automatiques futurs ne sont pas affichés avant leur génération.
+
+Les boutons des joueurs ont une largeur uniforme (260 px, limitée à la largeur disponible), une hauteur de 60 px et une suppression compacte. Les fiches, indications et informations du lobby utilisent des textes bruns sur fond clair. Les sélecteurs restent dans leurs contenants. Ces corrections visuelles ne changent aucune règle de jeu.
+
+## Console organisateur et retour au jeu (11 octobre 2026)
+
+Pendant une partie, l’accès Organisateur se trouve dans le menu de la partie, avec les mêmes conditions de rôle qu’auparavant. Il ferme le menu puis ouvre la console. Le bouton Retour au jeu de la console masque le lobby, les pages de configuration et l’écran de préparation, ferme les fenêtres de placement ou de scan encore ouvertes et retire les styles de l’éditeur pour laisser le jeu visible. Le lecteur QR libère aussi la caméra lorsqu’une fenêtre est fermée de cette manière. Ce changement concerne uniquement l’interface et ne modifie aucune permission ni règle serveur.
+
+## Placements par les joueurs et cases repérées (11 octobre 2026)
+
+Les lieux compatibles proposent deux placements différés : par un joueur après une marche, ou dans une case validée. Ils restent absents de la carte jusqu’à leur placement et ne bloquent pas le lancement. Le point de départ et les lieux de l’économie initiale restent préparés avant de jouer. La marche est lancée dans le menu Placement et repérage ; le joueur choisit ensuite Placer ici lorsque la distance configurée est atteinte (300 m par défaut, de 10 à 10 000 m). Le serveur cumule les segments fiables après le départ de la marche et contrôle le terrain et l’écart entre lieux. Une position de moins de 30 secondes avec une précision connue de 50 m ou moins est nécessaire ; les sauts de plus de 250 m et les déplacements GPS dépassant 8 m/s ne sont pas comptés.
+
+Les missions secondaires de repérage du menu Placement et repérage désignent une autre case compatible du terrain. Le joueur la rejoint puis valide sa position pour alimenter le stock de son équipe. Chaque case ne peut être validée qu’une fois et sert à placer un seul lieu, au centre de la case. Le joueur choisit une case du stock ; le serveur recontrôle sa disponibilité et l’espacement avant de la consommer. Les marches, missions et cases sont conservées dans les sauvegardes ; chaque joueur reçoit uniquement sa marche et le stock de son équipe. Ces missions sont disponibles indépendamment de l’ancien système de quêtes. En simulation, les mêmes intentions et contrôles de placement sont exécutés par le serveur ; un pas de coordonnée vaut 10 m de marche et la précision GPS ne s’applique pas.
+
+Les commandes `playerPlacementCommand` ne reçoivent que l’action, le lieu et la case : le serveur injecte l’identité authentifiée et la dernière mesure officielle. Le stock privé `worldState.flags.playerPlacement` est retiré des projections de monde. Les mutations du moteur sont indépendantes du DOM. Aucun gain ou récompense supplémentaire n’est attribué par ces missions.
+
+14 octobre 2026 — correction de l’isolation des scénarios : le catalogue de
+conception commun ne détermine plus les lieux de la partie choisie. Les placements
+officiels du serveur sont utilisés directement en simulation. Les sauvegardes
+existantes ne sont pas migrées ; tester dans une nouvelle partie.
+
+## Parcours guidé et carte agrandie (14 octobre 2026)
+
+La création de partie suit un parcours guidé : Terrain → Réglages → Scénario et préparation → Joueurs. En partie rapide, le scénario reste facultatif et les réglages conduisent directement aux joueurs. Les étapes portent un nom visible et l’écran indique la progression avec une courte consigne. Enregistrer et continuer valide les réglages avant de poursuivre ; Retour remonte à l’étape précédente. Les options de position, de difficulté et de rythme sont regroupées dans Options avancées. Les actions principales restent accessibles sans imposer d’ouvrir ces options.
+
+Le terrain se dessine dans une fenêtre cartographique qui occupe presque tout l’écran, et tout l’écran sur téléphone. La recherche, Ma position, Annuler le dernier point et Valider la zone restent accessibles ; les exclusions et l’effacement se trouvent dans Options du tracé. Fermer conserve le brouillon et permet de rouvrir la carte ; une validation réussie ferme la fenêtre. Les boutons gardent une hauteur tactile minimale de 44 px. Cette réorganisation concerne la présentation : elle ne modifie ni les règles du moteur ni les contrôles serveur, et n’ajoute pas encore le mode intérieur sans GPS.
+
+## Déplacer les points du terrain (14 octobre 2026)
+
+Pendant le tracé, l’organisateur peut faire glisser les points du contour et des exclusions, à la souris ou au doigt. Au relâchement, le brouillon, la surface et le quadrillage sont actualisés. Les poignées ont une zone de saisie de 44 px ; déplacer un point ne crée pas un nouveau sommet. Le changement reste local au brouillon jusqu’à Valider la zone, puis le serveur contrôle le terrain comme auparavant. Les joueurs en consultation ne peuvent pas déplacer ces points.
+
+## Fiches de personnage communes (16 octobre 2026)
+
+Le choix du personnage dans les parties rapides, planifiées et rejointes utilise les mêmes fiches que la partie test : portrait, nom, spécialité et caractéristiques de la classe sélectionnée. Le catalogue et le composant de présentation sont partagés entre les parcours. Chaque joueur sélectionne une fiche ; le serveur confirme le choix et les conditions de disponibilité. Aucune classe n’est choisie automatiquement dans le lobby si le joueur n’en a pas encore choisi. Les fiches sont verrouillées pendant la partie et lors de la reprise d’une sauvegarde ; les rôles organisateurs sans héros restent sans sélection de personnage. Ce changement ne modifie ni les statistiques, ni les règles de création des héros, ni les validations de démarrage.
+
+## Armoiries des fiches QR (17 octobre 2026)
+
+Les fiches QR utilisent des écus SVG en noir et blanc adaptés au lieu : capitale, ville, village, camp, mine de fer, mine d’or, carrière, forêt de bûcherons et fort. La mine d’or porte une pioche et une pelle croisées, lame vers le haut, avec des pépites et un éclat. Les dessins sont inclus dans le document autonome, à 18 mm de haut et séparés du QR de 52 mm et de sa marge blanche. Les lieux particuliers sans illustration dédiée portent un écu neutre. Ce changement visuel ne modifie ni le contenu des codes, ni les contrôles de proximité, ni les règles serveur.
+
+## Validation initiale et zones de sécurité du scénario (19 octobre 2026)
+
+La fenêtre de préparation du scénario respecte les zones de sécurité du téléphone en haut et en bas. Sa hauteur est limitée à l’espace restant, tandis que le contenu central peut défiler et que les actions de validation restent accessibles. Valider et continuer initialise correctement une préparation encore absente : il n’est plus nécessaire de retirer puis remettre une quête. Le passage à l’étape suivante attend la confirmation de l’enregistrement serveur ; en cas de refus ou d’enregistrement non confirmé, l’étape reste affichée avec un message. Cette correction d’interface ne modifie ni la sélection des quêtes, ni leurs règles, ni les validations du moteur.
+</pre></details></main></body></html>

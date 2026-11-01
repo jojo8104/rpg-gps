@@ -1,3 +1,4 @@
+import { requireHeroGender } from "./hero-gender.js";
 import { Army } from "./army.js";
 import {
   HERO_GRADES,
@@ -14,6 +15,7 @@ export class Hero {
     playerId,
     name,
     classId = null,
+    gender = null,
     maxHealth = null,
     health = null,
     state = "active",
@@ -45,6 +47,7 @@ export class Hero {
     travelProgress = {},
     appearanceId = null,
     classFeatureState = {},
+    sideQuests = [],
     wagons = [],
   }) {
     this.id = Hero.#requireText(id, "L'identifiant du héros");
@@ -54,6 +57,7 @@ export class Hero {
       classId === null
         ? null
         : Hero.#requireText(classId, "L'identifiant de classe");
+    this.gender = requireHeroGender(gender, this.classId);
     this.baseStats = Hero.#createStats(
       baseStats ?? {
         attack: commandStats.attackBonus ?? 0,
@@ -84,7 +88,11 @@ export class Hero {
       maxHealth ?? this.finalStats.health,
       "Les PV maximum",
     );
-    this.health = Hero.#requireHealth(health ?? this.maxHealth, this.maxHealth);
+    this.health = Hero.#requireHealth(
+      health ?? this.maxHealth,
+      this.maxHealth,
+      state === "ghost",
+    );
     this.state = Hero.#requireText(state, "L'état du héros");
     this.pursuitCooldownUntil =
       pursuitCooldownUntil === null
@@ -145,6 +153,7 @@ export class Hero {
     )
       throw new TypeError("L'état des avantages de classe doit être un objet.");
     this.classFeatureState = structuredClone(classFeatureState);
+    this.sideQuests = structuredClone(sideQuests);
     this.wagons = Hero.#createWagons(wagons);
   }
 
@@ -338,6 +347,7 @@ export class Hero {
       playerId: this.playerId,
       name: this.name,
       classId: this.classId,
+      gender: this.gender,
       maxHealth: this.maxHealth,
       health: this.health,
       state: this.state,
@@ -372,6 +382,7 @@ export class Hero {
       travelProgress: structuredClone(this.travelProgress),
       appearanceId: this.appearanceId,
       classFeatureState: structuredClone(this.classFeatureState),
+      sideQuests: structuredClone(this.sideQuests),
       wagons: this.wagons.map((wagon) => ({ ...wagon })),
     };
   }

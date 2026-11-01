@@ -1,4 +1,6 @@
+import { normalizeCampTerrain } from "./camp-terrain-rules.js";
 import { Army } from "./army.js";
+import { normalizeVisual } from "./visual-definition.js";
 import { getItemDefinition } from "./item-catalog.js";
 
 const PRODUCTION_SLOTS_PER_RESOURCE = 4;
@@ -10,6 +12,8 @@ export class Location {
     id,
     name,
     type,
+    terrain = null,
+    visual = null,
     roles = [],
     source,
     position,
@@ -43,10 +47,13 @@ export class Location {
     abandonmentCycles = 0,
     dismantlings = [],
     improvements = [],
+    taxes = {},
   }) {
     this.id = Location.#requireText(id, "L'identifiant du lieu");
     this.name = Location.#requireText(name, "Le nom du lieu");
     this.type = Location.#requireText(type, "Le type du lieu");
+    this.terrain = normalizeCampTerrain(terrain);
+    this.visual = normalizeVisual(visual);
     this.roles = Location.#createTextList(roles, "Les rôles");
     this.source = Location.#requireText(source, "La source du lieu");
     this.position = Location.#createPosition(position);
@@ -93,6 +100,12 @@ export class Location {
     );
     this.features = Location.#createBooleanMap(features, "Les fonctionnalités");
     this.resources = Location.#createResources(resources);
+    this.taxes = {
+      accrued: Location.#requireNonNegativeNumber(
+        taxes.accrued ?? 0,
+        "Les impôts accumulés",
+      ),
+    };
     this.storedItems = Location.#createStoredItems(storedItems);
     this.contentment =
       contentment === null
@@ -255,9 +268,34 @@ export class Location {
     return true;
   }
   get defenseBonus() {
-    return this.improvements
+    const special = this.improvements
       .filter((item) => !item.destroyed)
       .reduce((sum, item) => sum + item.defenseBonus, 0);
+    const fortifications = {
+      barricades: Math.min(3, this.infrastructure.barricades ?? 0),
+      palisades: 3 + Math.min(2, this.infrastructure.palisades ?? 0),
+      palisade: 2,
+      palissade: 2,
+      walls: 4 + Math.min(2, this.infrastructure.walls ?? 0),
+      wall: 4,
+      ramparts: 7,
+    };
+    return (
+      special +
+      Object.entries(fortifications).reduce(
+        (best, [id, value]) =>
+          (this.infrastructure[id] ?? 0) > 0 ? Math.max(best, value) : best,
+        0,
+      )
+    );
+  }
+  get locationAttackBonus() {
+    return (
+      (this.infrastructure.defense_tower ?? 0) * 2 +
+      ((this.infrastructure.ramparts ?? 0) > 0
+        ? 3
+        : Math.min(2, this.infrastructure.walls ?? 0))
+    );
   }
   get militiaCapacityBonus() {
     return this.improvements
@@ -306,8 +344,8 @@ export class Location {
 
   get productionSlotCapacity() {
     return (
-      Object.keys(this.resources.production).length *
-      PRODUCTION_SLOTS_PER_RESOURCE
+      Object.values(this.resources.production).filter((amount) => amount > 0)
+        .length * PRODUCTION_SLOTS_PER_RESOURCE
     );
   }
 
@@ -413,7 +451,9 @@ export class Location {
     return {
       id: this.id,
       name: this.name,
+      ...(this.visual ? { visual: { ...this.visual } } : {}),
       type: this.type,
+      ...(this.terrain ? {terrain:{...this.terrain}} : {}),
       roles: [...this.roles],
       source: this.source,
       position: { ...this.position },
@@ -429,6 +469,7 @@ export class Location {
       defenseSlots: this.defenseSlots,
       features: { ...this.features },
       resources: Location.#copyResources(this.resources),
+      taxes: { ...this.taxes },
       storedItems: this.storedItems.map((item) => ({ ...item })),
       contentment: this.contentment,
       capture: { ...this.capture },
@@ -791,7 +832,14 @@ export class Location {
       typeof statistics !== "object"
     )
       throw new TypeError("Les statistiques doivent être un objet.");
-    return Location.#createNonNegativeMap(statistics, "Les statistiques");
+    const { tavernWorkerProductionBonus, ...counters } = statistics;
+    const result = Location.#createNonNegativeMap(counters, "Les statistiques");
+    if (tavernWorkerProductionBonus !== undefined)
+      result.tavernWorkerProductionBonus = Location.#createNonNegativeMap(
+        tavernWorkerProductionBonus,
+        "Les bonus des spécialistes",
+      );
+    return result;
   }
 
   static #createDurability(value) {

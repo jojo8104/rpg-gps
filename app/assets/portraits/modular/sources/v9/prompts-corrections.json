@@ -1,0 +1,7 @@
+{
+  "mode": "built-in imagegen",
+  "prompts": {
+    "male-features-clean": "Edit ONLY this production spritesheet: in the THREE male hair cutouts in bottom row, REMOVE THE HUMAN EARS AND ALL SKIN completely, leaving those areas genuinely transparent. Preserve all hair strands and transparent forehead/face opening. Hair must contain HAIR ONLY and no flesh. Keep all other cells, their positions, the blank face and eye/nose/mouth pieces exactly unchanged. Keep the same 4x3 grid, colors, sizes and genuine alpha background.",
+    "accessories-clean": "Remove the entire dark brown glowing background from this 4-column x 2-row spritesheet. All space around AND inside the 8 objects must become genuinely transparent alpha, including beard mouth holes and gaps between fork tines. Preserve the exact eight object drawings, their positions, grid and fine edges without redrawing them: top row spear, pitchfork, blue crystal staff, brown beard; bottom row spear, pitchfork, amber staff, grey goatee. No shadows or halos outside objects. Keep all objects completely separate and unchanged, full vertical poles visible. Output transparent PNG, absolutely no colored background."
+  }
+}

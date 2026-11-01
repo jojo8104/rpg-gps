@@ -43,7 +43,7 @@ export class HeroArmyModifier {
       defenseBonus:
         hero.finalStats?.defense ?? hero.commandStats?.defenseBonus ?? 0,
       moraleBonus:
-        (hero.finalStats?.morale ?? hero.commandStats?.moraleBonus ?? 0) +
+        (hero.finalStats?.morale ?? hero.commandStats?.moraleBonus ?? 0) - (hero.classFeatureState?.expeditionMorale ?? []).reduce((sum,e)=>sum+e.delta,0) +
         morale.total,
       speedMultiplier:
         speed.multiplier * ((hero.finalStats?.mobility ?? 3) / 3),
@@ -95,7 +95,7 @@ export class HeroArmyModifier {
     const factors = [
       ...(hero.moraleHistory ?? []),
       ...(context.moraleFactors ?? []),
-    ].filter((factor) => allowed.has(factor.source));
+    ].filter((factor) => allowed.has(factor.source) && !factor.reason?.startsWith("expedition:"));
     const details = factors.map((factor) => ({
       source: factor.source,
       value: factor.value,

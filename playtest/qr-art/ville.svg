@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 120" role="img" aria-labelledby="title">
+  <title id="title">Ville médiévale : maisons à colombages et beffroi</title>
+  <rect width="240" height="120" fill="white"/>
+  <g stroke="black" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="white" d="M94 98V42h31v56M91 42l18-27 19 27z"/>
+    <path fill="black" d="M109 15V5l18 5-18 5M104 52h10v14h-10z"/>
+    <path fill="white" d="M25 101V65h49v36M18 65l31-27 32 27zM135 100V56h50v44M128 56l32-28 32 28zM184 101V76h29v25M178 76l20-20 22 20z"/>
+    <path fill="black" d="M18 65l31-27 32 27zM128 56l32-28 32 28zM178 76l20-20 22 20z"/>
+    <path fill="none" d="M49 68v31M27 80h45M28 67l19 13 24-13M137 76h46M160 59v39M138 58l21 17 23-17"/>
+    <path fill="black" d="M37 101V89h10v12M168 101V85h10v16M194 85h8v9h-8z"/>
+    <path fill="white" d="M72 105V79h62v26M68 79V68h11v7h12v-7h12v7h12v-7h13v7h10v4z"/>
+    <path fill="black" d="M94 105V94a9 9 0 0 1 18 0v11"/>
+    <path fill="none" d="M17 106h206M94 115l5-8M114 107l8 8"/>
+  </g>
+</svg>

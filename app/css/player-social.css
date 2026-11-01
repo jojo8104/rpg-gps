@@ -1,0 +1,77 @@
+.player-trade-sheet {
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+.player-trade-offers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.trade-offer {
+  min-width: 0;
+  min-height: 100px;
+  border: 2px solid #8a7045;
+  border-radius: 10px;
+  padding: 10px;
+  background: #f0e5cd;
+  color: #342916;
+}
+.trade-offer[data-offer-drop] {
+  border-style: dashed;
+}
+.trade-offer-item {
+  display: grid;
+  gap: 6px;
+  padding: 8px 0;
+  border-bottom: 1px solid #bba680;
+  overflow-wrap: anywhere;
+}
+.trade-offer-item input {
+  width: 100%;
+  max-width: 100px;
+  min-height: 40px;
+}
+.player-trade-inventory {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.player-trade-inventory section {
+  min-width: 0;
+}
+.trade-item {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin: 5px 0;
+  touch-action: none;
+  overflow-wrap: anywhere;
+}
+.bottom-sheet .trade-offer p,
+.bottom-sheet .player-trade-inventory p {
+  color: #59452c;
+}
+.bottom-sheet.player-trade-sheet {
+  max-height: calc(
+    100dvh - 110px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  );
+}
+.player-trade-offers {
+  position: sticky;
+  top: -1px;
+  z-index: 2;
+  background: #f0e5cd;
+  border-radius: 10px;
+}
+.trade-offer {
+  max-height: 32dvh;
+  overflow-y: auto;
+}
+.trade-item.is-dragging {
+  opacity: 0.6;
+  outline: 2px solid #856515;
+}
+.trade-offer.is-drop-target {
+  background: #e2ce91;
+  border-color: #52390d;
+}

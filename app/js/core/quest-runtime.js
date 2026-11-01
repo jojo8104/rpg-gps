@@ -48,6 +48,11 @@ export class QuestRuntime {
       )
         return;
       if (!game.completeScenarioObjective(definition.id)) return;
+      if (definition.trigger?.type === "itemDelivery") {
+        const actor = game.getHero(event.actorId ?? game.activeQuestActorId);
+        const index = actor.carriedLoot.findIndex((entry) => entry.itemId === definition.trigger.itemId && entry.quantity === 1);
+        actor.carriedLoot.splice(index, 1);
+      }
       completedObjectiveIds.push(definition.id);
       if (definition.eventId) {
         const applied = game.triggerScenarioEvent(definition.eventId);
@@ -72,7 +77,10 @@ export class QuestRuntime {
     );
     let nextPhaseId = null;
     let nextQuestId = null;
-    if (phaseCompleted && phase.transitions.length === 1) {
+    if (phaseCompleted && event.type === "LocationEntered" && game.worldState.get("repression.reportPresented") && game.worldState.get("repression.prisonRequired") && ["return-journey", "return-after-investigation", "repression-failed-return"].includes(phase.id)) {
+      nextPhaseId = "repression-prison";
+      game.scenarioState.redirectToPhase(game.scenario, nextPhaseId);
+    } else if (phaseCompleted && phase.transitions.length === 1) {
       nextPhaseId = phase.transitions[0].nextPhase;
       if (!game.advanceScenario(nextPhaseId)) nextPhaseId = null;
       else {
@@ -106,6 +114,17 @@ export class QuestRuntime {
 
   #matches(trigger, event, game, trailProgress = null) {
     if (!trigger) return false;
+    if (["itemAcquired", "itemDelivery"].includes(trigger.type)) {
+      const actor = game.getHero(event.actorId ?? game.activeQuestActorId);
+      if (!actor || (trigger.playerId && actor.playerId !== trigger.playerId)) return false;
+      if (trigger.type === "itemAcquired") return event.type === "ItemAcquired" && event.itemId === trigger.itemId &&
+        actor.carriedLoot.some((entry) => entry.itemId === trigger.itemId);
+      if (event.type !== "InteractionCompleted" || event.interactionId !== trigger.interactionId) return false;
+      const location = game.getLocation(event.locationId);
+      if (!location?.heroIds.includes(actor.id) || (trigger.locationSlotId && !this.#sameLocation(trigger, event, game))) return false;
+      return actor.carriedLoot.some((entry) => entry.itemId === trigger.itemId && entry.quantity === 1);
+    }
+    if (trigger.type === "repressionEveryoneReturned") return ["LocationEntered", "RepressionReturnChecked"].includes(event.type) && game.setup.participants.every(p => (game.worldState.get("repression.returnedPlayerIds") ?? []).includes(p.playerId));
     if (trigger.type === "locationPlaced")
       return (
         event.type === "LocationPlaced" &&
@@ -143,6 +162,10 @@ export class QuestRuntime {
       );
     if (trigger.type === "battleWon") {
       if (event.type !== "BattleWon") return false;
+      if (trigger.requiresPlayerControl) {
+        const location = game.getLocation(event.locationId);
+        if (!location || !game.getPlayer(location.controllerId ?? location.ownerId) || game.locationAccessPolicy.enemyControllerIds.has(location.controllerId ?? location.ownerId)) return false;
+      }
       const binding = game.scenarioLocationBindings.find(
         (candidate) => candidate.locationId === event.locationId,
       );

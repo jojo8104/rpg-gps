@@ -1,0 +1,585 @@
+ROG-GPS / RPG GPS — CARNET DE VLOGS DE DÉVELOPPEMENT
+Proposition éditoriale du 6 octobre 2026 — version 1
+
+Au départ : jouer avec ma fille, puis imaginer une aventure avec ses amies pour son anniversaire. Ensuite : un royaume à construire, et des bugs qui prennent parfois le pouvoir.
+
+======================================================================
+1. COMMENT UTILISER CE DOCUMENT
+======================================================================
+
+Public : proches et petite communauté, y compris les personnes qui ne codent pas.
+Format proposé : 16 épisodes de 3 à 4 minutes, éventuellement 5 minutes pour les grandes bifurcations. Chaque vidéo doit fonctionner seule.
+Voix : première personne, chaleureuse, concrète, avec un peu d’autodérision. Tu portes l’envie, les choix et les observations terrain ; l’IA accompagne l’analyse, les propositions et le code. Les conversations montrent aussi des diagnostics incomplets, tes corrections et des retours en arrière. C’est une matière narrative précieuse.
+Titre de série possible : « Je transforme nos balades en RPG ».
+Autres titres : « Le royaume derrière le téléphone » ; « Journal d’un RPG qui sort de la maison ».
+Nom : tu écris rog-gps ; les fichiers utilisent RPG GPS. Conserver provisoirement les deux dans ce document, puis choisir le nom public avant les cartons vidéo.
+
+Les speeches ci-dessous sont des propositions nouvelles à mettre à ta sauce. Ils ne sont pas des citations historiques et ne supposent pas que tu as réellement ressenti chaque émotion proposée. Les petites métaphores peuvent être romancées ; les incidents, dates et conclusions techniques doivent conserver leur sens.
+
+PÉRIMÈTRE DE LA RECONSTITUTION
+
+Consultés : les 30 commits Git accessibles, du 16 août au 8 septembre 2026 ; les 35 conversations récentes liées au dossier présentes dans la liste accessible de l’application, avec leurs pages antérieures lorsqu’elles étaient disponibles ; deux conversations archivées pertinentes ou candidates ; deux conversations ChatGPT sur la chasse au trésor et la répartition des quêtes ; documentation, fichiers du projet et inventaire des visuels locaux. Certaines conversations sont des forks et répètent des passages : ce ne sont pas de nouvelles étapes.
+Inspection visuelle directe : hero-anchor-preview.png, map-geography-preview.jpg, tactical-battle-mobile.jpg et battlefield-generator-preview.jpg. Les autres images sont des ressources repérées, sans examen visuel exhaustif de chaque fichier. Des photos de journaux serveur sont référencées dans les échanges ; leurs analyses ont été lues, mais les photos ne sont pas toutes inspectées ici.
+
+Limites : ce travail ne constitue pas une relecture exhaustive de tout ton historique ChatGPT/Codex. La liste des conversations récentes est limitée à 50 entrées, tous projets confondus, et ne fournit pas ici de pagination vers les anciennes conversations non archivées. Les fichiers privés hors projet, les autres projets sans lien utile et les données personnelles sans rapport n’ont pas été explorés. La naissance du projet peut être antérieure au premier commit : le 16 août est la première trace Git retrouvée, pas une date de conception certaine.
+Les nombres de tests et mesures cités sont des résultats rapportés à l’époque, pas une nouvelle validation du jeu actuel. Aucun code du jeu n’est modifié pour ce document.
+
+LÉGENDE DES PLANS
+ARCHIVE : visuel ou texte réellement conservé.
+À TOURNER : nouvelle capture ou prise de vue actuelle.
+RECONSTITUTION : scène rejouée, montage illustratif ou ancien bug simulé. L’indiquer à l’écran si la scène peut être prise pour une archive.
+À CONFIRMER : souvenir personnel, date exacte, résultat IRL ou état déployé non établi.
+
+======================================================================
+2. LE FIL DE LA SAISON
+======================================================================
+
+Épisode 00 — Au départ, je voulais jouer avec ma fille.
+Épisode 01 — Le premier royaume tient dans un navigateur.
+Épisode 02 — Une armée, c’est aussi des bagages.
+Épisode 03 — Donner une histoire aux kilomètres.
+Épisode 04 — Le téléphone doit suivre le joueur.
+Épisode 05 — Partager enfin le même monde.
+Épisode 06 — Mon pire ennemi : les manipulations inutiles.
+Épisode 07 — Le poste de guet qui a arrêté le royaume.
+Épisode 08 — Coopérer, ce n’est pas jouer côte à côte.
+Épisode 09 — Le fichier qui voulait tout faire.
+Épisode 10 — J’ai débranché le cœur du jeu pour le reconstruire.
+Épisode 11 — Je marche, mais mon héros reste immobile.
+Épisode 12 — Le monde réel prend une apparence de RPG.
+Épisode 13 — Quinze cases pour changer les combats.
+Épisode 14 — Sept pièces d’or et une récompense qui revient.
+Épisode 15 — Le royaume continuait à tourner sans nous.
+
+La saison suit les premières traces puis l’apparition des problèmes. Certains chantiers se chevauchent : expliquer « pendant ce temps » plutôt que prétendre qu’une fonctionnalité était définitivement terminée avant la suivante.
+
+======================================================================
+3. LES ÉPISODES
+======================================================================
+
+ÉPISODE 00 — AU DÉPART, JE VOULAIS JOUER AVEC MA FILLE
+Période : genèse personnelle, avant les premières traces Git ; date à préciser.
+Thème : ton envie initiale, les personnes pour lesquelles tu crées et l’expérience que tu veux leur faire vivre.
+Durée cible : 3 min 30.
+
+Synopsis
+Le point de départ est familial : jouer avec ta fille, puis imaginer un jeu auquel elle pourrait participer avec ses amies pour son anniversaire. Tu racontes comment cette envie devient un projet de RPG dehors. Le spectateur découvre d’abord les personnes auxquelles tu penses, puis le royaume que tu essaies de fabriquer pour elles. La date et la scène exacte du déclic restent à préciser.
+
+Enjeux / à faire ressortir
+Donner une raison de suivre la série avant de parler des fonctionnalités : créer un moment partagé avec ta fille. Cette motivation personnelle a été confirmée par toi le 6 octobre dans la conversation de préparation du vlog. L’échange du 1er octobre sur le public du projet mentionne les anniversaires organisés par les parents, les groupes d’amis et les joueurs solo dehors ; il rejoint cette motivation. Le passage précis sur ta fille n’a pas été retrouvé dans les anciennes conversations accessibles. Ne pas annoncer que l’anniversaire a déjà eu lieu ou que le jeu y a été testé.
+
+Grandes phrases proposées
+« Au départ, je voulais jouer avec ma fille. »
+« Et si son anniversaire devenait une aventure à vivre avec ses amies ? »
+« Le téléphone devait nous donner une raison de regarder autour de nous. »
+« Avant le premier bug, il y avait surtout une envie de partager quelque chose avec elle. »
+
+Paragraphes et speech
+1 — Ouverture face caméra : « Au départ, je voulais jouer avec ma fille. Puis je me suis dit : et si je fabriquais une aventure qu’elle pourrait vivre avec ses amies pour son anniversaire ? C’est de cette envie qu’est parti ce projet. »
+2 — L’aventure imaginée : « Imagine : un chemin devient une route royale. Un lieu cache un indice. On doit se retrouver, choisir quoi faire et s’aider pour continuer. J’avais envie de construire un jeu qui donne une histoire à ce qu’on fait dehors. »
+3 — Ton souvenir, à compléter sans le fabriquer : « Je me souviens de [moment réel où tu y as pensé ou en as parlé]. Ce qui m’attirait, c’était [ce que tu veux partager avec elle : à dire avec tes mots]. »
+4 — Le passage à la création : « Pour donner corps à cette idée, il a fallu fabriquer les lieux, les quêtes, les personnages et tout ce qui les fait tenir ensemble. Le projet a grandi. Mais je veux garder cette envie de départ comme point de repère. »
+5 — La promesse de série : « Je n’ai presque rien documenté au fil du travail. Alors je reprends les traces : les idées, les essais, les bugs et les choix. Je vais vous raconter comment cette aventure se construit. »
+
+Plans / montage / son
+À TOURNER : toi face caméra pour la première phrase ; deux paires de chaussures sur un chemin si vous souhaitez tourner ensemble ; ton carnet avec « Une aventure pour son anniversaire ? ». On peut raconter ce projet sans montrer ta fille ni ses amies : deux places à une table, un dessin du royaume, ta main préparant une carte suffisent. RECONSTITUTION : apparition de noms fantasy sur une promenade actuelle, sans prétendre montrer le premier essai. ARCHIVE : carte et images du jeu en brèves surimpressions. Ouvrir avec les sons naturels, puis quelques notes acoustiques ou une ambiance fantasy légère. Garder le passage personnel avec peu de coupes ; éviter une musique trop sentimentale.
+Fin / lien : « Pour commencer, il me fallait déjà un monde qui existe. »
+Source : ton témoignage du 6 octobre 2026 dans cette conversation ; principes du projet ; échanges « Concevoir les quêtes d’équipe » et « Définir la stratégie du site SaaS ». Le moment exact du déclic reste à ajouter. La conversation « Organiser une chasse au trésor » contient des idées de rencontres entre équipes, sans mention personnelle de ta fille dans les messages accessibles.
+
+----------------------------------------------------------------------
+ÉPISODE 01 — LE PREMIER ROYAUME TIENT DANS UN NAVIGATEUR
+Période : 16–20 août 2026, premières traces Git disponibles.
+Thème : construire une première base jouable.
+Durée cible : 3 min.
+
+Synopsis
+L’idée se transforme en objets concrets : héros, lieux, unités, zone de jeu et rencontres. Le premier commit contient déjà une base importante ; raconter une naissance visible dans les archives, sans prétendre partir d’un fichier vide filmé à l’époque.
+
+Enjeux / à faire ressortir
+Passer du « ce serait sympa » à des règles qui s’exécutent. Expliquer simplement pourquoi une carte, un héros et une armée sont des éléments distincts. Montrer une première boucle : se déplacer, découvrir, interagir.
+
+Grandes phrases
+« Mon premier objectif : pouvoir faire quelque chose dans ce monde. »
+« Une carte seule ne fait pas une aventure. »
+« Le 16 août, j’ai au moins une première trace conservée de ce royaume. »
+
+Paragraphes et speech
+1 — « J’ai commencé avec HTML, CSS et JavaScript. Il fallait représenter un joueur, son héros, les lieux et ce qui se passe quand on s’en approche. »
+2 — « Très vite, j’ai voulu pouvoir tester les règles sans dépendre du téléphone. Le GPS devait indiquer où je suis ; les règles devaient décider ce que ça permet. »
+3 — « Les premières traces montrent aussi la carte fictive et les essais mobiles. C’était mon terrain d’entraînement avant les sorties réelles. »
+
+Plans / montage / son
+ARCHIVE : carton discret « 16 août — première trace Git retrouvée », puis extraits des définitions de héros et de lieux. À TOURNER : une boucle simple dans la version actuelle, légendée « démonstration actuelle ». Si une ancienne version est montrée, la préparer dans une copie isolée. Trois petits sons différencient déplacement, découverte et interaction ; pas de mur de code.
+Fin : « Maintenant que le héros pouvait agir, il lui fallait un royaume qui réagisse. »
+Sources : a807b5b, 28682d2, 835ae42, 10a547d et 7d816ab.
+
+----------------------------------------------------------------------
+ÉPISODE 02 — UNE ARMÉE, C’EST AUSSI DES BAGAGES
+Période : 19–24 août ; prolongements jusqu’au 5 septembre.
+Thème : progression, économie, armées et conséquences persistantes.
+Durée cible : 3 min 30.
+
+Synopsis
+Les unités cessent d’être de simples icônes. Elles ont une santé, une progression et des besoins. Les ressources se transportent ; les groupes autonomes donnent une activité au monde. Le joueur commence à commander une petite organisation.
+
+Enjeux / à faire ressortir
+Chaque ajout ouvre un choix : recruter ou économiser, transporter ou garder une place, combattre ou préserver ses troupes. Donner une impression de profondeur à travers un exemple, sans réciter tout le catalogue.
+
+Grandes phrases
+« Une armée doit aussi survivre à ce qui arrive après le combat. »
+« Le vrai pouvoir de mon héros, c’est parfois une place libre dans son sac. »
+
+Paragraphes et speech
+1 — « J’ajoutais des troupes, des ressources et de la progression. Mais il fallait que tout cela reste utile après avoir fermé un menu. »
+2 — « Une bataille laisse des traces : pertes, blessés, butin, parfois déserteurs. Le monde devait se souvenir de ce qu’on avait fait. »
+3 — « Les convois et les groupes autonomes donnaient aussi une impression de vie. Le royaume pouvait avoir ses propres trajets pendant que le joueur préparait les siens. »
+
+Plans / montage / son
+À TOURNER : gros plan sur une unité, inventaire puis garnison. RECONSTITUTION : schéma animé « lieu → bagage → camp », avec trois ressources seulement. ARCHIVE : images des unités actuelles, légendées si utilisées pour illustrer une étape ancienne. Bruits discrets de sac, pièces et pas ; accélérer la présentation, ralentir sur le choix concret.
+Fin : « Avec tout ça, il manquait une raison d’aller quelque part. »
+Sources : 835ae42, edfa06d, 519bd0a, c3694a8, f5b9b04, fbee201 ; README et modules de conséquences.
+
+----------------------------------------------------------------------
+ÉPISODE 03 — DONNER UNE HISTOIRE AUX KILOMÈTRES
+Période : 24–29 août 2026.
+Thème : premières campagnes, missions et décisions narratives.
+Durée cible : 4 min.
+
+Synopsis
+Des objectifs temporisés, l’évacuation, le ravitaillement, les Greniers et la Répression transforment des lieux en scènes. Tu montres comment une consigne simple peut entraîner une décision et une conséquence.
+
+Enjeux / à faire ressortir
+Le récit donne un sens au trajet. La difficulté consiste à accorder dialogues, lieux, délais et récompenses. Présenter les campagnes comme des étapes du prototype ; leur présence dans l’historique ne signifie pas qu’elles restent toutes activées aujourd’hui.
+
+Grandes phrases
+« Je voulais qu’on ait une raison de faire le détour. »
+« Livrer vingt rations, c’est déjà une petite histoire si quelqu’un les attend. »
+« Derrière chaque choix écrit, il faut un monde capable d’en garder la conséquence. »
+
+Paragraphes et speech
+1 — « Une mine ou un fort, c’est joli sur la carte. Une mine où des prospecteurs ont disparu, c’est une question qu’on a envie de résoudre. »
+2 — « On a ajouté des évacuations, des livraisons, des délais et des choix dans les dialogues. Je commençais à voir un scénario au lieu d’une collection de menus. »
+3 — « Le piège, c’est qu’une phrase peut annoncer une mission alors que le lieu ou le bon état n’est pas encore prêt. Cette difficulté reviendra plus tard. »
+
+Plans / montage / son
+ARCHIVE : définitions des scénarios, portraits d’Aldren et d’Armand. À TOURNER : lecture d’une brève consigne et itinéraire. Les scènes de Répression, si encore présentes, peuvent servir d’illustrations après vérification. RECONSTITUTION : compte à rebours graphique pour expliquer une mission historique. Fond musical retenu ; silence avant un choix.
+Fin : « Il fallait maintenant rendre tout ça utilisable avec un pouce. »
+Sources : 9207d60, e9e8a55, d7ac83b, ff9bb72, 11d76c6 et 85005f0.
+
+----------------------------------------------------------------------
+ÉPISODE 04 — LE TÉLÉPHONE DOIT SUIVRE LE JOUEUR
+Période : premières corrections mobiles en août ; exemples détaillés les 25–27 septembre.
+Thème : ergonomie terrain et lisibilité.
+Durée cible : 3 min 30.
+
+Synopsis
+Sur le bureau, un menu paraît acceptable. Dehors, il prend toute la place ou revient quand le GPS hésite. L’épisode suit les panneaux compacts, le retour à la carte avec un pouce et les corrections de contraste.
+
+Enjeux / à faire ressortir
+Tu observes les gestes réels et tu changes l’interface pour eux. Une amélioration réussie peut être un clic en moins. Ne pas faire croire que chaque correctif a été validé immédiatement en extérieur.
+
+Grandes phrases
+« Le GPS hésitait, et mon interface insistait. »
+« Si je ferme une fenêtre, j’aimerais qu’elle comprenne le message. »
+« Le pouce est devenu mon testeur le plus exigeant. »
+
+Paragraphes et speech
+1 — « Un lieu détecté ouvrait un gros panneau. Avec une position qui varie un peu, le joueur pouvait avoir l’impression de lutter contre l’écran. »
+2 — « J’ai demandé un aperçu compact : nom du lieu, type, et ouverture complète seulement quand on le veut. Puis un retour direct à la carte. »
+3 — « On a aussi corrigé les cadres qui changeaient de forme et les textes trop proches du fond. Ces détails décident si le jeu est agréable à utiliser. »
+
+Plans / montage / son
+RECONSTITUTION : panneau qui revient deux fois, carton « comportement rejoué ». À TOURNER : pouce ouvrant l’aperçu puis revenant à la carte. Montage avant/après sur le contraste ; arrêt sur une zone illisible, puis la correction. Deux sons d’ouverture pour la blague, ensuite silence dans la démonstration du confort retrouvé.
+Fin : « Et si plusieurs téléphones devaient partager ce royaume ? »
+Sources : ef38f83, 7d816ab, 3719a43, f932065 ; conversations sur le pré-bottomsheet et « Fixer les tailles de l’interface ».
+
+----------------------------------------------------------------------
+ÉPISODE 05 — PARTAGER ENFIN LE MÊME MONDE
+Période : 8 septembre, puis clarification de l’autorité serveur fin septembre–début octobre.
+Thème : multijoueur, sauvegardes et vérité commune.
+Durée cible : 3 min 30.
+
+Synopsis
+Le royaume passe d’une expérience locale à un monde servi par un backend. La question devient : que voient les autres joueurs et qui décide qu’une action a réussi ?
+
+Enjeux / à faire ressortir
+Comprendre l’autorité serveur avec un exemple simple d’échange. Distinguer l’arrivée du multijoueur et le chantier ultérieur pour faire aussi tourner le solo sur le serveur. La transition n’a pas été instantanée.
+
+Grandes phrases
+« Pour jouer ensemble, il fallait partager les conséquences. »
+« Deux téléphones peuvent attendre ; ils ne peuvent pas avoir deux versions de la même pièce d’or. »
+
+Paragraphes et speech
+1 — « Le 8 septembre, l’historique marque l’arrivée du multijoueur et des sauvegardes serveur. Le monde avait désormais un endroit où garder son état commun. »
+2 — « Si deux personnes échangent, le serveur doit vérifier les objets, la place et l’accord des deux. Les téléphones montrent ensuite le résultat. »
+3 — « Cette décision rend le jeu cohérent, mais elle ajoute de l’attente et des problèmes de reconnexion. Il faudra apprendre à rendre cette attente supportable. »
+
+Plans / montage / son
+À TOURNER : deux téléphones ou deux vues de navigateur, sans présenter cela comme une partie communautaire réellement filmée. RECONSTITUTION : schéma « intention → serveur → état commun ». Montrer seulement les informations visibles par chaque joueur. Un son commun au moment de la confirmation, musique légère.
+Fin : « Avant d’optimiser le réseau, j’ai commencé par enlever les corvées. »
+Sources : 6d74f5c ; README, docs/network-sync.md ; échanges sur solo/multi et instructions mises à jour.
+
+----------------------------------------------------------------------
+ÉPISODE 06 — MON PIRE ENNEMI : LES MANIPULATIONS INUTILES
+Période : 23–26 septembre 2026.
+Thème : économie compréhensible, construction et qualité des interactions.
+Durée cible : 3 min 30.
+
+Synopsis
+Construire exigeait parfois de déplacer des ressources à la main ou de détruire un bâtiment pour pouvoir évoluer. Les objets répétaient leurs statistiques sans raconter grand-chose. Tu transformes ces irritants en décisions de conception.
+
+Enjeux / à faire ressortir
+Préserver le transport et la stratégie tout en réduisant les manipulations. Montrer que tu peux refuser une contrainte qui produit une corvée plutôt qu’un choix intéressant.
+
+Grandes phrases
+« Je voulais construire un village, pas ranger trois fois mon sac. »
+« Démolir pour avoir le droit de progresser : quelque chose clochait. »
+
+Paragraphes et speech
+1 — « J’avais les matériaux dans le lieu et dans mes bagages. Pourquoi fallait-il tout transférer avant de construire ? On a permis au serveur de compléter le stock avec ce que le héros transporte sur place. »
+2 — « Ensuite, j’ai remarqué un piège dans les emplacements : certains bâtiments obligatoires arrivaient alors que les places étaient déjà prises. Il fallait revoir cette logique. »
+3 — « Les objets ont aussi reçu des descriptions immersives. Une épée doit donner envie de la porter, tout en montrant clairement ce qu’elle change. »
+
+Plans / montage / son
+À TOURNER : coût réparti entre lieu et bagage, fiche d’objet et construction. RECONSTITUTION : quatre emplacements occupés et un bâtiment obligatoire qui cherche sa place. Petit bruit de caisses, puis transition courte sur la solution. Éviter de présenter les valeurs d’impôt de septembre comme un équilibre définitif.
+Fin : « Puis une construction a fait beaucoup plus que prendre une place. »
+Sources : conversations sur paiements lieu/bagage, slots, objets, impôts et forge ; docs/location-improvements.md et location-taxes.md.
+
+----------------------------------------------------------------------
+ÉPISODE 07 — LE POSTE DE GUET QUI A ARRÊTÉ LE ROYAUME
+Période : 27 septembre 2026.
+Thème : enquête sur un bug en cascade.
+Durée cible : 4 min.
+
+Synopsis
+Les ressources cessent d’arriver. La population et les démantèlements se bloquent aussi. Un premier diagnostic pointe les menus ; tu précises ensuite que le problème apparaît avec le poste de guet. La reproduction conduit à une patrouille hors limites.
+
+Enjeux / à faire ressortir
+Une bonne observation peut être plus utile qu’une grande hypothèse. Montrer que les premiers diagnostics ont évolué. Le correctif local et ses tests ne constituent pas une preuve filmée du résultat dans ta partie ouverte.
+
+Grandes phrases
+« J’ai construit un poste de guet. Le royaume a arrêté de travailler. »
+« Le bug était petit ; sa zone d’influence était immense. »
+« Le détail décisif, c’était : ça arrive quand je construis ça. »
+
+Paragraphes et speech
+1 — « La production s’arrête alors que le serveur est en ligne. Puis je vois que la population et les travaux n’avancent plus non plus. »
+2 — « On explore d’abord une pause liée aux menus. Mais mon essai apporte un indice plus précis : le poste de guet. Au niveau 2, l’éclaireur pouvait recevoir un point de patrouille hors des limites. »
+3 — « Cette erreur interrompait la mise à jour du monde. Le calcul a été corrigé pour obtenir une position valide, et un test reproduisant ce cas a été ajouté. On avait enfin quelque chose de concret à vérifier. »
+
+Plans / montage / son
+RECONSTITUTION : trois compteurs gelés après la construction, puis zoom vers un point de patrouille hors zone. ARCHIVE : extrait bref de ta description et nom du test. Ajouter une ligne temporelle « hypothèse → indice → reproduction → correction ». Couper la musique quand tout se fige ; reprise douce lors du résultat du test. Ne pas utiliser une fausse capture d’erreur comme archive.
+Fin : « Pendant ce temps, mes convois avaient aussi un drôle de comportement… » Une capsule de 20 secondes peut raconter leur retour visuel au départ, corrigé dans l’animation.
+Source : « Diagnostiquer la production des camp » ; 58 tests ciblés rapportés pour la correction du poste de guet, 29 pour l’affichage des convois.
+
+----------------------------------------------------------------------
+ÉPISODE 08 — COOPÉRER, CE N’EST PAS JOUER CÔTE À CÔTE
+Période : 27 septembre–1er octobre 2026.
+Thème : rassemblement et première mission collective.
+Durée cible : 4 min.
+
+Synopsis
+Tu veux une coopération qui a un sens dans l’histoire. La première quête d’équipe consiste à terminer un camp, en faire un fort et installer des lanciers. Un mandat unique donne une responsabilité à son porteur. Reste un défi : tester seul une mission collective.
+
+Enjeux / à faire ressortir
+Partager un objectif, se répartir les transports et se rassembler. Les idées de relais, de temples et de diversions sont des pistes, pas une collection de fonctionnalités terminées.
+
+Grandes phrases
+« Ajouter plusieurs joueurs ne suffit pas à fabriquer une équipe. »
+« Un seul mandat : il fallait déjà discuter de qui le porterait. »
+« Pour tester une quête à plusieurs, j’étais… tout seul. »
+
+Paragraphes et speech
+1 — « Je voulais que le scénario donne une raison de se retrouver. Un messager peut appeler les joueurs ; à la capitale, leur présence peut ouvrir une mission commune. »
+2 — « On a choisi un fort à terminer. Le camp est plus ou moins avancé selon l’effectif, et l’équipe apporte les ressources et la garnison. Le mandat revient à un participant. »
+3 — « Pour essayer à la maison, on a simulé la taille de l’équipe et créé un dépôt de test. Je faisais tous les trajets : ce mode permettait de vérifier les besoins, sans prétendre remplacer une vraie soirée à plusieurs. »
+
+Plans / montage / son
+RECONSTITUTION : toi avec trois accessoires ou trois cartons pour incarner les tâches, mention « test solo ». À TOURNER : trajet dépôt/camp et fiche du mandat si le parcours historique peut être préparé dans un environnement adapté. ARCHIVE : docs/team-quest-ideas.md. Sons de pas, matériaux et bref motif de rassemblement.
+Fin : « Toutes ces idées commençaient à avoir un coût : le code devenait difficile à faire évoluer. »
+Sources : « Concevoir les quêtes d’équipe », « Développer la première quête », docs/team-quest-ideas.md. Attention : ancien système de quêtes désormais désactivé.
+
+----------------------------------------------------------------------
+ÉPISODE 09 — LE FICHIER QUI VOULAIT TOUT FAIRE
+Période : 30 septembre–3 octobre ; progression exacte à suivre avec les dates des tours.
+Thème : reconnaître un problème d’organisation et découper les responsabilités.
+Durée cible : 4 min.
+
+Synopsis
+Tu poses la question : main.js devient-il du spaghetti ? L’analyse retrouve 7 372 lignes et de nombreuses responsabilités croisées. Les dialogues, combats, lieux, GPS, multijoueur et écrans du héros déménagent progressivement.
+
+Enjeux / à faire ressortir
+Ton évolution : tu regardes maintenant comment le projet pourra grandir. Réduire un fichier ne garantit ni vitesse ni absence de bugs. Le vrai progrès est de savoir où une responsabilité doit vivre.
+
+Grandes phrases
+« Mon fichier principal voulait gérer tout le royaume. »
+« Chaque nouvelle idée avait fini par lui demander une chambre. »
+« J’ai commencé à demander : où est-ce que cette règle doit vraiment vivre ? »
+
+Paragraphes et speech
+1 — « Au départ, rassembler les branchements dans un fichier est pratique. À plus de sept mille lignes, je commençais à avoir peur d’ajouter une fonctionnalité. »
+2 — « On a déménagé par étapes. D’abord les petites responsabilités, puis les dialogues, les batailles, la carte et l’interface du joueur. Main devait surtout assembler les modules. »
+3 — « Les échanges conservent un passage par 1 577 lignes, puis 1 483 avec la session. Ces chiffres marquent une étape, pas une garantie de qualité. Après le rangement, il fallait vérifier les raccords. »
+
+Plans / montage / son
+ARCHIVE : courts extraits des réponses historiques et noms des fichiers. RECONSTITUTION : une grande maison dont les fonctions déménagent dans plusieurs pièces. À TOURNER : arborescence actuelle, identifiée comme actuelle. Compteur 7 372 → 1 577, légendé « mesures rapportées pendant le chantier ». Un bruit de carton par déplacement ; éviter une minute entière de code qui défile.
+Fin : « Le rangement a rendu les problèmes plus visibles. Les quêtes allaient demander un vrai changement. »
+Sources : les deux conversations intitulées « Évaluer la scalabilité de main.js ». L’une est un fork ; ne pas doubler les étapes.
+
+----------------------------------------------------------------------
+ÉPISODE 10 — J’AI DÉBRANCHÉ LE CŒUR DU JEU POUR LE RECONSTRUIRE
+Période : 3–5 octobre 2026.
+Thème : refonte des quêtes et recherche de briques simples.
+Durée cible : 4 à 5 min.
+
+Synopsis
+Les dialogues se bloquent, des camps manquent et des associations de lieux échouent. Tu demandes une désactivation temporaire des anciennes quêtes. Puis tu précises toi-même les actions fondamentales : atteindre, parcourir, prendre, donner, parler, combattre, construire. Le ravitaillement devient le premier cas raccordé.
+
+Enjeux / à faire ressortir
+Accepter une pause de fonctionnalité pour clarifier le modèle. Faire entendre ton exigence : des actions concrètes pour le joueur. Ne pas attribuer tous les bugs au nettoyage de main.js : cette causalité n’a pas été démontrée.
+
+Grandes phrases
+« Les quêtes étaient le cœur du jeu. J’ai accepté de les débrancher un moment. »
+« Je voulais des petites actions capables de raconter de grandes histoires. »
+« “Prendre” et “donner”, au moins, je vois ce que le joueur fait. »
+
+Paragraphes et speech
+1 — « Les quêtes accumulaient les difficultés. Au lieu d’ajouter une exception à chaque fois, j’ai demandé qu’on mette l’ancien système de côté. Les données ont été conservées. »
+2 — « On m’a d’abord proposé des briques très techniques. J’ai précisé que je cherchais les gestes du joueur. Une quête complexe peut être une suite d’actions simples, avec leurs conditions et leurs conséquences. »
+3 — « Le premier essai est concret : recevoir une mission, prendre cinq rations dans quatre villages et remettre vingt rations au fort. Le serveur valide la progression ; le dialogue raconte ce qui se passe. »
+4 — « Même l’interface a demandé un choix : parler au maréchal pour recevoir la mission, puis prendre et donner depuis le menu des lieux. Chaque bouton devait avoir un rôle clair. »
+
+Plans / montage / son
+ARCHIVE : ancienne politique désactivée, nouvelle fiche JSON, extraits de tes demandes sur les briques. RECONSTITUTION : sept cartes de verbes, quatre collectes qui convergent vers une livraison. À TOURNER : démonstration du nouveau ravitaillement après vérification du parcours. Musique suspendue au débranchement, puis motif simple quand les briques s’assemblent.
+Fin : « Il restait à sortir vérifier ce que le téléphone racontait de ma position. »
+Sources : « Concevoir le modèle des quêtes », docs/quest-system-refactor.md et quest-definition.md ; data/quests/royal-fort-supply.json. État local : ancien système désactivé, nouveau moteur activé. Les premières réponses de raccordement mentionnaient l’absence de test fonctionnel ; ne pas transformer ce raccordement en validation exhaustive.
+
+----------------------------------------------------------------------
+ÉPISODE 11 — JE MARCHE, MAIS MON HÉROS RESTE IMMOBILE
+Période : 4 octobre 2026.
+Thème : position affichée, position officielle et reprise de session.
+Durée cible : 3 min 30.
+
+Synopsis
+Tu reviens d’un essai IRL : le pion ne suit pas correctement et la session se perd après fermeture de l’écran. On sépare le mouvement visuel immédiat du GPS et les actions validées par le serveur.
+
+Enjeux / à faire ressortir
+La réalité du terrain révèle ce que les tests ne montrent pas toujours. Ton téléphone doit donner un retour naturel, tout en respectant les règles officielles.
+
+Grandes phrases
+« Dans un jeu GPS, voir son héros immobile pendant qu’on marche, c’est assez gênant. »
+« Mon téléphone savait où j’étais. L’écran ne racontait pas encore la même chose. »
+
+Paragraphes et speech
+1 — « Dehors, le premier problème est évident : je marche, le héros ne suit pas. Et après avoir verrouillé l’écran, je retrouve une session qui ne reprend pas correctement. »
+2 — « Les corrections ont porté sur la position utilisée pour l’affichage et sur la restauration de session avant les commandes. Puis j’ai demandé un pion qui suive directement la mesure GPS du téléphone. »
+3 — « Les actions continuent à utiliser la position officielle du serveur. Le mouvement affiché peut être réactif, sans attribuer de récompense ni déclencher un combat à sa place. Il fallait encore refaire l’essai dehors. »
+
+Plans / montage / son
+À TOURNER : pieds en mouvement et téléphone à l’arrêt dans un endroit calme, puis parcours marche/verrouillage/déverrouillage. RECONSTITUTION : ancien pion figé, clairement annoncé. Schéma à deux lignes « affichage » et « validation ». Sons naturels dominants ; éviter un effet dramatique disproportionné.
+Fin : « Et cette carte, justement, je voulais qu’elle ressemble davantage à mon jeu. »
+Source : « Corriger carte joueur et session » ; 44, 34 puis 45 tests ciblés rapportés. Les réponses conservées indiquent des corrections locales restant à déployer et à valider IRL.
+
+----------------------------------------------------------------------
+ÉPISODE 12 — LE MONDE RÉEL PREND UNE APPARENCE DE RPG
+Période : 4–5 octobre 2026.
+Thème : carte fantasy, caméra et fabrication des sprites.
+Durée cible : 4 min.
+
+Synopsis
+Les données géographiques servent à dessiner un fond 2D. Puis arrivent l’inclinaison, la rotation, les lieux sur socles et le héros JRPG. Le résultat apporte une identité, avec quelques surprises : images aplaties, héros qui flotte et marche qui tremble.
+
+Enjeux / à faire ressortir
+Une image générée doit encore devenir un élément utilisable du jeu. Montrer l’importance des ancres, des pieds et des poses. La carte conservée localement ne rend pas tout le jeu indépendant du serveur.
+
+Grandes phrases
+« Le quartier restait le même. Il commençait à ressembler à un royaume. »
+« Le héros était beau. Ses pieds, eux, n’étaient pas encore d’accord. »
+« Quelques pixels suffisent parfois à donner l’impression qu’un personnage vole. »
+
+Paragraphes et speech
+1 — « J’ai voulu garder les chemins et les forêts du réel, mais leur donner notre apparence. Le serveur prépare la géographie ; le téléphone la dessine et la conserve. »
+2 — « Puis j’ai demandé une caméra inclinable et un héros à huit directions. Avec la perspective, les images des lieux s’aplatissaient : il fallait garder les bâtiments debout sur leurs socles. »
+3 — « Le sprite est devenu plus proche d’un JRPG 16 bits. Mais la planche n’était pas parfaitement régulière : on a aligné les poses, le corps et les pieds pour arrêter le tremblement et recoller l’ombre. »
+
+Plans / montage / son
+ARCHIVE : map-geography-preview.jpg, map-sprites-preview.png, hero-jrpg-preview.png, hero-anchor-preview.png, location-base-preview.png et location-rings-preview.png. À TOURNER : courte rotation puis suivi de dos. RECONSTITUTION : superposition de deux poses et ligne de pieds ; ne pas fabriquer un « avant » en le présentant comme capture ancienne. Petit motif rétro lors de la marche, puis sons naturels pour relier décor et promenade.
+Fin : « Le terrain avait une apparence. Les combats avaient besoin d’un espace. »
+Sources : « Évaluer un tileset OSM personnalisé », docs/play-area-map.md, hero-sprite-art.md et hero-jrpg-art.md. Les timeouts d’extraction ont aussi conduit à un worker séparé ; leur résolution complète sur tous les mobiles n’est pas établie par les seules archives.
+
+----------------------------------------------------------------------
+ÉPISODE 13 — QUINZE CASES POUR CHANGER LES COMBATS
+Période : réflexions sur les dégâts du 24–27 septembre ; plateau et animation le 5 octobre.
+Thème : rendre les décisions tactiques visibles et compréhensibles.
+Durée cible : 4 min.
+
+Synopsis
+Les combats sont longs et peu agréables. Après les réglages de dégâts et de moral, tu proposes un plateau 3 × 5, des réserves en éventail et des ordres programmés. Les troupes doivent ensuite bouger par étape pour que l’on comprenne le résultat.
+
+Enjeux / à faire ressortir
+Ajouter de la stratégie sans surcharger un écran de téléphone. Montrer un choix d’ordre et sa conséquence. Le nouveau terrain généré est visuel : forêt, eau et pont n’ont pas encore leurs propres effets tactiques.
+
+Grandes phrases
+« Quinze cases suffisaient pour donner une place à mes décisions. »
+« Le résultat pouvait être juste et pourtant incompréhensible à regarder. »
+« Il fallait voir l’ordre 1 avant de découvrir ce qu’avait fait l’ordre 2. »
+
+Paragraphes et speech
+1 — « J’avais commencé par accélérer les dégâts et la baisse de moral. Mais j’avais surtout envie de mieux comprendre ce qui se passait. »
+2 — « J’ai proposé trois colonnes et cinq rangées. Les archers gagnent un intérêt de distance ; les réserves attendent leur déploiement. Le commandement limite les ordres, l’autorité limite l’armée. »
+3 — « Le serveur résout les ordres des deux camps simultanément, étape par étape. L’interface joue ensuite les mouvements et les impacts dans cet ordre, avec la possibilité de passer. »
+4 — « On a aussi commencé des terrains générés avec des règles. Pour l’instant, le pont et les biomes donnent un décor ; leurs bonus viendront plus tard. »
+
+Plans / montage / son
+ARCHIVE : tactical-battle-mobile.jpg, battlefield-generator-preview.jpg, atlas terrain.png et structures.png. À TOURNER : un seul tour facile à lire, deux flèches numérotées, puis résolution ralentie. Montage sur une pause explicative plutôt qu’un combat complet. Sons différents pour déplacement et impact ; pas de bruitage à chaque interface.
+Fin : « Gagner, c’est bien. Recevoir la récompense correctement, c’est mieux. »
+Sources : « Améliorer combats et expérience », « Quel est le calcul pour les combats? », « Créer des tilesets cohérents pour la » ; docs/battle-tactics.md et battlefield-generation.md. La capture du générateur est un banc d’essai, pas une partie réelle.
+
+----------------------------------------------------------------------
+ÉPISODE 14 — SEPT PIÈCES D’OR ET UNE RÉCOMPENSE QUI REVIENT
+Période : 5 octobre 2026.
+Thème : butin, inventaire plein et tests qui doivent suivre les règles.
+Durée cible : 3 min.
+
+Synopsis
+Le bouton de récupération revient après rechargement et un message est illisible. Tu proposes une collecte automatique. On traite aussi le surplus, puis un test échoue parce qu’il cherche encore sept pièces dans le butin déjà transféré.
+
+Enjeux / à faire ressortir
+Une récompense doit être fiable et attribuée une seule fois. Quand une règle change, un test peut vérifier un ancien comportement : il faut comprendre l’échec, pas simplement supprimer l’assertion.
+
+Grandes phrases
+« J’avais récupéré le butin. Le bouton me proposait de le récupérer encore. »
+« Ces sept pièces d’or nous ont obligés à vérifier où l’argent allait vraiment. »
+
+Paragraphes et speech
+1 — « Après un combat, l’écran de butin me donnait des informations contradictoires. J’ai demandé que la récupération se fasse automatiquement côté serveur. »
+2 — « Sauf qu’un sac peut être plein. Les places disponibles sont remplies et le surplus reste réservé, à récupérer après avoir fait de la place. »
+3 — « Un test attendait encore sept pièces dans le butin disponible. Elles avaient déjà été transférées au vainqueur. On a changé ce qu’il vérifie : le bon destinataire, et aucun deuxième gain. »
+
+Plans / montage / son
+RECONSTITUTION : ancien bouton après rechargement. À TOURNER : sac plein, collecte partielle, reste réservé. ARCHIVE : nom du test et résultat historique, sans coller tout le terminal. Animation de sept pièces vers le vainqueur, puis second clic sans gain. Un seul son de pièces pour renforcer l’idée.
+Fin : « Je pensais surtout aux lenteurs du téléphone. Une autre enquête nous attendait sur le serveur. »
+Sources : « Corriger l’affichage du butin » et « Corriger le test de récupération du ». 17 tests ciblés puis 883 tests rapportés ; ce sont des validations historiques.
+
+----------------------------------------------------------------------
+ÉPISODE 15 — LE ROYAUME CONTINUAIT À TOURNER SANS NOUS
+Période : 5–6 octobre 2026 ; chantier encore en cours lors de la rédaction.
+Thème : distinguer lenteur de chargement, charge serveur et observation du système.
+Durée cible : 4 à 5 min.
+
+Synopsis
+Le démarrage est très long. On trouve beaucoup d’images préchargées, tu réduis les portraits et retires des assets. Mais le portable Linux signale aussi un plantage. Les journaux confirment un dépassement de mémoire JavaScript ; le code révèle des parties qui continuent à être simulées sans joueur.
+
+Enjeux / à faire ressortir
+Plusieurs problèmes peuvent produire la même sensation de lenteur. Tu demandes des limites et de la visibilité : deux parties actives maximum, arrêt de la simulation sans joueurs et tableau de bord. La cause complète du dépassement mémoire n’est pas démontrée.
+
+Grandes phrases
+« Je cherchais ce qui ralentissait l’écran. Le royaume travaillait encore quand personne ne jouait. »
+« Le ventilateur s’est calmé. L’enquête, elle, n’était pas terminée. »
+« À force de vouloir tout préparer, on faisait attendre le joueur avant sa première action. »
+
+Paragraphes et speech
+1 — « Le diagnostic de chargement retrouve environ 64 Mio de visuels préchargés dans la version examinée. Je voulais des actions réactives ; je n’avais pas demandé de tout télécharger avant de jouer. »
+2 — « On limite le préchargement aux portraits et on retire des références inutiles. Mais les alertes du portable montrent un autre problème : Node a atteint sa limite de mémoire JavaScript. »
+3 — « Dans le code, les parties démarrées continuaient à être simulées même sans joueur, y compris après restauration. Ce travail pouvait contribuer à la charge. Cela ne prouvait pas encore toute la cause du plantage. »
+4 — « J’ai demandé une limite de deux parties et l’arrêt des simulations sans joueurs. Puis un tableau de bord pour voir les parties, les positions et l’activité. Le prochain progrès sera aussi de mesurer ce qu’on améliore. »
+
+Plans / montage / son
+À TOURNER : attente de lancement mesurée, ventilateur du portable, écran de supervision une fois sa validation terminée. ARCHIVE : extraits anonymisés des messages et chiffres historiques. Les photos serveur référencées peuvent servir après vérification et masquage des données privées. RECONSTITUTION : plusieurs petits royaumes continuant à tourner sur une table vide. Couper la musique lors de l’erreur ; terminer sur le souffle qui diminue, puis le bruit extérieur du premier épisode.
+Fin de saison : « Ce royaume n’est pas fini. Mais maintenant, je sais mieux ce que je veux construire et ce qu’il faut observer pour y arriver. Et au bout de tout ça, je garde la même envie : pouvoir partager cette aventure avec ma fille. »
+Sources : « Diagnostiquer le chargement lent », « Diagnostiquer arrêt du serveur », « Accélérer l’équipement visuel ». Le timeout d’arrêt systemd et le dépassement mémoire sont deux incidents distincts. Les protections à deux parties étaient annoncées locales, restant à déployer ; le tableau de bord était encore en développement lors de la lecture. Ne pas annoncer une performance définitivement corrigée.
+
+======================================================================
+4. RECETTE DE MONTAGE COMMUNE
+======================================================================
+
+Pour une vidéo de 3 min 30 :
+00:00–00:12 — incident ou image intrigante, puis titre très court.
+00:12–00:40 — ce que tu voulais rendre possible pour le joueur.
+00:40–01:20 — obstacle, montré par un cas concret.
+01:20–02:15 — hypothèse, décision et changement, sans détailler toutes les recherches.
+02:15–03:00 — démonstration du résultat ou constat de ce qui reste à vérifier.
+03:00–03:30 — ce que tu as compris et passage vers l’épisode suivant.
+
+Le texte d’un épisode de 3 minutes peut viser environ 350–420 mots, avec de la place pour les gestes et les silences. Les paragraphes fournis sont une base courte à développer avec un souvenir personnel et une démonstration.
+
+Alterner trois matières : toi et tes décisions ; écran lisible ; monde extérieur. Montrer une interaction par plan. Quand le code est nécessaire, entourer quelques lignes et dire leur effet sur le joueur. Si un écran contient trop de texte, recadrer sur la partie utile.
+
+Ne pas répéter toute l’introduction du projet. Une phrase suffit : « Je développe un RPG où nos déplacements réels font avancer l’aventure. »
+Le ressort humoristique peut revenir : « Le royaume vient encore de m’assigner une quête de débogage. » À utiliser avec parcimonie, surtout dans les épisodes 07, 09 et 15.
+Prévoir un mini-bilan à l’écran : « Ce que je voulais / Ce qui coinçait / Ce qui a changé ». Pour un chantier inachevé, le troisième devient « Prochain essai ».
+
+Son : voix claire au premier plan ; une ambiance musicale simple et peu dense ; quelques sons courts associés à la découverte, aux pièces ou aux étapes. Privilégier les sons que tu enregistres et les morceaux dont tu peux utiliser la licence. Faire entendre les pas et le portable quand ils sont utiles au récit. Les sons de quête ajoutés dans le jeu ne doivent pas être présentés comme déjà validés sur tous les mobiles.
+
+Question de fin facultative : « Dans cette mission, vous auriez transporté les matériaux ou les renforts ? » ; « Vous préférez garder un peu d’attente ou voir une animation immédiate ? » ; « Quel endroit de votre quartier deviendrait un fort ? » Une seule question par vidéo, liée au sujet.
+
+======================================================================
+5. RESSOURCES VISUELLES ET SOURCES À GARDER SOUS LA MAIN
+======================================================================
+
+Chemins ci-dessous relatifs à la racine du projet.
+
+VISUELS INSPECTÉS
+playtest/map-geography-preview.jpg — exemple synthétique du fond 2D avec forêt, eau, chemins ; aucun joueur réel ni partie créée. Épisodes 01/12.
+playtest/hero-anchor-preview.png — héros et lieux sur une carte synthétique ; utile pour expliquer ancre et pieds. Épisode 12.
+playtest/tactical-battle-mobile.jpg — capture mobile du plateau et de l’éventail ; état de test au tour 25, pas une preuve d’équilibrage ni une victoire. Épisode 13.
+playtest/battlefield-generator-preview.jpg — banc d’essai du générateur, pont et biomes ; mentionne que les effets viendront ensuite. Épisode 13.
+
+AUTRES RESSOURCES REPÉRÉES, À VÉRIFIER AVANT LE MONTAGE
+playtest/map-sprites-preview.png ; hero-jrpg-preview.png ; location-base-preview.png ; location-rings-preview.png.
+app/assets/welcome-portrait.png et welcome-landscape.png — identité du jeu.
+app/assets/portraits/ — héros ; app/assets/characters/ — personnages.
+app/assets/heroes/hero-jrpg-walk-v2.png — planche de marche actuelle.
+app/assets/units/ et app/assets/oldunits/ — variantes et unités ; ne pas attribuer une date à une variante sur le seul nom du fichier.
+app/assets/map/tileset-v1/terrain.png et structures.png — atlas du terrain et des constructions.
+app/assets/improvements/ — bâtiments ; app/assets/equipment/ — objets.
+Un PSD et un JPG liés au retrait d’un arc sont conservés à la racine et dans les unités : possible coulisse de retouche après inspection ; leur nom ne prouve pas à lui seul le déroulement du travail.
+Les images de scènes narratives ont été évoquées dans les échanges sous app/assets/scenes/. Leur présence effective et leur contenu doivent être vérifiés avant de les prévoir comme plans indispensables.
+
+REPÈRES GIT
+16 août a807b5b — première base archivée.
+20 août 7d816ab — interactions tactiles de garnison.
+23 août edfa06d — progression, économie, groupes autonomes.
+24–27 août 9207d60 / d7ac83b / ff9bb72 / 11d76c6 — objectifs, évacuation, ravitaillement et campagnes.
+30 août f932065 — création de partie mobile.
+1er septembre 4ed917a — brouillard et zone de jeu.
+3 septembre fc1d7bd / f5b9b04 — unités illustrées, inventaire et équipement.
+5 septembre fbee201 / 405d81e / 242b647 — camps, interface et préparation/déploiement.
+8 septembre 6d74f5c — multijoueur et sauvegardes serveur.
+Après le 8 septembre, les travaux locaux consultés sont largement non commités. La chronologie repose alors sur les dates des messages et la documentation, sans inventer de commits.
+
+CONVERSATIONS CLÉS — IDENTIFIANTS POUR RETROUVER LA MATIÈRE
+Pré-bottomsheet et contrastes : 01a0d5f0-12c5-72d0-8a2f-ba09fd57c5fe.
+Tailles de l’interface : 01a0d77a-f3df-71d1-a9bf-56dce0f0c440.
+Production / poste de guet / convois : 01a0e322-b317-7cf0-9d8f-0d8eb8b99a5c.
+Quêtes d’équipe : 01a0e304-fcbd-7050-a719-ae1aef2eda68.
+Première quête collective : 01a0e4fb-4d80-7063-b2f8-b90e9981fc57.
+main.js : 01a0f4ec-77b9-7a82-8130-c2c0a4b1aac9 et 01a0f9df-f7f3-7082-a435-04c8ea6a17bd.
+Refonte des quêtes : 01a0fdc6-5322-7b51-ba17-bddd88d54b57.
+Essai IRL et reprise : 01a1070c-e556-7fa1-8a02-0899a6cad40a.
+Carte et sprites : 01a1080f-3c5b-7c21-bb12-ae85f2667cd6.
+Combats : 01a10c43-c3ae-75c2-a8c4-23e18e1ff0cf.
+Tilesets : 01a10d12-4efd-7340-8b3f-678ef3f38494.
+Butin : 01a10c3e-6d32-7790-93c7-4fdbbea34c4c.
+Tests de récupération : 01a10c8f-a937-7cb1-b0b3-10774dd6dc56.
+Chargement et serveur : 01a10d82-ae28-7723-bc57-e487cbbe7f4a.
+Arrêt systemd : 01a10b0c-fa93-77f3-9ac5-9a4571cc67d1.
+Motivation/public envisagé : 01a0f98d-ece6-7a91-8f6c-923cf396c620 ; motivation familiale confirmée dans la présente conversation le 6 octobre 2026.
+Chasse au trésor entre équipes : 6abc239e-a498-83eb-aa7f-6202ddf70063 — pistes de conception, pas fonctionnalités intégrées.
+Répartition des quêtes (ChatGPT) : 6abc2026-2bc4-83ed-9179-c590869111f2.
+Caravane, idée séparée : 01a0d927-8656-7333-8b82-d05c6b6d6e20.
+
+DEUX HORS-SÉRIE POSSIBLES
+« Une idée en fait naître une autre » : le 25 septembre, la marche libre et une caravane marchande sont discutées, puis identifiées comme un projet séparé. Angle : apprendre à garder le périmètre du RPG GPS. Ne pas présenter Caravane comme un mode déjà intégré.
+« L’IA comme compagnon de chantier » : montrer une demande, une première hypothèse incomplète, ton indice supplémentaire et la correction. Bons cas : poste de guet, statistiques de commandement, définition des actions de quête. Montrer les limites de l’accompagnement autant que son utilité.
+
+======================================================================
+6. CE QU’IL RESTE À PERSONNALISER AVANT LE PREMIER TOURNAGE
+======================================================================
+
+Pour la genèse : l’envie de jouer avec ta fille et l’idée de son anniversaire avec ses amies sont désormais établies par ton témoignage. Restent à préciser ton moment déclencheur, tes inspirations réelles, ce qui t’attire personnellement dans la création de jeux, et ce que tu veux qu’elle et ses amies racontent après une partie. Ces éléments ne peuvent pas être déduits du code.
+Pour chaque épisode : ajouter une phrase vraie de souvenir (« J’ai remarqué ça quand… »), le lieu ou le contexte si tu souhaites le partager, et le résultat du prochain essai lorsqu’il n’est pas confirmé dans les archives.
+Avant d’afficher une conversation : choisir un extrait court, conserver le sens, retirer les données privées. Préférer les demandes sur le jeu aux commandes de déploiement.
+Avant d’annoncer une correction : distinguer « codé », « testé dans le moteur », « vérifié dans le navigateur », « déployé » et « confirmé dehors ».
+
+Premier tournage conseillé : épisode 00, puis épisode 07. Le premier explique pourquoi suivre le projet ; le second montre immédiatement la personnalité de la série avec un incident documenté et une résolution compréhensible.

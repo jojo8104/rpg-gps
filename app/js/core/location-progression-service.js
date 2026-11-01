@@ -1,4 +1,21 @@
+import { terrainAllowsType } from "./camp-terrain-rules.js";
 export const LOCATION_EVOLUTION = Object.freeze({
+  "lumber-camp": {
+    previousType: "camp",
+    nextType: null,
+    maxLevel: 5,
+    baseHealth: 140,
+    healthPerLevel: 30,
+    xpBase: 250,
+  },
+  quarry: {
+    previousType: "camp",
+    nextType: null,
+    maxLevel: 5,
+    baseHealth: 140,
+    healthPerLevel: 30,
+    xpBase: 250,
+  },
   camp: {
     previousType: null,
     nextType: null,
@@ -124,6 +141,12 @@ export class LocationProgressionService {
       return { success: false, reason: "insufficient_experience" };
     if (location.level >= definition.maxLevel && !definition.nextType)
       return { success: false, reason: "maximum_level" };
+    if (
+      location.level >= definition.maxLevel &&
+      definition.nextType &&
+      !terrainAllowsType(location, definition.nextType)
+    )
+      return { success: false, reason: "terrain_incompatible" };
     location.progression.experience -= required;
     if (location.level < definition.maxLevel) location.level += 1;
     else if (definition.nextType) {

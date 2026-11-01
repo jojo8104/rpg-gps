@@ -1,0 +1,43 @@
+/* Une animation de présentation, maintenue jusqu'à la réponse officielle. */
+.command-feedback {
+  position: fixed;
+  top: 35vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(80vw, 22rem);
+  animation: none;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: #18202eed;
+  pointer-events: none;
+}
+.command-feedback small {
+  display: block;
+  font-size: 0.8rem;
+  letter-spacing: normal;
+}
+.command-feedback .travel-reward__xp {
+  animation: command-pulse 0.8s ease-in-out infinite alternate;
+}
+.command-feedback.is-capture .travel-reward__xp {
+  display: block;
+  animation: capture-clash 0.45s ease-in-out infinite alternate;
+}
+@keyframes command-pulse {
+  to {
+    opacity: 0.45;
+  }
+}
+@keyframes capture-clash {
+  from {
+    transform: scale(0.85) rotate(-12deg);
+  }
+  to {
+    transform: scale(1.15) rotate(12deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .command-feedback .travel-reward__xp {
+    animation: none;
+  }
+}

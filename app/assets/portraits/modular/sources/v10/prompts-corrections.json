@@ -1,0 +1,7 @@
+{
+  "mode": "built-in imagegen",
+  "prompts": {
+    "shapes-correction": "Edit ONLY the third face in the TOP ROW (female square-chin blank face). Make its lower jaw and chin visibly SQUARE: angular jaw corners and a short flat horizontal chin instead of a pointed V chin. Keep feminine adult proportions, exactly the same forehead, skull width, ears, skin tone, image position and total face height. Do not change any of the other 9 sprite cutouts, transparency or 4x3 layout. No eyes nose mouth brows hair or neck on the blank faces. Genuine transparent alpha.",
+    "male-correction": "Edit ONLY the eyebrow COLORS of the three expression eye pairs in top row CELLS 2, 3 and 4 (laughing, angry and menacing). Change those eyebrows from silver-white to natural DARK CHESTNUT BROWN matching the normal male hair in the game. Keep the first top-row aged eye pair's eyebrows SILVER WHITE. Do not change eye shapes, gaze, expressions, skin, mouths, wrinkle overlays, their positions, transparency or the 4x3 grid. Preserve everything else pixel-faithfully. Genuine transparent alpha background."
+  }
+}

@@ -15,9 +15,12 @@ export class Unit {
     equipmentIds = [],
     specialPowerIds = [],
     state = "active",
+    garrisonQuestRewarded = false,
     healthPerSoldier = 10,
     combatHealthThreshold = 4,
     soldierHealth = null,
+    battleSlot = null,
+    expeditionMorale = [],
   }) {
     this.id = Unit.#text(id, "L'identifiant de l'unite");
     this.ownerPlayerId = Unit.#text(
@@ -59,7 +62,24 @@ export class Unit {
     this.experience = Unit.#nonNegative(experience, "L'experience");
     this.equipmentIds = Unit.#ids(equipmentIds);
     this.specialPowerIds = Unit.#ids(specialPowerIds);
+    this.expeditionMorale = expeditionMorale.map((e) => {
+      if (
+        !Number.isFinite(e.delta) ||
+        !Number.isSafeInteger(e.quantity) ||
+        e.quantity < 0 ||
+        !Number.isSafeInteger(e.expiresAt) ||
+        e.expiresAt < 0 ||
+        typeof e.eventId !== "string"
+      )
+        throw new RangeError("Effet de moral d’expédition invalide.");
+      return { ...e };
+    });
     this.state = Unit.#text(state, "L'etat de l'unite");
+    this.garrisonQuestRewarded = garrisonQuestRewarded === true;
+    this.battleSlot =
+      Number.isInteger(battleSlot) && battleSlot >= 0 && battleSlot < 3
+        ? battleSlot
+        : null;
   }
 
   get isDefeated() {
@@ -188,9 +208,14 @@ export class Unit {
       equipmentIds: [...this.equipmentIds],
       specialPowerIds: [...this.specialPowerIds],
       state: this.state,
+      garrisonQuestRewarded: this.garrisonQuestRewarded,
       healthPerSoldier: this.healthPerSoldier,
       combatHealthThreshold: this.combatHealthThreshold,
       soldierHealth: [...this.soldierHealth],
+      battleSlot: this.battleSlot,
+      ...(this.expeditionMorale.length
+        ? { expeditionMorale: this.expeditionMorale.map((e) => ({ ...e })) }
+        : {}),
     };
   }
 

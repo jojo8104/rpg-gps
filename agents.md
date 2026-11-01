@@ -32,6 +32,14 @@ Je développe un jeu RPG/stratégie GPS jouable dans le monde réel.
 
 ## Documentation du jeu
 
+- Préférer une courte introduction du concept, suivie d’un tableau de statistiques avec illustrations, puis d’un texte expliquant les valeurs, conditions et limites. Ajouter si utile un exemple illustré en fin de concept ou d’article. Utiliser uniquement des valeurs vérifiées et légender les images ; ne pas inventer des chiffres pour remplir un tableau.
+
+- Le parcours principal du wiki est un guide de règles pour les joueurs, organisé par thème et fonctionnalité : conditions, actions, conséquences et exemples. Les notes techniques, retouches visuelles, outils, projets et systèmes historiques restent dans les rubriques secondaires et l’historique ; ne pas les accumuler dans les pages de règles. Utiliser `audience` et `topics` dans les sources du wiki.
+
+- Le wiki présente un article par page HTML. Tout document lié doit disposer d’une explication dans `docs/wiki-articles.json`, être rendu en article HTML et conserver son historique. Ajouter les illustrations existantes pertinentes avec une légende exacte ; conserver les médias archivés. Ne pas remplacer un lien de lecture par un lien vers du Markdown brut.
+
+- Le dépôt GitHub dédié est `jojo8104/rpg-gps-wiki`. Après génération, exécuter `npm run wiki:export` pour préparer `.wiki-publish/`, puis y committer et pousser les mises à jour lors d’une publication demandée. Les sources restent maintenues avec le jeu. Conserver toutes les archives.
+
 - À chaque changement du jeu dans une discussion, mettre à jour le wiki en parallèle, sauf indication contraire explicite de l’utilisateur. Actualiser `docs/wiki-content.json` et les documents de règles concernés dans `docs/` dans le même changement ; pour un changement technique, documenter son effet ou son absence d’effet sur les règles dans la rubrique concernée.
 - Conserver l’historique de chaque article : une note datée en fin d’article doit donner accès aux versions précédentes archivées. Générer avec `npm run wiki:build -- --note "Description du changement"` et inclure `wiki/history.json` ainsi que les nouveaux fichiers de `wiki/archives/`. Ne jamais supprimer ni réécrire les versions archivées.
 - Générer le wiki avec `npm run wiki:build` après modification du contenu, de `data/hero-classes.json` ou de `data/units.json` et inclure `wiki/index.html` généré.

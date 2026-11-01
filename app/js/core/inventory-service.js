@@ -1,6 +1,7 @@
 import { HERO_GRADES } from "./hero-progression-config.js";
 import { SlotContainer, createStacksForQuantity } from "./slot-container.js";
 import { getItemDefinition } from "./item-catalog.js";
+import { isBagFreeDocument } from "./item-baggage.js";
 
 const HERO_BAG_SLOTS = Object.freeze([8, 10, 12, 14, 16]);
 
@@ -45,12 +46,15 @@ export class InventoryService {
       if (!bundleSize || !Number.isFinite(quantity) || quantity <= 0) return;
       quantitiesByItem[itemId] = (quantitiesByItem[itemId] ?? 0) + quantity;
       slotsByItem[itemId] =
-        (slotsByItem[itemId] ?? 0) + Math.ceil(quantity / bundleSize);
+        (slotsByItem[itemId] ?? 0) +
+        (isBagFreeDocument(itemId) ? 0 : Math.ceil(quantity / bundleSize));
     });
     (hero.carriedLoot ?? []).forEach((entry) => {
       quantitiesByItem[entry.itemId] =
         (quantitiesByItem[entry.itemId] ?? 0) + entry.quantity;
-      slotsByItem[entry.itemId] = (slotsByItem[entry.itemId] ?? 0) + 1;
+      slotsByItem[entry.itemId] =
+        (slotsByItem[entry.itemId] ?? 0) +
+        (isBagFreeDocument(entry.itemId) ? 0 : 1);
     });
     const slotCapacity = this.getHeroBagSlotCount(hero);
     const usedSlots = Object.values(slotsByItem).reduce(

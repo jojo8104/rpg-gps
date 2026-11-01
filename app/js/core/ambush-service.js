@@ -1,7 +1,52 @@
-/** Calcule la portée, la réussite et les effets d'une embuscade sans dépendre de l'interface. */
+/** Calcule et applique les effets d'une embuscade sans dépendre de l'interface. */
 export class AmbushService {
   constructor({ preparationDurationMs = 20_000 } = {}) {
     this.preparationDurationMs = preparationDurationMs;
+  }
+
+  applyEffects({
+    battle,
+    effects,
+    sourceHeroId = null,
+    attackerTeamId = null,
+  }) {
+    const state = battle.duel;
+    const attacker =
+      attackerTeamId ??
+      battle.teams.find((team) =>
+        team.heroes.some(
+          (hero) => hero.sourceId === sourceHeroId || hero.id === sourceHeroId,
+        ),
+      )?.id;
+    if (!state || !state.players.some((player) => player.id === attacker))
+      throw new Error("Le camp de l’embuscade doit participer au duel.");
+    if (
+      !Number.isInteger(effects.rounds) ||
+      effects.rounds < 0 ||
+      !Number.isFinite(effects.attackerAttackMultiplier) ||
+      effects.attackerAttackMultiplier < 1 ||
+      !Number.isFinite(effects.defenderDefenseMultiplier) ||
+      effects.defenderDefenseMultiplier <= 0 ||
+      effects.defenderDefenseMultiplier > 1
+    )
+      throw new Error("Effets d’embuscade invalides.");
+    if (!effects.rounds) return;
+    if (
+      state.round !== 1 ||
+      state.players.some((player) => player.locked) ||
+      Object.keys(state.pendingChoices).length ||
+      state.ambush
+    )
+      throw new Error(
+        "L’embuscade doit être appliquée avant les choix du premier duel.",
+      );
+    state.ambush = {
+      attackerTeamId: attacker,
+      sourceHeroId,
+      attackerAttackMultiplier: effects.attackerAttackMultiplier,
+      defenderDefenseMultiplier: effects.defenderDefenseMultiplier,
+      expiresAfterRound: effects.rounds,
+    };
   }
 
   engagementRange({ baseRange, attackerUnits = [], unitDefinitions }) {
@@ -136,12 +181,12 @@ export class AmbushService {
 function effectsFor(level) {
   const values = {
     cancelled: [0, 1, 1],
-    light: [4_000, 1.1, 0.95],
-    success: [6_000, 1.15, 0.9],
-    perfect: [8_000, 1.2, 0.85],
+    light: [1, 1.1, 0.95],
+    success: [1, 1.15, 0.9],
+    perfect: [1, 1.2, 0.85],
   }[level];
   return {
-    durationMs: values[0],
+    rounds: values[0],
     attackerAttackMultiplier: values[1],
     defenderDefenseMultiplier: values[2],
   };

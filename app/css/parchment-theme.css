@@ -1,99 +1,529 @@
-:root { --parchment:#ead6aa;--parchment-light:#fff0cc;--parchment-deep:#d2aa70;--parchment-ink:#352319;--parchment-muted:#654936;--wood:#4b2e20;--gold:#c69b38;--cream:#fff0c9;--danger:#7c2924;--success:#315b35; }
-body { background:linear-gradient(90deg,#1d1713 0 12px,transparent 12px calc(100% - 12px),#1d1713 calc(100% - 12px)),repeating-linear-gradient(135deg,#2a211b 0 7px,#332820 7px 14px);color:var(--parchment-ink);font-family:Georgia,"Times New Roman",serif; }
-h1,h2,h3,h4,h5,h6,strong { color:var(--parchment-ink); } p,li,label,small,span { text-shadow:none; }
-.text-muted,.setup-hint,.garrison-help,.army-card__meta,.army-card__summary,.world-card p,.sheet-feedback { color:var(--parchment-muted)!important; }
-.eyebrow,.sheet-state,.quest-card>small { color:#79531d!important;font-weight:800;letter-spacing:.11em; }
-.setup-screen { position:relative;isolation:isolate;overflow:hidden;color:var(--parchment-ink);border:3px solid #241914;border-radius:8px;background:radial-gradient(circle at 15% 20%,#a76f3920 0 2px,transparent 3px),radial-gradient(circle at 85% 72%,#81512d1c 0 2px,transparent 3px),linear-gradient(90deg,#bd8f541c,transparent 12%,transparent 88%,#8b5a341c),linear-gradient(#fff0cc,#e3c38e);box-shadow:inset 0 0 0 2px var(--gold),inset 0 0 28px #71451f55,0 12px 35px #0009; }
-.setup-screen::before,.setup-screen::after { content:"❧";position:absolute;z-index:-1;color:#805f2e88;font-size:4rem;line-height:1; }.setup-screen::before{top:.3rem;right:.55rem}.setup-screen::after{left:.55rem;bottom:.3rem;transform:rotate(180deg)}
-.setup-screen h1 { padding-bottom:.65rem;border-bottom:2px solid #8c6647;font-variant:small-caps;letter-spacing:.025em; }
-button { color:var(--cream);border-color:#211711;background:linear-gradient(#ffffff12,transparent 42%),linear-gradient(90deg,#513321,#765038 50%,#4b2d1e);box-shadow:inset 0 0 0 2px #c49a45,inset 0 -5px 10px #1d0f0a55,0 3px 0 #1d1410;font-family:Georgia,"Times New Roman",serif;font-weight:700;text-shadow:0 1px 2px #000; }
-button strong,button small,button span { color:inherit!important; } button:disabled { color:#b9aa8f!important;background:#51463b!important;border-color:#302820!important;box-shadow:inset 0 0 0 1px #776956!important;opacity:.78; }
-.secondary-button,.sheet-close,.army-detail-back { color:var(--parchment-ink)!important;border-color:#5a422f;background:linear-gradient(#fff5d8,#d8b77d);box-shadow:inset 0 0 0 1px #f3d881,0 2px 0 #6b4930;text-shadow:0 1px #fff8; }
-select,input,textarea { color:var(--parchment-ink)!important;border-color:#715139!important;background:#fff0cd!important;font-family:Georgia,"Times New Roman",serif; } select option{color:var(--parchment-ink);background:#fff0cd}
-.gps-setup-panel,.bottom-sheet,.quest-card,.army-card,.world-card,.compact-hero-card,.inventory-panel,.inventory-card,.hero-identity,.hero-stat-panel,.hero-aptitudes,.garrison-sheet,.dialogue-card,.equipment-panel { color:var(--parchment-ink);border-color:#33251c!important;background:repeating-linear-gradient(0deg,transparent 0 31px,#8e653714 32px),linear-gradient(100deg,#d0a76b22,transparent 14%,transparent 84%,#8d5b3322),linear-gradient(#fff0cc,#e2c18c)!important;box-shadow:inset 0 0 0 2px var(--gold),inset 0 0 18px #7a4b2855,0 5px 16px #0006; }
-.gps-setup-panel h2,.gps-setup-panel h3,.bottom-sheet h2,.bottom-sheet h3,.quest-card strong,.army-card h3,.world-card h3,.compact-hero-card h3,.inventory-card strong { color:var(--parchment-ink)!important; }
-.setup-placement-block,.tool-block,.army-card__details,.world-detail-section { color:var(--parchment-ink);border-color:#9a7347!important;background:#c89e6328!important; }
-.placement-option,.army-card__stats div,.stock-slot,.inventory-slot { color:var(--parchment-ink)!important;border-color:#9a7347!important;background:#f4dfb6dd!important; }
-.army-card.is-expanded,.world-card.is-active { background:linear-gradient(#fff0c9,#d5ad73)!important; }.army-illustration,.world-illustration{color:#f1cf73!important;border-color:#201712!important;background:radial-gradient(circle,#826248,#3f2b20 72%)!important}
-.trait-chip,.hero-stat-button,.equipment-slot,.garrison-unit,.garrison-slot { color:var(--cream)!important;border-color:#2b1d16!important;background:linear-gradient(#674832,#35251c)!important; }.trait-chip small,.garrison-unit small,.equipment-slot small{color:#ead7ad!important}
-.stat-detail,.trait-detail,.equipment-slot-menu { color:var(--cream)!important;border-color:var(--gold)!important;background:#34251df5!important; }.stat-detail strong,.trait-detail strong,.equipment-slot-menu strong{color:#ffe9af!important}.stat-detail p,.trait-detail p,.equipment-slot-menu small{color:#dec9a5!important}
-.bottom-nav { border-color:#1f1712!important;background:linear-gradient(#6d4933,#32231b)!important;box-shadow:inset 0 2px 0 var(--gold),0 -5px 18px #0008!important; }.bottom-nav button{color:#ead8b1!important;border:0;background:transparent!important;box-shadow:none!important;text-shadow:0 1px 2px #000}.bottom-nav button.is-active{color:#342318!important;background:linear-gradient(#fff4d4,#d9b778)!important;box-shadow:inset 0 0 0 2px var(--gold),0 0 8px #f3d77a66!important;text-shadow:0 1px #fff}
-.quest-card li{color:var(--parchment-ink);border-color:#9b734b!important}.quest-card li.is-completed{color:var(--success)!important}.quest-deadline,.is-failed{color:var(--danger)!important}
-.location-tab,.location-tabs{color:var(--cream);background:#38271f!important}.location-tabs button{color:#e8d2a9!important}.location-tabs button.is-active{color:#38251a!important;background:#efd59e!important}
-.army-health-bar,.hero-progress,.unit-xp__bar{border-color:#3d2a1f!important;background:#211813!important}.battle-result-card,.battle-result-summary{color:var(--parchment-ink)!important}
-@media(max-width:560px){.setup-screen::before,.setup-screen::after{font-size:2.7rem;opacity:.65}}
+:root {
+  --parchment: #ead6aa;
+  --parchment-light: #fff0cc;
+  --parchment-deep: #d2aa70;
+  --parchment-ink: #352319;
+  --parchment-muted: #654936;
+  --wood: #4b2e20;
+  --gold: #c69b38;
+  --cream: #fff0c9;
+  --danger: #7c2924;
+  --success: #315b35;
+}
+body {
+  background:
+    linear-gradient(
+      90deg,
+      #1d1713 0 12px,
+      transparent 12px calc(100% - 12px),
+      #1d1713 calc(100% - 12px)
+    ),
+    repeating-linear-gradient(135deg, #2a211b 0 7px, #332820 7px 14px);
+  color: var(--parchment-ink);
+  font-family: Georgia, "Times New Roman", serif;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+strong {
+  color: var(--parchment-ink);
+}
+p,
+li,
+label,
+small,
+span {
+  text-shadow: none;
+}
+.text-muted,
+.setup-hint,
+.garrison-help,
+.army-card__meta,
+.army-card__summary,
+.world-card p,
+.sheet-feedback {
+  color: var(--parchment-muted) !important;
+}
+.eyebrow,
+.sheet-state,
+.quest-card > small {
+  color: #79531d !important;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+.setup-screen {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--parchment-ink);
+  border: 3px solid #241914;
+  border-radius: 8px;
+  background:
+    radial-gradient(circle at 15% 20%, #a76f3920 0 2px, transparent 3px),
+    radial-gradient(circle at 85% 72%, #81512d1c 0 2px, transparent 3px),
+    linear-gradient(
+      90deg,
+      #bd8f541c,
+      transparent 12%,
+      transparent 88%,
+      #8b5a341c
+    ),
+    linear-gradient(#fff0cc, #e3c38e);
+  box-shadow:
+    inset 0 0 0 2px var(--gold),
+    inset 0 0 28px #71451f55,
+    0 12px 35px #0009;
+}
+.setup-screen::before,
+.setup-screen::after {
+  content: "❧";
+  position: absolute;
+  z-index: -1;
+  color: #805f2e88;
+  font-size: 4rem;
+  line-height: 1;
+}
+.setup-screen::before {
+  top: 0.3rem;
+  right: 0.55rem;
+}
+.setup-screen::after {
+  left: 0.55rem;
+  bottom: 0.3rem;
+  transform: rotate(180deg);
+}
+.setup-screen h1 {
+  padding-bottom: 0.65rem;
+  border-bottom: 2px solid #8c6647;
+  font-variant: small-caps;
+  letter-spacing: 0.025em;
+}
+button {
+  color: var(--cream);
+  border-color: #211711;
+  background:
+    linear-gradient(#ffffff12, transparent 42%),
+    linear-gradient(90deg, #513321, #765038 50%, #4b2d1e);
+  box-shadow:
+    inset 0 0 0 2px #c49a45,
+    inset 0 -5px 10px #1d0f0a55,
+    0 3px 0 #1d1410;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  text-shadow: 0 1px 2px #000;
+}
+button strong,
+button small,
+button span {
+  color: inherit !important;
+}
+button:disabled {
+  color: #b9aa8f !important;
+  background: #51463b !important;
+  border-color: #302820 !important;
+  box-shadow: inset 0 0 0 1px #776956 !important;
+  opacity: 0.78;
+}
+.secondary-button,
+.sheet-close,
+.army-detail-back {
+  color: var(--parchment-ink) !important;
+  border-color: #5a422f;
+  background: linear-gradient(#fff5d8, #d8b77d);
+  box-shadow:
+    inset 0 0 0 1px #f3d881,
+    0 2px 0 #6b4930;
+  text-shadow: 0 1px #fff8;
+}
+select,
+input,
+textarea {
+  color: var(--parchment-ink) !important;
+  border-color: #715139 !important;
+  background: #fff0cd !important;
+  font-family: Georgia, "Times New Roman", serif;
+}
+select option {
+  color: var(--parchment-ink);
+  background: #fff0cd;
+}
+.gps-setup-panel,
+.bottom-sheet,
+.quest-card,
+.army-card,
+.world-card,
+.compact-hero-card,
+.inventory-panel,
+.inventory-card,
+.hero-identity,
+.hero-stat-panel,
+.hero-aptitudes,
+.garrison-sheet,
+.dialogue-card,
+.equipment-panel {
+  color: var(--parchment-ink);
+  border-color: #33251c !important;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, #8e653714 32px),
+    linear-gradient(
+      100deg,
+      #d0a76b22,
+      transparent 14%,
+      transparent 84%,
+      #8d5b3322
+    ),
+    linear-gradient(#fff0cc, #e2c18c) !important;
+  box-shadow:
+    inset 0 0 0 2px var(--gold),
+    inset 0 0 18px #7a4b2855,
+    0 5px 16px #0006;
+}
+.gps-setup-panel h2,
+.gps-setup-panel h3,
+.bottom-sheet h2,
+.bottom-sheet h3,
+.quest-card strong,
+.army-card h3,
+.world-card h3,
+.compact-hero-card h3,
+.inventory-card strong {
+  color: var(--parchment-ink) !important;
+}
+.setup-placement-block,
+.tool-block,
+.army-card__details,
+.world-detail-section {
+  color: var(--parchment-ink);
+  border-color: #9a7347 !important;
+  background: #c89e6328 !important;
+}
+.placement-option,
+.army-card__stats div,
+.stock-slot,
+.inventory-slot {
+  color: var(--parchment-ink) !important;
+  border-color: #9a7347 !important;
+  background: #f4dfb6dd !important;
+}
+.army-card.is-expanded,
+.world-card.is-active {
+  background: linear-gradient(#fff0c9, #d5ad73) !important;
+}
+.army-illustration,
+.world-illustration {
+  color: #f1cf73 !important;
+  border-color: #201712 !important;
+  background: radial-gradient(circle, #826248, #3f2b20 72%) !important;
+}
+.trait-chip,
+.hero-stat-button,
+.equipment-slot,
+.garrison-unit,
+.garrison-slot {
+  color: var(--cream) !important;
+  border-color: #2b1d16 !important;
+  background: linear-gradient(#674832, #35251c) !important;
+}
+.trait-chip small,
+.garrison-unit small,
+.equipment-slot small {
+  color: #ead7ad !important;
+}
+.stat-detail,
+.trait-detail,
+.equipment-slot-menu {
+  color: var(--cream) !important;
+  border-color: var(--gold) !important;
+  background: #34251df5 !important;
+}
+.stat-detail strong,
+.trait-detail strong,
+.equipment-slot-menu strong {
+  color: #ffe9af !important;
+}
+.stat-detail p,
+.trait-detail p,
+.equipment-slot-menu small {
+  color: #dec9a5 !important;
+}
+.bottom-nav {
+  border-color: #1f1712 !important;
+  background: linear-gradient(#6d4933, #32231b) !important;
+  box-shadow:
+    inset 0 2px 0 var(--gold),
+    0 -5px 18px #0008 !important;
+}
+.bottom-nav button {
+  color: #ead8b1 !important;
+  border: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  text-shadow: 0 1px 2px #000;
+}
+.bottom-nav button.is-active {
+  color: #342318 !important;
+  background: linear-gradient(#fff4d4, #d9b778) !important;
+  box-shadow:
+    inset 0 0 0 2px var(--gold),
+    0 0 8px #f3d77a66 !important;
+  text-shadow: 0 1px #fff;
+}
+.quest-card li {
+  color: var(--parchment-ink);
+  border-color: #9b734b !important;
+}
+.quest-card li.is-completed {
+  color: var(--success) !important;
+}
+.quest-deadline,
+.is-failed {
+  color: var(--danger) !important;
+}
+.location-tab,
+.location-tabs {
+  color: var(--cream);
+  background: #38271f !important;
+}
+.location-tabs button {
+  color: #e8d2a9 !important;
+}
+.location-tabs button.is-active {
+  color: #38251a !important;
+  background: #efd59e !important;
+}
+.army-health-bar,
+.hero-progress,
+.unit-xp__bar {
+  border-color: #3d2a1f !important;
+  background: #211813 !important;
+}
+.battle-result-card,
+.battle-result-summary {
+  color: var(--parchment-ink) !important;
+}
+@media (max-width: 560px) {
+  .setup-screen::before,
+  .setup-screen::after {
+    font-size: 2.7rem;
+    opacity: 0.65;
+  }
+}
 
 /* Identité : portrait à gauche, informations entièrement contenues à droite. */
-@media(orientation:portrait){
-  #hero-content .hero-identity{display:grid!important;grid-template-columns:minmax(0,42%) minmax(0,58%)!important;grid-template-rows:150px!important;align-items:stretch!important;overflow:hidden}
-  #hero-content .hero-portrait{grid-column:1!important;grid-row:1!important;width:100%!important;height:150px!important;min-width:0;object-fit:cover;object-position:center top;border-radius:0!important}
-  #hero-content .hero-identity>header{grid-column:2!important;grid-row:1!important;display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:.3rem!important;width:auto!important;height:100%!important;min-width:0;padding:.55rem .45rem!important;text-align:left!important;background:transparent!important;border:0!important;border-radius:0!important;overflow:hidden}
-  #hero-content .hero-identity>header>div{min-width:0;max-width:100%;overflow:hidden}
-  #hero-content .hero-identity h3{max-width:100%;margin:0!important;font-size:clamp(1.05rem,7vw,1.65rem)!important;line-height:1.05!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  #hero-content .hero-identity .hero-rank{display:grid!important;gap:.12rem!important;max-width:100%;margin:.3rem 0 0!important;font-size:clamp(.58rem,3.2vw,.78rem)!important;line-height:1.1!important;letter-spacing:.08em!important;overflow:hidden}
-  #hero-content .hero-identity .hero-rank span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#654124!important}
-  #hero-content .hero-state{display:block!important;flex:0 0 auto;padding:.22rem .42rem;border:1px solid #5c402c;border-radius:999px;background:#315b35;color:#fff0c9!important;font-size:.58rem;line-height:1;text-transform:uppercase}
-  #hero-content .hero-stat-panel{min-height:0!important;padding:.3rem!important;gap:.18rem!important;overflow:visible!important}
-  #hero-content .compact-hero-stats{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:.18rem!important}
-  #hero-content .compact-hero-stats>div,#hero-content .compact-hero-stats>.hero-stat-button{min-height:46px!important;padding:.18rem .08rem!important;border-radius:7px!important}
-  #hero-content .compact-hero-stats strong{font-size:clamp(.62rem,2.8vw,.78rem)!important;line-height:1.05!important;white-space:nowrap}
-  #hero-content .compact-hero-stats span{margin-top:.08rem!important;font-size:clamp(.43rem,2.15vw,.58rem)!important;line-height:1.05!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (orientation: portrait) {
+  #hero-content .hero-identity {
+    display: grid !important;
+    grid-template-columns: minmax(0, 42%) minmax(0, 58%) !important;
+    grid-template-rows: 150px !important;
+    align-items: stretch !important;
+    overflow: hidden;
+  }
+  #hero-content .hero-portrait {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    height: 150px !important;
+    min-width: 0;
+    object-fit: cover;
+    object-position: center top;
+    border-radius: 0 !important;
+  }
+  #hero-content .hero-identity > header {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    display: flex !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    gap: 0.3rem !important;
+    width: auto !important;
+    height: 100% !important;
+    min-width: 0;
+    padding: 0.55rem 0.45rem !important;
+    text-align: left !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden;
+  }
+  #hero-content .hero-identity > header > div {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  #hero-content .hero-identity h3 {
+    max-width: 100%;
+    margin: 0 !important;
+    font-size: clamp(1.05rem, 7vw, 1.65rem) !important;
+    line-height: 1.05 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #hero-content .hero-identity .hero-rank {
+    display: grid !important;
+    gap: 0.12rem !important;
+    max-width: 100%;
+    margin: 0.3rem 0 0 !important;
+    font-size: clamp(0.58rem, 3.2vw, 0.78rem) !important;
+    line-height: 1.1 !important;
+    letter-spacing: 0.08em !important;
+    overflow: hidden;
+  }
+  #hero-content .hero-identity .hero-rank span {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #654124 !important;
+  }
+  #hero-content .hero-state {
+    display: block !important;
+    flex: 0 0 auto;
+    padding: 0.22rem 0.42rem;
+    border: 1px solid #5c402c;
+    border-radius: 999px;
+    background: #315b35;
+    color: #fff0c9 !important;
+    font-size: 0.58rem;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+  #hero-content .hero-stat-panel {
+    min-height: 0 !important;
+    padding: 0.3rem !important;
+    gap: 0.18rem !important;
+    overflow: visible !important;
+  }
+  #hero-content .compact-hero-stats {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 0.18rem !important;
+  }
+  #hero-content .compact-hero-stats > div,
+  #hero-content .compact-hero-stats > .hero-stat-button {
+    min-height: 46px !important;
+    padding: 0.18rem 0.08rem !important;
+    border-radius: 7px !important;
+  }
+  #hero-content .compact-hero-stats strong {
+    font-size: clamp(0.62rem, 2.8vw, 0.78rem) !important;
+    line-height: 1.05 !important;
+    white-space: nowrap;
+  }
+  #hero-content .compact-hero-stats span {
+    margin-top: 0.08rem !important;
+    font-size: clamp(0.43rem, 2.15vw, 0.58rem) !important;
+    line-height: 1.05 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
-.ghost-return-notice{position:fixed;z-index:1900;top:max(.65rem,env(safe-area-inset-top));right:.7rem;left:.7rem;display:grid;gap:.2rem;max-width:620px;margin:auto;padding:.7rem .85rem;border:2px solid #2a1b18;border-radius:10px;background:linear-gradient(#71352f,#481f20);color:#fff2cf;box-shadow:inset 0 0 0 2px #d4ad52,0 6px 22px #000a;text-align:center;pointer-events:none}
-.ghost-return-notice[hidden]{display:none!important}.ghost-return-notice strong{color:#fff0bd!important;font-size:.92rem}.ghost-return-notice span{color:#f3dfc5!important;font-size:.76rem;line-height:1.25}
+.ghost-return-notice {
+  position: fixed;
+  z-index: 1900;
+  top: max(0.65rem, env(safe-area-inset-top));
+  right: 0.7rem;
+  left: 0.7rem;
+  display: grid;
+  gap: 0.2rem;
+  max-width: 620px;
+  margin: auto;
+  padding: 0.7rem 0.85rem;
+  border: 2px solid #2a1b18;
+  border-radius: 10px;
+  background: linear-gradient(#71352f, #481f20);
+  color: #fff2cf;
+  box-shadow:
+    inset 0 0 0 2px #d4ad52,
+    0 6px 22px #000a;
+  text-align: center;
+  pointer-events: none;
+}
+.ghost-return-notice[hidden] {
+  display: none !important;
+}
+.ghost-return-notice strong {
+  color: #fff0bd !important;
+  font-size: 0.92rem;
+}
+.ghost-return-notice span {
+  color: #f3dfc5 !important;
+  font-size: 0.76rem;
+  line-height: 1.25;
+}
 
 /* Toutes les statistiques du héros partagent la même finition bois brun. */
-#hero-content .compact-hero-stats>div,
-#hero-content .compact-hero-stats>.hero-stat-button{
-  color:var(--cream)!important;
-  border-color:#2b1d16!important;
-  background:linear-gradient(#674832,#35251c)!important;
-  box-shadow:inset 0 0 0 1px #c69b38,0 2px 3px #0005!important;
+#hero-content .compact-hero-stats > div,
+#hero-content .compact-hero-stats > .hero-stat-button {
+  color: var(--cream) !important;
+  border-color: #2b1d16 !important;
+  background: linear-gradient(#674832, #35251c) !important;
+  box-shadow:
+    inset 0 0 0 1px #c69b38,
+    0 2px 3px #0005 !important;
 }
-#hero-content .compact-hero-stats strong{color:#fff0c9!important}
-#hero-content .compact-hero-stats span{color:#ead7ad!important}
-#hero-content .compact-hero-stats>.is-selected{
-  border-color:#e0ba59!important;
-  background:linear-gradient(#79543a,#443025)!important;
+#hero-content .compact-hero-stats strong {
+  color: #fff0c9 !important;
+}
+#hero-content .compact-hero-stats span {
+  color: #ead7ad !important;
+}
+#hero-content .compact-hero-stats > .is-selected {
+  border-color: #e0ba59 !important;
+  background: linear-gradient(#79543a, #443025) !important;
 }
 
 /* Fiches détaillées de Monde : parchemin, encre brune et menus assortis. */
-.location-detail{color:var(--parchment-ink)!important}
-.location-detail>header,
-.location-detail>section{
-  color:var(--parchment-ink)!important;
-  border-color:#6f4d34!important;
-  background:repeating-linear-gradient(0deg,transparent 0 31px,#8e653714 32px),linear-gradient(#fff0cc,#e2c18c)!important;
-  box-shadow:inset 0 0 0 1px var(--gold),inset 0 0 12px #7a4b2838!important;
+.location-detail {
+  color: var(--parchment-ink) !important;
+}
+.location-detail > header,
+.location-detail > section {
+  color: var(--parchment-ink) !important;
+  border-color: #6f4d34 !important;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 31px, #8e653714 32px),
+    linear-gradient(#fff0cc, #e2c18c) !important;
+  box-shadow:
+    inset 0 0 0 1px var(--gold),
+    inset 0 0 12px #7a4b2838 !important;
 }
 .location-detail h2,
 .location-detail h3,
 .location-detail h4,
-.location-detail strong{color:var(--parchment-ink)!important}
+.location-detail strong {
+  color: var(--parchment-ink) !important;
+}
 .location-detail p,
 .location-detail li,
 .location-detail small,
 .location-detail .location-header-facts,
-.location-detail .world-owner{color:var(--parchment-muted)!important}
-.location-detail .location-heading>span{
-  color:var(--cream)!important;
-  border:1px solid #2b1d16;
-  background:linear-gradient(#674832,#35251c)!important;
+.location-detail .world-owner {
+  color: var(--parchment-muted) !important;
 }
-.location-detail .location-action-menu{
-  color:var(--parchment-ink)!important;
-  border-color:#9a7347!important;
-  background:#f4dfb6e8!important;
+.location-detail .location-heading > span {
+  color: var(--cream) !important;
+  border: 1px solid #2b1d16;
+  background: linear-gradient(#674832, #35251c) !important;
+}
+.location-detail .location-action-menu {
+  color: var(--parchment-ink) !important;
+  border-color: #9a7347 !important;
+  background: #f4dfb6e8 !important;
 }
 .location-detail .recruit-option,
 .location-detail .deposit-resource,
 .location-detail .reserve-balance,
 .location-detail .stock-container,
-.location-detail .camp-progress{
-  color:var(--parchment-ink)!important;
-  border-color:#9a7347!important;
-  background:linear-gradient(#fff0cc,#dfbd86)!important;
-  box-shadow:inset 0 1px #fff8df!important;
+.location-detail .camp-progress {
+  color: var(--parchment-ink) !important;
+  border-color: #9a7347 !important;
+  background: linear-gradient(#fff0cc, #dfbd86) !important;
+  box-shadow: inset 0 1px #fff8df !important;
 }
 .location-detail .recruit-option p,
 .location-detail .recruit-option span,
@@ -103,155 +533,490 @@ select,input,textarea { color:var(--parchment-ink)!important;border-color:#71513
 .location-detail .reserve-balance__amounts output,
 .location-detail .camp-progress span,
 .location-detail .camp-progress small,
-.location-detail .stock-container header{
-  color:var(--parchment-muted)!important;
+.location-detail .stock-container header {
+  color: var(--parchment-muted) !important;
 }
-.location-detail .stock-slot{
-  color:var(--parchment-ink)!important;
-  border-color:#9a7347!important;
-  background:#f7e4bddd!important;
+.location-detail .stock-slot {
+  color: var(--parchment-ink) !important;
+  border-color: #9a7347 !important;
+  background: #f7e4bddd !important;
 }
-.location-detail .recruit-illustration{
-  border-color:#795737!important;
-  background:radial-gradient(circle at 50% 35%,#b98d56,#4b3325 78%)!important;
+.location-detail .recruit-illustration {
+  border-color: #795737 !important;
+  background: radial-gradient(
+    circle at 50% 35%,
+    #b98d56,
+    #4b3325 78%
+  ) !important;
 }
-.location-detail .garrison-reinforcements i{
-  color:var(--cream)!important;
-  border-color:#2b1d16!important;
-  background:#4a3225!important;
+.location-detail .garrison-reinforcements i {
+  color: var(--cream) !important;
+  border-color: #2b1d16 !important;
+  background: #4a3225 !important;
 }
-.location-detail .recruit-capacity{
-  color:#2d1c12!important;
-  border:1px solid #8f673f;
-  background:linear-gradient(#fff2cf,#dcb77e)!important;
-  box-shadow:inset 0 1px #fff9e3,0 1px 2px #51331c55;
-  font-weight:700;
+.location-detail .recruit-capacity {
+  color: #2d1c12 !important;
+  border: 1px solid #8f673f;
+  background: linear-gradient(#fff2cf, #dcb77e) !important;
+  box-shadow:
+    inset 0 1px #fff9e3,
+    0 1px 2px #51331c55;
+  font-weight: 700;
 }
-.location-detail .recruit-capacity.is-full{
-  color:#35160f!important;
-  border-color:#8b482f;
-  background:linear-gradient(#f2c27f,#c98352)!important;
+.location-detail .recruit-capacity.is-full {
+  color: #35160f !important;
+  border-color: #8b482f;
+  background: linear-gradient(#f2c27f, #c98352) !important;
 }
-.location-detail-art{
-  border-color:#2b1d16!important;
-  background:#4b3325!important;
-  box-shadow:inset 0 0 0 2px var(--gold)!important;
+.location-detail-art {
+  border-color: #2b1d16 !important;
+  background: #4b3325 !important;
+  box-shadow: inset 0 0 0 2px var(--gold) !important;
 }
 
 /* Annuaire : informations secondaires lisibles sur le parchemin clair. */
 .world-card .world-distance,
 .world-card .world-card__meta,
-.world-card .world-card__meta span{
-  color:#3f291c!important;
-  font-weight:800;
-  text-shadow:0 1px #fff3cf;
+.world-card .world-card__meta span {
+  color: #3f291c !important;
+  font-weight: 800;
+  text-shadow: 0 1px #fff3cf;
 }
 
 /* Bottom sheet : contraste explicite sur chaque surface claire ou sombre. */
-.bottom-sheet{color:var(--parchment-ink)!important}
-.bottom-sheet>p,
-.bottom-sheet .sheet-grab span{color:var(--parchment-muted)!important}
+.bottom-sheet {
+  color: var(--parchment-ink) !important;
+}
+.bottom-sheet > p,
+.bottom-sheet .sheet-grab span {
+  color: var(--parchment-muted) !important;
+}
 .bottom-sheet .sheet-feedback,
 .bottom-sheet .sheet-defense,
-.bottom-sheet .sheet-action-menu{
-  color:var(--parchment-ink)!important;
-  border-color:#795737!important;
-  background:#f4dfb6!important;
-  box-shadow:inset 0 0 0 1px #c69b3866!important;
+.bottom-sheet .sheet-action-menu {
+  color: var(--parchment-ink) !important;
+  border-color: #795737 !important;
+  background: #f4dfb6 !important;
+  box-shadow: inset 0 0 0 1px #c69b3866 !important;
 }
 .bottom-sheet .sheet-feedback,
-.bottom-sheet .sheet-defense>small,
+.bottom-sheet .sheet-defense > small,
 .bottom-sheet .sheet-defense span small,
 .bottom-sheet .sheet-action-menu p,
-.bottom-sheet .sheet-action-menu small{color:var(--parchment-muted)!important}
-.bottom-sheet .sheet-defense strong,
-.bottom-sheet .sheet-action-menu h3{color:var(--parchment-ink)!important}
-.bottom-sheet .sheet-defense-slots i:not(.is-occupied){
-  color:#654936!important;
-  border-color:#896748!important;
-  background:#dfc394!important;
+.bottom-sheet .sheet-action-menu small {
+  color: var(--parchment-muted) !important;
 }
-.bottom-sheet .sheet-defense-reinforcements i{
-  color:var(--cream)!important;
-  border-color:#2b1d16!important;
-  background:#4a3225!important;
+.bottom-sheet .sheet-defense strong,
+.bottom-sheet .sheet-action-menu h3 {
+  color: var(--parchment-ink) !important;
+}
+.bottom-sheet .sheet-defense-slots i:not(.is-occupied) {
+  color: #654936 !important;
+  border-color: #896748 !important;
+  background: #dfc394 !important;
+}
+.bottom-sheet .sheet-defense-reinforcements i {
+  color: var(--cream) !important;
+  border-color: #2b1d16 !important;
+  background: #4a3225 !important;
 }
 
 /* Cartouches de terrain : parchemin et bois, sans fond vert sombre. */
-.garrison-summary{
-  color:var(--parchment-ink)!important;
-  border-color:#795737!important;
-  background:linear-gradient(#fff0cc,#e2c18c)!important;
-  box-shadow:inset 0 0 0 1px var(--gold),0 3px 9px #0005!important;
+.garrison-summary {
+  color: var(--parchment-ink) !important;
+  border-color: #795737 !important;
+  background: linear-gradient(#fff0cc, #e2c18c) !important;
+  box-shadow:
+    inset 0 0 0 1px var(--gold),
+    0 3px 9px #0005 !important;
 }
-.garrison-summary small{color:var(--parchment-muted)!important}
-.garrison-summary-slots i:not(.is-occupied){
-  color:#654936!important;
-  border-color:#896748!important;
-  background:#dfc394!important;
+.garrison-summary small {
+  color: var(--parchment-muted) !important;
 }
-.quest-hud{
-  color:var(--parchment-ink)!important;
-  border-color:#795737!important;
-  background:linear-gradient(#fff0ccf2,#e2c18cf2)!important;
-  box-shadow:inset 0 0 0 1px var(--gold),0 8px 24px #0008!important;
+.garrison-summary-slots i:not(.is-occupied) {
+  color: #654936 !important;
+  border-color: #896748 !important;
+  background: #dfc394 !important;
+}
+.quest-hud {
+  color: var(--parchment-ink) !important;
+  border-color: #795737 !important;
+  background: linear-gradient(#fff0ccf2, #e2c18cf2) !important;
+  box-shadow:
+    inset 0 0 0 1px var(--gold),
+    0 8px 24px #0008 !important;
 }
 .quest-hud strong,
 .quest-hud p,
-.quest-hud li{color:var(--parchment-ink)!important}
+.quest-hud li {
+  color: var(--parchment-ink) !important;
+}
 .quest-hud__chevron,
-.quest-hud__summary{color:var(--parchment-muted)!important}
-.quest-hud__details li.is-completed{color:var(--success)!important}
-.quest-hud__progress{background:#8d6846!important}
-.quest-hud__progress span{background:#c69b38!important}
-.quest-hud__progress small{color:#fff0c9!important;text-shadow:0 1px 2px #241914}
-.quest-hud.is-ready{
-  border-color:#9b6a25!important;
-  box-shadow:inset 0 0 0 1px #e0ba59,0 8px 24px #0008,0 0 0 3px #c69b3844!important;
+.quest-hud__summary {
+  color: var(--parchment-muted) !important;
+}
+.quest-hud__details li.is-completed {
+  color: var(--success) !important;
+}
+.quest-hud__progress {
+  background: #8d6846 !important;
+}
+.quest-hud__progress span {
+  background: #c69b38 !important;
+}
+.quest-hud__progress small {
+  color: #fff0c9 !important;
+  text-shadow: 0 1px 2px #241914;
+}
+.quest-hud.is-ready {
+  border-color: #9b6a25 !important;
+  box-shadow:
+    inset 0 0 0 1px #e0ba59,
+    0 8px 24px #0008,
+    0 0 0 3px #c69b3844 !important;
 }
 
 /* En paysage, l'identité reprend le parchemin lisible de la vue portrait. */
-@media(orientation:landscape){
-  #hero-content .hero-identity>header{
-    min-width:0!important;
-    padding:.2rem .32rem!important;
-    color:var(--parchment-ink)!important;
-    border-color:#6f4d34!important;
-    background:linear-gradient(#fff0cc,#e2c18c)!important;
-    box-shadow:inset 0 0 0 1px var(--gold)!important;
-    text-shadow:none!important;
+@media (orientation: landscape) {
+  #hero-content .hero-identity > header {
+    min-width: 0 !important;
+    padding: 0.2rem 0.32rem !important;
+    color: var(--parchment-ink) !important;
+    border-color: #6f4d34 !important;
+    background: linear-gradient(#fff0cc, #e2c18c) !important;
+    box-shadow: inset 0 0 0 1px var(--gold) !important;
+    text-shadow: none !important;
   }
-  #hero-content .hero-identity h3{
-    max-width:100%;
-    margin:0!important;
-    color:var(--parchment-ink)!important;
-    font-size:clamp(.62rem,1.65vw,.86rem)!important;
-    line-height:1.05!important;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+  #hero-content .hero-identity h3 {
+    max-width: 100%;
+    margin: 0 !important;
+    color: var(--parchment-ink) !important;
+    font-size: clamp(0.62rem, 1.65vw, 0.86rem) !important;
+    line-height: 1.05 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  #hero-content .hero-identity .hero-rank{
-    max-width:100%;
-    margin:.08rem 0 0!important;
-    color:var(--parchment-muted)!important;
-    font-size:clamp(.48rem,1.1vw,.62rem)!important;
-    line-height:1.05!important;
-    letter-spacing:.035em!important;
-    overflow:hidden;
+  #hero-content .hero-identity .hero-rank {
+    max-width: 100%;
+    margin: 0.08rem 0 0 !important;
+    color: var(--parchment-muted) !important;
+    font-size: clamp(0.48rem, 1.1vw, 0.62rem) !important;
+    line-height: 1.05 !important;
+    letter-spacing: 0.035em !important;
+    overflow: hidden;
   }
-  #hero-content .hero-identity .hero-rank span{color:var(--parchment-muted)!important}
-  #hero-content .hero-state{
-    display:block!important;
-    justify-self:center;
-    margin:.1rem 0 0;
-    padding:.12rem .32rem;
-    border:1px solid #5c402c;
-    border-radius:999px;
-    background:#315b35;
-    color:#fff0c9!important;
-    font-size:.46rem;
-    line-height:1;
-    text-transform:uppercase;
+  #hero-content .hero-identity .hero-rank span {
+    color: var(--parchment-muted) !important;
   }
+  #hero-content .hero-state {
+    display: block !important;
+    justify-self: center;
+    margin: 0.1rem 0 0;
+    padding: 0.12rem 0.32rem;
+    border: 1px solid #5c402c;
+    border-radius: 999px;
+    background: #315b35;
+    color: #fff0c9 !important;
+    font-size: 0.46rem;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+}
+
+/* Les états de sélection restent visibles au-dessus du thème des slots. */
+.lobby-hero-choice,
+.lobby-terrain {
+  color: var(--parchment-ink);
+  border-color: #9a7347;
+  background: linear-gradient(var(--parchment-light), #dfbd86);
+}
+.world-card.is-active {
+  border-color: var(--gold) !important;
+  box-shadow:
+    inset 0 0 0 2px var(--gold),
+    0 5px 16px #0006;
+}
+.stock-slot.loot-transfer-slot.is-staged {
+  color: var(--parchment-ink) !important;
+  border-color: var(--gold) !important;
+  background: #d9b778 !important;
+  box-shadow: inset 0 0 0 2px #8c6647;
+}
+.garrison-slot.is-drop-target {
+  border-color: var(--gold) !important;
+  background: linear-gradient(#79543a, #443025) !important;
+}
+
+/* Les résumés désactivés restent des panneaux d'information lisibles. */
+.garrison-summary,
+.bottom-sheet .sheet-defense {
+  text-shadow: none;
+}
+button.garrison-summary:disabled,
+.bottom-sheet button.sheet-defense:disabled {
+  color: var(--parchment-ink) !important;
+  background: #e2cfad !important;
+  border-color: #947553 !important;
+  box-shadow: inset 0 0 0 1px #f4e3c5 !important;
+  opacity: 1;
+  cursor: default;
+  text-shadow: none;
+}
+button.garrison-summary:disabled strong,
+.bottom-sheet button.sheet-defense:disabled strong {
+  color: var(--parchment-ink) !important;
+}
+button.garrison-summary:disabled small,
+.bottom-sheet button.sheet-defense:disabled small {
+  color: var(--parchment-muted) !important;
+}
+button.garrison-summary:disabled .is-occupied small,
+.bottom-sheet button.sheet-defense:disabled .is-occupied small {
+  color: var(--cream) !important;
+}
+
+/* Le commerce imbrique ses paragraphes dans un panneau interne. */
+.bottom-sheet p {
+  color: var(--parchment-muted);
+}
+.garrison-unit,
+.garrison-slot {
+  text-shadow: none;
+}
+.garrison-unit strong,
+.garrison-slot strong {
+  color: var(--cream) !important;
+}
+.garrison-unit span,
+.garrison-unit small,
+.garrison-slot small {
+  color: #ead7ad !important;
+}
+
+/* Navigation des lieux : définir ensemble le fond et le texte pour garantir le contraste. */
+.location-detail .location-return-map,
+.bottom-sheet.location-tab .location-tab__button {
+  color: #352319;
+  background: #fff0cc;
+  border-color: #654936;
+  text-shadow: none;
+}
+.location-detail .location-return-map:hover,
+.location-detail .location-return-map:active,
+.bottom-sheet.location-tab .location-tab__button:hover,
+.bottom-sheet.location-tab .location-tab__button:active {
+  color: #352319;
+  background: #ead6aa;
+}
+.location-detail .location-return-map:focus-visible,
+.bottom-sheet.location-tab .location-tab__button:focus-visible {
+  outline: 3px solid #352319;
+  outline-offset: -5px;
+}
+
+/* Stocks : surfaces opaques et texte foncé, y compris la production. */
+.location-detail .stock-manager .stock-container,
+.location-detail .stock-manager .production-reserves {
+  color: #352319;
+  border-color: #9a7347 !important;
+  background: #fff0cc !important;
+  text-shadow: none;
+}
+.location-detail .stock-manager .stock-slot {
+  color: #352319 !important;
+  border-color: #9a7347 !important;
+  background: #f7e4bd !important;
+  text-shadow: none;
+}
+.location-detail .stock-manager header,
+.location-detail .stock-manager header span,
+.location-detail .stock-manager header small,
+.location-detail .stock-manager .stock-slot small,
+.location-detail .stock-manager .stock-transfer-mark {
+  color: #654936 !important;
+}
+.location-detail .stock-manager .stock-slot.is-empty {
+  opacity: 1;
+  color: #654936 !important;
+  background: #ead6aa !important;
+}
+.location-detail .stock-manager .stock-container.is-drop-target {
+  border-color: #654936 !important;
+  background: #ead6aa !important;
+  outline: 2px solid #654936;
+}
+
+.battle-result .sheet-feedback {
+  color: #f4e3bd !important;
+  background: #30251c !important;
+  padding: 0.65rem;
+  border-radius: 0.4rem;
+}
+
+/* Journal : mêmes surfaces parchemin et encre que les menus de gestion. */
+#quests-view {
+  color: var(--parchment-ink);
+  background: var(--parchment);
+}
+#quests-content .quest-journal-summary,
+#quests-content .quest-empty {
+  color: var(--parchment-ink);
+  background: var(--parchment-light);
+  border: 1px solid var(--parchment-muted);
+  border-radius: 12px;
+  padding: 1rem;
+}
+#quests-content .quest-card p,
+#quests-content .quest-journal-summary p {
+  color: var(--parchment-muted);
+}
+#quests-content .quest-objectives li {
+  color: var(--parchment-ink);
+  background: var(--parchment-light);
+  opacity: 1;
+}
+#quests-content .quest-objectives .is-skipped,
+#quests-content .quest-objectives .is-locked {
+  color: var(--parchment-muted);
+  background: var(--parchment);
+}
+#quests-content progress {
+  appearance: none;
+  border: 1px solid var(--parchment-muted);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--parchment);
+}
+#quests-content progress::-webkit-progress-bar {
+  background: var(--parchment);
+}
+#quests-content progress::-webkit-progress-value {
+  background: var(--gold);
+}
+#quests-content progress::-moz-progress-bar {
+  background: var(--gold);
+}
+
+/* La progression suit la palette parchemin des fiches. */
+.hero-progress-dialog {
+  background: #ead8b2;
+  color: #352519;
+  border: 2px solid #94734b;
+  border-radius: 12px;
+}
+.hero-progress-dialog__panel {
+  background: linear-gradient(135deg, #f7edce, #dfc496);
+  color: #352519;
+  padding-top: 3rem;
+}
+.hero-progress-dialog .level-up-summary {
+  background: #e1c797;
+  border-color: #a07b48;
+}
+.hero-progress-dialog .level-up-summary p {
+  color: #654426;
+}
+.hero-progress-dialog .level-up-options button {
+  background: #f7ebcf;
+  color: #352519;
+  border: 1px solid #94734b;
+  box-shadow: 0 3px 8px #5e402322;
+}
+.hero-progress-dialog .level-up-options button:hover {
+  background: #fff5dd;
+  border-color: #654426;
+}
+.hero-progress-dialog__panel > .sheet-close {
+  background: #715135;
+  color: #fff3d8;
+}
+.hero-distance {
+  font-size: 0.75rem;
+  color: #705035;
+  letter-spacing: normal;
+}
+
+#hero-content .hero-identity .hero-distance {
+  display: grid;
+  gap: 0.12rem;
+  overflow: visible;
+  white-space: normal;
+  letter-spacing: normal;
+  line-height: 1.15;
+}
+.hero-distance__label {
+  font-size: 0.6rem;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.hero-distance__value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+#hero-content .hero-identity .hero-distance {
+  margin-top: 0.2rem;
+  color: var(--parchment-ink);
+  text-transform: none;
+}
+#hero-content .hero-identity .hero-distance > * {
+  display: block;
+  white-space: normal;
+  line-height: 1.15;
+}
+@media (orientation: landscape) {
+  #hero-content .compact-hero-card {
+    grid-template-rows: minmax(0, 1fr) minmax(100px, auto) 40px 130px;
+    min-height: 440px;
+  }
+}
+
+#quests-content .quest-card--collapsible {
+  padding: 0;
+  overflow: hidden;
+}
+#quests-content .quest-card__toggle {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.15rem 0.5rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--parchment-ink);
+  text-align: left;
+  cursor: pointer;
+}
+#quests-content .quest-card__toggle > small {
+  grid-column: 1;
+  font-size: 0.65rem;
+  color: var(--parchment-muted);
+}
+#quests-content .quest-card__toggle > strong,
+#quests-content .quest-card__toggle > h3 {
+  grid-column: 1;
+  margin: 0;
+  font-size: 0.9rem;
+}
+#quests-content .quest-card__toggle::after {
+  content: "▸";
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+#quests-content .quest-card__toggle[aria-expanded="true"]::after {
+  content: "▾";
+}
+#quests-content .quest-card__toggle:focus-visible {
+  outline: 2px solid var(--parchment-ink);
+  outline-offset: -3px;
+}
+#quests-content .quest-card__body {
+  padding: 0 0.7rem 0.65rem;
+}
+#quests-content .quest-card__body[hidden] {
+  display: none;
 }

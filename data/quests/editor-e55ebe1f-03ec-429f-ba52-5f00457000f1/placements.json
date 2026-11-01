@@ -1,0 +1,26 @@
+[
+  {
+    "locationSlotId": "capital",
+    "locationId": "capital",
+    "position": {
+      "latitude": 48.8584635,
+      "longitude": 2.3478548
+    }
+  },
+  {
+    "locationSlotId": "broceliande",
+    "locationId": "broceliande",
+    "position": {
+      "latitude": 48.8590424,
+      "longitude": 2.3596351
+    }
+  },
+  {
+    "locationSlotId": "carrière",
+    "locationId": "carrière",
+    "position": {
+      "latitude": 48.8569953,
+      "longitude": 2.3539273
+    }
+  }
+]

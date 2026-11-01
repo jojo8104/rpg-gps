@@ -4,7 +4,7 @@ export function setupMapVisibility({
 } = {}) {
   return {
     fogEnabled: setupActive ? false : fogEnabled,
-    knownOnly: !setupActive,
+    knownOnly: false,
     includeHiddenLocations: setupActive,
   };
 }

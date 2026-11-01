@@ -14,7 +14,7 @@ test("la résolution conserve les survivants et transforme les déserteurs en gr
   game.start();
   const battle = game.createBattle({ teamParticipants: [{ id: "red", heroIds: [first.id], positions: { [first.id]: { x: 0, y: 0 } } }, { id: "blue", heroIds: [second.id], positions: { [second.id]: { x: 5, y: 0 } } }], position: { latitude: 0, longitude: 0 }, sourceLocationId: "enemy-camp", sourceEnemyTeamId: "blue" });
   const blueUnit = battle.teams[1].units[0];
-  battle.markUnitDeserted(blueUnit.id);
+  blueUnit.state = "deserted";
   battle.teams[1].heroes[0].state = "ghost";
   battle.status = "finished";
   battle.winnerTeamId = "red";

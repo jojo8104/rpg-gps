@@ -1,0 +1,228 @@
+# Carte de préparation et fond de jeu 2D
+
+La préparation conserve une carte Leaflet/OSM navigable dans le monde entier.
+La recherche de ville ou d'adresse est explicite, indépendante du GPS, et passe
+par `/api/maps/search`. Le GPS ne recentre pas automatiquement la carte pendant
+le tracé. Le bouton de recentrage reste disponible.
+
+Quand la préparation est terminée, `GameMapBackground` conserve le fond raster OSM pendant le téléchargement, puis le retire une fois le fond 2D créé.
+Le mobile demande `/api/maps/prepare` avec le polygone de la zone. Le serveur
+valide les coordonnées et les dimensions, extrait la géographie OSM via Overpass,
+et retourne un paquet JSON versionné. Les coordonnées sont WGS84 dans l'ordre
+GeoJSON `[longitude, latitude]` ; géométries `LineString` et `Polygon`, avec les
+anneaux intérieurs pour les îlots. Le paquet contient uniquement des données
+géographiques, jamais des héros, quêtes, récompenses ou règles de déplacement.
+
+La première version couvre les chemins/routes, bâtiments, forêts, espaces verts,
+surfaces d'eau et cours d'eau. Elle ne reconstruit pas le littoral océanique et
+n'invente pas les terrains absents d'OSM. Les nouvelles extractions suivent le contour extérieur de la playarea, sans marge supplémentaire. Le fond à l’extérieur reste simple ; les limites officielles et les exclusions du jeu ne sont pas modifiées.
+La préparation accepte actuellement au plus 100 sommets, 100 km² de rectangle
+englobant et 20 km de côté, entre 80° sud et 80° nord. Le découpage de récupération décrit ci-dessous respecte ces mêmes limites ; il ne permet pas de charger une zone plus grande.
+
+Depuis le 22 octobre, le navigateur ne conserve plus de paquet géographique
+persistant implicite. L’ancien cache `rpg-gps-map-packages-v1` est supprimé à
+l’activation du service worker et à l’initialisation du client cartographique.
+Le rendu courant reste en mémoire ; une nouvelle ouverture consulte le serveur.
+La conservation explicite passe par Mes cartes dans le sélecteur de terrain.
+Un cache serveur persistant est enregistré dans `<RPG_GPS_DATA_DIR>/maps` au
+démarrage normal ; `createRpgGpsServer` utilise par défaut un cache mémoire pour
+les tests et les serveurs intégrés. Les requêtes concurrentes identiques sont
+regroupées, avec une seule préparation à la fois.
+
+## Diagnostic : cache disponible, nouvelle extraction échouée (24 octobre 2026)
+
+Le diagnostic du 24 octobre 2026 distingue la lecture de banque du téléchargement réel : une partie située dans une couverture déjà stockée peut fonctionner sans aucun accès fournisseur. Un seul POST polygonal synthétique minuscule, limité aux chemins et sans coordonnées de joueur, a été lancé depuis le serveur vers le fournisseur principal par défaut ; il a expiré après 20 secondes sans réponse exploitable. Cela ne prouve ni un bannissement personnel, ni une saturation précise, ni l’indisponibilité de toutes les instances. La lecture des sources déployées n’était pas autorisée au compte SSH utilisé ; ce test ne certifie donc pas la version exacte du code exécuté par le service.
+
+Le jeu et le Dashboard affichent désormais une distinction explicite : les données déjà en banque restent disponibles, mais les surfaces manquantes ne sont pas téléchargées après échec fournisseur. Les rejets HTTP conservent leur statut amont dans le message et le champ providerStatus ; les erreurs et journaux distinguent expiration, accès réseau et rejet HTTP. Le vrai worker transmet ces métadonnées. Les journaux ne contiennent ni polygone, URL, corps de réponse fournisseur ni identifiant joueur. La pause croissante et la limite d’un seul appel restent inchangées : aucun test supplémentaire, découpage ou nouvel essai automatique n’est déclenché par ce diagnostic.
+
+Les journaux consultés signalaient aussi une RangeError répétée dans le nettoyage de la banque. Une faiblesse locale reproductible a été corrigée : la protection des fichiers utilisait les limites de surface réservées aux nouvelles extractions. Un terrain enregistré plus grand peut maintenant protéger les sources qu’il utilise sans faire échouer toute la conservation ; demander une extraction de ce terrain reste refusé par les mêmes limites qu’auparavant. Cette correction du stockage ne démontre pas à elle seule la cause de chaque RangeError de production et n’explique pas le délai du test fournisseur indépendant. Les tests vérifient cette séparation sans modifier les règles du jeu.
+
+## Nombre minimal de requêtes : un seul appel groupé (24 octobre 2026)
+
+Une préparation cartographique fait désormais zéro appel Overpass si les données sont disponibles, sinon un seul POST regroupant tous les contours manquants dans une union Overpass QL. Les catégories utiles au rendu sont demandées ensemble. Il n’y a aucun appel par catégorie, par objet, par joueur, par zoom ou par déplacement. Les demandes concurrentes du même contour partagent leur résultat ; une seule préparation est admise à la fois. Le regroupement réduit le nombre d’échanges HTTP, sans garantir une faible charge de calcul : la densité des bâtiments et chemins, la complexité des contours et les grandes relations influencent le volume et le temps de traitement.
+
+La zone d’un appel correspond à l’ensemble des surfaces réellement absentes à l’intérieur de la playarea, même disjointes ; aucune taille fixe de tuile n’est imposée. Les garde-fous du jeu restent 100 sommets au maximum, un rectangle englobant de 100 km² au plus et 20 km de côté au plus. Ce plafond n’est pas une garantie de traitement par le fournisseur : une zone dense peut échouer même si elle est beaucoup plus petite. La préparation refuse plus de 16 contours simples manquants ou une requête QL dépassant 128 Kio avant tout appel. Le calcul demandé à Overpass reste limité à 15 secondes par défaut, l’appel réseau à 20 secondes et la réponse à 32 Mio. Une expiration ou une erreur arrête la tentative sans nouvel appel ni découpage automatique. Une nouvelle demande explicite respecte la pause croissante et Retry-After et peut utiliser le fournisseur secondaire configuré.
+
+Le lot de surfaces manquantes n’est conservé qu’après réception complète et validation. Une réponse interrompue ne devient jamais une couverture disponible. Le lot validé peut être enregistré comme un fichier portion- à couverture MultiPolygon puis assemblé avec les sources de la banque. Les cartes complètes déjà disponibles et les portions anciennement téléchargées restent réutilisables, y compris après redémarrage. Les objets limitrophes peuvent conserver leur géométrie complète, dédoublonnée à l’assemblage. Aucun téléchargement de diagnostic réel n’a été lancé pour les tests. Aucun effet sur les règles, les gains ou les positions du jeu.
+
+Les paragraphes historiques ci-dessous qui décrivent des téléchargements successifs ou une reprise automatique par secteurs sont remplacés par cette politique.
+
+## Extraction polygonale et extérieur simple (24 octobre 2026)
+
+Les nouvelles extractions utilisent le filtre polygonal Overpass sur le contour exact de la playarea, sans la marge extérieure de 200 m. Le serveur soustrait les couvertures polygonales réelles de la banque à ce contour ; les concavités et les trous déjà couverts restent exclus des nouvelles requêtes. Les parties manquantes sont converties en contours simples compatibles avec Overpass, avec un maximum de 16 portions par préparation. Un bâtiment, une forêt ou un chemin touchant la limite peut être renvoyé avec sa géométrie complète : les objets ne sont pas tronqués dans la banque, mais le dessin des détails est découpé au contour du terrain. L’extérieur conserve un fond simple. Ce changement concerne le fond de jeu GPS après son chargement ; les cartes raster de préparation et de supervision restent navigables. Les exclusions de la playarea restent des contrôles de jeu distincts ; le filtre géographique vise le contour extérieur.
+
+Chaque nouveau paquet indique sa couverture réelle dans coveragePolygons (MultiPolygon GeoJSON) ; une portion n’est jamais assimilée à tout son rectangle englobant. Les paquets anciens sans ce champ restent utilisables avec leur couverture rectangulaire historique. Les fichiers portion- sont identifiés par leur clé, leurs bornes et leur couverture ; les anciens fichiers sector- restent lisibles. Le lot regroupé est enregistré après réception complète et reste réutilisable après redémarrage. Une expiration arrête l’appel sans découpage automatique. Les pauses fournisseur, Retry-After, le budget de 120 secondes, la limite de 32 Mio et le plafond de banque restent appliqués. Les opérations géométriques sont isolées dans polygon-coverage.js avec la bibliothèque polygon-clipping 0.15.7 ; le navigateur ne calcule aucune règle de jeu.
+
+## Gestion depuis le Dashboard
+
+Dans /dashboard/, la clé administrateur ouvre désormais Cartes sauvegardées et banque géographique. Le panneau se charge à son ouverture ou avec Actualiser la banque : consulter et prévisualiser ne déclenchent aucune extraction Overpass. Il indique le volume total, le budget, les octets protégés, les fichiers, la couverture de chaque carte nommée et ses sources. L’aperçu affiche un fond OpenStreetMap simple sous les couvertures enregistrées. Il charge des tuiles d’affichage avec attribution, sans extraction Overpass. Les suppressions bloquées précisent les usages à retirer (carte, partie ou sauvegarde). Les fichiers affichent les cartes, parties ou sauvegardes qui les utilisent. Compléter les données exige une action explicite et utilise le service d’extraction habituel, avec sa réutilisation de couverture et ses limites.
+
+Supprimer une carte nommée retire uniquement sa référence de bibliothèque ; les terrains des parties et leurs sauvegardes restent inchangés, et les fichiers peuvent rester dans la banque selon son budget. Supprimer un fichier ou vider les données inutilisées exige une confirmation ; le serveur refuse les fichiers protégés et suspend ces suppressions pendant une préparation ou un nettoyage. Les fichiers étrangers au format géré ne sont jamais proposés ni supprimés. Toutes ces API utilisent la même clé administrateur ; aucun joueur n’est connecté par leur consultation. Le changement ne modifie ni les règles, ni les gains, ni les positions officielles du jeu.
+
+## Réutilisation des surfaces communes et téléchargement différentiel (24 octobre 2026, version rectangulaire historique)
+
+Une nouvelle carte réutilise désormais toutes les surfaces déjà couvertes par des paquets complets ou des portions validées de la banque, même lorsque les contours des playareas diffèrent. Le serveur calcule la différence entre le rectangle demandé avec sa marge de 200 m et l’union des rectangles réellement téléchargés. Si plusieurs cartes couvrent ensemble la zone, aucun appel Overpass n’est nécessaire. Sinon, seuls les rectangles manquants sont extraits successivement, sans nouvelle marge autour de chacun. Les objets OSM complets sont fusionnés par identifiant ; les polygones et leurs îlots sont conservés. La carte complète est publiée seulement quand toute sa couverture est disponible, dans la limite de 32 Mio de géométries assemblées.
+
+Chaque portion réussie est immédiatement conservée sur disque et peut servir à d’autres zones. Après un échec ou un redémarrage, la couverture est recalculée à partir des fichiers disponibles et seules les portions restantes sont demandées. Les pauses fournisseur, le respect de Retry-After, une seule préparation à la fois et le budget de 120 secondes restent appliqués. Une couverture exigeant plus de 16 rectangles manquants est refusée avant tout appel réseau ; il faut alors choisir une zone plus petite. La banque applique son budget aux cartes complètes et aux portions ; le nettoyage protège les fichiers nécessaires à la couverture des zones utilisées ou sauvegardées. La purge manuelle protège de façon conservatrice tous les fichiers qui intersectent ces zones. Les anciennes données ne sont pas rafraîchies automatiquement. Aucun effet sur les distances, positions, gains ou règles du jeu.
+
+## Banque géographique et couplage des cartes (24 octobre 2026, première version)
+
+Une carte sauvegardée est liée à ses données géographiques par une référence persistée geographyKey ; les anciennes sauvegardes obtiennent cette référence à la lecture. Après une extraction réussie, rouvrir la carte consulte le fichier serveur sans contacter Overpass. Si le téléchargement a échoué, seul le tracé est sauvegardé et les données restent à compléter : aucune disponibilité fictive n’est annoncée. Les téléchargements complets non liés restent désormais dans une banque serveur réutilisable, plafonnée par défaut à 512 Mio au total. RPG_GPS_MAP_BANK_MAX_BYTES règle ce budget en octets ; zéro désactive la réserve de paquets inutilisés. Les paquets utiles aux parties, sauvegardes et cartes nommées restent protégés même si leur volume dépasse le plafond. Au-delà du budget, le nettoyage retire les fichiers inutilisés les plus anciens, selon leur date de modification, sans nouvelle extraction. Les secteurs incomplets restent protégés tant que leur zone est utilisée.
+
+Avant tout appel fournisseur, le serveur cherche aussi un paquet complet couvrant entièrement le rectangle demandé avec sa marge de 200 m. Il privilégie la plus petite couverture disponible, réutilise ses géométries et adapte les limites et la clé de la réponse, sans écrire une copie pour la sous-zone. Cette première version exigeait un paquet couvrant à lui seul la cible ; la réutilisation différentielle décrite plus haut remplace cette restriction. Le paquet couvrant reste protégé si une carte sauvegardée en dépend. L’index mémoire ne garde que les métadonnées et se reconstruit à partir des anciens fichiers au redémarrage ; les fichiers inchangés ne sont pas redécodés à chaque nettoyage. Les données peuvent être anciennes : aucun rafraîchissement automatique n’est déclenché. Le diagnostic check-map-cache.mjs indique les octets totaux des fichiers gérés, les octets des cartes complètes valides et leur taille moyenne et maximale. Cette banque ne change aucune règle de jeu et ne rend pas le serveur de jeu facultatif.
+
+Le nettoyage ponctuel clean-map-cache.mjs reste une purge explicite des données inutilisées de la banque, après prévisualisation ; il protège aussi les contours équivalents et les paquets couvrant les zones sauvegardées. Il ne doit pas être confondu avec le budget automatique de la banque.
+
+## Mes cartes et durée de conservation (22 octobre 2026, historique)
+
+Le bouton Mes cartes dans l’en-tête du sélecteur ouvre un panneau superposé,
+fermé par défaut et défilant indépendamment. Il ne réserve pas de colonne ni
+de ligne permanente dans la vue cartographique. L’organisateur nomme le terrain
+et choisit Sauvegarder cette carte. Le serveur valide le polygone et les exclusions,
+les rattache au compte joueur (ou à son identité de navigateur, à défaut à sa place
+dans la partie) et persiste la bibliothèque dans server-state.json. Les autres
+joueurs ne voient pas cette bibliothèque. Un nom déjà utilisé est refusé ; aucun
+écrasement silencieux. La limite est de 50 cartes par identité, avec des noms de
+1 à 60 caractères.
+
+La sauvegarde lance ensuite l’extraction du fond 2D. En cas d’échec OSM, le tracé
+reste sauvegardé et le message indique explicitement que le fond reste à compléter.
+Les secteurs déjà réussis sont conservés. Choisir un nom recharge le contour et
+les exclusions dans le brouillon, recadre la carte et ferme le panneau. Il faut
+ensuite Valider la zone pour appliquer le terrain officiel à la partie ; les
+contrôles serveur restent identiques. Le fond complet est réutilisé par le serveur
+au prochain chargement si le polygone et la version correspondent exactement.
+
+Supprimer retire l’entrée de la bibliothèque. Le nettoyage serveur s’exécute au
+démarrage puis toutes les dix secondes. Il retire de la mémoire et du disque les
+cartes et secteurs qui ne sont liés ni à une partie existante, ni à une sauvegarde
+explicite de partie, ni à une carte de bibliothèque. Une déconnexion ne supprime
+pas une partie et ne déclenche donc pas la perte de sa carte. Les extractions en
+cours sont protégées, puis leur résultat devient supprimable une fois inutilisé.
+Une carte partagée par plusieurs usages reste conservée jusqu’à disparition du
+dernier. Les anciens fichiers sans usage sont soumis à ce même nettoyage dès le
+déploiement ; aucune carte n’est automatiquement ajoutée à la bibliothèque.
+Les autres fichiers du répertoire ne sont pas supprimés.
+
+Les tests vérifient la confidentialité, la restauration de la bibliothèque, la
+sélection du tracé avec exclusions, la distinction entre sauvegarde et extraction,
+le nettoyage des paquets et secteurs, la protection des extractions en cours et
+le passage par le vrai worker. Le jeu reste servi par le serveur ; aucune règle,
+récompense, position officielle ou limite du terrain n’est modifiée. Les sections
+de diagnostic datées plus anciennes décrivent l’état observé à leur date.
+Au démarrage normal, l'extraction et le décodage s'exécutent dans un worker Node
+distinct de la boucle du moteur de jeu. Il est créé à la première préparation,
+conserve le cache et est arrêté avec le serveur. Une charge du moteur ne bloque
+donc plus directement les événements réseau de l'extraction.
+
+`GeographyRenderer` dessine des tuiles Canvas locales avec une palette et des
+motifs pixel simples. Il dessine seulement les géométries intersectant une tuile,
+et ne télécharge aucune image de fond pendant le jeu. Les niveaux de zoom
+utilisent le même paquet. Leaflet reste le support de caméra et des interactions
+existantes (lieux, héros, brouillard, traces) ; ce changement ne constitue pas
+un remplacement complet de Leaflet. Le mode fictif emploie le même fond Canvas,
+sans téléchargement OSM, et les mêmes commandes serveur déjà présentes.
+
+En cas d'échec d'extraction, un message et un bouton Réessayer apparaissent.
+Aucune carte géographique fictive n'est substituée silencieusement au mode GPS.
+L'état de jeu continue à nécessiter le serveur, même quand le fond est en cache.
+
+## Politique actuelle de téléchargement (24 octobre 2026)
+
+Les extractions OSM sont limitées aux zones enregistrées d’une partie, d’une sauvegarde ou de Mes cartes. Une seule préparation est admise à la fois ; les demandes du même contour partagent le résultat même si le premier sommet ou le sens du tracé change, sans arrondir les coordonnées. Les anciens caches complets et secteurs restent réutilisables et protégés par le nettoyage. Après un échec fournisseur, aucune relance immédiate ni bascule automatique n’est effectuée : une pause globale de 30 secondes double jusqu’à 16 minutes, ou davantage si Retry-After l’impose. La prochaine demande explicite peut utiliser le fournisseur secondaire configuré. Une panne réseau ou HTTP 504 ne déclenche aucun découpage. Les contours manquants sont regroupés dans un seul appel. Une expiration ne déclenche ni relance ni découpage automatique. Les limites sont propres au processus cartographique et sont réinitialisées à son redémarrage ; plusieurs serveurs nécessitent une limite partagée. Ce contrôle des zones ne constitue pas une authentification HTTP par joueur. Aucun changement des règles du jeu.
+
+La requête conserve les catégories utiles au dessin. La marge de 200 m de la première version n’est plus demandée. Les relations de routes et de cours d’eau linéaires, non rendues, ne sont plus demandées ; les relations de berges restent incluses. Les géométries restent complètes pour préserver les polygones et leurs îlots. Il n’y a aucune extraction au zoom ou au déplacement, ni en mode fictif. Les cartes complètes en cache sont consultables pendant une pause fournisseur.
+
+Les sections datées ci-dessous décrivent aussi des comportements antérieurs ; cette politique remplace leurs anciennes reprises automatiques.
+
+## Fournisseurs
+
+- `RPG_GPS_OVERPASS_URL` remplace l'endpoint d'extraction, par défaut
+  `https://overpass-api.de/api/interpreter`.
+- Le fournisseur secondaire par défaut est `https://overpass.private.coffee/api/interpreter`. Il est utilisé lors d’une demande ultérieure après un échec et la pause obligatoire, sans tentative automatique supplémentaire. Un fournisseur personnalisé n’impose aucun secours public. `RPG_GPS_OVERPASS_FALLBACK_URL` configure le secours ; une valeur vide le désactive. Chaque appel dispose de 20 secondes et une préparation de 120 secondes au maximum.
+- `RPG_GPS_GEOCODER_URL` remplace l'endpoint de recherche, par défaut
+  `https://nominatim.openstreetmap.org/search`.
+
+La recherche n'utilise pas d'autocomplétion, met ses résultats en cache et espace
+les requêtes sortantes d'au moins 1,1 seconde par serveur. Pour un déploiement
+avec plusieurs instances ou un trafic important, configurer un fournisseur
+adapté ou un service hébergé, et une limite partagée. Les coordonnées de la zone
+sont envoyées au fournisseur Overpass ; les termes de recherche sont envoyés au
+géocodeur. L'attribution OpenStreetMap est conservée dans le jeu.
+
+Références : [Overpass QL](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL),
+[politique Nominatim](https://operations.osmfoundation.org/policies/nominatim/).
+
+## Vérification
+
+`node --test tests/map-package.test.js` vérifie conversion, îlots, limites,
+cache serveur persistant, partage des requêtes, pauses fournisseur, reprise manuelle, erreurs et restriction de l’API aux zones enregistrées.
+`playtest/map-geography.html` montre un exemple synthétique sans créer de partie
+ou de joueur, et permet de vérifier la recherche sur une carte réelle.
+# Caméra pendant le jeu
+
+Le panneau « Caméra » règle la rotation et l'inclinaison (0 à 50°). Deux doigts permettent de tourner, incliner et zoomer ; sur PC, Maj + glisser règle la rotation et l'inclinaison. Le dézoom s'arrête à une vue qui contient toute la zone, recalculée selon la taille de l'écran et la perspective. « Zone entière » retrouve cette vue.
+
+Le premier clic sur le bouton du héros centre et suit sa position, le deuxième active le suivi de dos avec rotation selon son cap. Le troisième arrête la rotation automatique. Une manipulation manuelle libère le suivi. Sans nouvelle mesure de cap GPS, la caméra conserve le dernier cap connu. En simulation, le cap visuel vient des déplacements officiels reçus du serveur.
+
+La caméra transforme uniquement la présentation : les clics sont projetés en sens inverse, et les déplacements du héros fictif restent des intentions envoyées au serveur.
+
+## Continuité du fond (20 octobre 2026)
+
+Le fond de préparation reste affiché tant que le fond géographique 2D n’a pas été créé. Un échec conserve ce fond et propose Réessayer. Le serveur dispose de 120 secondes pour préparer la géographie ; le navigateur attend au plus 130 secondes pour laisser la réponse arriver. Les règles et les positions officielles ne sont pas modifiées.
+
+## Récupération d’une extraction OSM expirée
+
+Le serveur tente d’abord la zone entière sur le fournisseur principal puis sur le secondaire configuré. Si ces tentatives expirent (y compris une réponse HTTP 504 ou une expiration signalée dans la réponse Overpass), il découpe le rectangle extrait en quatre secteurs, téléchargés successivement. Chaque secteur utilise les mêmes fournisseurs et son propre délai de 20 secondes par requête, dans la limite globale de 120 secondes. Une saturation HTTP 429 ou une erreur définitive ne déclenche pas de nouvelles requêtes par secteurs. Aucun fournisseur supplémentaire n’est imposé lorsqu’une instance spécifique est configurée.
+
+Les secteurs réussis sont conservés sur disque et dans un petit cache mémoire de huit secteurs au maximum. Réessayer réutilise les secteurs valides déjà reçus, y compris après redémarrage du serveur. Après redémarrage, le serveur peut d’abord retenter la zone entière avant de relire ces secteurs. Les géométries complètes sont assemblées et dédoublonnées par identifiant OSM, en conservant les anneaux intérieurs. La carte complète n’est publiée et mise en cache qu’après réussite des quatre secteurs ; aucun fond géographique partiel n’est présenté comme complet. Le volume assemblé des géométries est limité à 32 Mio.
+
+Le message de chargement prévient qu’une récupération peut durer jusqu’à deux minutes. Le fond raster reste disponible pendant cette opération ; en cas de nouvel échec, Réessayer permet de poursuivre ou l’utilisateur peut choisir une zone plus petite. Cette amélioration concerne seulement la géographie et ne modifie ni les positions officielles, ni la progression, ni les règles du jeu.
+
+## Diagnostic et retour au fond classique (21 octobre 2026)
+
+Le code de référence Git 6d74f5c (8 septembre 2026, fichier app/js/ui/map-view.js) affichait directement les tuiles raster OSM en GPS, en préparation comme pendant la partie. La version actuelle a ajouté une extraction de la géographie par le serveur via Overpass, un paquet cartographique mis en cache sur serveur et navigateur, puis un rendu Canvas 2D. Cela ajoute une nouvelle dépendance réseau : le fournisseur d’extraction peut échouer alors que l’affichage des tuiles raster fonctionne encore.
+
+Les corrections récentes ont conservé le fond raster pendant le téléchargement et en cas d’échec, puis ajouté une reprise par quatre secteurs, avec 120 secondes de budget serveur et 130 secondes côté navigateur. Le mécanisme actuel essaie aussi le fournisseur secondaire configuré. Ces mesures ne rendent pas un fournisseur indisponible accessible. L’historique Git ne contient pas de commit distinct pour chaque modification récente non commitée : il ne permet pas de dater précisément la dernière version ayant fonctionné sur le téléphone.
+
+Le diagnostic distant du 21 octobre a confirmé que le serveur sert le cache v279 et le client avec son délai de 130 secondes. Deux requêtes synthétiques de très petite taille, sans données de joueur, ont échoué depuis le serveur : POST vers overpass-api.de en HTTP 502 et vers overpass.private.coffee par expiration à 10 secondes ; les essais GET ont aussi expiré. Cela prouve une difficulté d’accès aux extractions au moment du diagnostic, sans prouver que toutes les instances Overpass sont constamment indisponibles ni identifier à lui seul le rôle d’un éventuel intermédiaire réseau.
+
+Le contrôle de chargement propose maintenant Continuer avec la carte OSM, pendant l’attente comme après une erreur. Ce bouton conserve le fond raster déjà utilisé avant l’extraction, ferme le message et empêche un résultat 2D tardif de remplacer ce choix dans la zone courante. Aucun nouveau téléchargement d’extraction n’est lancé par ce bouton. Une nouvelle zone ou une nouvelle ouverture peut retenter la carte 2D. Le fond classique dépend toujours de la disponibilité de ses tuiles OSM ; ce n’est pas un fond hors ligne garanti. Aucun changement des règles ou des positions serveur.
+
+## Vérification de la première extraction et de la conservation (21 octobre 2026)
+
+Un nouveau diagnostic depuis le serveur a obtenu une réponse explicite du fournisseur principal : HTTP 502, service à capacité, tous les workers occupés et file d’attente pleine. La même réponse est survenue sur une requête synthétique minuscule, avec l’identification habituelle du jeu puis avec une identification comportant son adresse publique. Cette observation établit la saturation annoncée pour ces tentatives ; elle ne prouve pas un quota personnel de données épuisé. D’autres lectures de statut ont reçu une erreur 406 ou expiré ; le fournisseur secondaire a également expiré. Aucune coordonnée de joueur n’a été utilisée pour ces diagnostics.
+
+La configuration systemd consultée ne déclare pas d’interdiction réseau pour le service. Les fournisseurs sont résolus en IPv4 et IPv6. Le dossier de stockage prévu est /var/lib/rpg-gps/maps, à l’extérieur des versions du jeu, avec le compte rpggps et un chemin de données inscriptible déclaré pour le service. Le compte SSH ordinaire n’a pas accès au contenu de ce dossier : sa validité en production doit être inspectée sous le compte du service et ne doit pas être déduite uniquement des tests.
+
+Le test tests/map-cache-durability.test.js lance le vrai worker cartographique avec un fournisseur HTTP synthétique. Deux demandes concurrentes identiques ne déclenchent qu’une requête. Le fichier complet est vérifié sur disque. Le fournisseur est ensuite réellement arrêté et le worker terminé ; un nouveau worker restitue exactement la même carte depuis ce dossier, sans fournisseur disponible. Ce test valide la persistance du code et les demandes partagées, sans prétendre avoir redémarré le serveur de production.
+
+Le diagnostic scripts/check-map-cache.mjs fonctionne en lecture seule : il vérifie les paquets complets, la correspondance entre leur clé et le nom de fichier, compte les secteurs et les fichiers temporaires, et contrôle les droits d’écriture du compte qui le lance. Il ne révèle ni les coordonnées ni les clés de zone. Exemple à exécuter avec le compte de service :
+
+```sh
+sudo -u rpggps node /opt/rpg-gps/current/scripts/check-map-cache.mjs /var/lib/rpg-gps/maps
+```
+
+Cette commande suppose que l’outil a été inclus dans la version déployée. Une copie autonome préparée pour le diagnostic peut être exécutée depuis /tmp avec les mêmes arguments. Aucun fichier du cache n’est modifié. Aucun changement des règles du jeu.
+
+## Rapprochement des parties et du cache (22 octobre 2026)
+
+L’inspection de production communiquée indique 38 cartes complètes, toutes valides, deux secteurs, aucun fichier invalide ou temporaire, et un répertoire inscriptible (26 068 877 octets). Ce bilan confirme la conservation des fichiers, sans identifier la zone qui échoue.
+
+Le diagnostic accepte maintenant un second argument facultatif : le chemin de server-state.json. Il rapproche les zones de préparation, de lancement et du jeu de chaque partie des clés exactes du cache, et indique completeMapAvailable et savedSectors. mapId est uniquement une empreinte de comparaison ; aucune coordonnée, clé géographique brute ou donnée de session n’est affichée. Une différence d’empreinte entre les sources signale des polygones différents selon le contrat actuel, sans prouver leur cause. Une zone absente n’implique pas une corruption du stockage. L’outil ne télécharge rien et ne modifie aucun fichier. Aucun effet sur les règles du jeu.
+
+```sh
+sudo -u rpggps node /tmp/check-map-cache-20261022.mjs /var/lib/rpg-gps/maps /var/lib/rpg-gps/server-state.json
+```
+
+## Nettoyage ponctuel du cache existant (22 octobre 2026)
+
+Le script scripts/clean-map-cache.mjs accepte le répertoire maps et le fichier server-state.json voisin. Sans option, il affiche les candidats sans écrire. Avec --apply, il retire uniquement les paquets complets ou secteurs valides dont le nom correspond à leur clé, sans usage dans les parties, sauvegardes de parties ou bibliothèque. Les fichiers modifiés depuis moins de deux minutes sont ignorés pour protéger les téléchargements récents. La sauvegarde est relue avant chaque décision ; un état inconnu interrompt le nettoyage. Les fichiers étrangers, invalides et temporaires ne sont pas supprimés. Le rapport donne uniquement des compteurs et le nombre d’octets effectivement libérés.
+
+Une copie autonome peut être exécutée sous le compte rpggps depuis /tmp. L’accès SSH ordinaire ne suffit pas : sudo demande le mot de passe de l’opérateur. Cette opération ne purge que le disque ; le nouveau cycle de conservation retire aussi les données mémoire après déploiement. Le nettoyage du cache géographique du navigateur intervient à l’activation de la nouvelle version ou à l’initialisation du nouveau client. Aucun nettoyage réel ne doit être annoncé sans le rapport de l’exécution. Aucun changement des règles du jeu.
+
+Références techniques : [filtre polygonal Overpass](https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#By_polygon_(poly)), [polygon-clipping](https://github.com/mfogel/polygon-clipping).
+
+### Vignettes dans le Dashboard
+
+Les cartes nommées sont des fiches carrées sur la moitié gauche de la rubrique Cartes : miniature du contour, nom, couverture, volume et actions. Le fond OpenStreetMap partagé se trouve à droite ; Voir le recentre sur la carte choisie. Les miniatures de contours sont générées sans téléchargement géographique supplémentaire. Sur téléphone les deux zones se superposent ; les fichiers de la banque gardent leur tableau. La page peut défiler et les espacements sont réduits, sans modifier les règles ni la protection des données utilisées.

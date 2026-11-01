@@ -1,0 +1,206 @@
+[
+  {
+    "id": "capital",
+    "name": "Capitale Royale",
+    "type": "capital",
+    "roles": [],
+    "source": "scenario",
+    "position": {
+      "latitude": 48.8584635,
+      "longitude": 2.3478548
+    },
+    "interactionRadius": 25,
+    "detectionRadius": 75,
+    "state": "active",
+    "visibility": "hidden",
+    "ownerId": null,
+    "controllerId": null,
+    "level": 1,
+    "population": null,
+    "populationCapacity": null,
+    "defenseSlots": 0,
+    "features": {},
+    "resources": {
+      "production": {},
+      "productionStock": {},
+      "stock": {},
+      "storageCapacity": 0,
+      "infrastructureStorage": 0
+    },
+    "taxes": {
+      "accrued": 0
+    },
+    "storedItems": [],
+    "contentment": null,
+    "capture": {
+      "questObjectiveId": null
+    },
+    "storageSlotCapacity": 4,
+    "infrastructure": {},
+    "heroIds": [],
+    "garrison": {
+      "units": []
+    },
+    "dismantlings": [],
+    "improvements": [],
+    "recruitment": {
+      "availableUnitTypeIds": [],
+      "production": {},
+      "stock": {},
+      "capacity": 0,
+      "weights": {},
+      "capacities": {},
+      "variance": 0
+    },
+    "questIds": [],
+    "eventIds": [],
+    "interactionIds": [],
+    "chief": null,
+    "qr": {
+      "enabled": false,
+      "required": false
+    },
+    "statistics": {},
+    "progression": {
+      "experience": 0
+    },
+    "durability": null,
+    "abandonmentCycles": 0
+  },
+  {
+    "id": "broceliande",
+    "name": "Forêt de Broceliande",
+    "type": "lumber-camp",
+    "roles": [],
+    "source": "scenario",
+    "position": {
+      "latitude": 48.8590424,
+      "longitude": 2.3596351
+    },
+    "interactionRadius": 25,
+    "detectionRadius": 75,
+    "state": "active",
+    "visibility": "hidden",
+    "ownerId": null,
+    "controllerId": null,
+    "level": 1,
+    "population": null,
+    "populationCapacity": null,
+    "defenseSlots": 0,
+    "features": {},
+    "resources": {
+      "production": {},
+      "productionStock": {},
+      "stock": {},
+      "storageCapacity": 0,
+      "infrastructureStorage": 0
+    },
+    "taxes": {
+      "accrued": 0
+    },
+    "storedItems": [],
+    "contentment": null,
+    "capture": {
+      "questObjectiveId": null
+    },
+    "storageSlotCapacity": 4,
+    "infrastructure": {},
+    "heroIds": [],
+    "garrison": {
+      "units": []
+    },
+    "dismantlings": [],
+    "improvements": [],
+    "recruitment": {
+      "availableUnitTypeIds": [],
+      "production": {},
+      "stock": {},
+      "capacity": 0,
+      "weights": {},
+      "capacities": {},
+      "variance": 0
+    },
+    "questIds": [],
+    "eventIds": [],
+    "interactionIds": [],
+    "chief": null,
+    "qr": {
+      "enabled": false,
+      "required": false
+    },
+    "statistics": {},
+    "progression": {
+      "experience": 0
+    },
+    "durability": null,
+    "abandonmentCycles": 0
+  },
+  {
+    "id": "carrière",
+    "name": "la carrière",
+    "type": "quarry",
+    "roles": [],
+    "source": "scenario",
+    "position": {
+      "latitude": 48.8569953,
+      "longitude": 2.3539273
+    },
+    "interactionRadius": 25,
+    "detectionRadius": 75,
+    "state": "active",
+    "visibility": "hidden",
+    "ownerId": null,
+    "controllerId": null,
+    "level": 1,
+    "population": null,
+    "populationCapacity": null,
+    "defenseSlots": 0,
+    "features": {},
+    "resources": {
+      "production": {},
+      "productionStock": {},
+      "stock": {},
+      "storageCapacity": 0,
+      "infrastructureStorage": 0
+    },
+    "taxes": {
+      "accrued": 0
+    },
+    "storedItems": [],
+    "contentment": null,
+    "capture": {
+      "questObjectiveId": null
+    },
+    "storageSlotCapacity": 4,
+    "infrastructure": {},
+    "heroIds": [],
+    "garrison": {
+      "units": []
+    },
+    "dismantlings": [],
+    "improvements": [],
+    "recruitment": {
+      "availableUnitTypeIds": [],
+      "production": {},
+      "stock": {},
+      "capacity": 0,
+      "weights": {},
+      "capacities": {},
+      "variance": 0
+    },
+    "questIds": [],
+    "eventIds": [],
+    "interactionIds": [],
+    "chief": null,
+    "qr": {
+      "enabled": false,
+      "required": false
+    },
+    "statistics": {},
+    "progression": {
+      "experience": 0
+    },
+    "durability": null,
+    "abandonmentCycles": 0
+  }
+]

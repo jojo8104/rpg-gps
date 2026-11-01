@@ -1,6 +1,7 @@
 import { MapLayers } from "./MapLayers.js";
 
 const MARKER_ART = Object.freeze({
+  town: "assets/markers/map/village.png",
   fort: "assets/markers/map/fort.png",
   village: "assets/markers/map/village.png",
   mine: "assets/markers/map/mine.png",
@@ -9,20 +10,53 @@ const MARKER_ART = Object.freeze({
   quarry: "assets/markers/map/quarry.png",
   "lumber-camp": "assets/markers/map/lumber-camp.png",
   quest: "assets/markers/map/quest.png",
+  clue: "assets/markers/map/footprints.svg",
 });
 
 export class LocationRenderer {
-  constructor({ map, onSelect }) {
+  constructor({ map, onSelect, billboards }) {
     this.map = map;
     this.onSelect = onSelect;
+    this.billboards = billboards;
     this.layers = new Map();
+    this.ranges = new Map();
   }
 
   render(location) {
     const presentation = locationPresentation(location);
+    const radius = location.interactionRadius ?? location.radius;
+    const color =
+      presentation.owner === "enemy"
+        ? "#ed7373"
+        : presentation.owner === "ally"
+          ? "#68bcec"
+          : "#d6b35c";
+    if (Number.isFinite(radius) && radius > 0) {
+      let range = this.ranges.get(location.id);
+      if (!range) {
+        range = L.circle(asLatLng(location.position), {
+          pane: MapLayers.TERRITORIES,
+          radius,
+          color,
+          fillColor: color,
+          fillOpacity: 0.18,
+          opacity: 0.55,
+          weight: 1,
+          interactive: false,
+        }).addTo(this.map);
+        this.ranges.set(location.id, range);
+      } else
+        range
+          .setLatLng(asLatLng(location.position))
+          .setRadius(radius)
+          .setStyle({ color, fillColor: color });
+    } else {
+      this.ranges.get(location.id)?.remove();
+      this.ranges.delete(location.id);
+    }
     const icon = L.divIcon({
       className: "rpg-marker-host",
-      html: `<div class="rpg-location" data-type="${presentation.type}" data-owner="${presentation.owner}" data-status="${presentation.status}"><span class="rpg-location__frame"><img class="rpg-location__art" src="${MARKER_ART[presentation.type] ?? MARKER_ART.quest}" alt="" draggable="false"><span class="rpg-location__semantic" aria-hidden="true">${locationMarkerSvg(presentation.type)}</span></span><span class="rpg-location__far-dot" aria-hidden="true">${locationMarkerSvg(presentation.type)}</span><span class="rpg-location__badge" aria-hidden="true">${presentation.badge}</span><span class="rpg-location__label">${escapeHtml(presentation.label)}</span></div>`,
+      html: `<div class="rpg-location rpg-location-ground" data-type="${presentation.type}" data-owner="${presentation.owner}" data-status="${presentation.status}"><span class="rpg-location__ring" aria-hidden="true"></span><span class="rpg-location__frame"></span></div>`,
       iconSize: [64, 76],
       iconAnchor: [32, 38],
     });
@@ -42,12 +76,22 @@ export class LocationRenderer {
       });
       this.layers.set(location.id, marker);
     } else marker.setLatLng(asLatLng(location.position)).setIcon(icon);
+    this.billboards.set(`location:${location.id}`, {
+      marker,
+      kind: "location",
+      label: presentation.label,
+      html: `<span class="rpg-place-illustration" data-status="${presentation.status}"><img src="${escapeHtml(location.visual?.icon ?? MARKER_ART[presentation.art])}" alt="" draggable="false"><span class="rpg-location__badge">${presentation.badge}</span><span class="rpg-location__label">${escapeHtml(presentation.label)}</span></span>`,
+      onClick: () => this.onSelect(location.id),
+    });
   }
 
   removeMissing(ids) {
     for (const [id, layer] of this.layers)
       if (!ids.has(id)) {
         layer.remove();
+        this.billboards.remove(`location:${id}`);
+        this.ranges.get(id)?.remove();
+        this.ranges.delete(id);
         this.layers.delete(id);
       }
   }
@@ -66,7 +110,7 @@ export function locationMarkerSvg(type) {
       '<path d="m7 29 13-18 13 18ZM20 11v18M11 29h18M12 9l16 18M28 9 12 18"/>',
     quest: '<path d="M14 13c1-5 13-5 13 2 0 5-7 5-7 10M20 31v1"/>',
   };
-  return `<svg viewBox="0 0 40 40" focusable="false"><g>${shapes[type] ?? shapes.quest}</g></svg>`;
+  return `<svg viewBox="0 0 40 40" focusable="false"><g>${shapes[type] ?? (type === "town" ? shapes.village : shapes.quest)}</g></svg>`;
 }
 
 export function locationPresentation(location) {
@@ -74,11 +118,20 @@ export function locationPresentation(location) {
   const enemy = location.owner === "enemy";
   return {
     type: MARKER_ART[location.type] ? location.type : "quest",
+    art: location.roles?.includes("clue")
+      ? "clue"
+      : MARKER_ART[location.type]
+        ? location.type
+        : "quest",
     owner: enemy ? "enemy" : (location.owner ?? "neutral"),
     status: unknown ? "unknown" : location.nearby ? "active" : "discovered",
     label: unknown ? "Lieu inconnu" : location.name,
     badge:
-      location.type === "quest" || location.objective ? "!" : enemy ? "⚔" : "",
+      location.questMarker === "combat"
+        ? "⚔"
+        : location.questMarker === "objective"
+          ? "●"
+          : "",
   };
 }
 

@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sprites JRPG — huit directions</title>
+    <link rel="stylesheet" href="../app/css/map-camera.css" />
+    <style>
+      body {
+        margin: 24px;
+        background: #22352c;
+        color: #f5edcf;
+        font: 16px system-ui;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      h2 {
+        font-size: 18px;
+        margin: 20px 0 8px;
+      }
+      .directions {
+        display: grid;
+        grid-template-columns: repeat(8, minmax(90px, 1fr));
+        gap: 8px;
+      }
+      .card {
+        background: #526747;
+        padding: 8px;
+        text-align: center;
+        border-radius: 8px;
+      }
+      .character {
+        position: relative;
+        width: 80px;
+        height: 84px;
+        margin: auto;
+      }
+      .rpg-hero-sprite {
+        margin-left: 0;
+      }
+      .rpg-hero-foot-shadow {
+        left: 25px;
+      }
+      @media (max-width: 760px) {
+        .directions {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Sprites JRPG · huit orientations</h1>
+    <p>Trois poses de marche. SW, W et NW sont les miroirs de SE, E et NE.</p>
+    <label
+      ><input id="walking" type="checkbox" checked /> Animation de marche</label
+    >
+    <main id="gallery"></main>
+    <script type="module">
+      import { heroSprite } from "../app/js/map/UnitRenderer.js";
+      import { heroPoseStyle } from "../app/js/map/hero-sprite-atlas.js";
+      const gallery = document.querySelector("#gallery");
+      const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+      for (const [classId, label] of [
+        ["warrior", "Aventurier"],
+        ["mage", "Mage"],
+        ["ranger", "Éclaireuse"],
+      ]) {
+        const section = document.createElement("section");
+        section.innerHTML = `<h2>${label}</h2><div class="directions"></div>`;
+        directions.forEach((direction, index) => {
+          const card = document.createElement("div");
+          card.className = "card is-walking";
+          card.innerHTML = `<div class="character">${heroSprite(classId)}</div><span>${direction}</span>`;
+          card
+            .querySelectorAll(".rpg-hero-pose")
+            .forEach((pose, step) =>
+              Object.assign(pose.style, heroPoseStyle(index, step, classId)),
+            );
+          section.querySelector(".directions").append(card);
+        });
+        gallery.append(section);
+      }
+      document.querySelector("#walking").addEventListener("change", (event) => {
+        gallery
+          .querySelectorAll(".card")
+          .forEach((card) =>
+            card.classList.toggle("is-walking", event.target.checked),
+          );
+      });
+    </script>
+  </body>
+</html>

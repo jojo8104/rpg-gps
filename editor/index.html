@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Atelier visuel de quêtes et de mondes pour RPG GPS."
+    />
+    <title>Atelier · RPG GPS</title>
+    <link rel="stylesheet" href="editor.css" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+  </head>
+  <body>
+    <header class="app-header">
+      <a class="brand" href="./" aria-label="Atelier RPG GPS"
+        ><span class="brand-mark">⌘</span><span>RPG GPS <b>Atelier</b></span></a
+      >
+      <div class="project-heading">
+        <span class="breadcrumb">PROJET / QUÊTE</span
+        ><strong id="project-title">Chargement de l’atelier…</strong>
+      </div>
+      <span id="save-state" class="save-state">● Brouillon local</span>
+      <div class="header-actions">
+        <button id="import-button" class="button ghost">↥ Importer</button
+        ><button id="save-button" class="button ghost">Enregistrer</button
+        ><button
+          id="install-button"
+          class="button"
+          title="Valider et sauvegarder les fichiers dans les données du serveur. Redémarrage requis."
+        >
+          Enregistrer dans le jeu</button
+        ><button id="export-button" class="button primary">
+          Exporter <span>↗</span>
+        </button>
+      </div>
+      <input
+        id="import-file"
+        type="file"
+        accept=".json,application/json"
+        hidden
+      />
+    </header>
+    <div class="workspace">
+      <aside class="library">
+        <div class="library-heading">
+          <button id="new-project" class="button primary new-quest">
+            + Nouvelle quête
+          </button>
+          <span class="eyebrow">ESPACE DE CRÉATION</span>
+          <h1>Votre aventure.</h1>
+          <p>Des actions. Des choix.<br />Un monde à explorer.</p>
+        </div>
+        <nav class="workspace-tabs" aria-label="Espaces de travail">
+          <button data-tab="graph" class="active">
+            ⌘ <span>Schéma de quête</span></button
+          ><button data-tab="map">
+            ◇ <span>Monde & carte</span><small>OPTIONNEL</small></button
+          ><button data-tab="validation">
+            ✓ <span>Validation</span><i id="validation-count">—</i>
+          </button>
+          <button data-tab="assets">♙ <span>PNJ, GA & objets</span></button>
+          <button data-tab="strategic">
+            ⚑ <span>Événements stratégiques</span>
+          </button>
+          <button data-tab="campaign">⑂ <span>Scénario & quêtes</span></button>
+        </nav>
+        <div class="library-section">
+          <div class="section-heading">
+            <h2>Actions</h2>
+            <span>8 TYPES</span>
+          </div>
+          <div id="palette"></div>
+        </div>
+        <div class="library-section examples">
+          <div class="section-heading">
+            <h2>Bibliothèque</h2>
+          </div>
+          <button id="branch-example" class="example-button">
+            ⑂
+            <span
+              >Une mission au choix<small>Exemple à embranchements</small></span
+            >
+          </button>
+          <div id="samples"></div>
+        </div>
+        <div class="library-footer">
+          <span class="connection-dot"></span
+          ><span id="connection-status">Connexion au serveur</span
+          ><a
+            href="../wiki/"
+            target="_blank"
+            rel="noopener"
+            title="Ouvrir le wiki"
+            >↗</a
+          >
+        </div>
+      </aside>
+      <main class="main-workspace">
+        <section id="graph-panel" class="work-panel">
+          <div class="panel-toolbar">
+            <div>
+              <span class="eyebrow">CONSTRUIRE LE PARCOURS</span>
+              <h2>Schéma de quête <span id="action-count">0 actions</span></h2>
+            </div>
+            <div class="toolbar-actions">
+              <button id="quest-settings" class="button small">
+                ⚙ Fiche de quête</button
+              ><button id="auto-layout" class="button small">⇥ Organiser</button
+              ><button id="validate-button" class="button small">
+                ✓ Valider
+              </button>
+            </div>
+          </div>
+          <div
+            id="graph-canvas"
+            class="graph-canvas"
+            tabindex="0"
+            aria-label="Schéma interactif de la quête"
+          >
+            <div id="graph-world">
+              <svg id="graph-links" aria-label="Liens entre les actions"></svg>
+              <div id="graph-nodes"></div>
+            </div>
+            <div id="graph-empty" class="empty-canvas">
+              <div class="empty-orbit">⌘</div>
+              <h3>Tout commence par une action.</h3>
+              <p>
+                Ajoutez un bloc depuis la palette à gauche,<br />ou ouvrez une
+                quête de la bibliothèque.
+              </p>
+              <button id="empty-add" class="button primary">
+                + Ajouter une conversation
+              </button>
+            </div>
+            <div id="link-hint" class="canvas-hint" hidden>
+              Choisissez l’entrée de l’action suivante. Échap pour annuler.
+            </div>
+            <div class="canvas-caption">
+              <span class="mini-dot"></span> Cliquez sur une sortie, puis sur
+              l’entrée du bloc suivant.
+            </div>
+            <div class="zoom-tools">
+              <button id="zoom-out" aria-label="Réduire">−</button
+              ><span id="zoom-label">100 %</span
+              ><button id="zoom-in" aria-label="Agrandir">+</button
+              ><button id="fit-graph" aria-label="Recentrer le schéma">
+                ⌖
+              </button>
+            </div>
+          </div>
+          <footer class="panel-footer">
+            <span id="selection-status"
+              >Sélectionnez un bloc pour modifier sa fiche.</span
+            ><span
+              >Déplacer : glisser · Vue : fond du schéma · Supprimer :
+              Suppr</span
+            >
+          </footer>
+        </section>
+        <section id="strategic-panel" class="validation-panel" hidden>
+          <div class="panel-heading"><h2>Événements stratégiques</h2></div>
+          <div id="strategic-content" class="validation-content"></div>
+        </section>
+        <section id="campaign-panel" class="validation-panel" hidden>
+          <div class="panel-toolbar">
+            <div>
+              <span class="eyebrow">COMPOSER L’AVENTURE</span>
+              <h2>Scénario & quêtes</h2>
+            </div>
+          </div>
+          <div id="campaign-content" class="validation-content"></div>
+        </section>
+        <section id="assets-panel" class="validation-panel" hidden>
+          <div class="panel-toolbar">
+            <div>
+              <span class="eyebrow">PERSONNAGES ET CONTENU</span>
+              <h2>PNJ, groupes autonomes & objets</h2>
+            </div>
+          </div>
+          <div id="assets-content" class="validation-content"></div>
+        </section>
+        <section id="map-panel" class="work-panel" hidden>
+          <div class="panel-toolbar">
+            <div>
+              <span class="eyebrow">DONNER VIE AU TERRAIN</span>
+              <h2>Monde & carte <span>GPS</span></h2>
+            </div>
+            <div class="toolbar-actions">
+              <button id="add-location" class="button small">+ Lieu</button
+              ><button
+                id="generate-location"
+                class="button small"
+                title="Outil de l’éditeur : générer une fiche de lieu, avec un placement aléatoire dans la play area."
+              >
+                🎲 Générer un lieu</button
+              ><button id="area-tool" class="button small">◇ Play area</button
+              ><button id="exclusion-tool" class="button small">
+                ⊘ Exclusion</button
+              ><button id="finish-polygon" class="button small primary" hidden>
+                Terminer le tracé
+              </button>
+            </div>
+          </div>
+          <div class="map-search">
+            <label
+              >Latitude
+              <input
+                id="map-latitude"
+                type="number"
+                step="any"
+                value="48.8566" /></label
+            ><label
+              >Longitude
+              <input
+                id="map-longitude"
+                type="number"
+                step="any"
+                value="2.3522" /></label
+            ><button id="map-center" class="button small">Centrer</button
+            ><button id="map-fit" class="button small">Voir le terrain</button
+            ><label class="tile-toggle"
+              ><input id="map-tiles" type="checkbox" checked /> Fond
+              OpenStreetMap</label
+            >
+          </div>
+          <div
+            id="map-canvas"
+            class="map-canvas"
+            tabindex="0"
+            aria-label="Carte de conception du monde"
+          >
+            <div id="editor-leaflet-map"></div>
+            <div class="map-note" id="map-note">
+              Carte optionnelle · Sélectionnez un lieu, puis cliquez pour le
+              placer.
+            </div>
+            <div class="map-zoom zoom-tools">
+              <button id="map-zoom-out" aria-label="Dézoomer la carte">−</button
+              ><span id="map-zoom-label">16</span
+              ><button id="map-zoom-in" aria-label="Zoomer la carte">+</button>
+            </div>
+            <div class="map-attribution" hidden>
+              ©
+              <a
+                href="https://www.openstreetmap.org/copyright"
+                target="_blank"
+                rel="noopener"
+                >OpenStreetMap</a
+              >
+            </div>
+          </div>
+          <footer class="panel-footer">
+            <span id="map-summary">Aucune play area liée.</span
+            ><span>Distances et espacements : validation serveur.</span>
+          </footer>
+        </section>
+        <section id="validation-panel" class="validation-panel" hidden>
+          <div class="panel-toolbar">
+            <div>
+              <span class="eyebrow">AVANT DE PARTIR</span>
+              <h2>Validation du projet</h2>
+            </div>
+            <button id="revalidate" class="button primary">
+              ✓ Vérifier avec le serveur
+            </button>
+          </div>
+          <div id="validation-content" class="validation-content">
+            <div class="validation-intro">
+              <span>✓</span>
+              <h3>Une aventure cohérente, du début à la fin.</h3>
+              <p>
+                Vérifiez les actions, les dialogues, les références et, si vous
+                avez lié une play area, les placements du monde.
+              </p>
+              <p>
+                Le serveur vérifie la définition. Aucun gain ni état de partie
+                n’est appliqué.
+              </p>
+            </div>
+          </div>
+        </section>
+      </main>
+      <aside class="inspector">
+        <div class="inspector-heading">
+          <span class="eyebrow">PROPRIÉTÉS</span>
+          <div>
+            <h2 id="inspector-title">Fiche de quête</h2>
+            <button
+              id="close-selection"
+              title="Revenir à la fiche de quête"
+              aria-label="Revenir à la fiche de quête"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+        <div id="inspector-content" class="inspector-content"></div>
+      </aside>
+    </div>
+    <div id="toast" class="toast" role="status" hidden></div>
+    <dialog id="replace-dialog">
+      <form method="dialog">
+        <span class="eyebrow">CHANGER DE PROJET</span>
+        <h2>Conserver votre travail ?</h2>
+        <p>
+          Le brouillon actuel sera remplacé. Vous pouvez d’abord le télécharger.
+        </p>
+        <div class="dialog-actions">
+          <button value="cancel" class="button">Annuler</button
+          ><button value="save" class="button">Enregistrer et ouvrir</button
+          ><button value="replace" class="button primary">Ouvrir</button>
+        </div>
+      </form>
+    </dialog>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

@@ -1,4 +1,15 @@
 .DS_Store
 Thumbs.db
 node_modules/
+.npm-cache/
 *.log
+
+.wiki-publish/
+
+# Rapports et outils temporaires locaux
+/tmp/
+/.dashboard-preview.mjs
+/*-results.txt
+/*-tests.txt
+/*-targeted.txt
+/*-check.txt

@@ -1,3 +1,5 @@
+import { CAMP_IMPROVEMENTS } from "./camp-improvement-service.js";
+
 export function describeHeroStat(stat, value) {
   if (!Number.isFinite(value)) return "inconnu";
   if (stat === "speed")
@@ -23,14 +25,24 @@ export function buildLocationIntel({
 }) {
   const known = (required, value, fallback = "?") =>
     knowledgeLevel >= required ? value : fallback;
-  const production = Object.entries(location.resources.production).map(
+  const producingImprovements = new Set();
+  for (const [id, level] of Object.entries(location.infrastructure)) {
+    if (level <= 0) continue;
+    const effects = CAMP_IMPROVEMENTS[id]?.levels[level - 1]?.effects ?? {};
+    for (const [effect, resource] of [["foodProduction", "food"], ["beerProduction", "beer"], ["horseProduction", "horse"]]) {
+      if (effects[effect] > 0) producingImprovements.add(resource);
+    }
+    if (id === "hunting_lodge") producingImprovements.add("food");
+  }
+  const production = Object.entries(location.resources.production)
+    .filter(([id, amount]) => amount > 0 || producingImprovements.has(id)).map(
     ([id, amount]) => ({
       id,
       amount: known(2, amount),
       capacity: known(3, location.resources.storageCapacity),
     }),
   );
-  const recruitProduction = Object.entries(location.recruitment.production).map(
+  const recruitProduction = Object.entries(location.recruitment.production).filter(([, amount]) => amount > 0).map(
     ([id, amount]) => ({
       id: `recrues · ${id}`,
       amount: known(2, amount),
@@ -115,6 +127,7 @@ export function buildLocationIntel({
     storageCapacity: known(3, location.resources.storageCapacity),
     presences,
     defense: {
+      improvementSlots: knowledgeLevel >= 2 ? snapshot.defense?.improvementSlots ?? null : null,
       slots: known(2, location.defenseSlots),
       occupiedSlots: known(2, occupiedSlots),
       units: knowledgeLevel >= 2 ? units : [],
@@ -126,7 +139,7 @@ export function buildLocationIntel({
           : [],
       structures:
         knowledgeLevel >= 2
-          ? Object.entries(location.infrastructure).map(([type, level]) => {
+          ? snapshot.defense?.structures ?? Object.entries(location.infrastructure).filter(([type, level]) => level > 0 && (CAMP_IMPROVEMENTS[type]?.category === "defense" || ["wall", "tower", "towers", "tour", "tours", "watchtower", "defense_tower", "palisade", "palissade", "barricade", "rampart"].includes(type))).map(([type, level]) => {
               const task = location.dismantlings.find(
                 (entry) => entry.structureId === type,
               );

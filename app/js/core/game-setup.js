@@ -287,9 +287,18 @@ export class GameSetup {
           placement.strategy ?? "fixed",
           "La stratégie de placement",
         );
-        if (!["fixed", "distance"].includes(strategy))
+        if (
+          ![
+            "fixed",
+            "random",
+            "distance",
+            "area-relative",
+            "player-walk",
+            "validated-cell",
+          ].includes(strategy)
+        )
           throw new RangeError(
-            "La stratégie de placement doit être fixed ou distance.",
+            "La stratégie de placement doit être fixed, random, distance, area-relative, player-walk ou validated-cell.",
           );
         const normalized = { ...structuredClone(placement), strategy };
         if (strategy === "distance") {

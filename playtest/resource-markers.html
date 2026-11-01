@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marqueurs des ressources découvertes</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #171e1a; color: #ede5cf; font: 16px system-ui; padding: 40px 24px; }
+  main { max-width: 1050px; margin: auto; }
+  h1 { font-family: Georgia, serif; font-weight: normal; }
+  p { color: #bdc5b6; line-height: 1.6; max-width: 760px; }
+  #markers { display: grid; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); gap: 16px; margin: 32px 0; }
+  figure { margin: 0; padding: 20px 12px; text-align: center; border: 1px solid #56634e; border-radius: 12px; background: #303d2e; }
+  .large { width: 144px; height: 144px; object-fit: contain; }
+  .small { width: 64px; height: 64px; object-fit: contain; display: block; margin: 20px auto 12px; }
+  figcaption { font-weight: 600; }
+  small { color: #bdc5b6; }
+</style>
+<main>
+  <h1>Les ressources découvertes</h1>
+  <p>Cinq terrains naturels, avant toute installation de campement. Chaque illustration est présentée en grand puis à 64 pixels pour vérifier sa lisibilité sur la carte. Les cellules vides n’ont pas de marqueur.</p>
+  <div id="markers"></div>
+  <p>Prévisualisation des illustrations. Le système de découverte et de fondation par cellule reste à implémenter ; cette page ne révèle aucune donnée de partie.</p>
+</main>
+<script type="module">
+  import { RESOURCE_MARKERS } from '../app/js/map/resource-marker-catalog.js';
+  const container = document.querySelector('#markers');
+  for (const { label, icon } of Object.values(RESOURCE_MARKERS)) {
+    const figure = document.createElement('figure');
+    for (const size of ['large', 'small']) {
+      const image = document.createElement('img');
+      image.src = `../app/${icon}`;
+      image.alt = size === 'large' ? label : '';
+      image.className = size;
+      figure.append(image);
+    }
+    const caption = document.createElement('figcaption');
+    caption.textContent = label;
+    figure.append(caption);
+    container.append(figure);
+  }
+</script>
+</html>

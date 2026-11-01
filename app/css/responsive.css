@@ -16,22 +16,22 @@
 
 .quest-offer {
   margin-bottom: 0.75rem;
-  border: 1px solid #6d8d56;
+  border: 1px solid var(--parchment-muted);
   border-radius: 14px;
-  background: #17251a;
+  background: var(--parchment-light);
 }
 .quest-offer ol {
   display: grid;
   gap: 0.4rem;
   padding-left: 1.3rem;
-  color: #d6e3d6;
+  color: var(--parchment-ink);
 }
 .quest-offer.is-highlighted {
   border-color: #d9c06b;
   box-shadow: 0 0 0 2px #d9c06b2e;
 }
 .quest-offer.is-highlighted > small {
-  color: #ffe083;
+  color: var(--parchment-muted);
 }
 .quest-location-actions {
   display: flex;
@@ -76,7 +76,7 @@
   padding: 0.7rem;
   border: 1px solid #35553b;
   border-radius: 12px;
-  background: #17251a;
+  background: var(--parchment-light);
 }
 .setup-placement-block h3 {
   margin: 0 0 0.4rem;
@@ -160,7 +160,7 @@
   gap: 0.25rem;
   margin: 0.55rem 0;
   padding-left: 1.15rem;
-  color: #d6e3d6;
+  color: var(--parchment-ink);
   font-size: 0.82rem;
 }
 .quest-hud__details li.is-completed {

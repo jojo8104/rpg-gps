@@ -1,4 +1,12 @@
+import { formatInteger } from "./number-format.js";
 let activeLocationId = null;
+const sheetGestures = new WeakMap();
+
+function clearSheetGestures(element) {
+  sheetGestures.get(element)?.abort();
+  sheetGestures.delete(element);
+  delete element.dataset.expandedLocationId;
+}
 
 export function renderLocationSheet({
   element,
@@ -9,7 +17,11 @@ export function renderLocationSheet({
   onOpenReserves = null,
   onOpenGarrison = null,
 }) {
-  element.classList.remove("location-tab");
+  clearSheetGestures(element);
+  const gestures = new AbortController();
+  sheetGestures.set(element, gestures);
+  element.dataset.expandedLocationId = location.id;
+  element.classList.remove("location-tab", "garrison-sheet");
   if (activeLocationId !== location.id) {
     activeLocationId = location.id;
   }
@@ -49,10 +61,10 @@ export function renderLocationSheet({
     onClose();
   });
   element.querySelectorAll("[data-action]").forEach((button) =>
-    button.addEventListener("click", (event) => {
+    button.addEventListener("click", async (event) => {
       event.preventDefault();
       event.stopPropagation();
-      onAction(button.dataset.action);
+      await onAction(button.dataset.action);
     }),
   );
   element
@@ -62,11 +74,13 @@ export function renderLocationSheet({
       event.stopPropagation();
       onOpenReserves?.();
     });
-  element.querySelectorAll("[data-open-interaction]").forEach((button) =>
-    button.addEventListener("click", () =>
-      onOpenWorld?.(button.dataset.openInteraction),
-    ),
-  );
+  element
+    .querySelectorAll("[data-open-interaction]")
+    .forEach((button) =>
+      button.addEventListener("click", () =>
+        onOpenWorld?.(button.dataset.openInteraction),
+      ),
+    );
   const grab = document.createElement("div");
   grab.className = "sheet-grab";
   grab.tabIndex = 0;
@@ -91,7 +105,7 @@ export function renderLocationSheet({
       !location.nearby ||
       location.relation === "enemy" ||
       slotCount === 0;
-    summary.innerHTML = `<span><strong>Défense</strong><small>${occupied.length}/${slotCount} slots · ${reinforcements.length} renfort(s)</small></span><span class="sheet-defense-slots">${Array.from({ length: slotCount }, (_, index) => (occupied[index] ? `<i class="is-occupied">⚔<small>${occupied[index].quantity}</small></i>` : "<i>＋</i>")).join("") || "<em>Aucun slot</em>"}</span>${reinforcements.length ? `<span class="sheet-defense-reinforcements">${reinforcements.map((unit) => `<i>♟ ${unit.quantity} ${unit.name}${unit.heroName ? ` · ${unit.heroName}` : ""}</i>`).join("")}</span>` : ""}<small>${location.relation === "enemy" ? "Forces ennemies observées" : location.relation === "neutral" ? "Forces neutres observées" : location.nearby ? "Touchez pour gérer" : "Approchez-vous pour gérer"}</small>`;
+    summary.innerHTML = `<span><strong>Défense</strong><small>${occupied.length}/${slotCount} slots · ${reinforcements.length} renfort(s)</small></span><span class="sheet-defense-slots">${Array.from({ length: slotCount }, (_, index) => (occupied[index] ? `<i class="is-occupied">⚔<small>${formatInteger(occupied[index].quantity)}</small></i>` : "<i>＋</i>")).join("") || "<em>Aucun slot</em>"}</span>${reinforcements.length ? `<span class="sheet-defense-reinforcements">${reinforcements.map((unit) => `<i>♟ ${formatInteger(unit.quantity)} ${unit.name}${unit.heroName ? ` · ${unit.heroName}` : ""}</i>`).join("")}</span>` : ""}<small>${location.relation === "enemy" ? "Forces ennemies observées" : location.relation === "neutral" ? "Forces neutres observées" : location.nearby ? "Touchez pour gérer" : "Approchez-vous pour gérer"}</small>`;
     element.querySelector(".sheet-actions")?.before(summary);
     summary.addEventListener("click", () => onOpenGarrison?.());
   }
@@ -106,7 +120,7 @@ export function renderLocationSheet({
       const touch = event.touches[0];
       touchStart = { x: touch.clientX, y: touch.clientY };
     },
-    { passive: true },
+    { passive: true, signal: gestures.signal },
   );
   element.addEventListener(
     "touchend",
@@ -127,7 +141,7 @@ export function renderLocationSheet({
         onClose();
       }
     },
-    { passive: true },
+    { passive: true, signal: gestures.signal },
   );
   grab.addEventListener("click", (event) => {
     event.preventDefault();
@@ -149,11 +163,14 @@ export function renderLocationSheet({
     "touchmove",
     "touchend",
   ].forEach((type) =>
-    element.addEventListener(type, (event) => event.stopPropagation()),
+    element.addEventListener(type, (event) => event.stopPropagation(), {
+      signal: gestures.signal,
+    }),
   );
 }
 
 export function renderLocationTab({ element, location, onOpen }) {
+  clearSheetGestures(element);
   element.hidden = false;
   element.innerHTML = "";
   element.classList.remove("garrison-sheet");
@@ -170,14 +187,20 @@ export function renderLocationTab({ element, location, onOpen }) {
   chevron.setAttribute("aria-hidden", "true");
   chevron.textContent = "‹";
   button.append(type, name, chevron);
-  button.addEventListener("click", onOpen);
+  button.addEventListener("click", (event) => {
+    event.stopPropagation();
+    onOpen();
+  });
   element.append(button);
 }
 
 function serviceActionButton(action) {
   const costs = Object.entries(action.details?.costs ?? {})
     .filter(([, amount]) => amount > 0)
-    .map(([id, amount]) => `${amount} ${id}`)
+    .map(
+      ([id, amount]) =>
+        `${formatInteger(amount)} ${id}${action.details?.payment ? ` : ${formatInteger(action.details.payment.fromLocation[id])} du lieu + ${formatInteger(action.details.payment.fromBag[id])} du bagage` : ""}`,
+    )
     .join(" · ");
   const unavailable = action.details?.unavailableReason;
   return `<button data-action="${action.id}" type="button" ${unavailable ? `disabled title="${unavailable}"` : ""}><span>${action.label}</span>${costs ? `<small>${costs}</small>` : ""}${unavailable ? `<small>${unavailable}</small>` : ""}</button>`;
@@ -189,24 +212,30 @@ function structureList(structures = []) {
 }
 function reserveBalanceForm(action) {
   const details = action.details ?? {};
-  return `<form class="reserve-balance" data-reserve-action="${action.id}" data-total="${details.total}"><strong>${details.resourceName}</strong><div class="reserve-balance__amounts"><span>Lieu <output data-location-amount>${details.locationAmount}</output></span><span>Héros <output data-hero-amount>${details.heroAmount}</output></span></div><input aria-label="Répartition de ${details.resourceName}" type="range" min="0" max="${details.total}" value="${details.heroAmount}" step="1" /><button type="submit">Appliquer</button></form>`;
+  return `<form class="reserve-balance" data-reserve-action="${action.id}" data-total="${details.total}"><strong>${details.resourceName}</strong><div class="reserve-balance__amounts"><span>Lieu <output data-location-amount>${formatInteger(details.locationAmount)}</output></span><span>Héros <output data-hero-amount>${formatInteger(details.heroAmount)}</output></span></div><input aria-label="Répartition de ${details.resourceName}" type="range" min="0" max="${details.total}" value="${details.heroAmount}" step="1" /><button type="submit">Appliquer</button></form>`;
 }
 function updateReserveBalance(input) {
   const form = input.closest("[data-reserve-action]");
   const heroAmount = Number(input.value);
   form.querySelector("[data-hero-amount]").value = heroAmount;
-  form.querySelector("[data-location-amount]").value =
-    Number(form.dataset.total) - heroAmount;
+  form.querySelector("[data-location-amount]").value = formatInteger(
+    Number(form.dataset.total) - heroAmount,
+  );
 }
 function campProgress(development) {
   if (!development) return "";
   const blockers = development.levelUp.blockers ?? [];
-  return `<section class="camp-progress"><strong>Camp ${development.experience}/${development.experienceRequired} XP</strong><span>${development.slots.used}/${development.slots.maximum} emplacements de développement</span>${blockers.length ? `<small>${blockers.join(" · ")}</small>` : development.levelUp.eligible ? "<small>Prêt à évoluer</small>" : ""}</section>`;
+  return `<section class="camp-progress"><strong>Camp ${formatInteger(development.experience)}/${formatInteger(development.experienceRequired)} XP</strong><span>${development.slots.used}/${formatInteger(development.slots.maximum)} emplacements de spécialisation occupés</span>${development.reservedSlots ? `<span>${development.reservedSlots.used}/${development.reservedSlots.maximum} emplacements réservés aux prérequis</span>` : ""}${blockers.length ? `<small>${blockers.join(" · ")}</small>` : development.levelUp.eligible ? "<small>Prêt à évoluer</small>" : ""}</section>`;
 }
 
 export function closeSheet(element) {
+  clearSheetGestures(element);
   element.hidden = true;
   element.innerHTML = "";
-  element.classList.remove("garrison-sheet", "location-tab");
+  element.classList.remove(
+    "garrison-sheet",
+    "location-tab",
+    "player-trade-sheet",
+  );
   activeLocationId = null;
 }

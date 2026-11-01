@@ -1,3 +1,11 @@
+import { watchLookoutSprite } from "../map/watch-lookout-sprite.js";
+import { getAutonomousGroupArchetype } from "../core/autonomous-group-catalog.js";
+import {
+  autonomousGroupHeading,
+  autonomousGroupSprite,
+  autonomousGroupSpriteKind,
+} from "../map/autonomous-group-sprite.js";
+
 /**
  * Façade Leaflet utilisée par le contrôleur navigateur.
  * Elle maintient les couches visuelles et remonte les interactions, sans appliquer
@@ -6,6 +14,10 @@
 import { MapRenderer } from "../map/MapRenderer.js";
 import { MapLayers, createMapPanes } from "../map/MapLayers.js";
 import { AlliedHeroRenderer } from "../map/AlliedHeroRenderer.js";
+import { AutonomousGroupAnimator } from "../map/AutonomousGroupAnimator.js";
+import { GameMapBackground } from "../map/GameMapBackground.js";
+import { AstralTravelRenderer } from "../map/AstralTravelRenderer.js";
+import { MapCamera } from "../map/MapCamera.js";
 
 const SIMULATION_BOUNDS = [
   [-89, -179],
@@ -21,7 +33,9 @@ export class MapView {
     onLocationSelect,
     onTraceSelect = () => {},
     onAutonomousGroupSelect = () => {},
+    onPlayerSelect = () => {},
     onMapClick = () => {},
+    onAstralTarget = () => {},
   }) {
     this.mode = mode;
     this.onHeroMove = onHeroMove;
@@ -35,49 +49,72 @@ export class MapView {
     this.map = L.map(
       element,
       real
-        ? { zoomControl: true }
+        ? {
+            zoomControl: true,
+            zoomSnap: 0.25,
+            maxZoom: 20,
+            zoomAnimation: false,
+            fadeAnimation: false,
+          }
         : {
             crs: L.CRS.Simple,
             zoomControl: false,
             attributionControl: false,
             minZoom: -1,
             maxZoom: 2,
+            zoomSnap: 0.25,
+            zoomAnimation: false,
+            fadeAnimation: false,
           },
     );
     createMapPanes(this.map);
+    // Les vecteurs couvrent aussi les coins visibles après rotation/inclinaison.
+    for (const pane of Object.values(MapLayers))
+      this.map._paneRenderers[pane] = L.svg({ pane, padding: 1 });
+    let preparationLayer;
     if (real) {
-  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    pane: MapLayers.BASE_MAP,
-    maxZoom: 19,
-    keepBuffer: 6,
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
-  }).addTo(this.map);
+      preparationLayer = L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          pane: MapLayers.BASE_MAP,
+          maxZoom: 19,
+          keepBuffer: 6,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+        },
+      ).addTo(this.map);
 
-  this.map.setView(
-    initialPosition ? asLatLng(initialPosition) : [48.8566, 2.3522],
-    17,
-  );
-} else {
+      this.map.setView(
+        initialPosition ? asLatLng(initialPosition) : [48.8566, 2.3522],
+        17,
+      );
+    } else {
       this.map.fitBounds(SIMULATION_BOUNDS);
-      L.rectangle(SIMULATION_BOUNDS, {
+      preparationLayer = L.rectangle(SIMULATION_BOUNDS, {
         pane: MapLayers.BASE_MAP,
         className: "rpg-simulation-base",
         weight: 1,
         fillOpacity: 1,
       }).addTo(this.map);
     }
-    this.map.on("click", ({ latlng }) => this.onMapClick(toPosition(latlng)));
-    this.map.on("move zoom resize", () => {
-      if (this.bearingEnabled) this.#applyBearing();
+    this.camera = new MapCamera(this.map, { mode, onHeroMove });
+    this.background = new GameMapBackground({
+      map: this.map,
+      mode,
+      preparationLayer,
     });
+    this.map.on("click", ({ latlng }) => this.onMapClick(toPosition(latlng)));
     this.renderer = new MapRenderer({
       map: this.map,
       mode,
       onHeroMove,
       onLocationSelect,
     });
-    this.alliedHeroes = new AlliedHeroRenderer(this.map);
+    this.astral = new AstralTravelRenderer(this.map, onAstralTarget);
+    this.alliedHeroes = new AlliedHeroRenderer(this.map, {
+      onSelect: onPlayerSelect,
+      billboards: this.renderer.billboards,
+    });
     const legend = L.control({ position: "bottomleft" });
     legend.onAdd = () => {
       const element = L.DomUtil.create("div", "range-legend");
@@ -91,19 +128,35 @@ export class MapView {
     this.autonomousTraces = new Map();
     this.autonomousTraceLines = new Map();
     this.autonomousGroups = new Map();
+    this.autonomousAnimator = new AutonomousGroupAnimator();
+    this.map.on("unload", () => this.autonomousAnimator.dispose());
     this.watchBeacons = new Map();
     this.watchTargets = new Map();
+    this.alertMarkers = new Set();
     this.playArea = null;
     this.draftArea = null;
     this.exclusionAreas = L.layerGroup().addTo(this.map);
     this.exclusionDraft = null;
+    this.grid = L.layerGroup().addTo(this.map);
     this.heatmap = L.layerGroup().addTo(this.map);
   }
 
   // Synchronise les couches à partir d'un instantané déjà filtré par le moteur.
+  setHeroPosition(position, accuracy, heading) {
+    this.#heading(position, heading);
+    this.renderer.units.render(position, accuracy, this.heroHeading);
+    this.#heroDragging();
+  }
+
   render({
+    setupActive = true,
+    geographyPolygon = [],
     heroPosition,
     heroHeading = null,
+    heroClassId = "warrior",
+    heroGender = null,
+    heroArmyUnits,
+    astralTravel = null,
     accuracy = null,
     visionRadius = null,
     fogEnabled = true,
@@ -120,10 +173,19 @@ export class MapView {
     questTraces = [],
     gridCells = [],
     heatmapVisible = true,
+    territory = null,
+    explorationView = null,
+    onExplorationSelect = () => {},
   }) {
+    this.background.sync({ setupActive, polygon: geographyPolygon });
+    this.camera.sync({ setupActive, polygon: geographyPolygon });
+    this.#heading(heroPosition, heroHeading);
     this.renderer.render({
       heroPosition,
-      heroHeading,
+      heroHeading: this.heroHeading,
+      heroClassId,
+      heroGender,
+      heroArmyUnits,
       accuracy,
       visionRadius,
       fogEnabled,
@@ -131,7 +193,19 @@ export class MapView {
       revealedZones,
       locations,
       gridCells,
+      territory,
+      explorationView,
+      onExplorationSelect,
     });
+    this.astralState = {
+      travel: astralTravel,
+      gender: heroGender,
+      position: heroPosition,
+      locations,
+      groups: autonomousGroups,
+    };
+    this.#renderAstral();
+    this.#heroDragging();
     this.#area(playAreaPoints);
     this.#exclusions(excludedPolygons, exclusionDraftPoints);
     dynamicSites.forEach((site) => this.#site(site));
@@ -152,6 +226,9 @@ export class MapView {
     );
     this.#autonomousTracePaths(autonomousTraces);
     autonomousGroups.forEach((group) => this.#autonomousGroup(group));
+    this.autonomousAnimator.retain(
+      new Set(autonomousGroups.map((group) => group.id)),
+    );
     this.#removeMissing(
       this.autonomousGroups,
       new Set(autonomousGroups.map((item) => item.id)),
@@ -186,8 +263,8 @@ export class MapView {
     const center = asLatLng(beacon.position);
     const entry = this.watchBeacons.get(beacon.id);
     const icon = L.divIcon({
-      className: "watch-beacon-marker",
-      html: '<span aria-hidden="true">⌖</span>',
+      className: "watch-lookout-anchor",
+      html: "",
       iconSize: [34, 34],
       iconAnchor: [17, 17],
     });
@@ -218,6 +295,12 @@ export class MapView {
       entry.marker.setLatLng(center).setIcon(icon);
       entry.radius.setLatLng(center).setRadius(beacon.radius);
     }
+    this.renderer.billboards.set(`watch-lookout:${beacon.id}`, {
+      marker: this.watchBeacons.get(beacon.id).marker,
+      kind: "watch",
+      html: watchLookoutSprite(),
+      label: "Vigie camouflée",
+    });
   }
 
   #watchTarget(target) {
@@ -335,6 +418,8 @@ export class MapView {
   }
 
   #autonomousGroup(group) {
+    const customImage = group.visual?.icon ?? group.visual?.illustration;
+    const spriteKind = customImage ? null : autonomousGroupSpriteKind(group);
     const center = asLatLng(group.position);
     const entry = this.autonomousGroups.get(group.id);
     const symbol =
@@ -346,12 +431,28 @@ export class MapView {
             ? "➤"
             : "⌖";
     const icon = L.divIcon({
-      className: `autonomous-group-marker is-${group.type} is-${group.factionId ?? "independent"}`,
-      html: `<span>${symbol}</span><small>${group.soldiers || ""}</small>`,
+      className: `autonomous-group-marker is-${group.type} is-${group.factionId ?? "independent"} is-${group.relation ?? "neutral"}${spriteKind ? " has-sprite" : ""}`,
+      html: customImage
+        ? `<img src="${customImage}" alt="" style="width:46px;height:46px;object-fit:contain"><small>${group.soldiers || ""}</small>`
+        : spriteKind
+          ? ""
+          : `<span>${symbol}</span><small>${group.soldiers || ""}</small>`,
       iconSize: [46, 46],
       iconAnchor: [23, 23],
     });
-    const label = `${group.type === "army" ? "Armée" : "Groupe"} ${group.factionId === "chaos" ? "du Chaos" : "autonome"}`;
+    const typeLabels = {
+      army: "Armée",
+      rogue: "Groupe errant",
+      convoy: "Convoi",
+      messenger: "Messager",
+      prospecting: "Prospecteurs",
+      scout: "Éclaireur",
+    };
+    const label =
+      getAutonomousGroupArchetype(group.archetypeId)?.name ??
+      (group.factionId === "chaos"
+        ? `${typeLabels[group.type] ?? "Groupe"} du Chaos`
+        : `${typeLabels[group.type] ?? "Groupe"} autonome`);
     if (!entry) {
       const marker = L.marker(center, {
         pane: MapLayers.UNITS,
@@ -368,11 +469,27 @@ export class MapView {
         this.onAutonomousGroupSelect(group.id);
       });
       this.autonomousGroups.set(group.id, { marker });
+      marker.on("move", () => this.renderer.billboards.render());
     } else
       entry.marker
-        .setLatLng(center)
         .setIcon(icon)
         .setTooltipContent(`${label} · ${group.soldiers} soldats`);
+    this.autonomousAnimator.update(
+      group,
+      this.autonomousGroups.get(group.id).marker,
+    );
+    if (spriteKind)
+      this.renderer.billboards.set(`group-sprite:${group.id}`, {
+        marker: this.autonomousGroups.get(group.id).marker,
+        kind: "group",
+        spriteKind,
+        heading: autonomousGroupHeading(group, this.mode === "simulation"),
+        walking: group.status === "traveling",
+        html: autonomousGroupSprite(spriteKind),
+        label,
+        onClick: () => this.onAutonomousGroupSelect(group.id),
+      });
+    else this.renderer.billboards.remove(`group-sprite:${group.id}`);
   }
 
   // Commandes de caméra et de zone exposées à main.js.
@@ -381,7 +498,7 @@ export class MapView {
     this.playArea =
       points.length >= 3
         ? L.polygon(points.map(asLatLng), {
-            color: "#78e08f",
+            color: "#c69b38",
             fillOpacity: 0.12,
           }).addTo(this.map)
         : null;
@@ -394,47 +511,92 @@ export class MapView {
   focus(position, zoom = this.mode === "gps" ? 18 : 0.5) {
     this.map.flyTo(asLatLng(position), zoom, { duration: 0.35 });
   }
+  showTemporaryAlert(position, durationMs = 12000) {
+    const marker = L.marker(asLatLng(position), {
+      pane: MapLayers.EFFECTS,
+      zIndexOffset: 1600,
+      interactive: false,
+      icon: L.divIcon({
+        className: "watch-alert-marker-host",
+        html: '<span class="watch-alert-marker"><img src="assets/icons/watch-message.png" alt=""></span>',
+        iconSize: [54, 54],
+        iconAnchor: [27, 27],
+      }),
+    }).addTo(this.map);
+    this.alertMarkers.add(marker);
+    setTimeout(
+      () => {
+        marker.remove();
+        this.alertMarkers.delete(marker);
+      },
+      Math.max(0, durationMs),
+    );
+    return marker;
+  }
   follow(position) {
     this.map.panTo(asLatLng(position), { animate: false });
   }
   setHeroHeading(heading) {
-    this.heroHeading = Number.isFinite(heading) ? heading : 0;
+    if (!Number.isFinite(heading)) return;
+    this.heroHeading = heading;
     this.renderer.setHeroHeading(this.heroHeading);
-    this.#applyBearing();
+    this.camera.setHeading(this.heroHeading);
   }
 
   setAlliedHeroes(allies) {
+    this.astralAllies = allies;
     this.alliedHeroes.render(allies);
+    this.#renderAstral();
   }
 
   setBearingEnabled(enabled) {
-    this.bearingEnabled = this.mode === "gps" && enabled === true;
-    this.#applyBearing();
+    this.bearingEnabled = this.camera.setFollowHeading(enabled === true);
     return this.bearingEnabled;
   }
   toggleBearing() {
     return this.setBearingEnabled(!this.bearingEnabled);
   }
 
-  #applyBearing() {
-    const container = this.map.getContainer();
-    const size = this.map.getSize();
-    const mapPane = this.map.getPane("mapPane");
-    const panePosition = L.DomUtil.getPosition(mapPane) ?? L.point(0, 0);
-    const bearing = this.bearingEnabled ? -this.heroHeading : 0;
-    container.classList.toggle("map-is-bearing", this.bearingEnabled);
-    container.style.setProperty(
-      "--map-counter-bearing",
-      `${this.bearingEnabled ? this.heroHeading : 0}deg`,
-    );
-    // Leaflet translates mapPane while panning. Compensate that translation so
-    // rotation stays centered on the viewport and every GPS layer remains aligned.
-    // Translation and rotation must live in the same transform: using the separate
-    // CSS `rotate` property changes the coordinate system of Leaflet's translation
-    // on some mobile browsers, which makes markers appear to slide over the tiles.
-    mapPane.style.transformOrigin = `${size.x / 2 - panePosition.x}px ${size.y / 2 - panePosition.y}px`;
-    mapPane.style.rotate = "";
-    mapPane.style.transform = `translate3d(${panePosition.x}px, ${panePosition.y}px, 0px) rotate(${bearing}deg)`;
+  #renderAstral() {
+    if (!this.astralState) return;
+    const { travel, position, locations, groups } = this.astralState;
+    const targets = [
+      ...locations.map((item) => ({
+        kind: "location",
+        targetId: item.id,
+        position: item.position,
+      })),
+      ...groups.map((item) => ({
+        kind: "group",
+        targetId: item.id,
+        position: item.position,
+      })),
+      ...(this.astralAllies ?? []).map((item) => ({
+        kind: "hero",
+        targetId: item.heroId,
+        playerId: item.playerId,
+        position: item.position,
+      })),
+    ].filter((item) => item.position);
+    this.astral.render(travel, position, targets, this.astralState.gender);
+  }
+
+  #heroDragging() {
+    const dragging = this.renderer.units.marker?.dragging;
+    if (!dragging || this.mode === "gps") return;
+    if (this.camera.enabled) dragging.disable();
+    else dragging.enable();
+  }
+
+  #heading(position, heading) {
+    if (!position) return;
+    if (this.mode === "simulation" && this.lastHeroPosition) {
+      const dx = position.longitude - this.lastHeroPosition.longitude;
+      const dy = position.latitude - this.lastHeroPosition.latitude;
+      if (dx || dy) heading = (Math.atan2(dx, dy) * 180) / Math.PI;
+    }
+    this.lastHeroPosition = { ...position };
+    this.setHeroHeading(heading);
   }
 
   #area(points) {
@@ -531,8 +693,20 @@ export class MapView {
   }
 
   #heatmap(cells, visible) {
+    this.grid.clearLayers();
     this.heatmap.clearLayers();
-    if (!visible || cells.length === 0) return;
+    if (cells.length === 0) return;
+    cells.forEach((cell) =>
+      L.rectangle(cell.bounds.map(asLatLng), {
+        pane: MapLayers.EXPLORATION,
+        color: "#91a89a",
+        weight: 1,
+        opacity: 0.42,
+        fill: false,
+        interactive: false,
+      }).addTo(this.grid),
+    );
+    if (!visible) return;
     const maximum = Math.max(1, ...cells.map((cell) => cell.activity));
     cells.forEach((cell) => {
       const intensity = cell.activity / maximum;
@@ -550,9 +724,10 @@ export class MapView {
                 ? "#f6d971"
                 : "#ff635e";
       L.rectangle(cell.bounds.map(asLatLng), {
+        pane: MapLayers.EXPLORATION,
         color,
-        weight: signal > 0 ? 2 : 1,
-        opacity: 0.48,
+        weight: signal > 0 ? 2 : 0,
+        opacity: signal > 0 ? 0.65 : 0,
         fillColor: color,
         fillOpacity:
           signal > 0
@@ -578,6 +753,10 @@ export class MapView {
   #removeMissing(collection, ids) {
     for (const [id, layer] of collection)
       if (!ids.has(id)) {
+        if (collection === this.watchBeacons)
+          this.renderer.billboards.remove(`watch-lookout:${id}`);
+        if (collection === this.autonomousGroups)
+          this.renderer.billboards.remove(`group-sprite:${id}`);
         if (layer.marker) {
           layer.marker.remove();
           layer.radius?.remove();
@@ -603,7 +782,9 @@ export function endpointTraces(traces) {
     groups.get(trace.groupId).push(trace);
   });
   return [...groups.values()].flatMap((entries) => {
-    const ordered = entries.sort((left, right) => left.createdAt - right.createdAt);
+    const ordered = entries.sort(
+      (left, right) => left.createdAt - right.createdAt,
+    );
     return ordered.length === 1 ? ordered : [ordered[0], ordered.at(-1)];
   });
 }

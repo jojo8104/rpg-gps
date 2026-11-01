@@ -1,0 +1,40 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { mkdtemp, mkdir, writeFile, readdir, utimes, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
+import { mapPackageKey } from "../app/js/map/map-package.js";
+const run = promisify(execFile);
+test("nettoyage ciblé : prévisualisation, protection des usages et retrait des seuls paquets orphelins anciens", async t => {
+  const root = await mkdtemp(path.join(tmpdir(), "rpg-clean-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const directory = path.join(root, "maps");
+  await mkdir(directory);
+  const polygon = latitude => [{ latitude, longitude: 2 }, { latitude, longitude: 2.001 }, { latitude: latitude + .001, longitude: 2.001 }];
+  const stateFile = path.join(root, "server-state.json");
+  await writeFile(stateFile, JSON.stringify({ version: 1, lobbies: [{ playArea: { polygon: polygon(48) } }], manualSaves: [{ game: { setup: { playArea: { polygon: polygon(49) } } } }], savedMaps: [{ playArea: { polygon: polygon(50) } }] }));
+  for (const latitude of [48, 49, 50, 51, 52]) {
+    const key = mapPackageKey(polygon(latitude));
+    const file = path.join(directory, createHash("sha256").update(key).digest("hex") + ".json");
+    await writeFile(file, JSON.stringify({ version: 1, key, bounds: [latitude, 2, latitude + .001, 2.001], features: [] }));
+    if (latitude !== 52) await utimes(file, new Date(0), new Date(0));
+  }
+  await writeFile(path.join(directory, "unrelated.json"), "keep");
+  const script = fileURLToPath(new URL("../scripts/clean-map-cache.mjs", import.meta.url));
+  const preview = JSON.parse((await run(process.execPath, [script, directory, stateFile])).stdout);
+  assert.equal(preview.candidates, 1);
+  assert.equal((await readdir(directory)).length, 6);
+  const applied = JSON.parse((await run(process.execPath, [script, directory, stateFile, "--apply"])).stdout);
+  assert.equal(applied.removedFiles, 1);
+  assert.equal(applied.protectedFiles, 3);
+  assert.equal(applied.recentFiles, 1);
+  assert.ok(applied.freedBytes > 0);
+  assert.equal((await readdir(directory)).length, 5);
+  await writeFile(stateFile, "{}");
+  await assert.rejects(run(process.execPath, [script, directory, stateFile, "--apply"]));
+  assert.equal((await readdir(directory)).length, 5);
+});

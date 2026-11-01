@@ -107,3 +107,19 @@ test("une localisation sans population suspend ses services puis disparaît", ()
   location.advanceAbandonment(1); assert.equal(location.state, "destroyed");
   location.addPopulation(2); assert.equal(location.state, "destroyed");
 });
+
+
+test("les slots spécialisés comptent uniquement les ressources produites", () => {
+  const location = new Location({
+    id: "production-slots", name: "Camp", type: "camp", source: "test",
+    position: { latitude: 48, longitude: 2 },
+    resources: { production: { wood: 2, food: 0, horse: 0 }, productionStock: { food: 5 } },
+  });
+  assert.equal(location.productionSlotCapacity, 4);
+  location.resources.production.food = 1;
+  assert.equal(location.productionSlotCapacity, 8);
+  location.resources.production.wood = 0;
+  location.resources.production.food = 0;
+  assert.equal(location.productionSlotCapacity, 0);
+  assert.equal(location.resources.productionStock.food, 5);
+});

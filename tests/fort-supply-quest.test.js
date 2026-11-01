@@ -48,12 +48,13 @@ test("la quatrième quête exige et transfère réellement vingt rations", () =>
   assert.doesNotMatch(scenario.getEvent("fort-rations-delivered").effects.find((effect) => effect.type === "showNarration").text, /futur|chaos|continuera|capitale/i);
 });
 
-test("les quatre villages fournisseurs sont royaux, producteurs et placés dans les 25 %", () => {
+test("les quatre villages économiques sont royaux, producteurs et partagent les lieux du scénario", () => {
   const locations = JSON.parse(readFileSync(new URL("../data/locations.json", import.meta.url), "utf8"));
   const definition = JSON.parse(readFileSync(new URL("../data/scenarios/chaos.json", import.meta.url), "utf8"));
-  for (const direction of ["north", "east", "south", "west"]) {
-    const id = `supply-village-${direction}`; const village = locations.find((location) => location.id === id); const slot = definition.locationSlots.find((entry) => entry.id === id);
-    assert.equal(village.ownerId, "kingdom"); assert.ok(village.resources.production.food > 0); assert.ok(["field", "farm", "hunting_lodge"].some((improvement) => village.infrastructure[improvement] > 0)); assert.ok(slot.defaultPlacement.areaRadiusRatio <= 0.25);
+  for (const resource of ["gold", "iron", "wood", "stone"]) {
+    const id = `capital-resource-${resource}-village`; const village = locations.find((location) => location.id === id); const slot = definition.locationSlots.find((entry) => entry.id === id);
+    assert.ok(village); assert.ok(slot);
+    assert.equal(village.ownerId, "kingdom"); assert.ok(village.resources.production.food > 0); assert.ok(village.roles.includes("capital-economy"));
   }
 });
 

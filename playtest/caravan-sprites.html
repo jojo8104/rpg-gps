@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Caravane JRPG</title>
+    <link rel="stylesheet" href="../app/css/map-camera.css" />
+    <style>
+      body {
+        background: #22352c;
+        color: #f5edcf;
+        font: 16px system-ui;
+        margin: 24px;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        max-width: 900px;
+      }
+      .card {
+        background: #526747;
+        padding: 20px;
+        text-align: center;
+        border-radius: 8px;
+      }
+      .character {
+        position: relative;
+        width: 80px;
+        height: 90px;
+        margin: auto;
+      }
+      .rpg-hero-sprite {
+        margin-left: 0;
+      }
+      .rpg-hero-foot-shadow {
+        left: 25px;
+      }
+      @media (max-width: 600px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Caravane JRPG · huit orientations</h1>
+    <p>
+      Âne, marchand et charrette chargée. Trois poses ; vues ouest par miroir.
+    </p>
+    <label
+      ><input id="walking" type="checkbox" checked /> Animation de marche</label
+    >
+    <p></p>
+    <main class="grid"></main>
+    <script type="module">
+      import {
+        caravanSprite,
+        caravanPoseStyle,
+      } from "../app/js/map/caravan-sprite.js";
+      const gallery = document.querySelector("main");
+      ["N", "NE", "E", "SE", "S", "SW", "W", "NW"].forEach(
+        (label, direction) => {
+          const card = document.createElement("div");
+          card.className = "card is-walking";
+          card.innerHTML = `<div class="character">${caravanSprite()}</div><span>${label}</span>`;
+          card
+            .querySelectorAll(".rpg-hero-pose")
+            .forEach((pose, step) =>
+              Object.assign(pose.style, caravanPoseStyle(direction, step)),
+            );
+          gallery.append(card);
+        },
+      );
+      document
+        .querySelector("#walking")
+        .addEventListener("change", (event) =>
+          gallery
+            .querySelectorAll(".card")
+            .forEach((card) =>
+              card.classList.toggle("is-walking", event.target.checked),
+            ),
+        );
+    </script>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ennemis et faune — sprites de carte</title>
+<style>
+body{font:16px system-ui;background:#17251e;color:#eee;margin:0;padding:24px}main{max-width:1100px;margin:auto}h1{font-size:26px}p{color:#ccd4c7}section{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}article{background:#263a2d;border:1px solid #53644c;border-radius:12px;padding:16px}h2{font-size:19px;margin:0 0 8px}.sheet{background:#e8e2ce;border-radius:8px;margin-top:8px}.green{background:#648451}img{display:block;width:100%;image-rendering:pixelated}a{color:#ebce8b}small{display:block;color:#c4cfbf;margin-top:10px}
+</style>
+<main>
+<h1>Ennemis et faune : face et dos</h1>
+<p>Face à gauche · Dos à droite · PNG transparents · Ressources préparées pour la carte du monde.</p>
+<section id="gallery"></section>
+<p>Ces apparences sont disponibles dans les modèles de GA de l’éditeur de quête, avec un alignement ennemi, neutre ou allié. Les effectifs restent à configurer.</p>
+</main>
+<script type="module">
+const subjects=[['goblins','Groupe de gobelins'],['orcs','Groupe d’orcs'],['wolves','Meute de loups'],['bear','Ours'],['boar','Sanglier'],['deer','Cerf']];
+const gallery=document.querySelector('#gallery');
+for(const [id,label] of subjects){
+const article=document.createElement('article');
+const src=`../app/assets/groups/${id}-map-front-back-v1.png`;
+article.innerHTML=`<h2>${label}</h2><div class="sheet"><img src="${src}" alt="${label}, de face et de dos"></div><div class="sheet green"><img src="${src}" alt="Même planche sur fond vert"></div><small><a href="${src}" download>Télécharger le PNG</a></small>`;
+gallery.append(article);
+}
+</script>
+</html>

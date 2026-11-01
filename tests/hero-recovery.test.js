@@ -42,6 +42,17 @@ test("un ghost revient uniquement à sa base avec la moitié supérieure de ses 
   assert.equal(result.success, true); assert.equal(hero.state, "active"); assert.equal(hero.health, 13);
 });
 
+test("une chapelle soigne et remet un ghost dans la partie", () => {
+  const chapel = { ...baseLocation, id: "chapel", name: "Chapelle", roles: [], infrastructure: { chapel: 2 }, features: { healing: true }, ownerId: "p1" };
+  const game = new Game({ setup: setupFor(["p1"]), heroClasses: [{ id: "warrior", name: "Guerrier", abilityIds: [] }], locations: [baseLocation, chapel] });
+  const hero = game.chooseHero("p1", { name: "A", classId: "warrior" }); game.start();
+  game.getLocation("chapel").addHero(hero.id);
+  hero.health = 10;
+  assert.equal(game.recoverHeroes(2)[0].locationHealing, 4);
+  hero.setBattleState({ health: 0, state: "ghost" });
+  assert.equal(game.reviveHeroAtBase({ heroId: hero.id, locationId: "chapel" }).success, true);
+});
+
 test("à zéro PV le héros perd toutes ses troupes et tous ses bagages", () => {
   let sequence = 0; const idGenerator = (prefix) => `${prefix}-${++sequence}`;
   const unitDefinitions = [{ id: "militia", maxQuantity: 10, stats: { attack: 3, defense: 2, speed: 2, range: 1, morale: 4, healthPerSoldier: 10, combatHealthThreshold: 4 }, costs: {} }];
@@ -53,9 +64,24 @@ test("à zéro PV le héros perd toutes ses troupes et tous ses bagages", () => 
   const victim = game.chooseHero("p1", { name: "Victime", classId: "carrier" }); const attacker = game.chooseHero("p2", { name: "Attaquant", classId: "raider" }); game.start();
   assert.equal(victim.army.units.length, 1); assert.ok(victim.carriedLoot.length > 0); assert.equal(victim.resources.gold, 7);
   const battle = game.createBattle({ position: { latitude: 0.1, longitude: 0.1 }, teamParticipants: [{ id: "victims", heroIds: [victim.id] }, { id: "attackers", heroIds: [attacker.id] }] });
-  const battleAttacker = battle.teams[1].heroes[0]; battleAttacker.attack = 1000; battle.attack(battleAttacker.id, battle.teams[0].heroes[0].id);
+  battle.duel.players[1].hero.attack = 1000;
+  battle.duel.encounter.twist = { id: "NO_TECHNIQUE" };
+  battle.submitDuelChoice("victims", { cards: ["HERO"] });
+  battle.submitDuelChoice("attackers", { cards: ["HERO"] });
+  battle.lockDuelChoice("victims"); battle.lockDuelChoice("attackers");
   const result = game.resolveBattle(battle.id);
   assert.equal(victim.state, "ghost"); assert.equal(victim.health, 0); assert.equal(victim.army.units.length, 0); assert.equal(victim.carriedLoot.length, 0); assert.equal(victim.resources.gold, 0);
   assert.ok(result.consequences.losses.some((loss) => loss.reason === "hero_became_ghost" && loss.heroId === victim.id));
-  assert.ok(result.battleLoot.entries.some((entry) => entry.itemId === "gold" && entry.quantity === 7));
+  const goldEntry = result.battleLoot.entries.find((entry) => entry.itemId === "gold");
+  assert.ok(goldEntry);
+  assert.equal(goldEntry.quantity, 0);
+  assert.equal(goldEntry.allocations[attacker.playerId], 0);
+  assert.ok(result.battleLoot.collectionLog.some((entry) =>
+    entry.playerId === attacker.playerId && entry.collected.some((item) => item.itemId === "gold" && item.quantity === 7),
+  ));
+  const expectedGold = 7 + (result.duelSpoils.find((entry) => entry.heroId === attacker.id)?.gold ?? 0);
+  assert.equal(attacker.resources.gold, expectedGold);
+  const secondCollection = game.collectBattleLoot({ battleId: battle.id, playerId: attacker.playerId, heroId: attacker.id, selection: { [goldEntry.id]: 7 } });
+  assert.equal(secondCollection.success, false);
+  assert.equal(attacker.resources.gold, expectedGold);
 });

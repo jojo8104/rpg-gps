@@ -1,0 +1,114 @@
+﻿[
+    {
+        "originalWidth":  330,
+        "targetWidth":  320,
+        "scaleX":  0.96969696969696972,
+        "clothing":  0,
+        "gender":  "male"
+    },
+    {
+        "originalWidth":  301,
+        "targetWidth":  320,
+        "scaleX":  1.06312292358804,
+        "clothing":  1,
+        "gender":  "male"
+    },
+    {
+        "originalWidth":  329,
+        "targetWidth":  320,
+        "scaleX":  0.97264437689969607,
+        "clothing":  2,
+        "gender":  "male"
+    },
+    {
+        "originalWidth":  407,
+        "targetWidth":  320,
+        "scaleX":  0.78624078624078619,
+        "clothing":  3,
+        "gender":  "male"
+    },
+    {
+        "originalWidth":  352,
+        "targetWidth":  320,
+        "scaleX":  0.90909090909090906,
+        "clothing":  4,
+        "gender":  "male"
+    },
+    {
+        "originalWidth":  341,
+        "targetWidth":  320,
+        "scaleX":  0.93841642228739008,
+        "clothing":  5,
+        "gender":  "male"
+    },
+    {
+        "originalWidth":  420,
+        "targetWidth":  320,
+        "scaleX":  0.76190476190476186,
+        "clothing":  6,
+        "gender":  "male"
+    },
+    {
+        "originalWidth":  346,
+        "targetWidth":  320,
+        "scaleX":  0.92485549132947975,
+        "clothing":  7,
+        "gender":  "male"
+    },
+    {
+        "originalWidth":  301,
+        "targetWidth":  300,
+        "scaleX":  0.99667774086378735,
+        "clothing":  0,
+        "gender":  "female"
+    },
+    {
+        "originalWidth":  298,
+        "targetWidth":  300,
+        "scaleX":  1.0067114093959733,
+        "clothing":  1,
+        "gender":  "female"
+    },
+    {
+        "originalWidth":  324,
+        "targetWidth":  300,
+        "scaleX":  0.92592592592592593,
+        "clothing":  2,
+        "gender":  "female"
+    },
+    {
+        "originalWidth":  373,
+        "targetWidth":  300,
+        "scaleX":  0.80428954423592491,
+        "clothing":  3,
+        "gender":  "female"
+    },
+    {
+        "originalWidth":  319,
+        "targetWidth":  300,
+        "scaleX":  0.94043887147335425,
+        "clothing":  4,
+        "gender":  "female"
+    },
+    {
+        "originalWidth":  318,
+        "targetWidth":  300,
+        "scaleX":  0.94339622641509435,
+        "clothing":  5,
+        "gender":  "female"
+    },
+    {
+        "originalWidth":  394,
+        "targetWidth":  300,
+        "scaleX":  0.76142131979695427,
+        "clothing":  6,
+        "gender":  "female"
+    },
+    {
+        "originalWidth":  326,
+        "targetWidth":  300,
+        "scaleX":  0.92024539877300615,
+        "clothing":  7,
+        "gender":  "female"
+    }
+]

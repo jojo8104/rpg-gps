@@ -59,4 +59,9 @@ export class HeroConcealmentService {
   get signatureMultiplier() {
     return this.concealed ? this.concealedSignatureMultiplier : 1;
   }
+  reset() {
+    this.stationarySince = null;
+    this.lastPosition = null;
+    this.concealed = false;
+  }
 }

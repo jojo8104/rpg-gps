@@ -1,0 +1,33 @@
+{
+  "supply-order": {
+    "speakerId": "marshal-aldren",
+    "locationId": "capital",
+    "initialNodeId": "briefing",
+    "nodes": [
+      {
+        "id": "briefing",
+        "lines": [
+          {
+            "speaker": "L’intendant",
+            "text": "Le fortin de Rochegarde manque de vivres."
+          },
+          {
+            "speaker": "L’intendant",
+            "text": "Quatre villages de la ceinture de la capitale peuvent céder chacun cinq rations."
+          },
+          {
+            "speaker": "L’intendant",
+            "text": "Collectez ces réserves puis remettez les vingt rations au commandant du fortin."
+          }
+        ],
+        "choices": [
+          {
+            "id": "acknowledge",
+            "label": "Je vais réunir les vivres",
+            "goal": "order-received"
+          }
+        ]
+      }
+    ]
+  }
+}

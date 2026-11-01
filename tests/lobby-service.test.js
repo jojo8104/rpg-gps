@@ -17,6 +17,8 @@ function service() {
 test("un organisateur crée un lobby avec un code et un jeton privé", () => {
   const lobbies = service();
   const result = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
     playerName: "Jo",
     connectionId: "socket-1",
   });
@@ -32,7 +34,12 @@ test("un organisateur crée un lobby avec un code et un jeton privé", () => {
 
 test("un second joueur rejoint, se prépare et l’organisateur démarre", () => {
   const lobbies = service();
-  const host = lobbies.createLobby({ playerName: "Jo", connectionId: "one" });
+  const host = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+    connectionId: "one",
+  });
   const guest = lobbies.joinLobby({
     code: host.lobby.code.toLowerCase(),
     playerName: "Léa",
@@ -72,14 +79,25 @@ test("le serveur conserve Game, autorise le héros du joueur et continue sans l�
     randomBytesFn: (size) => Buffer.alloc(size, random++),
     now: () => currentTime,
   });
-  const host = lobbies.createLobby({ playerName: "Jo", connectionId: "host" });
+  const host = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+    connectionId: "host",
+  });
   const guest = lobbies.joinLobby({
     code: host.lobby.code,
     playerName: "Léa",
     connectionId: "guest",
   });
-  lobbies.selectHeroClass({ token: host.session.token, heroClassId: "warrior" });
-  lobbies.selectHeroClass({ token: guest.session.token, heroClassId: "warrior" });
+  lobbies.selectHeroClass({
+    token: host.session.token,
+    heroClassId: "warrior",
+  });
+  lobbies.selectHeroClass({
+    token: guest.session.token,
+    heroClassId: "warrior",
+  });
   lobbies.setReady({ token: host.session.token, ready: true });
   lobbies.setReady({ token: guest.session.token, ready: true });
   const lobby = lobbies.startLobby({ token: host.session.token });
@@ -138,7 +156,11 @@ test("le serveur conserve Game, autorise le héros du joueur et continue sans l�
     position: { latitude: 48.85, longitude: 2.35, accuracy: 5 },
   });
   const moved = { game: lobbies.gameSnapshot(lobby.code) };
-  assert.equal(moved.game.state.heroes.find((entry) => entry.id === guestHero.id).position.latitude, 48.85);
+  assert.equal(
+    moved.game.state.heroes.find((entry) => entry.id === guestHero.id).position
+      .latitude,
+    48.85,
+  );
   const ownCommand = lobbies.executeGameCommand({
     token: guest.session.token,
     command: "levelUpHero",
@@ -159,11 +181,71 @@ test("le serveur conserve Game, autorise le héros du joueur et continue sans l�
   const updates = lobbies.advanceGames();
   assert.equal(updates.length, 1);
   assert.equal(updates[0].state.status, "started");
+  lobbies.disconnect({ token: guest.session.token, connectionId: "guest" });
+  const beforeIdle = lobbies.gameSnapshot(lobby.code);
+  currentTime = 45_000;
+  assert.deepEqual(lobbies.advanceGames(), []);
+  assert.deepEqual(lobbies.gameSnapshot(lobby.code), beforeIdle);
+  const unattendedBattle = lobbies.gameSnapshot(lobby.code).state.battles[0];
+  assert.equal(unattendedBattle.status, "active");
+  assert.ok(unattendedBattle.duel.round >= 1);
+});
+
+test("deux parties actives maximum, avec libération à la déconnexion et contrôle de reprise", () => {
+  const lobbies = service();
+  const start = (name) =>
+    lobbies.startSolo({
+      playerName: name,
+      connectionId: name,
+      heroClassId: "warrior",
+      configuration: { positionMode: "simulation" },
+    });
+  const first = start("one");
+  const second = start("two");
+  assert.throws(
+    () => start("three"),
+    (error) => error.code === "server_capacity",
+  );
+  assert.doesNotThrow(() =>
+    lobbies.resumeSession({
+      token: first.session.token,
+      connectionId: "extra",
+    }),
+  );
+  lobbies.disconnect({ token: first.session.token, connectionId: "one" });
+  assert.throws(
+    () => start("three"),
+    (error) => error.code === "server_capacity",
+  );
+  lobbies.disconnect({ token: first.session.token, connectionId: "extra" });
+  const third = start("three");
+  assert.throws(
+    () =>
+      lobbies.resumeSession({
+        token: first.session.token,
+        connectionId: "back",
+      }),
+    (error) => error.code === "server_capacity",
+  );
+  lobbies.disconnect({ token: second.session.token, connectionId: "two" });
+  assert.doesNotThrow(() =>
+    lobbies.resumeSession({ token: first.session.token, connectionId: "back" }),
+  );
+  const restored = new LobbyService({
+    initialState: lobbies.exportState(),
+    now: () => 90_000,
+  });
+  assert.deepEqual(restored.advanceGames(), []);
+  assert.ok(third.lobby.code);
 });
 
 test("seul l’organisateur configure la partie", () => {
   const lobbies = service();
-  const host = lobbies.createLobby({ playerName: "Jo" });
+  const host = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   const guest = lobbies.joinLobby({ code: host.lobby.code, playerName: "Léa" });
 
   const configured = lobbies.updateConfiguration({
@@ -171,13 +253,14 @@ test("seul l’organisateur configure la partie", () => {
     configuration: {
       positionMode: "gps",
       maxPlayers: 3,
-      scenarioId: "repression",
+      scenarioId: "chaos",
       difficulty: "hard",
     },
   });
   assert.deepEqual(configured.configuration, {
     positionMode: "gps",
-    scenarioId: "repression",
+    gameType: "cooperation",
+    scenarioId: "chaos",
     difficulty: "hard",
   });
   assert.equal(configured.maxPlayers, 3);
@@ -193,7 +276,11 @@ test("seul l’organisateur configure la partie", () => {
 
 test("chaque joueur choisit sa classe avant de pouvoir être prêt", () => {
   const lobbies = service();
-  const host = lobbies.createLobby({ playerName: "Jo" });
+  const host = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   assert.throws(
     () => lobbies.setReady({ token: host.session.token, ready: true }),
     (error) => error.code === "hero_class_required",
@@ -213,7 +300,11 @@ test("chaque joueur choisit sa classe avant de pouvoir être prêt", () => {
 
 test("le mode GPS exige une zone définie par l’organisateur", () => {
   const lobbies = service();
-  const host = lobbies.createLobby({ playerName: "Jo" });
+  const host = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   const guest = lobbies.joinLobby({ code: host.lobby.code, playerName: "Léa" });
   lobbies.updateConfiguration({
     token: host.session.token,
@@ -267,10 +358,20 @@ test("une position est attribuée au joueur authentifié et validée", () => {
     randomBytesFn: (size) => Buffer.alloc(size, random++),
     now: () => now,
   });
-  const host = lobbies.createLobby({ playerName: "Jo" });
+  const host = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   const guest = lobbies.joinLobby({ code: host.lobby.code, playerName: "Léa" });
-  lobbies.selectHeroClass({ token: host.session.token, heroClassId: "warrior" });
-  lobbies.selectHeroClass({ token: guest.session.token, heroClassId: "ranger" });
+  lobbies.selectHeroClass({
+    token: host.session.token,
+    heroClassId: "warrior",
+  });
+  lobbies.selectHeroClass({
+    token: guest.session.token,
+    heroClassId: "ranger",
+  });
   lobbies.setReady({ token: host.session.token, ready: true });
   lobbies.setReady({ token: guest.session.token, ready: true });
   lobbies.startLobby({ token: host.session.token });
@@ -303,6 +404,8 @@ test("une position est attribuée au joueur authentifié et validée", () => {
 test("une session reprend sa place et suit réellement les connexions", () => {
   const lobbies = service();
   const created = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
     playerName: "Jo",
     connectionId: "old",
   });
@@ -321,7 +424,11 @@ test("une session reprend sa place et suit réellement les connexions", () => {
 
 test("un invité ne peut pas démarrer et un code inconnu est refusé", () => {
   const lobbies = service();
-  const host = lobbies.createLobby({ playerName: "Jo" });
+  const host = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   const guest = lobbies.joinLobby({ code: host.lobby.code, playerName: "Léa" });
   assert.throws(
     () => lobbies.startLobby({ token: guest.session.token }),
@@ -330,5 +437,49 @@ test("un invité ne peut pas démarrer et un code inconnu est refusé", () => {
   assert.throws(
     () => lobbies.joinLobby({ code: "ZZZZZ", playerName: "Léa" }),
     (error) => error.code === "lobby_not_found",
+  );
+});
+
+test("seul l’organisateur choisit le type et un duel bloque le troisième joueur", () => {
+  const lobbies = service();
+  const host = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+    connectionId: "one",
+  });
+  const guest = lobbies.joinLobby({
+    code: host.lobby.code,
+    playerName: "Léa",
+    connectionId: "two",
+  });
+  assert.throws(
+    () =>
+      lobbies.updateConfiguration({
+        token: guest.session.token,
+        configuration: { gameType: "duel" },
+      }),
+    /organisateur/,
+  );
+  const lobby = lobbies.updateConfiguration({
+    token: host.session.token,
+    configuration: { gameType: "duel", maxPlayers: 4 },
+  });
+  assert.equal(lobby.maxPlayers, 2);
+  assert.equal(lobby.configuration.gameType, "duel");
+  assert.throws(() =>
+    lobbies.joinLobby({
+      code: host.lobby.code,
+      playerName: "Tom",
+      connectionId: "three",
+    }),
+  );
+  assert.throws(
+    () =>
+      lobbies.updateConfiguration({
+        token: host.session.token,
+        configuration: { gameType: "unknown" },
+      }),
+    /Type de partie/,
   );
 });

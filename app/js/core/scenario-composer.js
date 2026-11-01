@@ -19,6 +19,11 @@ export function composeScenario(base, module) {
   };
   return {
     ...structuredClone(base),
+    dialogues: mergeUnique(
+      Object.entries(base.dialogues ?? {}).map(([id, value]) => ({ id, ...value })),
+      Object.entries(module.dialogues ?? {}).map(([id, value]) => ({ id, ...value })),
+      "dialogues",
+    ).reduce((result, { id, ...value }) => ({ ...result, [id]: value }), {}),
     locationSlots: mergeUnique(
       base.locationSlots,
       module.locationSlots,

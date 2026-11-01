@@ -22,6 +22,15 @@ const distance = (first, second) =>
     first.longitude - second.longitude,
   );
 
+test("le placement aléatoire choisit parmi les candidats autorisés", () => {
+  const first = new SetupPlacementService({ distanceFn: distance, randomFn: () => 0 });
+  const last = new SetupPlacementService({ distanceFn: distance, randomFn: () => 0.999 });
+  const options = { playArea: area, count: 1, randomize: true, acceptPosition: position => position.latitude > 0 };
+  const [a] = first.generate(options), [b] = last.generate(options);
+  assert.notDeepEqual(a, b);
+  assert.ok(a.latitude > 0 && b.latitude > 0);
+});
+
 test("le placement automatique reste dans la zone et espace les éléments", () => {
   const service = new SetupPlacementService({ distanceFn: distance });
   const positions = service.generate({
@@ -179,4 +188,11 @@ test("les zones interdites sont exclues avant le choix d'un objectif", () => {
   });
   assert.equal(area.contains(position), true);
   assert.equal(forbidden.contains(position), false);
+});
+
+test("la capitale automatique privilégie le centre autorisé", () => {
+  const service = new SetupPlacementService({ distanceFn: distance });
+  assert.deepEqual(service.findCentralPosition(area), { latitude: 0, longitude: 0 });
+  const concave = new PlayArea({ id: "concave", name: "L", polygon: [{latitude:0,longitude:0},{latitude:0,longitude:10},{latitude:2,longitude:10},{latitude:2,longitude:2},{latitude:10,longitude:2},{latitude:10,longitude:0}] });
+  assert.ok(concave.allowsPlacement(service.findCentralPosition(concave)));
 });

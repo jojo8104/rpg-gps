@@ -1,3 +1,7 @@
+import {
+  QUEST_SYSTEM_ENABLED,
+  QUEST_ENGINE_ENABLED,
+} from "../app/js/core/quest-system-policy.js";
 import { createReadStream, realpathSync } from "node:fs";
 import { stat } from "node:fs/promises";
 import { createServer as createHttpServer } from "node:http";
@@ -7,6 +11,19 @@ import { readServerConfig } from "./config.js";
 import { attachSocketGateway } from "./realtime/socket-gateway.js";
 import { LobbyService } from "./lobby/lobby-service.js";
 import { ServerStateStore } from "./persistence/server-state-store.js";
+import { OsmMapService } from "./maps/osm-map-service.js";
+import {
+  equivalentMapPackageKeys,
+  mapPackageKey,
+} from "../app/js/map/map-package.js";
+import { OsmMapWorkerService } from "./maps/osm-map-worker-service.js";
+import { createMapHttpApi } from "./maps/map-http-api.js";
+import { handleBattlefieldPreview } from "./maps/battlefield-http-api.js";
+import { randomBytes } from "node:crypto";
+import { createDashboardHttpApi } from "./monitoring/dashboard-http-api.js";
+import { createDashboardMapApi } from "./monitoring/dashboard-map-api.js";
+import { DashboardHistoryStore } from "./monitoring/dashboard-history-store.js";
+import { createEditorHttpApi } from "./editor/editor-http-api.js";
 
 const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
 const defaultProjectRoot = path.resolve(moduleDirectory, "..");
@@ -27,14 +44,57 @@ const MIME_TYPES = new Map([
 export function createRpgGpsServer({
   projectRoot = defaultProjectRoot,
   now = () => Date.now(),
-  lobbyService = new LobbyService({ now }),
+  lobbyService = new LobbyService({
+    now,
+    questSystemEnabled: QUEST_SYSTEM_ENABLED,
+    questEngineEnabled: QUEST_ENGINE_ENABLED,
+  }),
   stateStore = null,
+  mapService = new OsmMapService(),
+  mapFetch = globalThis.fetch,
+  historyStore = null,
+  dashboardToken = process.env.RPG_GPS_DASHBOARD_TOKEN ??
+    randomBytes(24).toString("hex"),
 } = {}) {
   const root = path.resolve(projectRoot);
   const startedAt = now();
+  let gateway;
+  const editorApi = createEditorHttpApi();
+  const dashboardApi = createDashboardHttpApi({
+    lobbies: lobbyService,
+    token: dashboardToken,
+    flush: () => stateStore?.flush(),
+    now,
+    historyStore,
+    mapAdministration: createDashboardMapApi({
+      maps: mapService,
+      lobbies: lobbyService,
+      flush: () => stateStore?.flush(),
+    }),
+    onDeleted: async (code) => {
+      gateway.closeDashboardParty(code);
+      await stateStore?.flush();
+      await historyStore?.delete(code);
+    },
+  });
+  const mapApi = createMapHttpApi({
+    maps: mapService,
+    fetchImpl: mapFetch,
+    now,
+    isAllowedPolygon: (polygon) => {
+      const keys = new Set(equivalentMapPackageKeys(polygon));
+      return lobbyService
+        .retainedMapPolygons()
+        .some((area) => keys.has(mapPackageKey(area)));
+    },
+  });
 
   const server = createHttpServer(async (request, response) => {
     setSecurityHeaders(response);
+    if (await editorApi(request, response)) return;
+    if (await dashboardApi(request, response)) return;
+    if (handleBattlefieldPreview(request, response)) return;
+    if (await mapApi(request, response)) return;
 
     if (request.url === "/health" || request.url?.startsWith("/health?")) {
       if (request.method !== "GET" && request.method !== "HEAD") {
@@ -77,15 +137,43 @@ export function createRpgGpsServer({
     const extension = path.extname(filePath).toLowerCase();
     response.writeHead(200, {
       "Content-Type": MIME_TYPES.get(extension) ?? "application/octet-stream",
-      "Cache-Control":
-        extension === ".html" ? "no-cache" : "public, max-age=300",
+      "Cache-Control": [".html", ".js", ".css", ".webmanifest"].includes(
+        extension,
+      )
+        ? "no-cache"
+        : "public, max-age=300",
     });
     if (request.method === "HEAD") return response.end();
     const stream = createReadStream(filePath);
     stream.on("error", () => response.destroy());
     stream.pipe(response);
   });
-  attachSocketGateway(server, { lobbyService });
+  gateway = attachSocketGateway(server, { lobbyService });
+  server.dashboardToken = dashboardToken;
+  server.dashboardHistoryStore = historyStore;
+  let retaining = false;
+  const retainMaps = async () => {
+    if (retaining || !mapService.retain) return;
+    retaining = true;
+    try {
+      await mapService.retain(lobbyService.retainedMapPolygons());
+    } catch (error) {
+      console.warn("[maps] Nettoyage impossible :", error.code ?? error.name);
+    } finally {
+      retaining = false;
+    }
+  };
+  const retentionTimer = setInterval(() => {
+    void retainMaps();
+  }, 10000);
+  retentionTimer.unref();
+  server.on("listening", () => {
+    void retainMaps();
+  });
+  server.on("close", () => {
+    clearInterval(retentionTimer);
+    void mapService.close?.();
+  });
   if (stateStore) {
     server.on("close", () => {
       void stateStore.flush().catch((error) => {
@@ -139,15 +227,34 @@ function sendText(response, status, body, method) {
 }
 
 export async function startServer(config = readServerConfig()) {
+  const historyStore = new DashboardHistoryStore({
+    directory: path.join(
+      config.dataDirectory ?? readServerConfig().dataDirectory,
+      "dashboard-history",
+    ),
+  });
   const stateStore = new ServerStateStore({
     directory: config.dataDirectory ?? readServerConfig().dataDirectory,
   });
   const lobbyService = new LobbyService({
     now: Date.now,
+    questSystemEnabled: QUEST_SYSTEM_ENABLED,
+    questEngineEnabled: QUEST_ENGINE_ENABLED,
     initialState: stateStore.loadSync(),
     onStateChanged: (state) => stateStore.schedule(state),
+    onWorldSample: (code, sample) => historyStore.append(code, sample),
   });
-  const server = createRpgGpsServer({ lobbyService, stateStore });
+  const server = createRpgGpsServer({
+    lobbyService,
+    stateStore,
+    historyStore,
+    mapService: new OsmMapWorkerService({
+      directory: path.join(
+        config.dataDirectory ?? readServerConfig().dataDirectory,
+        "maps",
+      ),
+    }),
+  });
   await new Promise((resolve, reject) => {
     server.once("error", reject);
     server.listen(config.port, config.host, resolve);
@@ -156,6 +263,9 @@ export async function startServer(config = readServerConfig()) {
   const port =
     typeof address === "object" && address ? address.port : config.port;
   console.log(`RPG GPS écoute sur http://${config.host}:${port}`);
+  console.log(
+    `Tableau de bord : /dashboard/ · clé administrateur : ${server.dashboardToken}`,
+  );
   if (isMainModule()) installGracefulShutdown(server, stateStore);
   return server;
 }
@@ -167,6 +277,7 @@ function installGracefulShutdown(server, stateStore) {
     stopping = true;
     await new Promise((resolve) => server.close(resolve));
     await stateStore.flush();
+    await server.dashboardHistoryStore?.flush();
   };
   const requestStop = () => {
     void stop().catch((error) => {

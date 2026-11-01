@@ -1,0 +1,788 @@
+{
+  "startup-menu.md": {
+    "summary": "Choisir le bon parcours pour démarrer, rejoindre ou reprendre une partie.",
+    "explanation": [
+      "Jeu rapide et préparation détaillée répondent à deux besoins : entrer dans une salle avec peu de réglages, ou préparer les lieux et le terrain d’une sortie. Dans les deux cas, choisir un joueur et valider le terrain ne remplace pas la validation du démarrage par le serveur.",
+      "Les paragraphes datés ci-dessous retracent l’évolution de l’interface. Ils expliquent notamment pourquoi un ancien écran ou bouton peut avoir été déplacé ; ils ne constituent pas de nouvelles règles de progression."
+    ],
+    "images": [
+      {
+        "path": "welcome-landscape.png",
+        "caption": "Illustration d’accueil du jeu, utilisée pour présenter les aventures."
+      }
+    ],
+    "audience": "development"
+  },
+  "party-preparation.md": {
+    "summary": "Préparer le terrain réel, les quêtes, les lieux et les QR codes avant la sortie.",
+    "explanation": [
+      "La préparation suit un ordre : le terrain fixe le cadre, puis le scénario détermine les quêtes et leurs lieux. Un lieu partagé entre plusieurs quêtes conserve une seule configuration, ce qui évite de placer plusieurs fois le même village.",
+      "Un emplacement QR doit être confirmé sur le terrain ; une position connue sur la carte et une installation réellement validée sont deux états différents. Les contraintes de présence et d’accès continuent d’être contrôlées par le serveur."
+    ],
+    "images": [
+      {
+        "path": "markers/village.png",
+        "caption": "Repère de village : un lieu peut être commun à plusieurs quêtes."
+      }
+    ],
+    "audience": "players"
+  },
+  "hero-items.md": {
+    "summary": "Comprendre les emplacements, les sources d’équipement et les limites d’acquisition.",
+    "explanation": [
+      "Il faut distinguer posséder un objet dans les bagages et le porter. Les incompatibilités, comme une arme à deux mains et un objet déjà tenu, sont vérifiées avant toute modification : un refus ne doit pas consommer l’objet.",
+      "Les stocks et quotas évitent qu’un rechargement de page crée de nouveaux équipements. Une récompense débloquée peut encore dépendre du quota disponible au moment de son retrait. Le nom du fichier d’image n’indique pas les pouvoirs de l’objet : seuls sa fiche et ses bonus font foi."
+    ],
+    "images": [
+      {
+        "path": "equipment/iron-sword.png",
+        "caption": "Épée de fer : illustration associée explicitement à cet équipement dans le catalogue."
+      },
+      {
+        "path": "equipment/round-shield.png",
+        "caption": "Bouclier rond : son emplacement et ses bonus proviennent de la fiche d’équipement."
+      }
+    ],
+    "audience": "players"
+  },
+  "hero-progression-display.md": {
+    "summary": "Distinguer progression officielle, récompense de marche et animation d’XP.",
+    "explanation": [
+      "Le serveur attribue la progression ; l’interface annonce la différence entre deux états officiels. Revoir une animation ou rafraîchir la page ne donne donc pas un second gain.",
+      "Les paliers de marche portent sur la distance fiable cumulée. À 500 mètres validés, le bonus décrit ici est de 100 XP ; une mesure rejetée ne contribue pas au total. La carte fictive utilise la conversion prévue par le même calcul serveur."
+    ],
+    "images": [
+      {
+        "path": "portraits/hero-wanderer.png",
+        "caption": "Portrait du héros guerrier. La progression et le grade restent des données du moteur."
+      }
+    ],
+    "audience": "development"
+  },
+  "mage-astral-travel.md": {
+    "summary": "Interagir à distance avec une cible visible sans déplacer le corps du Mage.",
+    "explanation": [
+      "La projection déplace une portée d’interaction, pas le héros réel. Une cible doit être connue ou détectée et son centre doit rester dans le rayon du grade. Le geste de glissement facilite le ciblage mais n’accorde aucun droit supplémentaire.",
+      "La fenêtre de dix secondes commence à l’activation, tout comme la recharge de dix minutes. Ouvrir une fiche ne consomme pas le pouvoir ; une action réussie le fait. Ce pouvoir disponible est distinct du concept de combat à distance encore prévu."
+    ],
+    "images": [
+      {
+        "path": "portraits/hero-mage.png",
+        "caption": "Portrait du Mage, classe disposant du voyage astral."
+      }
+    ],
+    "audience": "players"
+  },
+  "hero-map-sprites.md": {
+    "summary": "Reconnaître les classes et comprendre l’orientation des héros sur la carte.",
+    "explanation": [
+      "L’apparence suit la classe officielle connue. Les poses de marche et les miroirs des directions ouest servent uniquement à rendre les déplacements lisibles ; changer de côté un accessoire dans une image ne change pas l’équipement.",
+      "Le navigateur interpole les positions reçues pour obtenir une marche fluide. Il ne calcule ni déplacement officiel ni XP à partir des pas dessinés.",
+      "Le genre confirmé et sauvegardé par le serveur choisit les portraits et sprites de la classe, y compris les nouvelles variantes Guerrière, Mage masculin et Éclaireur masculin. Les héros adverses non identifiés gardent une silhouette générique. Aucune statistique ne dépend du genre."
+    ],
+    "images": [
+      {
+        "path": "heroes/mage-jrpg-walk-v1.png",
+        "caption": "Planche de marche du Mage : plusieurs orientations et poses du même personnage."
+      },
+      {
+        "path": "heroes/ranger-jrpg-walk-v1.png",
+        "caption": "Planche de l’Éclaireur ; les vues ouest utilisent les miroirs prévus par le rendu."
+      }
+    ],
+    "audience": "development"
+  },
+  "army-map-banners.md": {
+    "summary": "Lire un étendard sans le confondre avec une statistique de combat.",
+    "explanation": [
+      "La forme renseigne une tranche d’effectif déjà connue : 1 à 9, 10 à 29, puis 30 soldats ou plus. Elle ne révèle pas une armée dont le niveau d’information masque encore les effectifs.",
+      "Les couleurs indiquent la relation avec le joueur qui regarde la carte. Les étendards sont dessinés en CSS : il n’existe pas de fichier d’illustration à ajouter pour leur attribuer de nouvelles propriétés."
+    ],
+    "status": "Présentation",
+    "audience": "development"
+  },
+  "watch-lookout-sprite.md": {
+    "summary": "La vigie de l’Éclaireur prend l’apparence d’un guetteur camouflé.",
+    "explanation": [
+      "Le petit guetteur représente la balise de surveillance existante. Sa silhouette basse et ses herbes sont un choix graphique, sans bonus supplémentaire de furtivité.",
+      "Le cercle visible reste celui de la surveillance officielle. La taille du dessin varie avec le zoom ; cette variation ne modifie ni le rayon ni les alertes."
+    ],
+    "status": "Présentation",
+    "images": [
+      {
+        "path": "groups/watch-lookout-v1.png",
+        "caption": "Guetteur immobile utilisé comme apparence de la vigie."
+      }
+    ],
+    "audience": "development"
+  },
+  "hero-sprite-art.md": {
+    "summary": "Comment les héros restent lisibles lorsque la carte tourne ou s’incline.",
+    "explanation": [
+      "Les directions du personnage dépendent de la caméra : le même déplacement du monde peut être vu de face ou de dos. L’illustration reste droite tandis que son ancrage suit le plan de la carte.",
+      "La planche historique citée dans ce document décrit une étape de création. Les apparences actuelles sont présentées dans l’article Apparence du héros ; la priorité visuelle ne révèle jamais un héros caché."
+    ],
+    "status": "Présentation",
+    "images": [
+      {
+        "path": "heroes/hero-jrpg-walk-v2.png",
+        "caption": "Planche actuelle de marche de l’aventurier ; elle ne doit pas être confondue avec l’ancien asset de huit directions cité dans le texte historique."
+      }
+    ],
+    "audience": "development"
+  },
+  "location-improvements.md": {
+    "summary": "Choisir des bâtiments selon les services, la production et les places disponibles.",
+    "explanation": [
+      "Un bâtiment présent applique son effet même si le lieu a changé de type, mais cela ne rend pas toutes les constructions possibles partout. Les restrictions de construction et les effets des bâtiments sont deux règles distinctes.",
+      "Le bonus du niveau actuel remplace celui du niveau précédent : une ferme améliorée ne cumule pas tous ses anciens paliers. Les emplacements réservés aux bâtiments requis évitent qu’un développement facultatif empêche l’évolution du camp.",
+      "Les conversations de taverne et les autres dialogues partagent un panneau défilant : une longue liste de réponses n’oblige pas à masquer des options. La fermeture reste accessible en dehors de cette zone ; les choix et leurs effets sont toujours validés par le serveur."
+    ],
+    "images": [
+      {
+        "path": "improvements/farm.png",
+        "caption": "Ferme : production de nourriture et croissance selon le niveau."
+      },
+      {
+        "path": "improvements/tavern.png",
+        "caption": "Taverne : lieu de services et de missions annexes."
+      },
+      {
+        "path": "improvements/forge.png",
+        "caption": "Forge : ses services dépendent du bâtiment et des règles d’acquisition."
+      },
+      {
+        "path": "improvements/depot.png",
+        "caption": "Dépôt : nouvelle icône PNG utilisée dans les fiches et résumés des lieux."
+      }
+    ],
+    "audience": "players"
+  },
+  "location-taxes.md": {
+    "summary": "Une réserve fiscale plafonnée se remplit au rythme de la production.",
+    "explanation": [
+      "Avec 20 habitants et une ferme de niveau 2, le plafond vaut 24 or et le revenu 0,24 or par cycle. Le revenu dépend donc de la capacité fiscale ; il ne s’agit pas d’un prélèvement immédiat sur le joueur.",
+      "Attendre au-delà du plafond ne rapporte plus d’impôts. La collecte laisse les fractions dans la réserve et, en expert, diminue le contentement selon le montant prélevé. Un échec de collecte ne doit pas appliquer cette pénalité."
+    ],
+    "images": [
+      {
+        "path": "markers/village.png",
+        "caption": "Les villages actifs et peuplés font partie des lieux qui accumulent des impôts."
+      }
+    ],
+    "audience": "players"
+  },
+  "territories.md": {
+    "summary": "Comprendre la différence entre influence, frontière et prise de contrôle.",
+    "explanation": [
+      "La frontière est calculée à partir de l’influence des lieux contrôlés. Elle représente une approximation en cellules : le dessin ne constitue ni une mesure GPS exacte ni une extension de vision.",
+      "Être dans une zone de son équipe ne suffit pas à posséder tous ses lieux. La capture et la connexion territoriale suivent leurs propres conditions, vérifiées par le serveur."
+    ],
+    "images": [
+      {
+        "path": "markers/fort.png",
+        "caption": "Un fort est un point d’influence parmi les types de lieux pris en compte."
+      }
+    ],
+    "audience": "players"
+  },
+  "capital-ai.md": {
+    "summary": "La capitale utilise un trésor, des exploitations et des convois pour soutenir son armée.",
+    "explanation": [
+      "La reconquête consomme des ressources réelles : le réseau économique et les convois ont donc un rôle stratégique, au-delà du décor. Capturer une exploitation peut interrompre sa liaison à la capitale.",
+      "Le document décrit aussi une phase de campagne liée aux Greniers du roi. Sa présence dans les modules historiques ne signifie pas que tous les scénarios ou toutes les nouvelles parties déclenchent cette phase. Les anciennes sauvegardes sans cette configuration gardent leur état."
+    ],
+    "images": [
+      {
+        "path": "markers/capital.png",
+        "caption": "Illustration de la capitale, centre du réseau économique décrit ici."
+      }
+    ],
+    "audience": "players"
+  },
+  "caravan-map-sprites.md": {
+    "summary": "Reconnaître un convoi et distinguer sa représentation de son chargement.",
+    "explanation": [
+      "La charrette chargée est un symbole générique : le nombre de caisses dessinées ne permet pas de déduire le stock transporté ni la force de l’escorte. Il faut ouvrir la fiche officielle pour les connaître.",
+      "La marche de l’âne suit la trajectoire reçue. Tourner la caméra ou agrandir le sprite ne change ni son commerce ni son déplacement."
+    ],
+    "status": "Présentation",
+    "images": [
+      {
+        "path": "groups/caravan-jrpg-walk-v1.png",
+        "caption": "Planche de la caravane : orientations et poses du convoi générique."
+      }
+    ],
+    "audience": "development"
+  },
+  "autonomous-group-map-sprites.md": {
+    "summary": "Les groupes d’éclaireurs et de brigands disposent d’apparences distinctes.",
+    "explanation": [
+      "Les trois personnages des brigands forment une illustration, pas un décompte de soldats. Un groupe visible garde ses véritables effectifs, son propriétaire et sa mission dans l’état du serveur.",
+      "Un déserteur n’est pas automatiquement un brigand. Le choix du sprite respecte le type et l’identification du groupe, sans modifier les règles de détection ou les rencontres."
+    ],
+    "status": "Présentation",
+    "images": [
+      {
+        "path": "groups/brigands-jrpg-walk-v1.png",
+        "caption": "Planche des brigands : les trois silhouettes sont décoratives."
+      },
+      {
+        "path": "groups/scout-jrpg-walk-v1.png",
+        "caption": "Planche de l’éclaireur autonome, distinct du héros joueur Éclaireur."
+      }
+    ],
+    "audience": "development"
+  },
+  "scenario-map-definition.md": {
+    "summary": "Séparer les lieux créés, leur position, leur visibilité et leur apparition en quête.",
+    "explanation": [
+      "Un lieu peut être placé sans être découvert ; à l’inverse, connaître son nom ne valide pas sa position. Le rôle, la visibilité et la durée de vie expliquent pourquoi une trace de quête ne se comporte pas comme un village permanent.",
+      "Le monde initial minimal comprend dix lieux obligatoires. Les autres définitions du catalogue ne sont pas automatiquement créées : une quête qui exige des lieux encore non raccordés peut rester indisponible même si sa fiche existe."
+    ],
+    "images": [
+      {
+        "path": "markers/mine.png",
+        "caption": "Mine : un lieu de production et un emplacement de quête doivent être distingués par leurs définitions."
+      }
+    ],
+    "audience": "designers"
+  },
+  "enemy-map-sprites.md": {
+    "summary": "Choisir une apparence de groupe sans inventer ses troupes ou son comportement.",
+    "explanation": [
+      "L’apparence et l’alignement sont indépendants : un loup ou un orc peut être configuré comme ennemi, neutre ou allié. L’illustration seule ne dit donc pas si le groupe attaquera.",
+      "Les modèles commencent avec une armée vide. Le concepteur doit renseigner les troupes du catalogue ; les statistiques animales et les comportements spécifiques ne sont pas déduits de l’image."
+    ],
+    "images": [
+      {
+        "path": "groups/wolves-map-front-back-v1.png",
+        "caption": "Planche du groupe de loups ; les silhouettes ne déterminent pas son effectif."
+      },
+      {
+        "path": "groups/orcs-map-front-back-v1.png",
+        "caption": "Apparence de groupe d’orcs, configurable séparément de son alignement."
+      }
+    ],
+    "audience": "development"
+  },
+  "quest-definition.md": {
+    "summary": "Le serveur suit les actions, les branches et les preuves de résolution d’une quête.",
+    "explanation": [
+      "Une dépendance indique ce qui doit être terminé avant une action. Un lien conditionnel choisit un chemin à partir de la sortie officielle d’une action. Ces mécanismes permettent de proposer des choix sans laisser le navigateur décider librement d’une réussite.",
+      "Une action écartée n’est pas une action accomplie : son état skipped permet de fermer une branche devenue impossible. Pour un combat à plusieurs sorties, une défaite reconnue peut être une résolution ; les récompenses réservées à la victoire doivent donc être explicitement filtrées.",
+      "25 octobre 2026 : le scénario affiche un schéma de quêtes déplaçables et reliables par Réussite, Échec ou Abandon, avec plusieurs départs ou des quêtes indépendantes. Chaque quête affiche Proposition de quête pour ouvrir sa fiche et ses conditions d’accès facultatives ; les traits vers les racines sont une aide visuelle sans action fictive exportée. Les références connues se choisissent par noms dans des menus, et le panneau de droite est redimensionnable. Modifier est une nouvelle action serveur automatique, appliquée une fois au déblocage. Elle propose ressources, objets non équipés du catalogue actif, XP et statistiques de base du héros ; genre du portrait pour son apparence ; images des lieux et GA ; retrait d’un GA pour l’existence. Les aptitudes, la capacité des bagages, la propriété des lieux et la suppression des héros ou lieux restent à développer."
+    ],
+    "images": [
+      {
+        "path": "markers/quest.png",
+        "caption": "Repère de quête ; sa progression repose sur les actions validées par le serveur."
+      }
+    ],
+    "audience": "designers"
+  },
+  "missing-prospectors.md": {
+    "summary": "Parcours de sauvetage et de livraison des preuves des prospecteurs perdus.",
+    "explanation": [
+      "Cette fiche distingue la mission du catalogue et sa disponibilité dans le monde initial minimal. Les étapes décrites peuvent être testées lorsque les lieux requis existent ; leur présence au catalogue ne suffit pas à rendre la mission jouable au démarrage.",
+      "Le rapport et le géologue occupent chacun une place de bagage. Les prendre puis les remettre matérialise le sauvetage et ses preuves : lire le dialogue ne remplace pas ces transferts officiels."
+    ],
+    "status": "Disponibilité limitée",
+    "images": [
+      {
+        "path": "characters/armand-valgrise.png",
+        "caption": "Armand à Valgrise, interlocuteur du parcours des prospecteurs."
+      }
+    ],
+    "audience": "players"
+  },
+  "quest-authoring-guide.md": {
+    "summary": "Construire une fiche de quête réalisable, avec actions, dialogues et conséquences.",
+    "explanation": [
+      "Le template décrit une livraison pour montrer la structure ; ses identifiants d’exemple doivent être remplacés par des références du scénario. Copier le JSON ne crée pas à lui seul les lieux et objets nécessaires.",
+      "Commencez par un parcours simple, vérifiez chaque action sur le serveur, puis ajoutez les embranchements. Une jonction ET attend tous les chemins requis ; une jonction OU accepte un chemin sélectionné. Les récompenses de victoire doivent être rattachées à la bonne sortie."
+    ],
+    "status": "Conception",
+    "audience": "designers"
+  },
+  "quest-editor.md": {
+    "summary": "Dessiner des actions et préparer les définitions sans confondre édition et exécution.",
+    "explanation": [
+      "La liaison de la vue des ressources avec l’éditeur de portraits accepte un hôte navigateur injecté. Les tests Node utilisent un hôte simulé sans window global ; le navigateur conserve sa fenêtre par défaut. Cette correction permet de tester les modèles de groupes indépendamment des portraits, sans changer les projets ni les règles serveur.",
+      "Les positions des blocs organisent le schéma ; les dépendances, sorties et conditions définissent la progression. Déplacer un bloc ne change donc pas le déroulement officiel d’une quête.",
+      "Les modes coopératifs et événements stratégiques récents restent des données de conception tant que leur moteur serveur n’est pas raccordé. Le refus d’installation de ces projets protège cette distinction : un panneau éditable n’est pas la preuve que son comportement est jouable.",
+      "25 octobre 2026 : le scénario affiche un schéma de quêtes déplaçables et reliables par Réussite, Échec ou Abandon, avec plusieurs départs ou des quêtes indépendantes. Chaque quête affiche Proposition de quête pour ouvrir sa fiche et ses conditions d’accès facultatives ; les traits vers les racines sont une aide visuelle sans action fictive exportée. Les références connues se choisissent par noms dans des menus, et le panneau de droite est redimensionnable. Modifier est une nouvelle action serveur automatique, appliquée une fois au déblocage. Elle propose ressources, objets non équipés du catalogue actif, XP et statistiques de base du héros ; genre du portrait pour son apparence ; images des lieux et GA ; retrait d’un GA pour l’existence. Les aptitudes, la capacité des bagages, la propriété des lieux et la suppression des héros ou lieux restent à développer."
+    ],
+    "status": "Conception",
+    "audience": "designers"
+  },
+  "quest-creations.md": {
+    "summary": "Déclarer ce qu’une quête crée, quand elle le crée et à quel lieu cela appartient.",
+    "explanation": [
+      "Une création est une conséquence de quête, pas un ajout libre de l’interface. Ses dépendances et son rattachement au monde permettent de conserver un état cohérent lors d’une sauvegarde ou d’une reprise.",
+      "Vérifiez les types et références acceptés dans les détails ci-dessous : un lieu, un stock et un groupe autonome ne partagent pas les mêmes données ni les mêmes règles de présence."
+    ],
+    "status": "Conception",
+    "audience": "designers"
+  },
+  "battle-tactics.md": {
+    "summary": "Programmer les ordres sur le plateau et anticiper une résolution simultanée.",
+    "explanation": [
+      "Les deux camps préparent leurs intentions avant la résolution. Une cible peut donc ne plus être à portée au moment où l’attaque s’exécute. Valider un ordre ne garantit pas son succès si la situation change.",
+      "Le commandement limite les ordres du tour, tandis que l’autorité limite l’armée. Défendre sans ordre et choisir quelles cartes déployer font partie de la gestion de ce budget. Le dernier paragraphe sur l’interface décrit le remplacement des anciens panneaux textuels par les indications sur les cases."
+    ],
+    "images": [
+      {
+        "path": "units/spearman-thumbnail.png",
+        "caption": "Lanciers : l’un des types d’unités du combat tactique."
+      },
+      {
+        "path": "units/archer-thumbnail.png",
+        "caption": "Archer : sa portée et les effets de terrain influencent les positions à choisir."
+      }
+    ],
+    "audience": "players"
+  },
+  "tactical-bonuses.md": {
+    "summary": "Capturer les bonus centraux sans les confondre avec une récompense immédiate.",
+    "explanation": [
+      "Il faut occuper la case à la fin d’un déplacement officiel. Traverser brièvement un bonus pendant un harcèlement ne suffit pas : le trajet visuel ne vaut pas capture.",
+      "Les bonus d’attaque et de défense modifient temporairement des statistiques. L’XP et les objets suivent le traitement de fin de bataille ; leur apparition est aussi limitée selon la présence de joueurs humains dans les camps."
+    ],
+    "images": [
+      {
+        "path": "equipment/iron-sword.png",
+        "caption": "L’objet de bonus prévu par cette version est une épée de fer, remise par le circuit de butin sous conditions."
+      }
+    ],
+    "audience": "players"
+  },
+  "tactical-terrain-effects.md": {
+    "summary": "Adapter ses unités aux cases, aux structures et aux trajectoires autorisées.",
+    "explanation": [
+      "Un multiplicateur de défense ne garantit pas la même baisse en pourcentage des dégâts, puisque la défense entre dans une formule. Les effets de terrain et de structure se multiplient avant le calcul des dégâts.",
+      "Le ralentissement d’entrée sur certains terrains concerne l’étape d’entrée, pas la vitesse permanente ni la priorité d’ordre. L’ordre d’activation du mur de lances compte aussi : il ne protège pas rétroactivement contre un échange déjà résolu.",
+      "Les nouvelles textures simplifient le dessin en aplats anime/JRPG. Cette refonte visuelle conserve les règles de terrain et la génération serveur ; la couleur ne remplace pas la nature officielle de la case.",
+      "Le piton avec falaise sert de repère visuel au terrain rocheux ; cette illustration ne crée pas de nouvelle règle de hauteur ni de déplacement."
+    ],
+    "images": [
+      {
+        "path": "units/heavy-infantry-thumbnail.png",
+        "caption": "Infanterie lourde : sa défense et ses restrictions d’eau lui donnent un usage différent de la cavalerie."
+      },
+      {
+        "path": "units/light-cavalry-thumbnail.png",
+        "caption": "Cavalerie légère : la charge et le harcèlement dépendent des terrains traversés."
+      },
+      {
+        "path": "map/tileset-v3/terrain.png",
+        "caption": "Atlas JRPG v3 : en haut, plaine, forêt et collines ; en bas, piton rocheux avec falaise, eau et seconde plaine. Aucune structure ne figure sur cette planche."
+      }
+    ],
+    "audience": "players"
+  },
+  "battle-duel-rules.md": {
+    "summary": "Retrouver le fonctionnement des anciennes batailles sauvegardées en duels.",
+    "explanation": [
+      "Les passes utilisent les effectifs et le moral du début de chaque échange, puis appliquent les pertes avant la suite. Il faut distinguer soldat blessé hors combat et soldat mort : seuls les soldats encore aptes participent.",
+      "Ces règles expliquent les duels historiques. Elles ne remplacent pas les règles de déplacement et de programmation des nouveaux plateaux tactiques."
+    ],
+    "status": "Système historique",
+    "audience": "historical"
+  },
+  "ranged-combat.md": {
+    "summary": "Un concept de combat à distance, avec projection et pouvoirs, encore à intégrer.",
+    "explanation": [
+      "Ce texte est une spécification prévue, pas une notice de pouvoir disponible. Les dégâts du fantôme, les coûts et les conséquences de victoire ne doivent pas être déduits du voyage astral actuel.",
+      "Le point structurant envisagé est de séparer le corps réel, la projection et l’armée engagée. Tant que les validations et conséquences serveur ne sont pas intégrées, aucune nouvelle capacité de combat ne découle de cette description."
+    ],
+    "status": "Prévu — non disponible",
+    "images": [
+      {
+        "path": "portraits/hero-mage.png",
+        "caption": "Le Mage illustre ce concept ; cette image n’annonce pas sa disponibilité."
+      }
+    ],
+    "audience": "planned"
+  },
+  "dashboard-monitoring.md": {
+    "summary": "Observer l’état officiel et ses relevés sans faire avancer une partie en pause.",
+    "explanation": [
+      "Les erreurs de préparation cartographique indiquent maintenant le statut HTTP du fournisseur ou une expiration, sans confondre la disponibilité de la banque avec la réussite d’un nouveau téléchargement. Ces diagnostics n’ajoutent aucun appel automatique et ne modifient aucune règle de jeu.",
+      "Le panneau Cartes sauvegardées et banque géographique permet de contrôler le volume, la couverture et les usages des fichiers. Compléter une carte est explicite ; les suppressions demandent confirmation et les données utiles aux cartes ou parties sont protégées. La consultation ne fait avancer aucune partie et ne sollicite pas Overpass.",
+      "Le suivi enregistre des échantillons, pas tous les mouvements continus. Une ligne entre deux points ne prouve donc pas le trajet exact entre ces instants. Les relevés ne sont pas non plus des sauvegardes restaurables.",
+      "Le score de puissance sert à comparer les courbes avec une convention de supervision. Il ne remplace ni l’autorité ni le résultat d’un combat ; les fiches actuelles et la chronologie des positions répondent à des questions différentes.",
+      "Le choix de période et le curseur commun facilitent la comparaison des héros et des lieux au même moment. Le suivi en direct peut être repris sans modifier les relevés. Pour les lieux, lire les courbes de production sur l’axe gauche et les colonnes de stocks sur l’axe droit : un débit par cycle et une quantité disponible ne sont pas la même mesure. Les stocks des anciens relevés restent ceux qui avaient été enregistrés."
+    ],
+    "status": "Administration",
+    "audience": "administrators"
+  },
+  "powershell-server-guide.md": {
+    "summary": "Savoir dans quelle fenêtre et sur quelle machine exécuter les commandes.",
+    "explanation": [
+      "Le tunnel SSH reste ouvert dans une première fenêtre Windows. Une deuxième sert aux commandes : après connexion SSH, elles s’exécutent sur Linux jusqu’à exit. Cette distinction évite de chercher un service Linux dans le terminal local.",
+      "Déployer, consulter le Dashboard et redémarrer sont trois opérations différentes. Un redémarrage interrompt les connexions ; fermer le tunnel ferme seulement cet accès au Dashboard, sans arrêter le serveur du jeu."
+    ],
+    "status": "Administration",
+    "audience": "administrators"
+  },
+  "wiki-maintenance.md": {
+    "summary": "Mettre à jour les articles et publier le wiki en conservant ses anciennes versions.",
+    "explanation": [
+      "Les sources sont maintenues avec le jeu afin d’accompagner ses changements. La génération met en forme les données et les documents ; l’explication éditoriale doit toujours être vérifiée lorsque les règles changent.",
+      "Chaque article possède son propre historique. Une correction crée une nouvelle version ; elle ne réécrit pas l’archive qui permet de retrouver ce qui était indiqué auparavant."
+    ],
+    "status": "Documentation",
+    "audience": "administrators"
+  },
+  "hero-gender-variants.md": {
+    "summary": "Une Guerrière, un Mage et un Éclaireur avec portraits et sprites de marche.",
+    "explanation": [
+      "Le menu de sélection conserve trois cartes de classe. Dans la carte choisie, les boutons Femme / Homme changent le portrait et le titre ; le serveur valide et sauvegarde le genre du héros en solo comme en multijoueur. La fiche, les sprites sur la carte et la projection astrale du Mage suivent ce choix. À la reprise, le choix sauvegardé reste verrouillé. Les anciennes sauvegardes gardent les apparences historiques. Les caractéristiques et règles de jeu sont identiques pour les deux genres.",
+      "Chaque planche présente le même personnage dans cinq directions et trois poses. Les quinze silhouettes sont des poses d’animation, sans effet sur les effectifs ou les déplacements officiels."
+    ],
+    "status": "Disponible : choix du genre dans les trois cartes de classe",
+    "images": [
+      {
+        "path": "portraits/hero-warrior-female-v1.png",
+        "caption": "Portrait de la variante Guerrière."
+      },
+      {
+        "path": "heroes/warrior-female-jrpg-walk-v1.png",
+        "caption": "Planche de marche de la variante Guerrière : cinq orientations et trois poses."
+      },
+      {
+        "path": "portraits/hero-mage-male-v1.png",
+        "caption": "Portrait de la variante Mage."
+      },
+      {
+        "path": "heroes/mage-male-jrpg-walk-v1.png",
+        "caption": "Planche de marche de la variante Mage : cinq orientations et trois poses."
+      },
+      {
+        "path": "portraits/hero-ranger-male-v1.png",
+        "caption": "Portrait de la variante Éclaireur."
+      },
+      {
+        "path": "heroes/ranger-male-jrpg-walk-v1.png",
+        "caption": "Planche de marche de la variante Éclaireur : cinq orientations et trois poses."
+      }
+    ],
+    "audience": "development"
+  },
+  "idees-et-todo.md": {
+    "summary": "Distinguer les fonctionnalités prévues, les idées à explorer et douze tâches concrètes pour faire avancer le jeu.",
+    "explanation": [
+      "Cette page est un carnet de conception et une proposition de priorités. Elle distingue les éléments déjà documentés, ceux qui restent à concevoir et les suggestions nouvelles ; aucune de ces listes ne rend une fonctionnalité disponible.",
+      "La todo list commence par une aventure complète et fiable, puis un socle de coopération, avant les extensions de combat et de préparation. Chaque tâche possède un résultat vérifiable ; les priorités restent à arbitrer selon les essais."
+    ],
+    "status": "Conception — priorités proposées",
+    "images": [
+      {
+        "path": "markers/quest.png",
+        "caption": "Repère de quête : les idées de missions doivent devenir des parcours validés par le serveur avant d’être jouables."
+      },
+      {
+        "path": "improvements/barracks.png",
+        "caption": "Illustration de caserne, en lien avec les projets de fort et de coopération militaire."
+      }
+    ],
+    "audience": "planned"
+  },
+  "play-area-map.md": {
+    "summary": "Choisir et sauvegarder une carte, comprendre son extraction et sa durée de conservation.",
+    "explanation": [
+      "Une zone déjà couverte peut fonctionner alors que les nouvelles extractions échouent. Le diagnostic sépare désormais la banque disponible, les surfaces absentes, les expirations et le statut HTTP du fournisseur. Le nettoyage protège les sources des terrains enregistrés sans leur imposer les limites des nouvelles extractions ; aucune règle de jeu n’est modifiée.",
+      "Une préparation utilise zéro appel si la banque couvre le terrain, sinon un seul POST qui regroupe tous les manques. Il n’y a plus de découpage après expiration ni de téléchargement successif des contours. Les limites de surface du jeu ne garantissent pas qu’une instance publique accepte la charge : densité, volume et complexité restent déterminants. Aucun changement des règles du jeu.",
+      "Les extractions suivent maintenant le polygone exact sans marge extérieure. La banque conserve cette couverture réelle ; les objets limitrophes restent entiers pour leur intégrité, mais les détails sont dessinés uniquement à l’intérieur du contour et l’extérieur reste simple. Le gestionnaire du Dashboard permet de consulter et administrer les cartes sans téléchargement implicite. Aucun effet sur les règles du jeu.",
+      "Les surfaces communes de plusieurs cartes ou portions de la banque sont maintenant assemblées. Seuls les rectangles encore manquants sont téléchargés ; chaque portion réussie est conservée pour la reprise, et les identifiants OSM sont dédoublonnés sans perdre les îlots. Plus de 16 portions manquantes entraîne un refus avant extraction. Ce changement réduit les appels sans modifier les règles du jeu.",
+      "Les cartes sauvegardées conservent une référence à leur géographie sur le serveur. Une banque de 512 Mio par défaut garde aussi les téléchargements inutilisés et réutilise les paquets couvrant entièrement une nouvelle zone, sans nouvelle requête Overpass. Les données nécessaires aux cartes et parties restent protégées, même au-delà du budget ; aucun changement des règles du jeu.",
+      "Depuis le 24 octobre 2026, une seule préparation est admise à la fois. Les échecs imposent une pause croissante respectant Retry-After et aucune reprise immédiate. Seules les zones enregistrées sont extraites ; les contours équivalents réutilisent les anciens caches. Les règles de jeu restent identiques.",
+      "Mes cartes conserve explicitement les zones nommées et leurs exclusions dans une bibliothèque privée du serveur. Le panneau reste fermé et superposé pour privilégier la carte. Les paquets complets et les portions sans usage restent dans la banque dans la limite de son budget ; seuls les fichiers inutilisés nécessaires à libérer de l’espace sont retirés automatiquement ; le navigateur ne conserve plus de cache géographique persistant implicite. La première extraction et la conservation sont vérifiées séparément : le fournisseur principal a annoncé une saturation, tandis qu’un test du vrai worker prouve la relecture du cache après redémarrage sans fournisseur disponible. Cela ne remplace pas l’inspection des fichiers réels de production sous le compte rpggps ; le diagnostic en lecture seule fournit uniquement des compteurs et des contrôles de validité."
+    ],
+    "images": [],
+    "audience": "development"
+  },
+  "modular-portraits.md": {
+    "summary": "Des héros cohérents avec leurs sprites et des PNJ composés dans deux bibliothèques de proportions distinctes.",
+    "explanation": [
+      "Les portraits fixes des six héros définissent la palette et le traitement anime. Le Mage masculin abandonne le chapeau pointu au profit d’une capuche rabattue, également présente sur son sprite.",
+      "Les PNJ génériques utilisent une bibliothèque masculine ou féminine : tête, yeux, nez, bouche, vêtements et accessoires restent dans cette bibliothèque. La coiffure est indépendante de la tête et ne contient ni peau ni oreilles ; les cheveux longs ont des parties avant et arrière assorties. Un descripteur croisé est refusé.",
+      "Il s’agit uniquement de présentation : les caractéristiques, déplacements, productions et récompenses restent validés par le serveur. L’atelier de portraits permet d’inspecter plusieurs assemblages sans modifier une partie.",
+      "L’atelier permet de comparer quatre coupes sur un même visage dans chaque bibliothèque et de vérifier plusieurs lots de douze personnages masculins et douze personnages féminins. Les calques v1 restent archivés ; cette correction ne change pas les règles du jeu.",
+      "Les visages larges sont temporairement désactivés : chaque bibliothèque conserve une seule base de tête active. Les anciens fichiers restent archivés, mais ne sont plus générés ni acceptés dans un assemblage.",
+      "Les conversations composées réservent une scène au buste et au décor : au-dessus du texte sur téléphone, à côté du panneau sur écran large. Le titre clair reste lisible sur un bandeau sombre. Un défaut de découpage des cheveux qui ajoutait un fragment sous les yeux est corrigé.",
+      "La bibliothèque v3 réduit ensemble tête, traits et cheveux à 72 % de leur taille précédente sur une toile de 512 × 832 pixels. Les seize tenues ont des épaules complètes et des marges latérales ; les tenues à manches retroussées incluent les avant-bras et les mains. Les anciennes versions restent archivées.",
+      "La v4 sépare tête, cou plus fin et haut du torse. Les coiffures sont abaissées, les yeux féminins davantage espacés et les bustes masculins moins étirés en hauteur. Le buste descend dans la scène pour cacher la limite de l’illustration. Tous les dialogues gardent les mêmes dimensions à écran constant : 40 % de la hauteur pour le texte et les choix en portrait, panneau latéral en paysage. La réplique du forgeron est reformulée sans changer les tarifs ni les règles serveur.",
+      "La v5 remplit les cols ouverts avec un haut du torse adapté à chaque tenue et agrandit les coiffures de 6 %. Le bandeau montre une seule fois le lieu et le rôle, sans répétition au-dessus du texte. L’éditeur HTML permet de choisir les pièces, régler chaque groupe de calques et le cadrage, comparer les formats d’écran et conserver les essais dans un brouillon local ou un JSON validé. Les réglages restent dans l’éditeur ; ils ne modifient aucune partie ni aucune règle du jeu.",
+      "La v6 harmonise le gabarit apparent des huit tenues par bibliothèque et ajuste le dessous de torse avec le vêtement. Les yeux féminins 1 se déplacent de 2 pixels vers la gauche et la barbe suit la mâchoire du visage masculin actif. Les brouillons et exports v5 conservent leurs réglages dans l’éditeur. Les anciennes images restent archivées ; aucune règle du jeu ne change.",
+      "La v7 redessine les seize tenues avec un gabarit plus large. Le cou et le torse forment une base continue sous la tête indépendante. Le col arrière passe derrière le corps, les revers avant restent devant et une même zone de cou est protégée sur toutes les tenues. L’éditeur réunit les réglages du cou et du torse tout en archivant les anciens réglages du cou. Les versions précédentes sont conservées. Aucun effet sur les règles du jeu.",
+      "25 octobre 2026 : les tenues masculines de guerrier, mage, éclaireur, bourgmestre et tavernier sont élargies horizontalement à 115 %, avec des épaules redressées et plus carrées. Le cou masculin est élargi à 129 % avec un raccord progressif au torse dans le même calque. La hauteur et le cadrage des dialogues restent constants. Les brouillons v7 sont repris dans l’éditeur. Aucun effet sur les règles du jeu.",
+      "25 octobre 2026 : ajustements des tenues féminines sur la toile de 512 × 832 pixels : guerrière à −5 px horizontal ; travailleuse et bourgmestre à 90 % de largeur, −3 px horizontal et −12 px vertical ; tavernière à +16 px vertical. Les réglages portent sur le vêtement et le col arrière, dans le jeu et l’éditeur. Le cou-torse reste aligné sur la tête. Les valeurs de l’éditeur sont des retouches additionnelles. Aucun effet sur les règles du jeu.",
+      "25 octobre 2026 : le vêtement féminin de chef de village et son col arrière sont remontés de 15 pixels sur la toile de 512 × 832, dans le jeu et l’éditeur. La tête et le cou-torse conservent leur position. Aucun effet sur les règles du jeu.",
+      "25 octobre 2026 : chaque PNJ composé reçoit une largeur de 90 à 110 % appliquée ensemble à tous ses calques, et une opacité de barbe de 40 à 100 % lorsqu’il porte cet accessoire. Ces variations sont déterminées par son identité et restent stables après rechargement ou changement de lieu. Le décor et les portraits narratifs fixes ne sont pas déformés. L’éditeur propose les mêmes paramètres, les conserve dans son brouillon et ses exports JSON, et permet une opacité de barbe de 0 à 100 % pour les essais. Les anciens descripteurs sans ces valeurs restent à 100 %. Aucun effet sur les caractéristiques, combats, productions ou validations du serveur.",
+      "25 octobre 2026 : la plage de corpulence des PNJ est étendue à 50–180 %, pour la génération déterministe, la validation des descripteurs et le réglage de largeur globale dans l’éditeur. Tous les calques du personnage suivent le même facteur horizontal ; sa hauteur et le décor restent constants. Les variations de barbe sont conservées. Aucun effet sur les règles ou les caractéristiques du jeu.",
+      "25 octobre 2026 : la corpulence relie désormais deux blocs de largeur. Le bloc tête (visage, cheveux, yeux, nez, bouche, barbe, cicatrices et boucles d’oreilles) varie de 90 à 110 %. Le bloc corps (cou-torse, vêtements, cols arrière et pendentifs) varie de 50 à 130 %. Un seul réglage les fait évoluer ensemble dans le même sens : corps 50 % / tête 90 %, référence 100 % / 100 %, corps 130 % / tête 110 %. La hauteur reste constante. La génération reste stable par identité, l’opacité de barbe est conservée et l’éditeur affiche les deux valeurs. Les anciens brouillons au-dessus de 130 %, jusqu’à l’ancienne limite de 180 %, sont ramenés à 130 % tout en conservant les autres retouches. Aucun effet sur les règles du jeu.",
+      "25 octobre 2026 : la largeur minimale du bloc corps passe à 70 %, avec un maximum de 130 %. Le bloc tête reste lié de 90 à 110 %, avec les références corps 70 % / tête 90 %, 100 % / 100 % et 130 % / 110 %. Les anciens brouillons inférieurs à 70 % sont ramenés à ce minimum sans perdre leurs autres retouches. Ce réglage de présentation ne change aucune règle du jeu.",
+      "25 octobre 2026 : la bibliothèque v9 ajoute pour chaque genre un visage compatible, une tenue de brigand, deux paires d’yeux, deux nez, deux bouches, trois coiffures de couleurs variées, deux couvre-chefs, des lunettes et trois objets (lance, fourche, bâton magique). Deux barbes masculines sont ajoutées : barbe fournie et bouc poivre et sel, avec opacité réglable comme la barbe existante. Couvre-chef, lunettes et objet occupent des emplacements indépendants et peuvent se combiner avec les autres accessoires. Chaque bibliothèque compte désormais deux visages, sept coiffures, quatre variantes de chaque trait et neuf tenues. L’éditeur permet de choisir le visage et toutes les nouvelles pièces ; les anciens brouillons sont repris. Les variations liées tête 90–110 % / corps 70–130 % et les corrections de chaque tenue sont conservées. Les objets illustrés ne donnent aucun équipement, bonus ou capacité : aucune règle du jeu ni validation serveur ne change.",
+      "25 octobre 2026 : la bibliothèque v10 ajoute pour chaque genre deux formes de visage (menton carré et joufflu), un foulard masquant le nez et la bouche, un foulard noué comme couvre-chef, une coiffure blanche, des yeux et sourcils vieillis, ainsi que les expressions rire, colère et menaçant. Les rides du front, les plis de la bouche et les pattes-d’oie sont trois calques indépendants, combinables et réglables en opacité dans l’éditeur. Le sélecteur Expression applique ensemble les yeux et la bouche assortis ; chaque trait reste modifiable séparément. Le foulard du visage reste au-dessus de la barbe ; le rire ouvert reste visible devant celle-ci. Les signes d’âge et les expressions générés sont stables par identité. Toutes les anciennes pièces et les réglages de corpulence sont conservés. Ces variations visuelles ne changent aucune caractéristique, attitude d’IA ou règle du jeu.",
+      "25 octobre 2026 — Portraits v11 : chaque coiffure et barbe utilise une forme neutre, teintée parmi noir, brun, châtain, blond, roux, gris et blanc. La barbe peut suivre les cheveux ou recevoir une couleur indépendante ; son opacité reste réglable. Les casques, la casquette et la tiare sont des calques frontaux sans intérieur ni bord arrière. Les anciens brouillons sont repris avec leurs réglages. Changement de présentation uniquement, sans effet sur les règles ni les calculs serveur.",
+      "25 octobre 2026 — Portraits v12 : les casques sont descendus de 20 pixels. Un casque de mineur à lanterne frontale et une tenue de simple soldat sobre sont disponibles dans les bibliothèques masculine et féminine, dans l’éditeur et le catalogue. Les dix tenues conservent leur corps et leur col arrière associés. Les anciens brouillons restent importables. Aucun changement des règles ni des caractéristiques des unités : il s’agit uniquement de présentation.",
+      "25 octobre 2026 — Vérification des PNG v12 : la translation des casques conserve exactement la transparence et tolère uniquement l’arrondi RGB de 1 sur 255 dû au réenregistrement. Le diagnostic des tests reste borné pour éviter un épuisement mémoire. Le calque arrière de la tenue barbare féminine est explicitement vérifié comme entièrement transparent ; les autres pièces restent contrôlées. Aucun PNG ni règle du jeu ne change.",
+      "25 octobre 2026 — Le maréchal Aldren est désormais composé avec les mêmes calques que les PNJ, selon une identité fixe : armure sombre aux insignes dorés, cape bleu nuit et coupe courte uniques, visage carré, cheveux et barbe gris, rides et carrure à 115 %. Le bouton Charger le maréchal Aldren de l’éditeur permet de le retoucher. Les références historiques de son portrait affichent cette composition dans les dialogues, y compris les conversations de scénario ; l’ancienne illustration reste archivée. Aucun changement de quête, de statistique ou de règle serveur.",
+      "25 octobre 2026 — Tenues et accessoires barbares : une tenue en cuir et fourrure est disponible pour chaque genre, avec bras visibles et corps/col arrière associés. La longue barbe masculine est un accessoire séparé, avec sept couleurs et une opacité réglable ; elle peut être portée avec les autres vêtements. Le sommet des cheveux est masqué sous les casques pour éviter les mèches qui traversent la coque. Aucun changement des règles du jeu.",
+      "25 octobre 2026 — Aldren : la coupe courte est redessinée strictement de face, avec tempes et volumes équilibrés, pour correspondre au visage frontal. Un décor de salle du maréchal au château est ajouté : voûtes de pierre, fenêtres, bannières bleu et or, cartes et bureau de commandement. Cette salle est le décor fixe d’Aldren et reste sélectionnable dans l’éditeur. La coupe précédente et les illustrations précédentes sont conservées. Aucun effet sur les règles, les statistiques ou les quêtes.",
+      "25 octobre 2026 — Les portraits permettent de cumuler plusieurs accessoires de la même bibliothèque : barbe, cicatrice, bijoux et pendentif. La barbe a désormais une opacité fixe de 100 %, y compris après import d’un ancien réglage ; les autres accessoires gardent leurs réglages. Dans l’éditeur, le déplacement global du personnage est autorisé de −150 % à +150 % horizontalement et verticalement. Le cadrage du dialogue reste fixe. Ces règles de présentation ne modifient aucune caractéristique ni action du jeu."
+    ],
+    "images": [
+      {
+        "path": "portraits/hero-lineup-anime-v2.png",
+        "caption": "Planche validée des six héros : le Mage masculin, en haut au centre, porte les cheveux dégagés et une capuche rabattue."
+      },
+      {
+        "path": "portraits/modular/v7/assembly-check.png",
+        "caption": "Contrôle v7 : huit tenues masculines puis huit féminines, avec épaules plus larges, corps cou-torse unifié et cols arrière derrière le corps."
+      },
+      {
+        "path": "portraits/modular/v6/beard-check.png",
+        "caption": "Barbe v6 sur le visage masculin actif, avec les quatre coiffures et les deux variantes d’yeux."
+      },
+      {
+        "path": "portraits/modular/v1/background-mine.png",
+        "caption": "Décor anime utilisé derrière les responsables de mine."
+      },
+      {
+        "path": "portraits/modular/v8/assembly-check.png",
+        "caption": "Contrôle v8 : épaules masculines redressées, cinq tenues élargies à 115 % et cou à 129 %, sans étirement vertical."
+      },
+      {
+        "path": "portraits/modular/v8/assembly-check-female-adjustments.png",
+        "caption": "Ajustements féminins : guerrière déplacée vers la gauche ; travailleuse et bourgmestre réduites en largeur et remontées ; tavernière descendue. Les huit tenues masculines sont également montrées pour comparaison."
+      },
+      {
+        "path": "portraits/modular/v8/assembly-check-village-chief-adjustment.png",
+        "caption": "Contrôle des seize assemblages : le vêtement féminin de chef de village, en bas à gauche, est remonté de 15 pixels ; les ajustements précédents sont conservés."
+      },
+      {
+        "path": "portraits/modular/v8/variation-check.png",
+        "caption": "Contrôle des variations : trois largeurs masculines de 90, 100 et 110 % ; trois opacités de barbe de 40, 70 et 100 % ; trois largeurs féminines de 90, 100 et 110 %. Le visage et les pièces sont identiques dans chaque ligne."
+      },
+      {
+        "path": "portraits/modular/v8/two-blocks-check.png",
+        "caption": "Corpulence en deux blocs : corps à 50, 100 et 130 % avec tête à 90, 100 et 110 %, dans les bibliothèques masculine et féminine. La ligne centrale conserve le gabarit 100/100 pour comparer les opacités de barbe à 40, 70 et 100 %."
+      },
+      {
+        "path": "portraits/modular/v9/assembly-check.png",
+        "caption": "Seize assemblages v9, huit masculins puis huit féminins : nouvelles coiffures blondes, foncées et châtain, yeux verts et bleus, tenues de brigand, casque, casquette masculine, tiare féminine, lunettes, objets longs et deux nouvelles barbes. Plusieurs exemples mélangent les nouvelles pièces aux anciennes tenues, aux corpulences 70, 100 et 130 %."
+      },
+      {
+        "path": "portraits/modular/v10/assembly-check.png",
+        "caption": "Seize assemblages v10 : mentons carrés et joufflus, rides et cheveux blancs, foulards du visage et bandanas, rire, colère et regard menaçant. Huit exemples masculins puis huit féminins, avec pièces anciennes et corpulences de 70, 100 et 130 %."
+      },
+      {
+        "path": "portraits/modular/v11/assembly-check.png",
+        "caption": "Portraits v11 : même coupe déclinée dans sept couleurs, barbe assortie masculine et nouveaux casques, casquette et tiare frontaux ; huit exemples masculins puis huit féminins."
+      },
+      {
+        "path": "portraits/modular/v12/assembly-check.png",
+        "caption": "Portraits v12 : douze assemblages masculins puis douze féminins. Soldats avec casque abaissé, mineurs avec casque à lanterne, barbares en cuir et fourrure et longues barbes masculines. Corpulences de 70, 100 et 130 %."
+      },
+      {
+        "path": "portraits/modular/v12/marshal-check.png",
+        "caption": "Maréchal Aldren composé : tenue et coiffure uniques, pièces de visage, rides et barbe issues de la bibliothèque masculine. Carrure 115 %, cheveux et barbe gris."
+      },
+      {
+        "path": "portraits/modular/v12/marshal-front-room-check.png",
+        "caption": "Aldren dans la salle du maréchal au château : coupe frontale corrigée, tenue bleu nuit et or, décor de commandement à cartes et bannières."
+      },
+      {
+        "path": "portraits/modular/v1/background-marshal-room.png",
+        "caption": "Salle du maréchal : décor sans personnage, avec voûtes de pierre, bureau des cartes, bannières royales et fenêtres sur le château."
+      }
+    ],
+    "audience": "development"
+  },
+  "battlefield-generation.md": {
+    "summary": "Comprendre la génération des plateaux tactiques et leur présentation JRPG.",
+    "explanation": [
+      "Le serveur produit un plateau reproductible de trois colonnes et cinq rangées. La rivière est optionnelle ; les deux joueurs reçoivent la même carte officielle.",
+      "Les textures JRPG v2 simplifient seulement la présentation. Les effets des cases restent calculés par le serveur ; les structures utilisent leur propre atlas.",
+      "Le piton avec falaise sert de repère visuel au terrain rocheux ; cette illustration ne crée pas de nouvelle règle de hauteur ni de déplacement."
+    ],
+    "images": [
+      {
+        "path": "map/tileset-v3/terrain.png",
+        "caption": "Atlas JRPG v3 : en haut, plaine, forêt et collines ; en bas, piton rocheux avec falaise, eau et seconde plaine. Aucune structure ne figure sur cette planche."
+      }
+    ],
+    "audience": "development"
+  },
+  "hidden-resource-cells.md": {
+    "summary": "Conception des ressources cachées, campements, trésors, artefacts, donjons et parchemins d’indices.",
+    "explanation": [
+      "La découverte doit précéder une installation volontaire, puis l’évolution du campement selon la ressource. L’influence des lieux existants neutralise les contenus concernés.",
+      "Cette conception est prévue : le moteur actuel de prospection crée directement un lieu producteur. Les paramètres non décidés sont identifiés sans valeurs inventées.",
+      "Les découvertes exceptionnelles sous influence restent dans le lieu principal, sans marqueur ni interaction superposés. Les parchemins indiquent un lieu ou aident à rechercher sur place, exclusivement ; leur vente ou leur perte peut faire disparaître la découverte exceptionnelle selon des modalités encore à définir.",
+      "La disparition d’une découverte exceptionnelle concerne tous les joueurs de la partie. Les expéditions vers les trésors et donjons sont préparées : la compétence du groupe augmente la chance de revenir avec du butin. Les formules et les conséquences détaillées restent à définir.",
+      "Artefact : score d’expédition et un item puissant. Trésor : score d’expédition, or important et items. Donjon : puissance et expédition, or, item et XP. La préparation engage PNJ, volontaires, montures, matériel et ressources ; le héros peut transporter les moyens ou envoyer une mission depuis la tente de prospection après découverte. Les formules restent à définir.",
+      "La ressource du terrain limite les évolutions du camp : rien vers fort, bois vers camp de bûcheron, pierre vers carrière, terre fertile vers village ou ville, fer vers mine de fer et or vers mine d’or. Le camp est autorisé dans tous les cas. Une découverte exceptionnelle remportée par un joueur ou déclarée disparue perd son statut pour tous.",
+      "Les indices de localisation sont des cartes au trésor lisibles, générées automatiquement au début de la partie en séries de une à trois cartes selon la position et la valeur du site. Un nom, une anagramme, un ancien nom ou une légende peut désigner un lieu existant. Les PNJ peuvent expliquer ces désignations ; écouter une rumeur coûte 5 pièces d’or. Un module serveur commun pour les cartes et les informations de PNJ est recommandé, avec diffusion par dialogues et banque de rumeurs.",
+      "Les choix du dialogue donnent un bonus final au score d’expédition. Un exemple complet à six issues illustre cette préparation avec des valeurs proposées, non validées. Donjons, trésors et artefacts suivent le même processus de recherche. Les indices restent des items réutilisables, revendables pour archives lorsqu’ils deviennent obsolètes. L’utilisation de la recherche déclenche immédiatement une minute de recharge et réduit la discrétion de 50 % pendant une minute ; les ressources ne sont consommées qu’à la validation.",
+      "Toute tentative dans un donjon, réussie ou échouée, inflige des dégâts et modifie le moral du héros participant et des troupes engagées selon le résultat. Les valeurs, durées et pertes possibles restent à définir. Un héros qui ne participe pas à une expédition envoyée reste hors de ces conséquences.",
+      "Les répartitions naturelles et exceptionnelles sont validées, ainsi que le risque de disparition de 25 % et les archives à 5–10 or. Le bonus narratif dépend de la narration. Le barème plafonné d’expédition et sa formule de réussite sont désormais validés en conception. Le barème distinct de la jauge de recherche reste proposé, non validé.",
+      "Le socle persistant est désormais implémenté et documenté séparément : données versionnées, sauvegarde/reprise et confidentialité du bloc serveur. La génération est désormais raccordée au lancement neuf ; les interactions restent à implémenter. Le chargement d’une sauvegarde ne génère aucune ressource ni récompense supplémentaire.",
+      "La protection des connaissances est raccordée aux envois réseau : chaque joueur reçoit seulement ses découvertes, indices détenus et missions propres. Les destinations internes, fragments manquants et tirages restent côté serveur."
+    ],
+    "status": "Implémentation progressive — persistance et génération disponibles au 28 octobre 2026",
+    "audience": "planned",
+    "images": [
+      {
+        "path": "markers/map/resource-stone.png",
+        "caption": "Pierre : affleurement naturel, avant installation."
+      },
+      {
+        "path": "markers/map/resource-wood.png",
+        "caption": "Bois : arbres, sans campement de bûcherons."
+      },
+      {
+        "path": "markers/map/resource-iron.png",
+        "caption": "Fer : minerai sombre avec des veines de couleur rouille."
+      },
+      {
+        "path": "markers/map/resource-gold.png",
+        "caption": "Or : roche aurifère, sans mine construite."
+      },
+      {
+        "path": "markers/map/resource-fertile-land.png",
+        "caption": "Terre fertile : sol sombre et végétation, avant installation agricole."
+      }
+    ]
+  },
+  "exploration-persistence.md": {
+    "summary": "Socle technique des données d’exploration : instantanés versionnés, références et protection des informations cachées.",
+    "explanation": [
+      "Le format version 1 est raccordé à Game et aux sauvegardes serveur, y compris aux reprises depuis le disque et aux sauvegardes manuelles. Une ancienne partie reçoit un état vide sans génération ni récompense ajoutée.",
+      "Les modèles contrôlent la cohérence des liens et la sérialisation. Le bloc privé est exclu des projections joueur et ignoré lors de l’initialisation depuis le navigateur. La génération du terrain neuf est désormais raccordée au lancement serveur ; les commandes de dépense et de résolution des missions restent à implémenter.",
+      "Une vue publique distincte est maintenant fabriquée par joueur, avec droits individuels, identifiants opaques et résultats publiés seulement à leur échéance officielle. Le modèle privé reste réservé aux sauvegardes serveur."
+    ],
+    "audience": "development",
+    "status": "Persistance et génération au lancement implémentées ; interactions encore prévues",
+    "images": []
+  },
+  "exploration-generation.md": {
+    "summary": "Génération serveur des ressources et sites exceptionnels au lancement, sur la grille commune à la heatmap.",
+    "explanation": [
+      "Les répartitions validées alimentent deux tirages indépendants par cellule. Les exclusions sont respectées et les ressources sous emprise des lieux sont neutralisées ; les sites exceptionnels sont rattachés à un seul lieu principal sans interaction superposée.",
+      "Une graine privée et le terrain sont sauvegardés. Les reprises conservent le tirage ; les anciens mondes ne sont pas remplis rétroactivement. Le bloc reste privé et les interactions de découverte et récupération ne sont pas encore raccordées."
+    ],
+    "audience": "development",
+    "status": "Génération au lancement implémentée le 28 octobre 2026",
+    "images": [
+      {
+        "path": "markers/map/resource-stone.png",
+        "caption": "Marqueur de pierre disponible pour le futur affichage des ressources découvertes ; la génération reste cachée."
+      }
+    ]
+  },
+  "exploration-privacy.md": {
+    "summary": "Projection serveur des seules connaissances autorisées : fragments lisibles, droits de détention et secrets conservés côté serveur.",
+    "explanation": [
+      "La vue publique est calculée séparément pour chaque destinataire, sans exposer le terrain complet, les cibles internes des indices, les tirages. Les identifiants publics ne révèlent pas les cellules et les résultats futurs restent privés.",
+      "Les snapshots complets, deltas, événements et accusés passent par les mêmes protections. La vue est conservée côté client pour les interfaces ; elle ne remplace pas les sauvegardes officielles. Les interactions qui produiront ces connaissances restent à raccorder."
+    ],
+    "audience": "development",
+    "status": "Projection des connaissances implémentée le 28 octobre 2026",
+    "images": []
+  },
+  "exploration-clues.md": {
+    "summary": "Lire les cartes complémentaires, obtenir et conserver les parchemins, comprendre pertes, ventes et archives.",
+    "explanation": [
+      "La carte indique où aller ; le parchemin de recherche aide seulement à chercher sur place. Les fragments se complètent sans être consommés.",
+      "Les stocks sont finis et validés par le serveur. Une disparition après perte ou vente concerne tous les joueurs, alors que les objets obsolètes restent archivables. La recherche et les expéditions seront raccordées dans les étapes suivantes."
+    ],
+    "images": [],
+    "audience": "players"
+  },
+  "exploration-rumors-and-discovery.md": {
+    "summary": "Comprendre les cartes avec les PNJ et révéler les gisements sans créer automatiquement une exploitation.",
+    "explanation": [
+      "Les explications des cartes sont gratuites et mémorisées. L’écoute payante à 5 or peut donner un message de recherche fiable ou une conversation sans importance.",
+      "La prospection révèle les ressources et les sites extérieurs traversés. Les métiers transportés ont leurs chances propres, avec un essai mémorisé par joueur, cellule et spécialité. Les documents sont hors capacité de bagage."
+    ],
+    "images": [],
+    "audience": "players"
+  },
+  "tavern-rumors-and-documents.md": {
+    "summary": "Payer une écoute en taverne, recevoir un message de recherche ou une rumeur d’ambiance, et conserver ses documents sans encombrement.",
+    "explanation": [
+      "Une écoute validée coûte 5 or dans les deux cas. Le réglage initial est de 25 % de message utile si le stock le permet. Les autres conversations ne remettent aucun faux papier.",
+      "Les messages, papiers, parchemins et cartes sont des items hors capacité des bagages. Le serveur enregistre le résultat et empêche un second débit au rejeu ; les objets restent consultables, perdables et archivables selon leurs règles."
+    ],
+    "images": [],
+    "audience": "players"
+  },
+  "exploration-search.md": {
+    "summary": "Préparer une recherche extérieure, gérer la recharge et la discrétion, puis valider les ressources pour découvrir un site exceptionnel.",
+    "explanation": [
+      "L’ouverture déclenche immédiatement les deux échéances de 60 secondes, même si le joueur ferme ou annule. Les ressources sont dépensées uniquement à la validation, tandis que les papiers et spécialistes sont conservés.",
+      "Le barème de jauge est validé ; une jauge complète donne 90 % si la case et les indices correspondent au site actif. Le serveur calcule et vérifie les actions, conserve les résultats sans les rejouer et ne révèle aucun site caché par la prévisualisation."
+    ],
+    "images": [],
+    "audience": "players"
+  },
+  "exceptional-expeditions.md": {
+    "summary": "Sélectionner les moyens réels, calculer le score et partir avec le héros ou depuis un poste de prospection.",
+    "explanation": [
+      "Les deux départs utilisent le même barème et une validation serveur. Les soldats sont comptés individuellement et les spécialités une seule fois.",
+      "La préparation ne dépense rien ; le groupe envoyé retire réellement ses moyens du poste. Le trajet et les sauvegardes sont disponibles, mais la résolution et les récompenses restent à raccorder."
+    ],
+    "images": [],
+    "audience": "players"
+  },
+  "exceptional-site-resolution.md": {
+    "summary": "Tenter un site exceptionnel, recevoir son butin et gérer les dégâts, le moral et le retour d’un donjon.",
+    "explanation": [
+      "Le serveur compare les scores à la difficulté et effectue un seul tirage. Le site remporté est fermé pour tous ; un échec le laisse disponible.",
+      "Les dégâts et le moral des donjons touchent seulement les participants. Le butin et les provisions du retour sont conservés si la capacité des bagages ou du stock est insuffisante."
+    ],
+    "images": [],
+    "audience": "players"
+  },
+  "exceptional-site-closure.md": {
+    "summary": "Comprendre la fermeture d’un site pour tous, le rappel des missions et la vente des indices aux archives.",
+    "explanation": [
+      "La première victoire ou disparition fixe définitivement l’issue. Les préparations sont annulées et les groupes concurrents rappelés sans nouvelle tentative.",
+      "Le vainqueur conserve son butin ; les documents périmés restent des items et sont archivables pour 5, 7 ou 10 or sans risque ni double paiement. Les reprises conservent ces décisions."
+    ],
+    "images": [],
+    "audience": "players"
+  },
+  "camp-foundation-and-terrain.md": {
+    "summary": "Fonder un camp sur une case connue, envoyer les matériaux et respecter les évolutions autorisées par son terrain.",
+    "explanation": [
+      "La fondation et l’évolution sont validées côté serveur. Les coûts sont retirés des bagages sur place ou du poste lors d’un envoi ; une seule fondation peut occuper une cellule.",
+      "Le camp conserve son gisement, attend des habitants et ne produit naturellement qu’après spécialisation. Les lieux des scénarios gardent leur progression historique."
+    ],
+    "images": [
+      {
+        "path": "markers/map/resource-iron.png",
+        "caption": "Marqueur existant de fer : la ressource découverte autorise une mine de fer après développement du camp."
+      }
+    ],
+    "audience": "players"
+  },
+  "exploration-map-and-sheets.md": {
+    "summary": "Lire les gisements et sites découverts sur la carte, ouvrir les préparations et consulter les résultats et archives.",
+    "explanation": [
+      "Les cinq marqueurs utilisent exclusivement les positions des ressources connues transmises par le serveur. Un camp remplace son gisement sur la carte.",
+      "Les sites actifs ouvrent les préparations ; les résultats et documents restent accessibles après clôture sans révéler les secrets d’un autre joueur."
+    ],
+    "images": [
+      {
+        "path": "markers/map/resource-wood.png",
+        "caption": "Marqueur de bois utilisé sur la carte après découverte du gisement."
+      }
+    ],
+    "audience": "players"
+  }
+}

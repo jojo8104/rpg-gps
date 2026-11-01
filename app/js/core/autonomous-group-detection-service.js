@@ -11,7 +11,8 @@ export class AutonomousGroupDetectionService {
     const observerMultiplier = positiveMultiplier(observer.detectionMultiplier);
     return groups
       .filter(
-        (group) => !["destroyed", "mission_failed"].includes(group.status),
+        (group) =>
+          !["destroyed", "mission_failed", "completed"].includes(group.status),
       )
       .flatMap((group) => {
         const soldiers = group.army.units.reduce(
@@ -20,7 +21,7 @@ export class AutonomousGroupDetectionService {
         );
         const signature = Math.min(
           29,
-          15 + Math.ceil(soldiers / 2) + group.cargo.length * 2,
+          15 + Math.ceil(soldiers / 2) + group.occupiedCargoSlots * 2,
         );
         const concealmentMultiplier =
           positiveMultiplier(group.concealmentMultiplier) *
@@ -35,6 +36,10 @@ export class AutonomousGroupDetectionService {
           ? [
               {
                 id: group.id,
+                ...(group.archetypeId
+                  ? { archetypeId: group.archetypeId }
+                  : {}),
+                ...(group.alignment ? { alignment: group.alignment } : {}),
                 type: group.type,
                 owner: { ...group.owner },
                 factionId: group.factionId,
@@ -42,7 +47,7 @@ export class AutonomousGroupDetectionService {
                 status: group.status,
                 position: { ...group.position },
                 soldiers,
-                occupiedCargoSlots: group.cargo.length,
+                occupiedCargoSlots: group.occupiedCargoSlots,
                 distance,
                 detectionRadius,
                 signature,

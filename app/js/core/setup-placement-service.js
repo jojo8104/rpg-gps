@@ -7,12 +7,19 @@ export class SetupPlacementService {
     this.randomFn = randomFn;
   }
 
-  generate({ playArea, count, occupied = [], minimumDistance = 0 }) {
+  generate({
+    playArea,
+    count,
+    occupied = [],
+    minimumDistance = 0,
+    acceptPosition = () => true,
+    randomize = false,
+  }) {
     if (!Number.isInteger(count) || count < 0)
       throw new RangeError(
         "Le nombre de placements doit être un entier positif ou nul.",
       );
-    const candidates = this.#candidates(playArea);
+    const candidates = this.#candidates(playArea).filter(acceptPosition);
     const selected = [];
     while (selected.length < count) {
       const references = [...occupied, ...selected];
@@ -35,26 +42,50 @@ export class SetupPlacementService {
                 ),
         }))
         .sort((a, b) => b.distance - a.distance);
-      const choice =
-        ranked.find((entry) => entry.distance >= minimumDistance) ?? ranked[0];
+      const eligible = ranked.filter(
+        (entry) => entry.distance >= minimumDistance,
+      );
+      const choice = randomize
+        ? eligible[Math.floor(this.randomFn() * eligible.length)]
+        : eligible[0];
       if (!choice)
         throw new Error(
-          "La zone ne contient pas assez d’emplacements distincts.",
+          "La zone ne contient pas assez d’emplacements respectant la distance minimale.",
         );
       selected.push(choice.candidate);
     }
     return selected;
   }
 
-  resolveInside({ playArea, preferred, origin = null, minimumDistance = 0 }) {
+  findCentralPosition(playArea) {
+    const latitudes = playArea.polygon.map((point) => point.latitude);
+    const longitudes = playArea.polygon.map((point) => point.longitude);
+    return this.resolveInside({
+      playArea,
+      preferred: {
+        latitude: (Math.min(...latitudes) + Math.max(...latitudes)) / 2,
+        longitude: (Math.min(...longitudes) + Math.max(...longitudes)) / 2,
+      },
+    });
+  }
+
+  resolveInside({
+    playArea,
+    preferred,
+    origin = null,
+    minimumDistance = 0,
+    acceptPosition = () => true,
+  }) {
     const safePreferred = clampGeographicPosition(preferred);
     if (
       this.#allowsPlacement(playArea, safePreferred) &&
+      acceptPosition(safePreferred) &&
       (origin === null ||
         this.distanceFn(origin, safePreferred) >= minimumDistance)
     )
       return { ...safePreferred };
     const ranked = this.#candidates(playArea)
+      .filter(acceptPosition)
       .filter(
         (candidate) =>
           origin === null ||
@@ -82,20 +113,26 @@ export class SetupPlacementService {
     occupied = [],
     minimumSpacing = 0,
     excludedAreas = [],
+    acceptPosition = () => true,
   }) {
     if (!Number.isFinite(preferredDistance) || preferredDistance < 0)
       throw new RangeError("La distance préférée doit être positive ou nulle.");
     if (!Number.isFinite(preferredDirectionDegrees))
       throw new TypeError("La direction préférée doit être un nombre.");
     if (!Number.isFinite(directionJitterDegrees) || directionJitterDegrees < 0)
-      throw new RangeError("La variation de direction doit être positive ou nulle.");
+      throw new RangeError(
+        "La variation de direction doit être positive ou nulle.",
+      );
     if (
       !Number.isFinite(maximumDirectionDeviationDegrees) ||
       maximumDirectionDeviationDegrees < 0 ||
       maximumDirectionDeviationDegrees > 180
     )
-      throw new RangeError("L'écart de direction maximal doit être compris entre 0 et 180 degrés.");
+      throw new RangeError(
+        "L'écart de direction maximal doit être compris entre 0 et 180 degrés.",
+      );
     const allowedCandidates = this.#candidates(playArea)
+      .filter(acceptPosition)
       .filter(
         (candidate) => !excludedAreas.some((area) => area.contains(candidate)),
       )
@@ -106,7 +143,7 @@ export class SetupPlacementService {
       );
     if (allowedCandidates.length === 0)
       throw new RangeError(
-        "La PlayArea ne contient aucune position autorisée pour cet objectif.",
+        "Impossible de placer cet objectif : aucun emplacement testé dans la zone ne respecte les exclusions et l’écart avec les autres lieux.",
       );
     const direction = normalizeDegrees(
       preferredDirectionDegrees +

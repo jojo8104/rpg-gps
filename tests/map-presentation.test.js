@@ -6,8 +6,16 @@ import {
   locationMarkerSvg,
   locationPresentation,
 } from "../app/js/map/LocationRenderer.js";
-import { improvementIcon } from "../app/js/ui/world-view.js";
-import { dynamicSitePresentation, endpointTraces } from "../app/js/ui/map-view.js";
+import {
+  renderImprovementOptions,
+  defenseFrameClass,
+  improvementCard,
+  improvementIcon,
+} from "../app/js/ui/world-view.js";
+import {
+  dynamicSitePresentation,
+  endpointTraces,
+} from "../app/js/ui/map-view.js";
 import { headingDirection } from "../app/js/map/UnitRenderer.js";
 import {
   FOG_CLOUD_ASSET,
@@ -47,7 +55,29 @@ test("le renderer déduit le langage visuel depuis les données métier", () => 
   });
   assert.equal(enemy.owner, "enemy");
   assert.equal(enemy.status, "active");
-  assert.equal(enemy.badge, "⚔");
+  assert.equal(enemy.badge, "");
+  assert.equal(
+    locationPresentation({ type: "mine", name: "Mine", owner: "neutral" })
+      .badge,
+    "",
+  );
+  assert.equal(
+    locationPresentation({
+      type: "fort",
+      name: "Fort",
+      owner: "enemy",
+      questMarker: "combat",
+    }).badge,
+    "⚔",
+  );
+  assert.equal(
+    locationPresentation({
+      type: "village",
+      name: "Village",
+      questMarker: "objective",
+    }).badge,
+    "●",
+  );
   const conquered = locationPresentation({
     type: "camp",
     owner: "ally",
@@ -177,14 +207,16 @@ test("le brouillard utilise un seul calque texturé et un masque", () => {
 });
 
 test("le contour du brouillard suit le polygone réel de la zone de jeu", () => {
-  const cells = [{
-    id: "cell",
-    visits: 0,
-    bounds: [
-      { latitude: 0, longitude: 0 },
-      { latitude: 2, longitude: 2 },
-    ],
-  }];
+  const cells = [
+    {
+      id: "cell",
+      visits: 0,
+      bounds: [
+        { latitude: 0, longitude: 0 },
+        { latitude: 2, longitude: 2 },
+      ],
+    },
+  ];
   const geometry = fogMaskGeometry({
     cells,
     center: { latitude: 0.5, longitude: 0.5 },
@@ -217,7 +249,89 @@ test("la fiche détaillée raccourcit uniquement les descriptions trop longues",
 });
 
 test("chaque famille d'amélioration possède une icône de résumé", () => {
-  for (const id of ["farm", "forge", "barracks", "magic_academy", "walls", "tavern"])
+  for (const id of [
+    "farm",
+    "forge",
+    "barracks",
+    "magic_academy",
+    "walls",
+    "tavern",
+  ])
     assert.notEqual(improvementIcon(id), "◆");
   assert.equal(improvementIcon("unknown-improvement"), "◆");
+});
+
+test("la fortification la plus forte détermine le cadre du lieu", () => {
+  assert.equal(defenseFrameClass([]), "");
+  assert.equal(
+    defenseFrameClass([{ id: "barricades" }]),
+    "location-detail-art--barricades",
+  );
+  assert.equal(
+    defenseFrameClass([{ id: "palisades" }, { id: "walls" }]),
+    "location-detail-art--walls",
+  );
+  assert.equal(
+    defenseFrameClass([{ id: "walls" }, { id: "ramparts" }]),
+    "location-detail-art--ramparts",
+  );
+});
+
+test("une amélioration sans ressources est grisée et détaille les manques en rouge", () => {
+  const html = improvementCard({
+    id: "build-improvement:forge",
+    label: "Forge 1",
+    details: {
+      slotType: "development",
+      costs: { wood: 10, iron: 5 },
+      availableResources: { wood: 12, iron: 2 },
+      missingResources: [{ id: "iron", required: 5, available: 2, missing: 3 }],
+    },
+  });
+  assert.match(html, /is-unavailable/);
+  assert.match(html, /disabled/);
+  assert.match(html, /improvement-cost is-missing[^>]*>5 iron/);
+  assert.match(html, /Ressources manquantes : 3 iron/);
+  assert.doesNotMatch(html, /improvement-cost is-missing[^>]*>10 wood/);
+});
+
+test("le menu distingue les prérequis de branche et les possibilités facultatives", () => {
+  const html = renderImprovementOptions([
+    {
+      id: "build-improvement:trading_post",
+      label: "Comptoir",
+      details: {
+        progressionRequirements: [
+          { kind: "required", label: "Village", level: 1 },
+        ],
+      },
+    },
+    {
+      id: "build-improvement:watch_post",
+      label: "Guet",
+      details: {
+        progressionRequirements: [
+          { kind: "required", label: "Fort", level: 2 },
+        ],
+      },
+    },
+    {
+      id: "build-improvement:hunting_lodge",
+      label: "Chasse",
+      details: { progressionRequirements: [] },
+    },
+  ]);
+  assert.match(html, /Pour évoluer/);
+  assert.match(html, /Requis pour Village : niveau 1/);
+  assert.match(html, /Requis pour Fort : niveau 2/);
+  assert.match(html, /Autres améliorations possibles à ce stade/);
+  assert.ok(html.indexOf("Autres améliorations") < html.indexOf("Chasse"));
+  const blocked = improvementCard({
+    id: "build-improvement:depot",
+    label: "Dépôt",
+    details: { unavailableReason: "Aucun emplacement libre" },
+  });
+  assert.match(blocked, /disabled/);
+  assert.match(blocked, /Aucun emplacement libre/);
+  assert.doesNotMatch(blocked, /Ressources manquantes/);
 });

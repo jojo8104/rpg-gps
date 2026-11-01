@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Essai des cartes de bataille</title>
+  <style>
+    body {
+      margin: 0;
+      background: #202d27;
+      color: #eee6cd;
+      font: 16px system-ui;
+      padding: 20px;
+    }
+    main {
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 24px;
+    }
+    p {
+      line-height: 1.5;
+    }
+    form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    input,
+    button {
+      font: inherit;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .map {
+      position: relative;
+      width: min(100%, 384px);
+      margin: 20px auto;
+      aspect-ratio: 3/5;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .grid {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(5, 1fr);
+      pointer-events: none;
+    }
+    .grid span {
+      border: 1px solid #ffffff55;
+      padding: 5px;
+      font-size: 11px;
+      text-shadow: 0 1px 3px #000;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+    }
+    pre {
+      white-space: pre-wrap;
+      font-size: 12px;
+    }
+  </style>
+  <main>
+    <h1>Cartes de bataille · génération selon des règles</h1>
+    <p>
+      Le serveur génère une grille de 3 × 5 cases. Deux départs dégagés, une
+      rivière continue avec un pont, forêt, collines et relief rocheux. Les
+      terrains et constructions sont visuels pour cet essai : les effets sur les
+      unités viendront ensuite.
+    </p>
+    <form id="generate">
+      <label
+        >Graine
+        <input id="seed" value="test-1" maxlength="100" required /></label
+      ><button>Reproduire</button
+      ><button id="next" type="button">Nouvelle carte</button>
+    </form>
+    <label><input id="flip" type="checkbox" /> Vue du camp opposé</label>
+    <p id="status" role="status">Chargement…</p>
+    <div class="map">
+      <canvas id="map" aria-label="Carte générée par le serveur"></canvas>
+      <div class="grid" id="grid"></div>
+    </div>
+    <details>
+      <summary>Données officielles de la carte</summary>
+      <pre id="data"></pre>
+    </details>
+  </main>
+  <script type="module">
+    import {
+      loadMinimapTileset,
+      renderMinimapTileset,
+    } from "../app/js/map/minimap-tileset.js";
+    import { battlefieldPresentation } from "../app/js/map/tactical-terrain-renderer.js";
+    const status = document.querySelector("#status"),
+      seed = document.querySelector("#seed");
+    let battlefield,
+      images,
+      revision = 0;
+    const draw = () => {
+      if (!battlefield || !images) return;
+      const flip = document.querySelector("#flip").checked;
+      const { grid, objects } = battlefieldPresentation(battlefield, flip);
+      renderMinimapTileset(
+        document.querySelector("#map"),
+        images,
+        grid,
+        objects,
+        { size: 128 },
+      );
+      const cells = flip
+        ? battlefield.cells.toReversed().map((row) => row.toReversed())
+        : battlefield.cells;
+      const labels = {
+        grass: "Herbe",
+        forest: "Forêt",
+        hill: "Colline",
+        rock: "Roche",
+        water: "Eau",
+      };
+      document.querySelector("#grid").replaceChildren(
+        ...cells.flat().map((cell) => {
+          const span = document.createElement("span");
+          span.textContent = labels[cell.terrain];
+          return span;
+        }),
+      );
+    };
+    async function generate() {
+      const request = ++revision;
+      status.textContent = "Génération sur le serveur…";
+      try {
+        const response = await fetch(
+          `/api/playtest/battlefield?seed=${encodeURIComponent(seed.value)}`,
+        );
+        if (!response.ok)
+          throw Error(
+            "Génération indisponible. Ouvrez cette page via le serveur du jeu.",
+          );
+        const result = await response.json();
+        if (request !== revision) return;
+        battlefield = result;
+        images ??= await loadMinimapTileset();
+        if (request !== revision) return;
+        draw();
+        status.textContent = `Carte ${battlefield.seed} · les deux camps partagent les mêmes données`;
+        document.querySelector("#data").textContent = JSON.stringify(
+          battlefield,
+          null,
+          2,
+        );
+      } catch (error) {
+        if (request === revision) status.textContent = error.message;
+      }
+    }
+    document.querySelector("#generate").addEventListener("submit", (event) => {
+      event.preventDefault();
+      generate();
+    });
+    document.querySelector("#next").addEventListener("click", () => {
+      seed.value = crypto.randomUUID();
+      generate();
+    });
+    document.querySelector("#flip").addEventListener("change", draw);
+    generate();
+  </script>
+</html>

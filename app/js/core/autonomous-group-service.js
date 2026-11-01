@@ -2,6 +2,14 @@ import { AutonomousGroupTrace } from "./autonomous-group-trace.js";
 import { AutonomousInterceptionService } from "./autonomous-interception-service.js";
 import { AutonomousMovementService } from "./autonomous-movement-service.js";
 import { distanceMeters } from "./geo.js";
+import {
+  TradingConvoyService,
+  isManagedConvoy,
+} from "./trading-convoy-service.js";
+import {
+  ProspectingService,
+  isManagedProspecting,
+} from "./prospecting-service.js";
 
 /** Orchestre missions, mouvement, interceptions et traces sans dépendre du DOM. */
 export class AutonomousGroupService {
@@ -11,17 +19,23 @@ export class AutonomousGroupService {
     idGenerator = (prefix) => `${prefix}-${Date.now()}`,
     random = Math.random,
     traceSpacingMeters = 15,
+    convoyService = new TradingConvoyService({ idGenerator }),
+    prospectingService = new ProspectingService({ idGenerator }),
   } = {}) {
     this.movementService = movementService;
     this.interceptionService = interceptionService;
     this.idGenerator = idGenerator;
     this.random = random;
     this.traceSpacingMeters = traceSpacingMeters;
+    this.convoyService = convoyService;
+    this.prospectingService = prospectingService;
   }
 
   advance({
     groups,
     locations = [],
+    resourceZones = [],
+    inspectExplorationSegment = () => {},
     targets = [],
     playArea,
     now,
@@ -30,6 +44,48 @@ export class AutonomousGroupService {
     const events = [];
     const traces = [];
     for (const group of groups) {
+      if (
+        group.mission?.questId === "repression" &&
+        group.mission.kind === "guard"
+      )
+        continue;
+      if (
+        isManagedProspecting(group) &&
+        !["destroyed", "completed", "suspended"].includes(group.status)
+      ) {
+        const validity = this.prospectingService.validate(group, locations);
+        if (!validity.success) {
+          group.movement = null;
+          group.status = "suspended";
+          group.mission.suspensionReason = validity.reason;
+          events.push({
+            type: "prospecting_expedition_suspended",
+            groupId: group.id,
+            reason: validity.reason,
+            at: now,
+          });
+          continue;
+        }
+      }
+      if (
+        isManagedConvoy(group) &&
+        !["destroyed", "stopped", "suspended"].includes(group.status)
+      ) {
+        const validity = this.convoyService.validate(group, locations);
+        if (!validity.success) {
+          group.movement = null;
+          group.status =
+            validity.reason === "route_stopped" ? "stopped" : "suspended";
+          group.mission.suspensionReason = validity.reason;
+          events.push({
+            type: "autonomous_convoy_suspended",
+            groupId: group.id,
+            reason: validity.reason,
+            at: now,
+          });
+          continue;
+        }
+      }
       if (
         group.movement?.destination &&
         playArea &&
@@ -170,10 +226,20 @@ export class AutonomousGroupService {
           events,
         });
       const result = this.movementService.advance(group, now);
-      if (!result.changed) continue;
+      if (!result.changed) {
+        if (group.status === "arrived" && group.movement?.distanceMeters === 0)
+          this.#resolveArrival(group, { locations, now, events });
+        continue;
+      }
       traces.push(...this.#spacedTraces(group, result.segment));
       const hostileTargets = targets.filter(
-        (target) => target.id !== group.id && isHostile(group, target),
+        (target) =>
+          target.id !== group.id &&
+          !(
+            group.mission?.managedBy === "messenger_relay" &&
+            target.id === group.mission.targetId
+          ) &&
+          isHostile(group, target),
       );
       const detection = this.interceptionService.detect(
         result.segment,
@@ -206,6 +272,15 @@ export class AutonomousGroupService {
         });
         continue;
       }
+      events.push(
+        ...this.prospectingService.inspectSegment(
+          group,
+          result.segment,
+          resourceZones,
+        ),
+      );
+      if (isManagedProspecting(group) && group.mission.phase === "exploring")
+        inspectExplorationSegment(group, result.segment);
       if (result.arrived) {
         this.#resolveArrival(group, {
           locations,
@@ -256,6 +331,84 @@ export class AutonomousGroupService {
     group,
     { locations, targets, playArea, now, speedFor, events },
   ) {
+    if (["exceptional_expedition","camp_installation"].includes(group.mission?.managedBy)) {
+      if (!["waiting", "completed"].includes(group.mission.phase)) this.movementService.start(group, {
+        destination: group.mission.destination, speedMetersPerSecond: speedFor(group), now,
+      });
+      return;
+    }
+    if (group.mission?.managedBy === "watch_post") {
+      const destination = group.mission.waypoints[group.mission.waypointIndex];
+      if (destination)
+        this.movementService.start(group, {
+          destination,
+          speedMetersPerSecond: speedFor(group),
+          now,
+        });
+      return;
+    }
+    if (group.mission?.managedBy === "messenger_relay") {
+      const target = targets.find(
+        (entry) => entry.id === group.mission.targetId,
+      );
+      if (target?.position)
+        this.movementService.start(group, {
+          destination: target.position,
+          speedMetersPerSecond: speedFor(group),
+          now,
+        });
+      return;
+    }
+    if (isManagedConvoy(group)) {
+      const route = this.convoyService.destinationFor(group, locations);
+      if (!route.success) {
+        group.status =
+          route.reason === "route_stopped" ? "stopped" : "suspended";
+        group.mission.suspensionReason = route.reason;
+        events.push({
+          type: "autonomous_convoy_suspended",
+          groupId: group.id,
+          reason: route.reason,
+          at: now,
+        });
+        return;
+      }
+      delete group.mission.suspensionReason;
+      this.movementService.start(group, {
+        destination: route.destination.position,
+        speedMetersPerSecond: speedFor(group),
+        now,
+      });
+      events.push({
+        type: "autonomous_convoy_departed",
+        groupId: group.id,
+        phase: group.mission.phase,
+        destinationLocationId: route.destination.id,
+        at: now,
+      });
+      return;
+    }
+    if (isManagedProspecting(group)) {
+      const route = this.prospectingService.destinationFor(group, locations);
+      if (!route.success) {
+        group.status = "suspended";
+        group.mission.suspensionReason = route.reason;
+        events.push({
+          type: "prospecting_expedition_suspended",
+          groupId: group.id,
+          reason: route.reason,
+          at: now,
+        });
+        return;
+      }
+      if (route.returning) group.mission.phase = "returning";
+      this.movementService.start(group, {
+        destination: route.destination,
+        speedMetersPerSecond: speedFor(group),
+        now,
+      });
+      return;
+    }
     if (group.mission?.kind === "pursue") {
       const target = targets.find(
         (candidate) => candidate.id === group.mission.targetId,
@@ -319,6 +472,58 @@ export class AutonomousGroupService {
   }
 
   #resolveArrival(group, { locations, now, events }) {
+    if (["exceptional_expedition","camp_installation"].includes(group.mission?.managedBy)) {
+      group.mission.phase = group.mission.phase === "returning" ? "returned" : "waiting";
+      group.movement = null;
+      group.status = "arrived";
+      return;
+    }
+    if (group.mission?.managedBy === "watch_post") {
+      group.mission.waypointIndex =
+        (group.mission.waypointIndex + 1) % group.mission.waypoints.length;
+      group.movement = null;
+      group.status = "idle";
+      return;
+    }
+    if (group.mission?.managedBy === "messenger_relay") {
+      // Game checks that the moving recipient is actually reached before delivering.
+      group.status = "arrived";
+      group.movement = null;
+      events.push({
+        type: "relay_messenger_arrived",
+        groupId: group.id,
+        at: now,
+      });
+      return;
+    }
+    if (isManagedConvoy(group)) {
+      const result = this.convoyService.arrive(group, locations, now);
+      if (!result.success) {
+        group.status = "suspended";
+        group.mission.suspensionReason = result.reason;
+        events.push({
+          type: "autonomous_convoy_suspended",
+          groupId: group.id,
+          reason: result.reason,
+          at: now,
+        });
+      } else events.push({ ...result, groupId: group.id, at: now });
+      return;
+    }
+    if (isManagedProspecting(group)) {
+      const result = this.prospectingService.arrive(group, locations, now);
+      if (!result.success) {
+        group.status = "suspended";
+        group.mission.suspensionReason = result.reason;
+        events.push({
+          type: "prospecting_expedition_suspended",
+          groupId: group.id,
+          reason: result.reason,
+          at: now,
+        });
+      } else events.push({ ...result, groupId: group.id, at: now });
+      return;
+    }
     if (group.mission?.kind === "attack_location") {
       const location = locations.find(
         (item) => item.id === group.mission.targetId,
@@ -348,7 +553,10 @@ export class AutonomousGroupService {
     kind,
     position,
     createdAt,
-    { occupiedCargoSlots = group.cargo.length, directionDegrees = null } = {},
+    {
+      occupiedCargoSlots = group.occupiedCargoSlots,
+      directionDegrees = null,
+    } = {},
   ) {
     return new AutonomousGroupTrace({
       id: this.idGenerator("group-trace"),
@@ -422,10 +630,25 @@ function defaultSpeed(group) {
   if (group.type === "messenger") return 5;
   if (group.type === "prospecting") return 1.4;
   if (group.type === "convoy")
-    return Math.max(0.8, 2 - group.cargo.length * 0.1);
+    return Math.max(0.8, 2 - group.occupiedCargoSlots * 0.1);
   return 1.2;
 }
 function isHostile(group, target) {
+  // Un alignement explicite neutre/allié ne déclenche pas d’hostilité envers les héros.
+  if (group.alignment && group.alignment !== "enemy" && target.kind === "hero")
+    return false;
+  if (
+    group.originLocationId &&
+    group.owner.id === "kingdom" &&
+    target.playerId !== "chaos" &&
+    target.playerId !== "bandits"
+  )
+    return false;
+  if (
+    group.factionId === "chaos" &&
+    ["chaos", "bandits"].includes(target.playerId)
+  )
+    return false;
   if (
     target.owner?.kind === group.owner.kind &&
     target.owner?.id === group.owner.id

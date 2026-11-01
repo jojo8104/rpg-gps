@@ -1,4 +1,5 @@
 import { AutonomousGroup } from "./autonomous-group.js";
+import { RepressionQuest } from "./repression-quest.js";
 import { SetupPlacementService } from "./setup-placement-service.js";
 import { QuestDeadlineService } from "./quest-deadline-service.js";
 import { distanceMeters } from "./geo.js";
@@ -15,6 +16,36 @@ export class ScenarioEffectResolver {
 
   #applyEffect(effect, game) {
     switch (effect.type) {
+      case "unlockItemReward": {
+        const hero = game.getHero(effect.heroId ?? game.activeQuestActorId);
+        if (!hero) return { type: "item_reward_unlocked", success: false };
+        const success = game.itemAcquisitionService.unlock({
+          source: "mainQuest",
+          key: `${game.activeScenarioEventId}:${effect.rewardId ?? effect.itemId}`,
+          heroId: hero.id,
+          classId: hero.classId,
+          itemId: effect.itemId,
+        });
+        return {
+          type: "item_reward_unlocked",
+          success,
+          itemId: effect.itemId,
+          heroId: hero.id,
+        };
+      }
+      case "repression":
+        return RepressionQuest.effect(game, effect.action);
+      case "repressionRelease":
+        return {
+          type: "repression_released",
+          released: RepressionQuest.release(game),
+        };
+      case "corruptCapital": {
+        return {
+          type: "capital_corruption",
+          changed: game.capitalAiService.turnHostile(game),
+        };
+      }
       // Présentation et mise à disposition de contenu narratif.
       case "showNarration": {
         const text = ScenarioEffectResolver.#requireText(
@@ -23,6 +54,8 @@ export class ScenarioEffectResolver {
         );
         const entry = {
           type: "narration",
+          ...(effect.scene ? { scene: effect.scene } : {}),
+          ...(effect.speaker ? { speaker: effect.speaker } : {}),
           text,
           eventId: game.activeScenarioEventId,
         };
@@ -933,10 +966,22 @@ export class ScenarioEffectResolver {
     };
   }
   static #heroFor(effect, game) {
+    if (
+      game.scenarioState?.currentPhaseId === "treasure-choice" &&
+      game.activeQuestActorId
+    ) {
+      const hero = game.getHero(game.activeQuestActorId);
+      if (hero) return hero;
+    }
     const playerId = ScenarioEffectResolver.#requireText(
       effect.playerId ?? "local",
       "Le joueur récompensé",
     );
+    // « local » désigne le joueur de la commande, dont l'identité est fixée par le serveur.
+    if (playerId === "local" && game.activeQuestActorId) {
+      const actor = game.getHero(game.activeQuestActorId);
+      if (actor) return actor;
+    }
     const player = game.getPlayer(playerId);
     const hero =
       player?.heroIds

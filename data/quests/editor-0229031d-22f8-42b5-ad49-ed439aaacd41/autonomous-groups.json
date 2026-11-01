@@ -1,0 +1,36 @@
+[
+  {
+    "id": "ga-1",
+    "type": "army",
+    "owner": {
+      "kind": "faction",
+      "id": "independent"
+    },
+    "position": {
+      "latitude": 48.8566,
+      "longitude": 2.3522
+    },
+    "factionId": null,
+    "originLocationId": null,
+    "status": "idle",
+    "behavior": "passive",
+    "mission": null,
+    "army": {
+      "units": []
+    },
+    "commander": null,
+    "cargo": [],
+    "message": null,
+    "morale": null,
+    "movement": null,
+    "interruption": null,
+    "ambush": null,
+    "history": [],
+    "traceAnchor": {
+      "latitude": 48.8566,
+      "longitude": 2.3522
+    },
+    "detectionMultiplier": 1,
+    "concealmentMultiplier": 1
+  }
+]

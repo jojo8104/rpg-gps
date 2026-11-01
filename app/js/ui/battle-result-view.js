@@ -1,3 +1,4 @@
+import { formatInteger } from "./number-format.js";
 import { HERO_COMMAND_RANKS, UNIT_RANKS } from "../core/rank-system.js";
 import { renderLootStockSheet } from "./loot-stock-sheet.js";
 
@@ -37,7 +38,7 @@ export function renderBattleResultView({
         entry.previousRank !== entry.rank
           ? ` · ${label(HERO_COMMAND_RANKS, entry.previousRank)} → ${label(HERO_COMMAND_RANKS, entry.rank)}`
           : "";
-      return `<li><strong>${entry.name}</strong><span>+${entry.experienceGained} XP${promotion}</span></li>`;
+      return `<li><strong>${entry.name}</strong><span>+${formatInteger(entry.experienceGained)} XP${promotion}</span></li>`;
     })
     .join("");
   const ownedUnitIds = new Set(
@@ -63,7 +64,7 @@ export function renderBattleResultView({
         entry.previousRank !== entry.rank
           ? ` · ${label(UNIT_RANKS, entry.previousRank)} → ${label(UNIT_RANKS, entry.rank)}`
           : "";
-      return `<li><strong>${unitName(entry)}</strong><span>${entry.combatants ?? entry.quantity} aptes · ${entry.wounded ?? 0} blessés · ${entry.dead ?? 0} morts · +${entry.experienceGained} XP${promotion}</span></li>`;
+      return `<li><strong>${unitName(entry)}</strong><span>${formatInteger(entry.combatants ?? entry.quantity)} aptes · ${entry.wounded ?? 0} blessés · ${entry.dead ?? 0} morts · +${formatInteger(entry.experienceGained)} XP${promotion}</span></li>`;
     })
     .join("");
   const losses = result.consequences.losses.filter((entry) =>
@@ -91,7 +92,7 @@ export function renderBattleResultView({
     const entries = result.battleLoot.entries.filter(
       (entry) => entry.portable && (entry.allocations?.[playerId] ?? 0) > 0,
     );
-    lootElement.innerHTML = `${lootMessage ? `<p class="sheet-feedback" role="status">${lootMessage}</p>` : ""}<ul>${entries.map((entry) => `<li><strong>${entry.itemId}</strong><span>${entry.allocations[playerId]} attribué(s)</span></li>`).join("") || "<li>Tout le butin a été récupéré.</li>"}</ul>${entries.length ? '<button type="button" data-collect-result-loot>Récupérer le butin</button>' : ""}`;
+    lootElement.innerHTML = `${lootMessage ? `<p class="sheet-feedback" role="status">${lootMessage}</p>` : ""}${entries.length ? '<p>Les bagages sont pleins. Le surplus reste réservé, sans expiration. Libérez de la place puis récupérez le reste.</p>' : ""}<ul>${entries.map((entry) => `<li><strong>${entry.itemId}</strong><span>${entry.allocations[playerId]} en attente</span></li>`).join("") || "<li>Tout le butin a été récupéré.</li>"}</ul>${entries.length ? '<button type="button" data-collect-result-loot>Récupérer le reste</button>' : ""}`;
     lootElement
       .querySelector("[data-collect-result-loot]")
       ?.addEventListener("click", () =>

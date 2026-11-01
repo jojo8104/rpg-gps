@@ -14,12 +14,12 @@ test("la configuration de carte montre tous les lieux sans brouillard", () => {
   );
 });
 
-test("la partie conserve les règles de brouillard et de découverte", () => {
+test("la partie conserve le brouillard mais affiche tous les lieux existants", () => {
   assert.deepEqual(
     setupMapVisibility({ setupActive: false, fogEnabled: true }),
     {
       fogEnabled: true,
-      knownOnly: true,
+      knownOnly: false,
       includeHiddenLocations: false,
     },
   );

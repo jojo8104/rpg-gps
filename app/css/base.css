@@ -30,6 +30,23 @@ body {
   visibility: hidden;
   pointer-events: none;
 }
+.presentation-screen__actions {
+  position: absolute;
+  z-index: 2;
+  bottom: max(0.6rem, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 0.5rem;
+  width: min(24rem, calc(100% - 2rem));
+  max-width: calc(100% - 2rem);
+}
+.presentation-screen__actions button {
+  margin: 0;
+}
+.presentation-screen__actions[hidden] {
+  display: none;
+}
 .presentation-screen__artwork {
   position: absolute;
   inset: 0;
@@ -63,7 +80,7 @@ body {
   height: 100%;
   min-height: 100svh;
   padding: max(2rem, env(safe-area-inset-top)) 1.5rem
-    max(3rem, calc(env(safe-area-inset-bottom) + 2rem));
+    max(9rem, calc(env(safe-area-inset-bottom) + 8rem));
   border: 0;
   background: transparent;
   color: #fff4d2;
@@ -77,6 +94,70 @@ body {
     serif;
   letter-spacing: 0.04em;
   font-variant: small-caps;
+}
+.presentation-screen__enter:disabled {
+  opacity: 1;
+  cursor: wait;
+}
+#startup-progress {
+  width: min(80vw, 24rem);
+  height: 0.7rem;
+  margin-top: 1rem;
+  accent-color: #dfbb67;
+}
+#startup-status {
+  max-width: 32rem;
+  font-size: 0.85rem;
+  text-align: center;
+}
+#startup-retry {
+  position: absolute;
+  z-index: 2;
+  bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+.game-loading {
+  width: min(30rem, calc(100vw - 2rem));
+  border: 1px solid #c6a55c;
+  border-radius: 1rem;
+  padding: 2rem;
+  background: #fff0cc;
+  color: #352319;
+  color-scheme: light;
+  text-align: center;
+}
+.game-loading h2,
+.game-loading p {
+  color: #352319;
+  text-shadow: none;
+}
+.game-loading::backdrop {
+  background: #07100cdd;
+}
+.game-loading progress {
+  width: 100%;
+  height: 0.75rem;
+  accent-color: #315b35;
+}
+.game-loading progress::-webkit-progress-bar {
+  background: #d2c39f;
+  border-radius: 1rem;
+}
+.game-loading progress::-webkit-progress-value {
+  background: #315b35;
+  border-radius: 1rem;
+}
+.game-loading progress::-moz-progress-bar {
+  background: #315b35;
+}
+.game-loading p {
+  min-height: 3rem;
+}
+.account-row {
+  display: flex;
+  gap: 0.5rem;
+}
+.account-row > button:first-child {
+  flex: 1;
 }
 .presentation-screen__subtitle {
   color: #d9cba5;
@@ -197,18 +278,20 @@ button {
   gap: 0.75rem;
   margin: 1rem 0;
   padding: 1rem;
-  border: 1px solid #91d889;
+  border: 1px solid #9a7347;
   border-radius: 14px;
-  background: #18251c;
+  background: #f4dfb6;
+  color: #352319;
 }
 .lobby-terrain {
   display: grid;
   gap: 0.75rem;
   margin: 1rem 0;
   padding: 1rem;
-  border: 1px solid #78e08f;
+  border: 1px solid #c69b38;
   border-radius: 14px;
-  background: #18251c;
+  background: #f4dfb6;
+  color: #352319;
 }
 .lobby-terrain[hidden] {
   display: none;
@@ -226,7 +309,7 @@ button {
   height: min(48vh, 360px);
   min-height: 260px;
   overflow: hidden;
-  border: 1px solid #91d889;
+  border: 1px solid #9a7347;
   border-radius: 12px;
 }
 .lobby-terrain-map[hidden],
@@ -407,6 +490,39 @@ button {
   margin: 0;
   accent-color: #704a18;
 }
+.hero-gender-control {
+  display: flex;
+  gap: 0.2rem;
+  width: fit-content;
+  margin: 0.35rem 0;
+  padding: 0.15rem;
+  border: 1px solid #927044;
+  border-radius: 999px;
+}
+.hero-class-card:not(:has(> input:checked)) .hero-gender-control {
+  display: none;
+}
+.hero-gender-control button {
+  width: auto;
+  min-height: 32px;
+  padding: 0.25rem 0.65rem;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #493219;
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.hero-gender-control button[aria-pressed="true"] {
+  background: #694724;
+  color: #fff4dc;
+}
+.hero-gender-control button:focus-visible {
+  outline: 3px solid #406a8c;
+  outline-offset: 2px;
+}
 .hero-class-card__portrait {
   display: grid;
   place-items: center;
@@ -565,11 +681,12 @@ select {
   padding: max(4.8rem, calc(env(safe-area-inset-top) + 3rem)) 1rem
     calc(env(safe-area-inset-bottom) + 5.5rem);
 
-  background: #101a12;
+  background: var(--parchment);
+  color: var(--parchment-ink);
 }
 .quest-card {
   padding: 1rem;
-  border-bottom: 1px solid #304934;
+  border-bottom: 1px solid var(--parchment-muted);
 }
 .quest-card strong {
   display: block;
@@ -622,7 +739,7 @@ select {
   margin: 0.35rem 0;
 }
 .bottom-sheet p {
-  color: #c4d4c5;
+  color: var(--parchment-muted, #654936);
 }
 .sheet-close {
   float: right;
@@ -1817,8 +1934,8 @@ select {
   overflow: hidden;
 }
 .world-card.is-active {
-  border-color: #78e08f;
-  box-shadow: 0 0 0 1px #78e08f33;
+  border-color: #c69b38;
+  box-shadow: 0 0 0 1px #c69b3833;
 }
 .world-illustration {
   display: grid;
@@ -1895,7 +2012,7 @@ select {
 }
 .world-actions span,
 .world-empty {
-  color: #afc1b1;
+  color: var(--parchment-muted, #654936);
 }
 
 @media (min-width: 700px) {
@@ -1942,7 +2059,7 @@ select {
   max-width: 760px;
   margin: 0 auto;
 }
-.location-detail header,
+.location-detail > header,
 .location-detail > section {
   padding: 1rem;
   border: 1px solid #3c5941;
@@ -2022,8 +2139,8 @@ select {
   background: #62a8ff18;
 }
 .range-legend .is-interaction::before {
-  border-color: #78e08f;
-  background: #78e08f30;
+  border-color: #c69b38;
+  background: #c69b3830;
 }
 .world-card > .world-map-button {
   position: absolute;
@@ -2060,8 +2177,8 @@ body {
   bottom: 0;
   z-index: 3;
   padding: 0.45rem;
-  background: #17251a;
-  box-shadow: 0 -10px 24px #101a12;
+  background: #ead6aa;
+  box-shadow: 0 -10px 24px #35251c;
 }
 .sheet-grab {
   display: grid;
@@ -2147,15 +2264,15 @@ body {
   position: sticky;
   bottom: 0;
   z-index: 2;
-  box-shadow: 0 -8px 20px #101a12;
+  box-shadow: 0 -8px 20px #35251c;
 }
 .garrison-summary {
   display: grid;
   width: 100%;
   margin-top: 0.7rem;
   padding: 0.7rem;
-  border: 1px solid #52725a;
-  background: #1d3022;
+  border: 1px solid #795737;
+  background: #4a3225;
   color: inherit;
   text-align: left;
 }
@@ -2177,7 +2294,7 @@ body {
   place-items: center;
   width: 2.2rem;
   height: 2.2rem;
-  border: 1px dashed #65776a;
+  border: 1px dashed #896748;
   border-radius: 8px;
   color: #819184;
   font-style: normal;
@@ -2202,7 +2319,7 @@ body {
   margin: 0.25rem 0 0.5rem;
 }
 .garrison-help {
-  color: #afc1b1;
+  color: var(--parchment-muted, #654936);
   font-size: 0.82rem;
 }
 .garrison-army-zone,
@@ -2212,9 +2329,9 @@ body {
   gap: 0.5rem;
   min-height: 4.6rem;
   padding: 0.5rem;
-  border: 1px solid #3c5941;
+  border: 1px solid #9a7347;
   border-radius: 12px;
-  background: #101a12;
+  background: #e2c99e;
 }
 .garrison-unit,
 .garrison-slot {
@@ -2223,10 +2340,10 @@ body {
   gap: 0.2rem;
   min-height: 4.2rem;
   padding: 0.55rem;
-  border: 1px solid #52725a;
+  border: 1px solid #795737;
   border-radius: 10px;
-  background: #203325;
-  color: #eef7ef;
+  background: #4a3225;
+  color: #fff0c9;
   text-align: left;
 }
 .garrison-unit {
@@ -2238,21 +2355,21 @@ body {
 .garrison-unit span,
 .garrison-unit small,
 .garrison-slot small {
-  color: #b6c7b8;
+  color: #ead7ad;
   font-size: 0.72rem;
 }
 .garrison-unit.is-locked {
   opacity: 0.55;
 }
 .garrison-unit.is-selected {
-  outline: 2px solid #9ae794;
+  outline: 2px solid #c69b38;
 }
 .garrison-slot {
   border-style: dashed;
-  background: #17251a;
+  background: #ead6aa;
 }
 .is-drop-target {
-  outline: 2px solid #78e08f;
+  outline: 2px solid #c69b38;
   outline-offset: 2px;
 }
 .garrison-drag-ghost {
@@ -2280,15 +2397,15 @@ body {
 }
 .garrison-slot.is-occupied {
   border-style: solid;
-  background: #1d3022;
+  background: #4a3225;
 }
 .garrison-slot.is-empty {
   place-items: center;
   align-content: center;
   padding: 0.55rem;
-  border: 1px dashed #65776a;
-  background: #131f16;
-  color: #859589;
+  border: 1px dashed #896748;
+  background: #4a3225;
+  color: #ead7ad;
   text-align: center;
 }
 .garrison-slot.is-empty strong {
@@ -2299,7 +2416,7 @@ body {
   place-items: center;
   width: 2rem;
   height: 2rem;
-  border: 1px solid #66786a;
+  border: 1px solid #9a7347;
   border-radius: 50%;
   font-size: 1.25rem;
 }
@@ -2312,7 +2429,7 @@ body {
   padding: 0.5rem;
   border: 0;
   border-radius: 11px;
-  background: linear-gradient(145deg, #263d2b, #19291d);
+  background: linear-gradient(145deg, #674832, #35251c);
 }
 .garrison-unit__icon {
   display: grid !important;
@@ -2321,7 +2438,7 @@ body {
   height: 2.7rem;
   border: 1px solid #ffffff24;
   border-radius: 10px;
-  background: #101a12;
+  background: #35251c;
   color: #e0bd70;
 }
 .garrison-unit__icon .unit-type-icon {
@@ -2347,8 +2464,8 @@ body {
   margin: 0.2rem 0;
 }
 .garrison-slot.is-drop-target {
-  background: #24472c;
-  box-shadow: inset 0 0 0 2px #78e08f;
+  background: #d9b778;
+  box-shadow: inset 0 0 0 2px #c69b38;
 }
 .garrison-drag-ghost {
   display: grid;
@@ -2651,4 +2768,76 @@ body {
   .army-list > .army-card.is-expanded .army-card__chevron {
     display: none;
   }
+}
+
+/* Journal : lecture des missions et objectifs sur mobile comme sur ordinateur. */
+#quests-content {
+  max-width: 52rem;
+  margin-inline: auto;
+  display: grid;
+  gap: 1rem;
+}
+#quests-content .quest-card {
+  border: 1px solid #8b704b;
+  border-radius: 12px;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  overflow-wrap: anywhere;
+}
+#quests-content .quest-card h3,
+#quests-content .quest-card strong {
+  margin: 0.4rem 0 0.75rem;
+  font-size: 1.15rem;
+}
+#quests-content .quest-card p {
+  line-height: 1.6;
+}
+.quest-journal-summary {
+  padding: 0.5rem 0;
+}
+.quest-journal-summary strong {
+  font-size: 1.25rem;
+}
+.quest-journal-summary p {
+  margin: 0.4rem 0 0;
+}
+.quest-empty {
+  padding: 1.25rem;
+  border: 1px dashed #8b704b;
+  border-radius: 12px;
+  line-height: 1.6;
+}
+.quest-objectives {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.quest-objectives li {
+  padding: 0.7rem;
+  border: 1px solid #8b704b55;
+  border-radius: 6px;
+  line-height: 1.5;
+}
+.quest-objectives .is-active {
+  font-weight: 700;
+  border-inline-start: 4px solid #ab792a;
+}
+.quest-objectives .is-skipped,
+.quest-objectives .is-locked {
+  color: var(--parchment-muted);
+}
+#quests-content progress {
+  width: 100%;
+  height: 0.7rem;
+  accent-color: var(--gold);
+}
+#quests-content .quest-location-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+#quests-content button {
+  max-width: 100%;
+  white-space: normal;
+  margin-block: 0.25rem;
 }

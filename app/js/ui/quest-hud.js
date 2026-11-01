@@ -1,3 +1,4 @@
+import { formatInteger } from "./number-format.js";
 export function buildQuestHudModel({
   quest,
   placement = null,
@@ -93,7 +94,7 @@ export function renderQuestHud({
   const progress =
     model.progressPercent === null
       ? ""
-      : `<div class="quest-hud__progress" role="progressbar" aria-label="Distance parcourue : ${model.current} sur ${model.target} mètres${originRequirement}" aria-valuemin="0" aria-valuemax="${model.target}" aria-valuenow="${model.current}"><span style="width:${model.progressPercent}%"></span><small>${model.current} / ${model.target} m parcourus${originRequirement}</small></div>`;
+      : `<div class="quest-hud__progress" role="progressbar" aria-label="Distance parcourue : ${formatInteger(model.current)} sur ${model.target} mètres${originRequirement}" aria-valuemin="0" aria-valuemax="${model.target}" aria-valuenow="${model.current}"><span style="width:${model.progressPercent}%"></span><small>${formatInteger(model.current)} / ${model.target} m parcourus${originRequirement}</small></div>`;
   const locationButtons =
     model.locations
       ?.map(
@@ -183,4 +184,24 @@ function escapeHtml(value) {
         "'": "&#039;",
       })[character],
   );
+}
+
+// Adaptation de l’état officiel du nouveau moteur, sans progression locale.
+export function buildQuestEngineHudModel(view) {
+  if (!view?.enabled) return null;
+  const instance = view.instances?.find((item) => item.status === "active");
+  if (!instance) return null;
+  return buildQuestHudModel({
+    quest: {
+      id: instance.id,
+      title: instance.title,
+      description: instance.description ?? "",
+      objectives: (instance.actions ?? []).map((action) => ({
+        id: action.id,
+        text: action.label,
+        state: action.status,
+      })),
+      choices: [],
+    },
+  });
 }

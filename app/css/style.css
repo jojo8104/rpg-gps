@@ -5,5 +5,17 @@
 @import url("./game-components.css");
 @import url("./responsive.css");
 @import url("./map-navigation.css");
+@import url("./map-preparation.css");
+@import url("./map-camera.css");
 @import url("./landscape.css");
 @import url("./parchment-theme.css");
+
+@import url("./setup-compact.css");
+@import url("./party-preparation.css");
+@import url("./player-social.css");
+@import url("./command-feedback.css");
+
+@import url("./guided-setup.css");
+@import url("./portraits.css");
+
+@import url("./exterior-search.css");

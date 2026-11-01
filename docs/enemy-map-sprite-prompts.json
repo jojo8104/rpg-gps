@@ -1,0 +1,30 @@
+{
+  "mode": "built-in imagegen",
+  "common": "Use case: stylized-concept. Asset type: transparent production overworld sprite sheet for existing medieval GPS RPG. Reference images are STYLE REFERENCES ONLY: match their chunky 16-bit JRPG pixel art, chibi proportions, dark pixel outlines, restrained shaded pixel clusters, slightly elevated top-down RPG camera showing top of head/back and feet. NOT a realistic illustration or combat portrait. Create EXACTLY TWO complete static sprites, side by side in equal square cells on one wide sheet. LEFT cell: SOUTH, directly facing viewer, slightly elevated view. RIGHT cell: NORTH, directly facing away, back visible, same elevated view. No side views, no extra directions, no animation frames. Identical characters/anatomy/colors/equipment across both orientations. Center each sprite within its half, align feet on same baseline, equal apparent scale, generous transparent margins, no clipping. Genuine transparent background. No text, labels, border, grid, scenery, ground, drop shadow, glow, or pedestal. Pixels should read crisply at small map marker sizes. Subject: ",
+  "subjects": [
+    [
+      "goblins",
+      "A compact group of exactly three small green goblins, pointed ears, crude brown leather clothes, one with dagger, one with short spear, one with small wooden shield. Same identifiable trio in both views."
+    ],
+    [
+      "orcs",
+      "A compact group of exactly three stocky green orcs, broader and heavier than goblins, tusks, rough iron and brown leather armor, axes and cleaver. Same identifiable trio in both views."
+    ],
+    [
+      "wolves",
+      "A compact pack of exactly three grey wild wolves, four-legged animal anatomy, pointed ears, bushy tails, one slightly darker. Same trio in both views."
+    ],
+    [
+      "bear",
+      "One stocky brown wild bear, on all four legs, round ears, broad shoulders, no clothes or equipment."
+    ],
+    [
+      "boar",
+      "One wild boar on four short legs, dark brown bristly fur, broad snout, small ivory tusks. No clothes or equipment."
+    ],
+    [
+      "deer",
+      "One wild stag on four slender legs, warm brown coat, cream rump, branching antlers. No clothes or equipment."
+    ]
+  ]
+}

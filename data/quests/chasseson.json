@@ -1,0 +1,385 @@
+{
+  "format": "rpg-gps-editor",
+  "version": 1,
+  "quest": {
+    "schemaVersion": 1,
+    "id": "poste-frontieres",
+    "title": "Le poste des frontières",
+    "description": "Le poste a besoin de vivres et de renseignements. Choisissez votre mission auprès de l’intendant.",
+    "type": "simple",
+    "participationModes": [
+      "solo"
+    ],
+    "actions": [
+      {
+        "id": "parler-chasse",
+        "action": "Parler",
+        "label": "recontrer le chef de chasse",
+        "lieu": "chasse_camp",
+        "interaction": "Parler avec le veneur",
+        "requires": [],
+        "rewards": [],
+        "dialogue": {
+          "id": "dialogue-chasse",
+          "qui": "pnj",
+          "goal": "conversation-terminee"
+        }
+      },
+      {
+        "id": "atteindre-chasse",
+        "action": "Atteindre",
+        "label": "Rejoindre la partie de chasse",
+        "lieu": "chasse_camp",
+        "requires": [],
+        "rewards": []
+      },
+      {
+        "id": "atteindre-1",
+        "action": "Atteindre",
+        "label": "Rejoindre un lieu",
+        "lieu": "lieu-1",
+        "requires": [
+          "parler-chasse",
+          "atteindre-chasse"
+        ],
+        "rewards": []
+      }
+    ],
+    "links": [
+      {
+        "id": "lien-1",
+        "from": "atteindre-chasse",
+        "output": "success",
+        "to": "parler-chasse",
+        "conditions": []
+      },
+      {
+        "id": "lien-2",
+        "from": "parler-chasse",
+        "output": "success",
+        "to": "atteindre-1",
+        "conditions": []
+      }
+    ],
+    "prerequisites": [
+      {
+        "id": "rations",
+        "type": "ressource",
+        "resource": "food",
+        "quantity": 5,
+        "locationId": "capital",
+        "when": "accepted"
+      }
+    ],
+    "events": [],
+    "accessConditions": [],
+    "publicationCondition": null,
+    "outcomes": {
+      "success": [
+        {
+          "type": "xp",
+          "amount": 50
+        },
+        {
+          "type": "narration",
+          "text": "Le poste des frontières vous remercie."
+        }
+      ],
+      "failure": [
+        {
+          "type": "narration",
+          "text": "Vous revenez à la capitale pour préparer une nouvelle stratégie."
+        }
+      ],
+      "abandoned": []
+    },
+    "transitions": [],
+    "locationSlotId": "capital",
+    "giverNpcId": "intendant",
+    "interactionLabel": "Choisir une mission"
+  },
+  "dialogues": {
+    "briefing": {
+      "speakerId": "intendant",
+      "locationId": "capital",
+      "initialNodeId": "accueil",
+      "nodes": [
+        {
+          "id": "accueil",
+          "lines": [
+            {
+              "speaker": "L’intendant",
+              "text": "Le poste manque de vivres, et des éclaireurs ennemis rôdent. Que préférez-vous faire ?"
+            }
+          ],
+          "choices": [
+            {
+              "id": "vivres",
+              "label": "Je livrerai les provisions",
+              "goal": "ravitaillement"
+            },
+            {
+              "id": "camp",
+              "label": "Je reconnaîtrai le camp",
+              "goal": "reconnaissance"
+            }
+          ]
+        }
+      ]
+    },
+    "rapport": {
+      "speakerId": "intendant",
+      "locationId": "capital",
+      "initialNodeId": "merci",
+      "nodes": [
+        {
+          "id": "merci",
+          "lines": [
+            {
+              "speaker": "L’intendant",
+              "text": "Merci. Votre mission est accomplie."
+            }
+          ],
+          "choices": [
+            {
+              "id": "terminer",
+              "label": "Présenter mon rapport",
+              "goal": "rapport-recu"
+            }
+          ]
+        }
+      ]
+    },
+    "dialogue-parler-1": {
+      "speakerId": "pnj",
+      "locationId": "chasse_camp",
+      "initialNodeId": "accueil",
+      "nodes": [
+        {
+          "id": "accueil",
+          "lines": [
+            {
+              "speaker": "Interlocuteur",
+              "text": "Votre conversation commence ici."
+            }
+          ],
+          "choices": [
+            {
+              "id": "continuer",
+              "label": "Continuer",
+              "goal": "conversation-terminee"
+            }
+          ]
+        }
+      ]
+    },
+    "dialogue-chasse": {
+      "speakerId": "pnj",
+      "locationId": "chasse_camp",
+      "initialNodeId": "accueil",
+      "nodes": [
+        {
+          "id": "accueil",
+          "lines": [
+            {
+              "speaker": "Interlocuteur",
+              "text": "Bonjour."
+            }
+          ],
+          "choices": [
+            {
+              "id": "continuer",
+              "label": "Continuer",
+              "goal": "conversation-terminee"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "world": {
+    "name": "Les frontières du royaume",
+    "scenarioId": "poste-frontieres-monde",
+    "playArea": null,
+    "locationSlots": [
+      {
+        "id": "capital",
+        "type": "capital",
+        "defaultPlacement": {
+          "strategy": "random"
+        },
+        "world": {
+          "role": "starting-point",
+          "visibility": "known",
+          "lifetime": "persistent"
+        },
+        "appearance": {
+          "on": "immediate"
+        }
+      },
+      {
+        "id": "fort",
+        "type": "fort",
+        "defaultPlacement": {
+          "strategy": "random"
+        },
+        "world": {
+          "role": "world",
+          "visibility": "known",
+          "lifetime": "persistent"
+        },
+        "appearance": {
+          "on": "immediate"
+        }
+      },
+      {
+        "id": "camp",
+        "type": "camp",
+        "defaultPlacement": {
+          "strategy": "random"
+        },
+        "world": {
+          "role": "world",
+          "visibility": "known",
+          "lifetime": "persistent"
+        },
+        "appearance": {
+          "on": "immediate"
+        }
+      },
+      {
+        "id": "chasse_camp",
+        "type": "camp",
+        "defaultPlacement": {
+          "strategy": "random"
+        },
+        "world": {
+          "role": "world",
+          "visibility": "quest",
+          "lifetime": "ephemeral",
+          "removal": {
+            "questId": "poste-frontieres"
+          }
+        },
+        "appearance": {
+          "on": "QuestAccepted",
+          "questId": "poste-frontieres"
+        }
+      },
+      {
+        "id": "lieu-1",
+        "type": "quest",
+        "defaultPlacement": {
+          "strategy": "random"
+        },
+        "world": {
+          "role": "quest",
+          "visibility": "quest",
+          "lifetime": "persistent"
+        },
+        "appearance": {
+          "on": "immediate"
+        }
+      },
+      {
+        "id": "lieu-2",
+        "type": "quest",
+        "defaultPlacement": {
+          "strategy": "random"
+        },
+        "world": {
+          "role": "quest",
+          "visibility": "discoverable",
+          "lifetime": "ephemeral",
+          "removal": {
+            "questId": "poste-frontieres"
+          }
+        },
+        "appearance": {
+          "on": "ActionCompleted",
+          "actionId": "parler-chasse",
+          "questId": "Le poste des frontières"
+        }
+      }
+    ],
+    "locations": [
+      {
+        "id": "capital",
+        "name": "Capitale",
+        "type": "capital",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75
+      },
+      {
+        "id": "fort",
+        "name": "Poste des frontières",
+        "type": "fort",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75
+      },
+      {
+        "id": "camp",
+        "name": "Camp des éclaireurs",
+        "type": "camp",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75
+      },
+      {
+        "id": "chasse_camp",
+        "name": "camp de chasse",
+        "type": "camp",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75,
+        "roles": []
+      },
+      {
+        "id": "lieu-1",
+        "name": "colline",
+        "type": "quest",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75,
+        "roles": []
+      },
+      {
+        "id": "lieu-2",
+        "name": "Nouveau lieu",
+        "type": "quest",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75,
+        "roles": []
+      }
+    ]
+  },
+  "editor": {
+    "positions": {
+      "atteindre-chasse": {
+        "x": -38,
+        "y": 133
+      },
+      "parler-chasse": {
+        "x": 319,
+        "y": 128
+      },
+      "atteindre-1": {
+        "x": 700,
+        "y": 134
+      }
+    },
+    "viewport": {
+      "x": 479.4072502771402,
+      "y": 166.96697503373855,
+      "zoom": 0.8742061984685092
+    },
+    "map": {
+      "latitude": 70.22557194243628,
+      "longitude": -69.7181125,
+      "zoom": 3
+    }
+  }
+}

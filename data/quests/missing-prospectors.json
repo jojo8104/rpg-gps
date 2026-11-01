@@ -1,0 +1,209 @@
+{
+  "schemaVersion": 1,
+  "id": "missing-prospectors",
+  "title": "Les prospecteurs perdus",
+  "description": "Enquêtez sur la disparition de l’équipe royale de Valgrise et ramenez son survivant.",
+  "locationSlotId": "capital",
+  "giverNpcId": "marshal-aldren",
+  "interactionLabel": "Recevoir la mission des prospecteurs",
+  "dialogueId": "prospectors-receive-order",
+  "participationModes": ["solo"],
+  "prerequisites": [
+    {
+      "id": "mine-report",
+      "type": "item",
+      "itemId": "abandoned_mine_report",
+      "quantity": 1,
+      "locationId": "prospectors-battlefield",
+      "when": "accepted"
+    },
+    {
+      "id": "geologist",
+      "type": "item",
+      "itemId": "royal_geologist",
+      "quantity": 1,
+      "locationId": "gold-mine",
+      "when": "accepted"
+    }
+  ],
+  "actions": [
+    {
+      "id": "receive-order",
+      "action": "Parler",
+      "lieu": "capital",
+      "interaction": "Recevoir la mission des prospecteurs",
+      "dialogue": {
+        "id": "prospectors-receive-order",
+        "qui": "marshal-aldren",
+        "goal": "receive-order"
+      }
+    },
+    {
+      "id": "reach-camp",
+      "action": "Atteindre",
+      "lieu": "royal-camp",
+      "requires": ["receive-order"]
+    },
+    {
+      "id": "question-chief",
+      "action": "Parler",
+      "lieu": "royal-camp",
+      "interaction": "Questionner Armand sur les disparus",
+      "dialogue": {
+        "id": "prospectors-question-chief",
+        "qui": "armand-valgrise",
+        "goal": "question-chief"
+      },
+      "requires": ["reach-camp"]
+    },
+    {
+      "id": "reach-first-trace",
+      "action": "Atteindre",
+      "lieu": "prospectors-trace-1",
+      "requires": ["question-chief"]
+    },
+    {
+      "id": "inspect-first-trace",
+      "action": "Parler",
+      "lieu": "prospectors-trace-1",
+      "interaction": "Examiner les premières empreintes",
+      "dialogue": {
+        "id": "prospectors-inspect-first-trace",
+        "qui": "hero",
+        "goal": "inspect-first-trace"
+      },
+      "requires": ["reach-first-trace"]
+    },
+    {
+      "id": "reach-second-trace",
+      "action": "Atteindre",
+      "lieu": "prospectors-trace-2",
+      "requires": ["inspect-first-trace"]
+    },
+    {
+      "id": "inspect-second-trace",
+      "action": "Parler",
+      "lieu": "prospectors-trace-2",
+      "interaction": "Examiner les traces de lutte",
+      "dialogue": {
+        "id": "prospectors-inspect-second-trace",
+        "qui": "hero",
+        "goal": "inspect-second-trace"
+      },
+      "requires": ["reach-second-trace"]
+    },
+    {
+      "id": "reach-battlefield",
+      "action": "Atteindre",
+      "lieu": "prospectors-battlefield",
+      "requires": ["inspect-second-trace"]
+    },
+    {
+      "id": "search-battlefield",
+      "action": "Prendre",
+      "origine": "prospectors-battlefield",
+      "quoi": "abandoned_mine_report",
+      "combien": 1,
+      "interaction": "Fouiller et récupérer le rapport",
+      "requires": ["reach-battlefield"]
+    },
+    {
+      "id": "reach-mine",
+      "action": "Atteindre",
+      "lieu": "gold-mine",
+      "requires": ["search-battlefield"]
+    },
+    {
+      "id": "defeat-mine-chaos",
+      "action": "Combattre",
+      "qui": "gold-mine",
+      "targetLocationId": "gold-mine",
+      "label": "Vaincre les forces du Chaos à la mine",
+      "requires": ["reach-mine"]
+    },
+    {
+      "id": "find-geologist",
+      "action": "Parler",
+      "lieu": "gold-mine",
+      "interaction": "Ouvrir la porte condamnée",
+      "dialogue": {
+        "id": "prospectors-find-geologist",
+        "qui": "royal-geologist",
+        "goal": "find-geologist"
+      },
+      "requires": ["defeat-mine-chaos"]
+    },
+    {
+      "id": "rescue-geologist",
+      "action": "Prendre",
+      "origine": "gold-mine",
+      "quoi": "royal_geologist",
+      "combien": 1,
+      "interaction": "Escorter le géologue",
+      "requires": ["find-geologist"]
+    },
+    {
+      "id": "return-geologist-to-camp",
+      "action": "Atteindre",
+      "lieu": "royal-camp",
+      "requires": ["rescue-geologist"]
+    },
+    {
+      "id": "report-to-chief",
+      "action": "Parler",
+      "lieu": "royal-camp",
+      "interaction": "Présenter le survivant à Armand",
+      "dialogue": {
+        "id": "prospectors-report-to-chief",
+        "qui": "armand-valgrise",
+        "goal": "report-to-chief"
+      },
+      "requires": ["return-geologist-to-camp"]
+    },
+    {
+      "id": "return-to-capital",
+      "action": "Atteindre",
+      "lieu": "capital",
+      "requires": ["report-to-chief"]
+    },
+    {
+      "id": "deliver-geologist",
+      "action": "Donner",
+      "destinataire": "capital",
+      "quoi": "royal_geologist",
+      "combien": 1,
+      "interaction": "Confier le géologue aux intendants",
+      "requires": ["return-to-capital"]
+    },
+    {
+      "id": "deliver-report",
+      "action": "Donner",
+      "destinataire": "capital",
+      "quoi": "abandoned_mine_report",
+      "combien": 1,
+      "interaction": "Remettre le rapport des prospecteurs",
+      "requires": ["deliver-geologist"]
+    }
+  ],
+  "events": [],
+  "outcomes": {
+    "success": [
+      {
+        "type": "xp",
+        "amount": 50
+      },
+      {
+        "type": "resource",
+        "resource": "gold",
+        "amount": 25
+      },
+      {
+        "type": "narration",
+        "text": "Le géologue est en sécurité et le rapport remis au maréchal. La disparition des prospecteurs de Valgrise est élucidée."
+      }
+    ],
+    "failure": [],
+    "abandoned": []
+  },
+  "transitions": []
+}

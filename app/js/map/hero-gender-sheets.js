@@ -1,0 +1,250 @@
+import { MAGE_MALE_SHEET_V2 } from "./mage-male-sheet-v2.js";
+
+/* Rectangles alpha mesurés sur les PNG, sans modifier les images sources. */
+export const HERO_GENDER_SHEETS = {
+  "warrior-female": {
+    width: 971,
+    height: 1619,
+    scale: 0.25,
+    poses: [
+      [
+        {
+          x: 108,
+          y: 39,
+          width: 167,
+          height: 257,
+          axis: 191,
+        },
+        {
+          x: 400,
+          y: 40,
+          width: 174,
+          height: 264,
+          axis: 486.5,
+        },
+        {
+          x: 694,
+          y: 39,
+          width: 171,
+          height: 262,
+          axis: 779,
+        },
+      ],
+      [
+        {
+          x: 91,
+          y: 329,
+          width: 189,
+          height: 264,
+          axis: 185,
+        },
+        {
+          x: 389,
+          y: 329,
+          width: 189,
+          height: 268,
+          axis: 483,
+        },
+        {
+          x: 689,
+          y: 329,
+          width: 184,
+          height: 268,
+          axis: 780.5,
+        },
+      ],
+      [
+        {
+          x: 84,
+          y: 617,
+          width: 204,
+          height: 264,
+          axis: 185.5,
+        },
+        {
+          x: 387,
+          y: 617,
+          width: 197,
+          height: 266,
+          axis: 485,
+        },
+        {
+          x: 686,
+          y: 617,
+          width: 197,
+          height: 266,
+          axis: 784,
+        },
+      ],
+      [
+        {
+          x: 74,
+          y: 907,
+          width: 200,
+          height: 278,
+          axis: 173.5,
+        },
+        {
+          x: 372,
+          y: 908,
+          width: 198,
+          height: 280,
+          axis: 470.5,
+        },
+        {
+          x: 671,
+          y: 908,
+          width: 199,
+          height: 277,
+          axis: 770,
+        },
+      ],
+      [
+        {
+          x: 79,
+          y: 1212,
+          width: 213,
+          height: 266,
+          axis: 185,
+        },
+        {
+          x: 380,
+          y: 1211,
+          width: 208,
+          height: 272,
+          axis: 483.5,
+        },
+        {
+          x: 678,
+          y: 1211,
+          width: 210,
+          height: 272,
+          axis: 782.5,
+        },
+      ],
+    ],
+  },
+  "mage-male": MAGE_MALE_SHEET_V2,
+  "ranger-male": {
+    width: 971,
+    height: 1619,
+    scale: 0.21864951768488747,
+    poses: [
+      [
+        {
+          x: 134,
+          y: 35,
+          width: 176,
+          height: 286,
+          axis: 221.5,
+        },
+        {
+          x: 399,
+          y: 35,
+          width: 174,
+          height: 286,
+          axis: 485.5,
+        },
+        {
+          x: 659,
+          y: 35,
+          width: 179,
+          height: 286,
+          axis: 748,
+        },
+      ],
+      [
+        {
+          x: 120,
+          y: 336,
+          width: 195,
+          height: 281,
+          axis: 217,
+        },
+        {
+          x: 396,
+          y: 337,
+          width: 187,
+          height: 280,
+          axis: 489,
+        },
+        {
+          x: 661,
+          y: 336,
+          width: 184,
+          height: 281,
+          axis: 752.5,
+        },
+      ],
+      [
+        {
+          x: 117,
+          y: 627,
+          width: 200,
+          height: 303,
+          axis: 216.5,
+        },
+        {
+          x: 375,
+          y: 627,
+          width: 206,
+          height: 303,
+          axis: 477.5,
+        },
+        {
+          x: 648,
+          y: 627,
+          width: 201,
+          height: 303,
+          axis: 748,
+        },
+      ],
+      [
+        {
+          x: 111,
+          y: 940,
+          width: 202,
+          height: 302,
+          axis: 211.5,
+        },
+        {
+          x: 375,
+          y: 940,
+          width: 272,
+          height: 302,
+          axis: 510.5,
+        },
+        {
+          x: 647,
+          y: 940,
+          width: 209,
+          height: 302,
+          axis: 751,
+        },
+      ],
+      [
+        {
+          x: 111,
+          y: 1251,
+          width: 212,
+          height: 307,
+          axis: 216.5,
+        },
+        {
+          x: 323,
+          y: 1252,
+          width: 324,
+          height: 310,
+          axis: 484.5,
+        },
+        {
+          x: 647,
+          y: 1251,
+          width: 219,
+          height: 311,
+          axis: 756,
+        },
+      ],
+    ],
+  },
+};

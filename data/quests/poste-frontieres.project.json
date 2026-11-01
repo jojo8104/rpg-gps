@@ -1,0 +1,348 @@
+{
+  "format": "rpg-gps-editor",
+  "version": 1,
+  "quest": {
+    "schemaVersion": 1,
+    "id": "poste-frontieres",
+    "title": "Le poste des frontières",
+    "description": "Le poste a besoin de vivres et de renseignements. Choisissez votre mission auprès de l’intendant.",
+    "type": "simple",
+    "participationModes": [
+      "solo"
+    ],
+    "actions": [
+      {
+        "id": "choisir",
+        "action": "Parler",
+        "label": "Recevoir une mission",
+        "lieu": "capital",
+        "interaction": "Parler à l’intendant",
+        "dialogue": {
+          "id": "briefing",
+          "qui": "intendant"
+        },
+        "outputs": [
+          "ravitaillement",
+          "reconnaissance"
+        ]
+      },
+      {
+        "id": "collecter",
+        "action": "Prendre",
+        "label": "Réunir les provisions",
+        "origine": "capital",
+        "quoi": "food",
+        "combien": 5,
+        "interaction": "Prendre les provisions"
+      },
+      {
+        "id": "livrer",
+        "action": "Donner",
+        "label": "Ravitailler le poste",
+        "destinataire": "fort",
+        "quoi": "food",
+        "combien": 5,
+        "interaction": "Livrer les provisions"
+      },
+      {
+        "id": "explorer",
+        "action": "Atteindre",
+        "label": "Reconnaître le camp",
+        "lieu": "camp"
+      },
+      {
+        "id": "combattre",
+        "action": "Combattre",
+        "label": "Affronter les éclaireurs",
+        "qui": "camp",
+        "targetLocationId": "camp",
+        "outputs": [
+          "victory",
+          "defeat"
+        ]
+      },
+      {
+        "id": "rapport",
+        "action": "Parler",
+        "label": "Faire le rapport",
+        "lieu": "capital",
+        "interaction": "Présenter le rapport",
+        "dialogue": {
+          "id": "rapport",
+          "qui": "intendant",
+          "goal": "rapport-recu"
+        },
+        "join": "any",
+        "terminalOutcome": "success"
+      },
+      {
+        "id": "repli",
+        "action": "Atteindre",
+        "label": "Se replier à la capitale",
+        "lieu": "capital",
+        "terminalOutcome": "failure"
+      }
+    ],
+    "links": [
+      {
+        "id": "voie-vivres",
+        "from": "choisir",
+        "output": "ravitaillement",
+        "to": "collecter"
+      },
+      {
+        "id": "voie-reconnaissance",
+        "from": "choisir",
+        "output": "reconnaissance",
+        "to": "explorer"
+      },
+      {
+        "id": "livraison",
+        "from": "collecter",
+        "output": "success",
+        "to": "livrer"
+      },
+      {
+        "id": "arrivee",
+        "from": "explorer",
+        "output": "success",
+        "to": "combattre"
+      },
+      {
+        "id": "rapport-vivres",
+        "from": "livrer",
+        "output": "success",
+        "to": "rapport"
+      },
+      {
+        "id": "rapport-victoire",
+        "from": "combattre",
+        "output": "victory",
+        "to": "rapport"
+      },
+      {
+        "id": "retraite",
+        "from": "combattre",
+        "output": "defeat",
+        "to": "repli"
+      }
+    ],
+    "prerequisites": [
+      {
+        "id": "rations",
+        "type": "ressource",
+        "resource": "food",
+        "quantity": 5,
+        "locationId": "capital",
+        "when": "accepted"
+      }
+    ],
+    "events": [],
+    "accessConditions": [],
+    "publicationCondition": null,
+    "outcomes": {
+      "success": [
+        {
+          "type": "xp",
+          "amount": 50
+        },
+        {
+          "type": "narration",
+          "text": "Le poste des frontières vous remercie."
+        }
+      ],
+      "failure": [
+        {
+          "type": "narration",
+          "text": "Vous revenez à la capitale pour préparer une nouvelle stratégie."
+        }
+      ],
+      "abandoned": []
+    },
+    "transitions": [],
+    "locationSlotId": "capital",
+    "giverNpcId": "intendant",
+    "interactionLabel": "Choisir une mission"
+  },
+  "dialogues": {
+    "briefing": {
+      "speakerId": "intendant",
+      "locationId": "capital",
+      "initialNodeId": "accueil",
+      "nodes": [
+        {
+          "id": "accueil",
+          "lines": [
+            {
+              "speaker": "L’intendant",
+              "text": "Le poste manque de vivres, et des éclaireurs ennemis rôdent. Que préférez-vous faire ?"
+            }
+          ],
+          "choices": [
+            {
+              "id": "vivres",
+              "label": "Je livrerai les provisions",
+              "goal": "ravitaillement"
+            },
+            {
+              "id": "camp",
+              "label": "Je reconnaîtrai le camp",
+              "goal": "reconnaissance"
+            }
+          ]
+        }
+      ]
+    },
+    "rapport": {
+      "speakerId": "intendant",
+      "locationId": "capital",
+      "initialNodeId": "merci",
+      "nodes": [
+        {
+          "id": "merci",
+          "lines": [
+            {
+              "speaker": "L’intendant",
+              "text": "Merci. Votre mission est accomplie."
+            }
+          ],
+          "choices": [
+            {
+              "id": "terminer",
+              "label": "Présenter mon rapport",
+              "goal": "rapport-recu"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "world": {
+    "name": "Les frontières du royaume",
+    "scenarioId": "poste-frontieres-monde",
+    "playArea": null,
+    "locationSlots": [
+      {
+        "id": "capital",
+        "type": "capital",
+        "defaultPlacement": {
+          "strategy": "random"
+        },
+        "world": {
+          "role": "starting-point",
+          "visibility": "known",
+          "lifetime": "persistent"
+        },
+        "appearance": {
+          "on": "immediate"
+        }
+      },
+      {
+        "id": "fort",
+        "type": "fort",
+        "defaultPlacement": {
+          "strategy": "random"
+        },
+        "world": {
+          "role": "world",
+          "visibility": "known",
+          "lifetime": "persistent"
+        },
+        "appearance": {
+          "on": "immediate"
+        }
+      },
+      {
+        "id": "camp",
+        "type": "camp",
+        "defaultPlacement": {
+          "strategy": "random"
+        },
+        "world": {
+          "role": "world",
+          "visibility": "known",
+          "lifetime": "persistent"
+        },
+        "appearance": {
+          "on": "immediate"
+        }
+      }
+    ],
+    "locations": [
+      {
+        "id": "capital",
+        "name": "Capitale",
+        "type": "capital",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75
+      },
+      {
+        "id": "fort",
+        "name": "Poste des frontières",
+        "type": "fort",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75
+      },
+      {
+        "id": "camp",
+        "name": "Camp des éclaireurs",
+        "type": "camp",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75
+      }
+    ]
+  },
+  "editor": {
+    "positions": {
+      "choisir": {
+        "x": 0,
+        "y": 160
+      },
+      "collecter": {
+        "x": 330,
+        "y": 40
+      },
+      "livrer": {
+        "x": 660,
+        "y": 40
+      },
+      "explorer": {
+        "x": 330,
+        "y": 330
+      },
+      "combattre": {
+        "x": 660,
+        "y": 330
+      },
+      "rapport": {
+        "x": 1000,
+        "y": 40
+      },
+      "repli": {
+        "x": 1000,
+        "y": 500
+      }
+    },
+    "viewport": {
+      "x": 405.92335,
+      "y": 130.2378,
+      "zoom": 0.579555
+    },
+    "map": {
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "zoom": 16
+    }
+  },
+  "media": {
+    "images": []
+  },
+  "assets": {
+    "npcs": [],
+    "groups": [],
+    "items": []
+  }
+}

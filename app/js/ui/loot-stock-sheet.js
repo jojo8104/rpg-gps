@@ -1,4 +1,7 @@
+import { itemVisual } from "./item-visual.js";
+import { formatInteger } from "./number-format.js";
 import { getItemDefinition } from "../core/item-catalog.js";
+import { isBagFreeDocument } from "../core/item-baggage.js";
 
 export function renderLootStockSheet({
   element,
@@ -28,8 +31,14 @@ export function renderLootStockSheet({
     const field = fieldSlots.filter((slot) => !movedSlotIds.has(slot.id));
     const moved = fieldSlots.filter((slot) => movedSlotIds.has(slot.id));
     const stagedItemIds = new Set(moved.map((slot) => slot.itemId));
-    const projectedBag = bagSlots(
+    const projectedItems = bagSlots(
       projectedQuantities(bag.quantitiesByItem, moved),
+    );
+    const projectedBag = projectedItems.filter(
+      (slot) => !isBagFreeDocument(slot.itemId),
+    );
+    const projectedDocuments = projectedItems.filter((slot) =>
+      isBagFreeDocument(slot.itemId),
     );
     element.querySelector("[data-loot-manager]").innerHTML =
       `<div class="stock-manager loot-transfer-manager"><section class="stock-container" data-loot-side="field"><header><strong>Champ de bataille</strong><span>${field.length} groupe(s)</span></header><div class="stock-slot-grid">${field.map((slot) => slotButton(slot)).join("") || emptySlots(1)}${entries
@@ -37,7 +46,7 @@ export function renderLootStockSheet({
         .map(fixedSlot)
         .join(
           "",
-        )}</div></section><div class="stock-transfer-mark" aria-hidden="true">⇅</div><section class="stock-container" data-loot-side="bag"><header><strong>Bagages du héros</strong><span>${estimate.usedSlots}/${bag.slotCapacity} slots</span></header><div class="stock-slot-grid">${projectedBag.map((slot) => bagSlot(slot, stagedItemIds)).join("")}${emptySlots(Math.max(0, bag.slotCapacity - estimate.usedSlots))}</div></section>${feedback ? `<p class="loot-transfer-feedback" role="status">${feedback}</p>` : ""}<div class="sheet-actions"><button type="button" data-confirm-loot ${moved.length === 0 ? "disabled" : ""}>Valider les transferts</button></div></div>`;
+        )}</div></section><div class="stock-transfer-mark" aria-hidden="true">⇅</div><section class="stock-container" data-loot-side="bag"><header><strong>Bagages du héros</strong><span>${estimate.usedSlots}/${formatInteger(bag.slotCapacity)} slots</span></header><div class="stock-slot-grid">${projectedBag.map((slot) => bagSlot(slot, stagedItemIds)).join("")}${emptySlots(Math.max(0, bag.slotCapacity - estimate.usedSlots))}</div>${projectedDocuments.length ? `<h4>Documents · hors capacité des bagages</h4><div class="stock-slot-grid">${projectedDocuments.map((slot) => bagSlot(slot, stagedItemIds)).join("")}</div>` : ""}</section>${feedback ? `<p class="loot-transfer-feedback" role="status">${feedback}</p>` : ""}<div class="sheet-actions"><button type="button" data-confirm-loot ${moved.length === 0 ? "disabled" : ""}>Valider les transferts</button></div></div>`;
     bindTransfers({
       element,
       movedSlotIds,
@@ -68,7 +77,7 @@ function entrySlots(entry) {
       quantity,
       maximum,
       name: definition?.name ?? entry.itemId,
-      icon: definition?.icon ?? "◆",
+      icon: itemVisual(definition),
     });
   }
   return slots;
@@ -88,7 +97,7 @@ function bagSlots(quantitiesByItem) {
         quantity,
         maximum,
         name: definition?.name ?? itemId,
-        icon: definition?.icon ?? "◆",
+        icon: itemVisual(definition),
       });
     }
     return slots;
@@ -96,16 +105,16 @@ function bagSlots(quantitiesByItem) {
 }
 
 function slotButton(slot) {
-  return `<button type="button" class="stock-slot loot-transfer-slot" draggable="true" data-loot-slot="${slot.id}" title="Placer dans les bagages"><span>${slot.icon}</span><strong>${slot.quantity}/${slot.maximum}</strong><small>${slot.name}</small></button>`;
+  return `<button type="button" class="stock-slot loot-transfer-slot" draggable="true" data-loot-slot="${slot.id}" title="Placer dans les bagages"><span>${slot.icon}</span><strong>${formatInteger(slot.quantity)}/${formatInteger(slot.maximum)}</strong><small>${slot.name}</small></button>`;
 }
 function bagSlot(slot, stagedItemIds) {
   return stagedItemIds.has(slot.itemId)
-    ? `<button type="button" class="stock-slot loot-transfer-slot is-staged" draggable="true" data-loot-return-item="${slot.itemId}" title="Remettre un groupe sur le champ de bataille"><span>${slot.icon}</span><strong>${slot.quantity}/${slot.maximum}</strong><small>${slot.name}</small></button>`
-    : `<span class="stock-slot loot-bag-existing" title="Déjà dans les bagages"><span>${slot.icon}</span><strong>${slot.quantity}/${slot.maximum}</strong><small>${slot.name}</small></span>`;
+    ? `<button type="button" class="stock-slot loot-transfer-slot is-staged" draggable="true" data-loot-return-item="${slot.itemId}" title="Remettre un groupe sur le champ de bataille"><span>${slot.icon}</span><strong>${formatInteger(slot.quantity)}/${formatInteger(slot.maximum)}</strong><small>${slot.name}</small></button>`
+    : `<span class="stock-slot loot-bag-existing" title="Déjà dans les bagages"><span>${slot.icon}</span><strong>${formatInteger(slot.quantity)}/${formatInteger(slot.maximum)}</strong><small>${slot.name}</small></span>`;
 }
 function fixedSlot(entry) {
   const definition = getItemDefinition(entry.itemId);
-  return `<span class="stock-slot loot-fixed-slot" title="Non transportable"><span>${definition?.icon ?? "◆"}</span><strong>${entry.quantity}</strong><small>${definition?.name ?? entry.itemId}</small></span>`;
+  return `<span class="stock-slot loot-fixed-slot" title="Non transportable"><span>${itemVisual(definition)}</span><strong>${formatInteger(entry.quantity)}</strong><small>${definition?.name ?? entry.itemId}</small></span>`;
 }
 function emptySlots(count) {
   return Array.from(
@@ -228,10 +237,12 @@ function estimateSelection({ bag, entries, selection }) {
       const bundleSize = getItemDefinition(entry.itemId)?.bundleSize ?? 1;
       const currentQuantity = quantities[entry.itemId] ?? 0;
       const currentSlots = slots[entry.itemId] ?? 0;
-      const requiredSlots = Math.max(
-        0,
-        Math.ceil((currentQuantity + selected) / bundleSize) - currentSlots,
-      );
+      const requiredSlots = isBagFreeDocument(entry.itemId)
+        ? 0
+        : Math.max(
+            0,
+            Math.ceil((currentQuantity + selected) / bundleSize) - currentSlots,
+          );
       remainingSlots -= requiredSlots;
       quantities[entry.itemId] = currentQuantity + selected;
       slots[entry.itemId] = currentSlots + requiredSlots;

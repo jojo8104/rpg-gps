@@ -1,0 +1,111 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Premiers pas — version 9</title><link rel="stylesheet" href="../../wiki.css"></head><body><header><p class="eyebrow">Archive du wiki · Version 9</p><h1>Premiers pas</h1><p>2026-10-10 · Carte : commandes transparentes, quête serveur visible et languette de lieu sélectionné</p><a href="../../index.html#premiers-pas">Lire l’article actuel</a></header><main class="archive-content"><h2>Premiers pas</h2><p>Après l’accueil, choisissez Jeu rapide, Planifier une partie, Rejoindre une partie ou Partie test, puis votre joueur. Jeu rapide conserve les réglages par défaut. Planifier une partie ouvre d’abord la grande carte de playarea, puis les fiches du scénario, des quêtes et de leurs lieux. La validation du terrain reste visible sans défiler. Le parcours détaillé concerne uniquement le mode IRL.</p><p>Les nouvelles parties sont configurées par défaut pour 1 joueur en GPS réel. Validez la zone GPS avant de vous déclarer prêt ; augmentez la capacité dans les réglages pour accueillir d’autres joueurs. Le duel reste à deux joueurs. Partie test utilise explicitement la simulation et les sauvegardes conservent leurs paramètres. En mode GPS, le navigateur transmet vos mesures de position. En test sur carte fictive, vous déplacez le héros sur la carte. Les interactions et les actions passent dans les deux cas par les mêmes commandes du serveur.</p><p>Le serveur valide la position, les actions et leurs conséquences. Une page hébergée sur GitHub Pages permet de consulter ce guide ; une partie nécessite aussi un backend accessible.</p><p>En jeu, le menu conserve le code de partie et regroupe les outils Cheat, Debug, Heatmap et Brouillard de guerre sous Développement. L’organisateur peut Sauvegarder et quitter ou Quitter sans sauvegarde en détruisant la partie, après confirmation. Ces deux actions ferment la session pour tous les joueurs. La destruction invalide le code et les sessions sans créer de sauvegarde ; les anciennes sauvegardes restent disponibles. Le serveur contrôle cette permission.</p><p>La préparation détaillée permet de retirer les offres de quêtes indépendantes ; une quête définie comme linéaire et les dépendances nécessaires restent obligatoires. Le ravitaillement et Les prospecteurs perdus utilisent le moteur de quêtes actuel. L’ancien scénario à phases reste désactivé. Les lieux partagés gardent une configuration unique et proposent seulement les visibilités et placements permis par leur définition.</p><p>L’organisateur choisit joueur avancé (avec héros), absent, maître du jeu ou PNJ suprême (sans héros, avec un personnage de scénario à incarner). Les rôles sans héros exigent un autre joueur. La console des organisateurs présents permet actuellement d’installer ou déplacer les QR ; les autres outils narratifs restent prévus.</p><p>Le placement QR produit un document HTML autonome prêt à imprimer ou enregistrer en PDF : plusieurs fiches A4 avec code, nom du lieu, date, RPG GPS, illustration, notice et repères de découpe. Découpez et protégez chaque fiche contre la pluie, posez-la puis restez à côté pour enregistrer sa position au smartphone. Le serveur refuse les mesures de plus de 50 m de précision, les positions hors zone et les chevauchements de lieux. Récupérez les fiches après la partie.</p><p>En jeu, Scanner un QR ouvre la fiche du lieu après validation serveur : bon code de partie, lieu accessible, position officielle de moins de 30 secondes et proximité dans le même rayon que l’interaction du lieu. Le scan découvre le lieu sans attribuer de récompense. Les QR restent localisés dans ce parcours IRL ; le mode intérieur et les outils narratifs supplémentaires sont distincts et restent à développer.</p><p>Ce guide est également publié dans le dépôt dédié rpg-gps-wiki. La note en fin de chaque article permet de consulter ses versions précédentes archivées. Cette séparation de la documentation ne modifie aucune règle du jeu.</p><p>Sur la carte, le menu et le résumé de la quête active restent en haut. Le nouveau moteur de quêtes affiche désormais son objectif officiel dans ce résumé, avec les détails accessibles au toucher. Les pouvoirs utilisent des boutons fixes de 48 × 48 pixels dans un conteneur transparent ; en portrait ils se trouvent sous le résumé. Le recentrage est un petit bouton sur le côté. La navigation des écrans reste permanente en bas. Une seule languette de lieu apparaît au-dessus, uniquement lorsqu’un lieu est atteint ou sélectionné ; sans sélection ni lieu atteint, aucune languette. Un lieu cliqué à distance reste consultable en paysage, mais les interactions exigent toujours la proximité validée par le serveur. Ces changements de présentation ne modifient pas les règles.</p><p><a href="../../../docs/startup-menu.md">Menu et démarrage (document de règles)</a></p><p><a href="../../../docs/party-preparation.md">Préparation détaillée IRL et QR codes (document de règles)</a></p><details><summary>Menu et démarrage — texte conservé pour cette version</summary><pre class="archived-source"># Menu et démarrage
+
+Après la page de titre, le menu propose quatre choix avant la sélection du joueur :
+
+- **Jeu rapide** : création d’une salle avec les réglages par défaut du serveur (1 joueur, GPS réel), puis affichage de la page Joueurs pour choisir le héros et se déclarer prêt. La zone GPS doit être validée avant de se déclarer prêt. Les réglages restent accessibles.
+- **Planifier une partie** : création d’une salle, puis ouverture directe de la grande carte de playarea. Après validation, présentation du scénario et des quêtes, préparation des lieux, impression et installation des QR codes, puis vérification avant ouverture. Voir [Préparation détaillée IRL](party-preparation.md).
+- **Rejoindre une partie** : ouverture du formulaire de code après le choix du joueur. Le serveur valide l’inscription.
+- **Partie test** : préparation existante sur carte fictive.
+
+Le retour depuis le choix du joueur ou le formulaire de connexion ramène au menu des aventures. Le retour depuis ce menu ramène à la page de titre. La reprise enregistrée reste disponible depuis l’accueil.
+
+Identité, création, inscription, configuration et démarrage restent validés par le serveur. La préparation détaillée ajoute la sélection des quêtes indépendantes, les rôles organisateur et les placements QR officiels. Jeu rapide ne choisit pas automatiquement le héros et ne lance pas automatiquement la partie.
+
+Les nouvelles parties utilisent par défaut **1 joueur** et **GPS réel**. L’organisateur peut augmenter la capacité avant d’inviter d’autres joueurs ou choisir la simulation. Le duel exige toujours deux joueurs. Partie test demande explicitement la simulation ; une reprise garde les paramètres enregistrés dans la sauvegarde.
+
+## Menu pendant la partie
+
+Le code de partie reste affiché en haut. Un sous-menu **Développement**, fermé par défaut, regroupe Cheat / Triche, Debug (terrain, quêtes et pause), Heatmap, Brouillard de guerre et les filtres de traces. Il organise les outils existants ; il ne constitue pas une nouvelle permission administrateur.
+
+L’organisateur dispose de deux actions distinctes, en solo serveur comme en multijoueur :
+
+- **Sauvegarder et quitter** demande un nom et conserve la partie dans les sauvegardes serveur, puis ferme la session pour tous les joueurs.
+- **Quitter sans sauvegarde — Détruire la partie** demande une confirmation explicite. Le serveur vérifie que le demandeur est l’organisateur, supprime la partie active et invalide toutes ses sessions. Tous les joueurs reviennent au menu ; le code ne permet plus de rejoindre cette partie. Aucune nouvelle sauvegarde n’est créée et les anciennes sauvegardes sont conservées.
+
+Un autre joueur ne peut pas fermer la partie pour tout le groupe. En cas de refus serveur ou d’échec réseau, l’interface affiche l’erreur sans quitter localement la partie.
+
+## Commandes de la carte
+
+Le menu et le résumé de quête occupent le haut de l’écran. Le résumé est alimenté par la mission active et les actions reçues du serveur, y compris avec le nouveau moteur de quêtes ; il ne calcule aucune progression locale. En présence de plusieurs missions actives, la première dans la vue officielle est affichée. Le toucher ouvre les détails. Sans mission active, le résumé est masqué.
+
+Les pouvoirs ont une taille fixe de 48 × 48 pixels, sans réduction selon le texte. Leur conteneur est transparent, sans bordure, ombre ni flou ; les textes peuvent dépasser en attendant les icônes. En portrait, les pouvoirs sont sous le résumé. Le bouton de recentrage, réduit à 44 pixels, est placé sur le côté au milieu de l’écran.
+
+La navigation des écrans reste permanente en bas sur la carte. Une seule languette s’affiche au-dessus de la navigation pour le lieu atteint ou sélectionné par clic. Sans lieu sélectionné ou atteint, aucune languette ne doit être visible. Cliquer sur la carte pour fermer la fiche efface la sélection ; quitter le lieu atteint ferme également son aperçu. Les lieux distants cliqués restent consultables dans les deux orientations ; leurs interactions demeurent bloquées sans proximité officielle. Les fiches ouvertes restent au-dessus de la navigation basse.
+
+Ces modifications concernent uniquement la présentation : les effets, recharges, quêtes, déplacements et interactions restent calculés et validés par le serveur.
+</pre></details><details><summary>Préparation détaillée IRL et QR codes — texte conservé pour cette version</summary><pre class="archived-source"># Préparation détaillée IRL
+
+Le parcours « Planifier une partie » concerne le terrain réel. Le mode intérieur
+reste un parcours distinct, non implémenté ici. Le serveur conserve et valide
+la préparation ; le navigateur présente les fiches et transmet les intentions.
+
+## Parcours disponible
+
+1. **Playarea** : la carte occupe l’espace disponible, avec recherche d’adresse,
+   recentrage volontaire, tracé, annulation et exclusions. La validation reste
+   accessible sans défiler. Le terrain doit être validé avant la suite.
+2. **Scénario et quêtes** : présentation issue de la fiche « La fuite du royaume ».
+   Les deux quêtes du moteur actuel sont présentées depuis leurs fiches :
+   Le ravitaillement et Les prospecteurs perdus. Ce sont deux offres indépendantes,
+   retirables séparément ; les actions internes de chaque quête restent intactes.
+   Le contrat de préparation interdit le retrait d’une quête marquée linéaire et
+   vérifie les dépendances entre offres. L’ancien scénario à phases reste désactivé.
+3. **Lieux** : chaque fiche de quête affiche ses lieux nécessaires. Un lieu partagé
+   garde une seule configuration. Les autres lieux restent accessibles dans une
+   rubrique repliable. Les options sont limitées par leur définition : visibilité
+   connue, découverte, activation à l’ouverture de la partie, ou apparition selon
+   la quête ; placement prévu par le scénario, aléatoire, carte ou QR code.
+   Les placements différés imposés par le scénario ne sont pas librement modifiables.
+4. **Impression** : télécharger un fichier HTML autonome, puis l’ouvrir pour
+   imprimer ou enregistrer en PDF. Deux fiches peuvent tenir sur une feuille A4.
+   Chaque fiche contient le QR, le nom du lieu, la date, le nom RPG GPS, une petite
+   illustration médiévale vectorielle, des repères de découpe et une notice.
+5. **Installation** : découper, protéger contre les intempéries, poser la fiche,
+   puis rester à côté avec son smartphone. Scanner dans Installation ou choisir
+   le lieu et « Enregistrer ici ». Une carte montre la mesure et sa précision ;
+   confirmer pour transmettre la position au serveur. Une précision supérieure
+   à 50 m, une position hors playarea ou dans une exclusion sont refusées.
+6. **Vérification et ouverture** : date, personnage éventuel et positions manuelles
+   doivent être renseignés. Tous les joueurs doivent être prêts. Le serveur crée
+   le monde officiel, applique les placements et publie uniquement les quêtes retenues.
+
+## Rôles
+
+- **Joueur avancé** : héros jouable et console organisateur accessible pendant le jeu.
+- **Absent** : aucun héros ; préparation puis partie autonome. Pas de déplacement
+  de QR autorisé après l’ouverture.
+- **Maître du jeu** : aucun héros ; conserve sa console sur le terrain.
+- **PNJ suprême** : aucun héros ; nomme un personnage de scénario à incarner et
+  conserve sa console. Le roleplay se déroule sur le terrain.
+
+Un rôle sans héros exige au moins un autre joueur. La capacité inclut actuellement
+la place de l’organisateur ; elle passe au minimum à deux pour ces rôles.
+La console permet actuellement l’installation et le déplacement des QR codes.
+Les outils supplémentaires d’arbitrage, de dialogues incarnés et de déclenchement
+libre d’événements restent à définir et ne sont pas ajoutés à cette version.
+
+## Utilisation des QR en jeu
+
+Le QR identifie un lieu dans une partie. Son identifiant reste stable lors d’un
+déplacement : la fiche ne doit pas être réimprimée. Le serveur vérifie l’identité
+de la partie, l’apparition du lieu et une mesure GPS officielle récente (30 s).
+Le rayon est celui de l’interaction du lieu, avec les mêmes modificateurs du héros.
+Un scan valide découvre le lieu au niveau 3 et ouvre sa fiche ; il n’attribue
+aucune récompense et ne termine pas une quête à lui seul.
+
+Le scan caméra utilise jsQR fourni localement. Si la caméra est indisponible,
+le code texte imprimé peut être saisi. La caméra est arrêtée à la fermeture.
+En IRL les QR restent localisés ; le retrait de la contrainte GPS appartient au
+futur parcours intérieur. Les déplacements en cours de partie sont réservés à
+l’organisateur présent, contrôlés et consignés par le serveur.
+
+Récupérer les fiches après la partie. Les précédentes règles de combat, de
+production et de récompense restent inchangées.
+
+## Vérification
+
+`tests/party-preparation.test.js` couvre sélection, permissions, rôles sans héros,
+installation, persistance et document imprimable. Le document est décodé avec
+le même lecteur que le smartphone pour vérifier les QR produits. Les suites
+multijoueur, projection et placement couvrent les raccordements existants.
+</pre></details></main></body></html>

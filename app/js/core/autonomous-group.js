@@ -1,4 +1,10 @@
 import { Army } from "./army.js";
+import { normalizeVisual } from "./visual-definition.js";
+import { Hero } from "./hero.js";
+import {
+  AUTONOMOUS_GROUP_ALIGNMENTS,
+  getAutonomousGroupArchetype,
+} from "./autonomous-group-catalog.js";
 
 export const AUTONOMOUS_GROUP_TYPES = Object.freeze([
   "rogue",
@@ -6,6 +12,7 @@ export const AUTONOMOUS_GROUP_TYPES = Object.freeze([
   "messenger",
   "convoy",
   "prospecting",
+  "scout",
 ]);
 export const AUTONOMOUS_OWNER_KINDS = Object.freeze([
   "player",
@@ -19,6 +26,9 @@ export class AutonomousGroup {
   constructor({
     id,
     type,
+    visual = null,
+    archetypeId = null,
+    alignment = null,
     owner,
     position,
     factionId = null,
@@ -37,8 +47,22 @@ export class AutonomousGroup {
     traceAnchor = null,
     detectionMultiplier = 1,
     concealmentMultiplier = 1,
+    commander = null,
   }) {
     this.id = AutonomousGroup.#text(id, "L'identifiant du groupe autonome");
+    this.visual = normalizeVisual(visual);
+    if (archetypeId !== null && !getAutonomousGroupArchetype(archetypeId))
+      throw new RangeError("Apparence de groupe autonome inconnue.");
+    this.archetypeId = archetypeId;
+    const resolvedAlignment = alignment ?? (archetypeId ? "neutral" : null);
+    this.alignment =
+      resolvedAlignment === null
+        ? null
+        : AutonomousGroup.#choice(
+            resolvedAlignment,
+            AUTONOMOUS_GROUP_ALIGNMENTS,
+            "L’alignement du groupe autonome",
+          );
     this.type = AutonomousGroup.#choice(
       type,
       AUTONOMOUS_GROUP_TYPES,
@@ -55,6 +79,7 @@ export class AutonomousGroup {
     this.behavior = AutonomousGroup.#text(behavior, "Le comportement");
     this.mission = AutonomousGroup.#optionalRecord(mission, "La mission");
     this.army = army instanceof Army ? army : new Army(army);
+    this.commander = commander === null ? null : new Hero(commander);
     this.cargo = AutonomousGroup.#records(cargo, "La cargaison");
     this.message = AutonomousGroup.#optionalRecord(message, "Le message");
     if (morale !== null && (!Number.isFinite(morale) || morale < 0))
@@ -84,6 +109,9 @@ export class AutonomousGroup {
   toJSON() {
     return {
       id: this.id,
+      ...(this.archetypeId ? { archetypeId: this.archetypeId } : {}),
+      ...(this.alignment ? { alignment: this.alignment } : {}),
+      ...(this.visual ? { visual: { ...this.visual } } : {}),
       type: this.type,
       owner: { ...this.owner },
       position: { ...this.position },
@@ -93,6 +121,7 @@ export class AutonomousGroup {
       behavior: this.behavior,
       mission: this.mission === null ? null : structuredClone(this.mission),
       army: this.army.toJSON(),
+      commander: this.commander?.toJSON() ?? null,
       cargo: this.cargo.map((entry) => structuredClone(entry)),
       message: this.message === null ? null : structuredClone(this.message),
       morale: this.morale,
@@ -105,6 +134,17 @@ export class AutonomousGroup {
       detectionMultiplier: this.detectionMultiplier,
       concealmentMultiplier: this.concealmentMultiplier,
     };
+  }
+
+  get occupiedCargoSlots() {
+    return this.cargo.reduce(
+      (sum, entry) =>
+        sum +
+        (Number.isInteger(entry.occupiedSlots) && entry.occupiedSlots > 0
+          ? entry.occupiedSlots
+          : 1),
+      0,
+    );
   }
 
   static #owner(owner) {

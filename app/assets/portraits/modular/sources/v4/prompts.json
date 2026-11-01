@@ -1,0 +1,7 @@
+{
+  "date": "2026-10-24",
+  "tool": "imagegen intégré",
+  "output": "head-neck-atlas-v4.png",
+  "prompt": "Use case: precise-object-edit. Production transparent sprite atlas for existing simple Japanese anime RPG. Input image1 male blank face and image2 female blank face are EDIT TARGETS, keep their exact warm peach colors, clean cel shading and head/ear/jaw silhouettes. Make a 2 columns by 2 rows atlas, generous transparent gutters. TOP LEFT the same male bald blank head, TOP RIGHT the same female bald blank head: remove ALL neck and shoulders below the jaw, silhouette ends exactly at chin and jaw edge, heads without eyes nose mouth eyebrows hair. Preserve distinct original head shapes, no widening, no long forehead, not a skull. BOTTOM LEFT a separate SLIM ordinary male NECK attachment, BOTTOM RIGHT a separate slim female NECK attachment. Necks narrower than jaw with gentle trapezius base, warm peach matching respective face, shaded softly below chin, no head, no clothing. These are separate modular cutouts to overlap behind the chin; avoid broad muscular necks. All four pieces isolated on actual transparent background, no text, grid, checkerboard, background, facial traits or jewelry. Keep all silhouettes complete. Only repair contour cleanliness, remove orphan speckles.",
+  "transparent_background": true
+}

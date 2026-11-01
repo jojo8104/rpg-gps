@@ -1,0 +1,809 @@
+{
+  "pages": [
+    "index.html",
+    "premiers-pas.html",
+    "heros-armee.html",
+    "exploration.html",
+    "pouvoirs.html",
+    "armee.html",
+    "equipement.html",
+    "lieux.html",
+    "economie.html",
+    "quetes.html",
+    "cooperation.html",
+    "combats.html",
+    "sante.html",
+    "butin.html",
+    "concevoir-quetes.html",
+    "atelier-quetes.html",
+    "dashboard-monitoring.html",
+    "commandes-powershell.html",
+    "portrait-tools.html",
+    "ressources-cachees.html",
+    "exploration-persistence.html",
+    "article-startup-menu.html",
+    "article-party-preparation.html",
+    "article-idees-et-todo.html",
+    "article-play-area-map.html",
+    "article-hero-items.html",
+    "article-hero-progression-display.html",
+    "article-mage-astral-travel.html",
+    "article-hero-map-sprites.html",
+    "article-army-map-banners.html",
+    "article-watch-lookout-sprite.html",
+    "article-hero-sprite-art.html",
+    "article-hero-gender-variants.html",
+    "article-modular-portraits.html",
+    "article-enemy-map-sprites.html",
+    "article-exploration-clues.html",
+    "article-exploration-rumors-and-discovery.html",
+    "article-tavern-rumors-and-documents.html",
+    "article-exploration-search.html",
+    "article-exceptional-expeditions.html",
+    "article-exceptional-site-resolution.html",
+    "article-exceptional-site-closure.html",
+    "article-camp-foundation-and-terrain.html",
+    "article-exploration-map-and-sheets.html",
+    "article-ranged-combat.html",
+    "article-location-improvements.html",
+    "article-location-taxes.html",
+    "article-territories.html",
+    "article-capital-ai.html",
+    "article-caravan-map-sprites.html",
+    "article-autonomous-group-map-sprites.html",
+    "article-scenario-map-definition.html",
+    "article-quest-definition.html",
+    "article-missing-prospectors.html",
+    "article-battle-tactics.html",
+    "article-tactical-bonuses.html",
+    "article-tactical-terrain-effects.html",
+    "article-battle-duel-rules.html",
+    "article-battlefield-generation.html",
+    "article-quest-authoring-guide.html",
+    "article-quest-editor.html",
+    "article-dashboard-monitoring.html",
+    "article-powershell-server-guide.html",
+    "article-hidden-resource-cells.html",
+    "article-exploration-persistence.html",
+    "article-exploration-generation.html",
+    "article-exploration-privacy.html",
+    "article-wiki-maintenance.html",
+    "article-quest-creations.html",
+    "classes.html",
+    "unites.html"
+  ],
+  "media": [
+    "media/04aacff653bc6fd7-variation-check.png",
+    "media/0fc011797f0dd3e6-mounted-archer-thumbnail.png",
+    "media/121983c59744d12d-spearman-thumbnail.png",
+    "media/142414914f916c8b-farm.png",
+    "media/155cd9d429667723-scout-jrpg-walk-v1.png",
+    "media/15ec914d781e813f-mage-jrpg-walk-v1.png",
+    "media/16cd08311df5dc8c-orcs-map-front-back-v1.png",
+    "media/22ad70abf955e3d4-militia-thumbnail.png",
+    "media/253ef98c03ce5508-iron-sword.png",
+    "media/267f0427566c7937-terrain.png",
+    "media/2748837a487a9c75-assembly-check.png",
+    "media/2b16bd8f3f2dbb71-village.png",
+    "media/31ef285644e01e78-assembly-check-female-adjustments.png",
+    "media/33c6a9365ada4019-forge.png",
+    "media/34bd3d26ea427b88-assembly-check.png",
+    "media/35fea27eeee48e8c-assembly-check.png",
+    "media/3820c10ef4f20ba6-resource-wood.png",
+    "media/3a3f76d188cb8b01-depot.png",
+    "media/3ec03138d9c4c2d6-assembly-check.png",
+    "media/4265ab7fdc45a586-resource-fertile-land.png",
+    "media/43a34644a3b5bb04-light-cavalry-thumbnail.png",
+    "media/4777135fe8b85746-background-marshal-room.png",
+    "media/4b3700675508e71c-hero-ranger-female-anime-v2.png",
+    "media/519959120b71f862-watch-lookout-v1.png",
+    "media/5844aa8abdb188af-round-shield.png",
+    "media/5e19e62b9a74792b-armand-valgrise.png",
+    "media/5ec3731eb058a91f-mage-male-jrpg-walk-v1.png",
+    "media/61533e34b38539c9-hero-mage.png",
+    "media/69602525ecb12017-hero-ranger-male-v1.png",
+    "media/6b0658740641d647-resource-gold.png",
+    "media/72d2a30a65e33fdc-capital.png",
+    "media/7354d78c5c6ea4f6-ranger-male-jrpg-walk-v1.png",
+    "media/835676a433115db4-heavy-cavalry-thumbnail.png",
+    "media/8513b714b49630ed-marshal-front-room-check.png",
+    "media/8bb4b2ab8c2e7ecf-resource-stone.png",
+    "media/8e2ecbefaf9e1d47-hero-warrior-female-v1.png",
+    "media/8fea6238f1e4a441-chapel.png",
+    "media/90552615b54c7b55-assembly-check-village-chief-adjustment.png",
+    "media/94fba9390f986894-two-blocks-check.png",
+    "media/95df8b17c4abc164-hero-lineup-anime-v2.png",
+    "media/9b6c8d8ee0a5f78c-hero-jrpg-walk-v2.png",
+    "media/9bc73335d9d99d9b-hero-mage-male-v1.png",
+    "media/9c622ca0e54837a8-ranger-jrpg-walk-v1.png",
+    "media/9f4c351ccf9dddee-marshal-aldren.png",
+    "media/add1a25d8eb44666-beard-check.png",
+    "media/af27e9ad918f0b96-quest.png",
+    "media/b03b9d8179dc6835-assembly-check.png",
+    "media/b11311a8020f0f8c-hero-wanderer.png",
+    "media/b14b003c74d2f9b9-archer-thumbnail.png",
+    "media/b22a964cf86e6db2-heavy-infantry-thumbnail.png",
+    "media/b452f7e845ec6286-barracks.png",
+    "media/b58056e8d76a63aa-assembly-check.png",
+    "media/b6dfe580aa71cf35-warrior-female-jrpg-walk-v1.png",
+    "media/b7c85470e7af34db-marshal-check.png",
+    "media/bb7a2daeb0460e4e-hero-warrior-male-anime-v2.png",
+    "media/c0fd1ddaf1ed3c18-mine.png",
+    "media/cace479ffb489cea-swordsman-thumbnail.png",
+    "media/cd0983d8638cd890-wolves-map-front-back-v1.png",
+    "media/d575c6b89b598a80-tavern.png",
+    "media/d7421651b502e818-caravan-jrpg-walk-v1.png",
+    "media/da77337b2c709131-brigands-jrpg-walk-v1.png",
+    "media/dc71042794fbbae7-resource-iron.png",
+    "media/e09a45356136a1c1-background-mine.png",
+    "media/e4285b259d52edb3-hero-mage-female-anime-v2.png",
+    "media/e9d28d585b940317-fort.png",
+    "media/ee6eb1368038a1d4-welcome-landscape.png",
+    "media/eec3129682353553-trading-post.png"
+  ],
+  "assets": {
+    "welcome-landscape.png": "media/ee6eb1368038a1d4-welcome-landscape.png",
+    "portraits/hero-warrior-male-anime-v2.png": "media/bb7a2daeb0460e4e-hero-warrior-male-anime-v2.png",
+    "markers/quest.png": "media/af27e9ad918f0b96-quest.png",
+    "portraits/hero-mage-female-anime-v2.png": "media/e4285b259d52edb3-hero-mage-female-anime-v2.png",
+    "groups/watch-lookout-v1.png": "media/519959120b71f862-watch-lookout-v1.png",
+    "units/militia-thumbnail.png": "media/22ad70abf955e3d4-militia-thumbnail.png",
+    "units/spearman-thumbnail.png": "media/121983c59744d12d-spearman-thumbnail.png",
+    "equipment/round-shield.png": "media/5844aa8abdb188af-round-shield.png",
+    "equipment/iron-sword.png": "media/253ef98c03ce5508-iron-sword.png",
+    "markers/capital.png": "media/72d2a30a65e33fdc-capital.png",
+    "markers/village.png": "media/2b16bd8f3f2dbb71-village.png",
+    "improvements/farm.png": "media/142414914f916c8b-farm.png",
+    "improvements/trading-post.png": "media/eec3129682353553-trading-post.png",
+    "characters/marshal-aldren.png": "media/9f4c351ccf9dddee-marshal-aldren.png",
+    "units/heavy-cavalry-thumbnail.png": "media/835676a433115db4-heavy-cavalry-thumbnail.png",
+    "improvements/chapel.png": "media/8fea6238f1e4a441-chapel.png",
+    "improvements/barracks.png": "media/b452f7e845ec6286-barracks.png",
+    "portraits/hero-wanderer.png": "media/b11311a8020f0f8c-hero-wanderer.png",
+    "portraits/hero-mage.png": "media/61533e34b38539c9-hero-mage.png",
+    "heroes/ranger-jrpg-walk-v1.png": "media/9c622ca0e54837a8-ranger-jrpg-walk-v1.png",
+    "heroes/mage-jrpg-walk-v1.png": "media/15ec914d781e813f-mage-jrpg-walk-v1.png",
+    "heroes/hero-jrpg-walk-v2.png": "media/9b6c8d8ee0a5f78c-hero-jrpg-walk-v2.png",
+    "heroes/mage-male-jrpg-walk-v1.png": "media/5ec3731eb058a91f-mage-male-jrpg-walk-v1.png",
+    "heroes/ranger-male-jrpg-walk-v1.png": "media/7354d78c5c6ea4f6-ranger-male-jrpg-walk-v1.png",
+    "portraits/hero-warrior-female-v1.png": "media/8e2ecbefaf9e1d47-hero-warrior-female-v1.png",
+    "portraits/hero-ranger-male-v1.png": "media/69602525ecb12017-hero-ranger-male-v1.png",
+    "portraits/hero-mage-male-v1.png": "media/9bc73335d9d99d9b-hero-mage-male-v1.png",
+    "heroes/warrior-female-jrpg-walk-v1.png": "media/b6dfe580aa71cf35-warrior-female-jrpg-walk-v1.png",
+    "portraits/modular/v6/beard-check.png": "media/add1a25d8eb44666-beard-check.png",
+    "portraits/modular/v1/background-mine.png": "media/e09a45356136a1c1-background-mine.png",
+    "portraits/modular/v11/assembly-check.png": "media/34bd3d26ea427b88-assembly-check.png",
+    "portraits/modular/v12/marshal-front-room-check.png": "media/8513b714b49630ed-marshal-front-room-check.png",
+    "portraits/modular/v12/marshal-check.png": "media/b7c85470e7af34db-marshal-check.png",
+    "portraits/modular/v8/two-blocks-check.png": "media/94fba9390f986894-two-blocks-check.png",
+    "portraits/modular/v8/assembly-check-village-chief-adjustment.png": "media/90552615b54c7b55-assembly-check-village-chief-adjustment.png",
+    "portraits/modular/v8/assembly-check-female-adjustments.png": "media/31ef285644e01e78-assembly-check-female-adjustments.png",
+    "portraits/modular/v8/variation-check.png": "media/04aacff653bc6fd7-variation-check.png",
+    "portraits/modular/v10/assembly-check.png": "media/2748837a487a9c75-assembly-check.png",
+    "portraits/modular/v7/assembly-check.png": "media/3ec03138d9c4c2d6-assembly-check.png",
+    "portraits/modular/v1/background-marshal-room.png": "media/4777135fe8b85746-background-marshal-room.png",
+    "portraits/modular/v8/assembly-check.png": "media/b03b9d8179dc6835-assembly-check.png",
+    "portraits/modular/v9/assembly-check.png": "media/b58056e8d76a63aa-assembly-check.png",
+    "portraits/modular/v12/assembly-check.png": "media/35fea27eeee48e8c-assembly-check.png",
+    "portraits/hero-lineup-anime-v2.png": "media/95df8b17c4abc164-hero-lineup-anime-v2.png",
+    "groups/wolves-map-front-back-v1.png": "media/cd0983d8638cd890-wolves-map-front-back-v1.png",
+    "groups/orcs-map-front-back-v1.png": "media/16cd08311df5dc8c-orcs-map-front-back-v1.png",
+    "markers/map/resource-iron.png": "media/dc71042794fbbae7-resource-iron.png",
+    "markers/map/resource-wood.png": "media/3820c10ef4f20ba6-resource-wood.png",
+    "improvements/forge.png": "media/33c6a9365ada4019-forge.png",
+    "improvements/tavern.png": "media/d575c6b89b598a80-tavern.png",
+    "improvements/depot.png": "media/3a3f76d188cb8b01-depot.png",
+    "markers/fort.png": "media/e9d28d585b940317-fort.png",
+    "groups/caravan-jrpg-walk-v1.png": "media/d7421651b502e818-caravan-jrpg-walk-v1.png",
+    "groups/scout-jrpg-walk-v1.png": "media/155cd9d429667723-scout-jrpg-walk-v1.png",
+    "groups/brigands-jrpg-walk-v1.png": "media/da77337b2c709131-brigands-jrpg-walk-v1.png",
+    "markers/mine.png": "media/c0fd1ddaf1ed3c18-mine.png",
+    "characters/armand-valgrise.png": "media/5e19e62b9a74792b-armand-valgrise.png",
+    "units/archer-thumbnail.png": "media/b14b003c74d2f9b9-archer-thumbnail.png",
+    "map/tileset-v3/terrain.png": "media/267f0427566c7937-terrain.png",
+    "units/heavy-infantry-thumbnail.png": "media/b22a964cf86e6db2-heavy-infantry-thumbnail.png",
+    "units/light-cavalry-thumbnail.png": "media/43a34644a3b5bb04-light-cavalry-thumbnail.png",
+    "markers/map/resource-stone.png": "media/8bb4b2ab8c2e7ecf-resource-stone.png",
+    "markers/map/resource-fertile-land.png": "media/4265ab7fdc45a586-resource-fertile-land.png",
+    "markers/map/resource-gold.png": "media/6b0658740641d647-resource-gold.png",
+    "portraits/hero-ranger-female-anime-v2.png": "media/4b3700675508e71c-hero-ranger-female-anime-v2.png",
+    "units/swordsman-thumbnail.png": "media/cace479ffb489cea-swordsman-thumbnail.png",
+    "units/mounted-archer-thumbnail.png": "media/0fc011797f0dd3e6-mounted-archer-thumbnail.png"
+  },
+  "documents": [
+    "army-map-banners.md",
+    "autonomous-group-map-sprites.md",
+    "battle-duel-rules.md",
+    "battle-tactics.md",
+    "battlefield-generation.md",
+    "camp-foundation-and-terrain.md",
+    "capital-ai.md",
+    "caravan-map-sprites.md",
+    "dashboard-monitoring.md",
+    "enemy-map-sprites.md",
+    "exceptional-expeditions.md",
+    "exceptional-site-closure.md",
+    "exceptional-site-resolution.md",
+    "exploration-clues.md",
+    "exploration-generation.md",
+    "exploration-map-and-sheets.md",
+    "exploration-persistence.md",
+    "exploration-privacy.md",
+    "exploration-rumors-and-discovery.md",
+    "exploration-search.md",
+    "hero-gender-variants.md",
+    "hero-items.md",
+    "hero-map-sprites.md",
+    "hero-progression-display.md",
+    "hero-sprite-art.md",
+    "hidden-resource-cells.md",
+    "idees-et-todo.md",
+    "location-improvements.md",
+    "location-taxes.md",
+    "mage-astral-travel.md",
+    "missing-prospectors.md",
+    "modular-portraits.md",
+    "party-preparation.md",
+    "play-area-map.md",
+    "powershell-server-guide.md",
+    "quest-authoring-guide.md",
+    "quest-creations.md",
+    "quest-definition.md",
+    "quest-editor.md",
+    "ranged-combat.md",
+    "scenario-map-definition.md",
+    "startup-menu.md",
+    "tactical-bonuses.md",
+    "tactical-terrain-effects.md",
+    "tavern-rumors-and-documents.md",
+    "territories.md",
+    "watch-lookout-sprite.md",
+    "wiki-maintenance.md"
+  ],
+  "articles": [
+    {
+      "id": "premiers-pas",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Le principe du jeu",
+        "Créer, rejoindre ou reprendre",
+        "Terrain et QR codes",
+        "La boucle d’une aventure"
+      ]
+    },
+    {
+      "id": "heros-armee",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Les trois classes",
+        "Caractéristiques et limites",
+        "Expérience et passages de niveau",
+        "Grades et nombre de troupes",
+        "Marcher pour progresser",
+        "Apparence et capacités"
+      ]
+    },
+    {
+      "id": "exploration",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Position et proximité",
+        "Vision, découverte et brouillard",
+        "Discrétion et embuscades",
+        "Rencontres et groupes autonomes",
+        "Recherche et champs de bataille",
+        "Cartes et parchemins réutilisables",
+        "Disparition et annonce aux joueurs",
+        "Rumeurs et découvertes du terrain",
+        "Écoute payante et messages écrits",
+        "Rechercher un trésor, un artefact ou un donjon à l’extérieur",
+        "Préparer et faire partir une expédition exceptionnelle",
+        "Tenter les sites et revenir avec le butin",
+        "Un site fermé pour tous et des indices à archiver",
+        "Fonder un camp et respecter le terrain",
+        "Retrouver ses découvertes sur la carte"
+      ]
+    },
+    {
+      "id": "pouvoirs",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Conditions et recharge",
+        "Éclaireur : détection et vigies",
+        "Mage : divination et aura",
+        "Mage : voyage astral",
+        "Projets distincts des pouvoirs disponibles"
+      ]
+    },
+    {
+      "id": "armee",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Troupes, soldats et grades",
+        "Autorité nécessaire",
+        "Recruter et compléter",
+        "Promotion",
+        "Garnison et formation"
+      ]
+    },
+    {
+      "id": "equipement",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Porté ou transporté",
+        "Bonus des objets",
+        "Emplacements de bagages",
+        "Acheter, forger et découvrir",
+        "Trésors et récompenses différées"
+      ]
+    },
+    {
+      "id": "lieux",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Propriété et relations",
+        "Bâtiments et services",
+        "Développer un camp",
+        "Capturer et contrôler",
+        "Influence et frontières",
+        "Taverne, formations et services spécialisés"
+      ]
+    },
+    {
+      "id": "economie",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Stocks et production",
+        "Marché et imports",
+        "Impôts",
+        "Population et spécialistes",
+        "Prospection",
+        "Convois et réseau de la capitale"
+      ]
+    },
+    {
+      "id": "quetes",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Comprendre un objectif",
+        "Transport et preuves",
+        "Missions de chef et de taverne",
+        "Disponibilité et scénario",
+        "Partager et coopérer"
+      ]
+    },
+    {
+      "id": "cooperation",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Équipes et adversaires",
+        "Parler et partager",
+        "Échanger biens et unités",
+        "Distance et disponibilité",
+        "Quêtes d’équipe",
+        "Courrier, messagers et alertes"
+      ]
+    },
+    {
+      "id": "combats",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Le plateau",
+        "Ordres et résolution",
+        "Déplacement et portée",
+        "Terrain et spécialités",
+        "Moral, cohésion et bonus",
+        "Victoire, fuite et conséquences",
+        "Systèmes historiques et prévus"
+      ]
+    },
+    {
+      "id": "sante",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Soldats aptes, blessés et morts",
+        "Récupération des troupes",
+        "Soigner son héros",
+        "Revenir après zéro PV"
+      ]
+    },
+    {
+      "id": "butin",
+      "audience": "players",
+      "theme": true,
+      "topics": [
+        "Lire le rapport",
+        "Bénéficiaires et partage",
+        "Chercher et collecter",
+        "Récompenses et prochain combat"
+      ]
+    },
+    {
+      "id": "concevoir-quetes",
+      "audience": "designers",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "atelier-quetes",
+      "audience": "designers",
+      "theme": false,
+      "topics": [
+        "Schémas et action Modifier"
+      ]
+    },
+    {
+      "id": "dashboard-monitoring",
+      "audience": "administrators",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "commandes-powershell",
+      "audience": "administrators",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "portrait-tools",
+      "audience": "development",
+      "theme": false,
+      "topics": [
+        "Accessoires et cadrage — 25 octobre 2026"
+      ]
+    },
+    {
+      "id": "ressources-cachees",
+      "audience": "planned",
+      "theme": false,
+      "topics": [
+        "Des ressources invisibles dans la grille",
+        "Découvrir puis construire",
+        "Statut et paramètres à définir",
+        "Marqueurs des terrains découverts",
+        "Trésors, artefacts et donjons : une seule interaction",
+        "Cartes et parchemins d’indices",
+        "Scores et récompenses des lieux exceptionnels",
+        "Partir soi-même ou envoyer une expédition",
+        "Évolutions autorisées selon le terrain",
+        "Une découverte exceptionnelle se termine pour tous",
+        "Cartes de localisation en un à trois fragments",
+        "Décoder un nom de lieu et écouter une rumeur",
+        "Chercher un trésor à l’extérieur",
+        "Ancienne proposition de dialogue intérieur abandonnée",
+        "Articulation de la recherche et des scores",
+        "Indices réutilisables et archives",
+        "Ancien exemple narratif conservé dans l’historique",
+        "Donjons : dégâts et moral après une tentative",
+        "Paramètres validés le 26 octobre 2026",
+        "Barème d’expédition validé",
+        "Bruit des tavernes : conversations, pas faux objets"
+      ]
+    },
+    {
+      "id": "exploration-persistence",
+      "audience": "development",
+      "theme": false,
+      "topics": [
+        "Socle disponible",
+        "Confidentialité et limites",
+        "Génération des nouvelles parties — 28 octobre 2026",
+        "Vue publique et droits de lecture — 28 octobre 2026",
+        "Cartes et cycle de vie des indices — 28 octobre 2026",
+        "PNJ, rumeurs et essais de découverte — 28 octobre 2026"
+      ]
+    },
+    {
+      "id": "article-startup-menu",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-party-preparation",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-idees-et-todo",
+      "audience": "planned",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-play-area-map",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-hero-items",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-hero-progression-display",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-mage-astral-travel",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-hero-map-sprites",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-army-map-banners",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-watch-lookout-sprite",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-hero-sprite-art",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-hero-gender-variants",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-modular-portraits",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-enemy-map-sprites",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exploration-clues",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exploration-rumors-and-discovery",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-tavern-rumors-and-documents",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exploration-search",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exceptional-expeditions",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exceptional-site-resolution",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exceptional-site-closure",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-camp-foundation-and-terrain",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exploration-map-and-sheets",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-ranged-combat",
+      "audience": "planned",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-location-improvements",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-location-taxes",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-territories",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-capital-ai",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-caravan-map-sprites",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-autonomous-group-map-sprites",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-scenario-map-definition",
+      "audience": "designers",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-quest-definition",
+      "audience": "designers",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-missing-prospectors",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-battle-tactics",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-tactical-bonuses",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-tactical-terrain-effects",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-battle-duel-rules",
+      "audience": "historical",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-battlefield-generation",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-quest-authoring-guide",
+      "audience": "designers",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-quest-editor",
+      "audience": "designers",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-dashboard-monitoring",
+      "audience": "administrators",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-powershell-server-guide",
+      "audience": "administrators",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-hidden-resource-cells",
+      "audience": "planned",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exploration-persistence",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exploration-generation",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-exploration-privacy",
+      "audience": "development",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-wiki-maintenance",
+      "audience": "administrators",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "article-quest-creations",
+      "audience": "designers",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "classes",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    },
+    {
+      "id": "unites",
+      "audience": "players",
+      "theme": false,
+      "topics": []
+    }
+  ]
+}

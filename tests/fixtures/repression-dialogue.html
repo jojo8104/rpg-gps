@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <base href="/app/" />
+  <title>Vérification des dialogues de La Répression</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    nav {
+      position: fixed;
+      z-index: 10000;
+      top: 6px;
+      left: 6px;
+    }
+    #dialogue-layer {
+      z-index: 9000;
+    }
+  </style>
+  <nav>
+    <select aria-label="Scène">
+      <option value="choose-negotiate">Le Manoir</option>
+      <option value="convoy-discovered">Le convoi</option>
+      <option value="repression-imprisoned">La prison</option>
+      <option value="repression-release">La libération</option>
+    </select>
+  </nav>
+  <div id="dialogue-layer" class="dialogue-layer"></div>
+  <script type="module">
+    import { renderDialogueView } from "./js/ui/dialogue-view.js";
+    const scenario = await (
+      await fetch("../data/scenarios/repression.json")
+    ).json();
+    const select = document.querySelector("select");
+    let showChoices = false;
+    function render() {
+      const effect = scenario.events
+        .find((e) => e.id === select.value)
+        .effects.find((e) => e.type === "showNarration");
+      const options = scenario.phases.find(
+        (p) =>
+          p.id ===
+          (select.value === "choose-negotiate"
+            ? "negotiation"
+            : select.value === "convoy-discovered"
+              ? "return-journey"
+              : "repression-prison"),
+      ).choices;
+      renderDialogueView({
+        element: document.querySelector("#dialogue-layer"),
+        conversation: {
+          name: effect.speaker,
+          title: "La Répression",
+          portrait: `assets/scenes/repression-${effect.scene}.svg`,
+          options,
+        },
+        lines: [effect.text],
+        lineIndex: 0,
+        showChoices,
+        onAdvance: () => {
+          showChoices = true;
+          render();
+        },
+        onChoose: () => {
+          showChoices = false;
+          render();
+        },
+        onClose: () => {
+          showChoices = false;
+          render();
+        },
+      });
+    }
+    select.onchange = () => {
+      showChoices = false;
+      render();
+    };
+    render();
+  </script>
+</html>

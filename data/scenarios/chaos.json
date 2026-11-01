@@ -7,22 +7,177 @@
     "resources": { "gold": 50, "wood": 20, "iron": 10 },
     "unitStacks": [{ "typeId": "militia", "quantity": 6 }]
   },
+  "mapDefinition": {
+    "capitalPlacement": "center",
+    "initialLocationSlotIds": ["capital","capital-resource-gold-village","capital-resource-iron-village","capital-resource-wood-village","capital-resource-stone-village","capital-resource-gold","capital-resource-iron","capital-resource-wood","capital-resource-stone","supply-fort"],
+    "requiredLocationSlotIds": ["capital","capital-resource-gold-village","capital-resource-iron-village","capital-resource-wood-village","capital-resource-stone-village","capital-resource-gold","capital-resource-iron","capital-resource-wood","capital-resource-stone","supply-fort"],
+    "zones": [
+      {
+        "id": "kingdom-economy",
+        "innerRadiusRatio": 0,
+        "outerRadiusRatio": 0.3,
+        "enemyGroupDensityMultiplier": 1,
+        "locations": [
+          {
+            "type": "mine",
+            "resource": "gold",
+            "count": 1
+          },
+          {
+            "type": "mine",
+            "resource": "iron",
+            "count": 1
+          },
+          {
+            "type": "lumber-camp",
+            "resource": "wood",
+            "count": 1
+          },
+          {
+            "type": "quarry",
+            "resource": "stone",
+            "count": 1
+          },
+          {
+            "type": "village",
+            "count": 4
+          }
+        ]
+      },
+      {
+        "id": "kingdom-defenses",
+        "innerRadiusRatio": 0.3,
+        "outerRadiusRatio": 0.5,
+        "enemyGroupDensityMultiplier": 1,
+        "locations": [
+          {
+            "type": "fort",
+            "count": 4,
+            "directionsDegrees": [
+              0,
+              90,
+              180,
+              270
+            ]
+          },
+          {
+            "type": "camp",
+            "count": 4,
+            "directionsDegrees": [
+              0,
+              90,
+              180,
+              270
+            ]
+          }
+        ]
+      },
+      {
+        "id": "enemy-frontier",
+        "innerRadiusRatio": 0.5,
+        "outerRadiusRatio": 0.75,
+        "enemyGroupDensityMultiplier": 2,
+        "locations": [
+          {
+            "type": "fort",
+            "count": 4,
+            "faction": "enemy"
+          },
+          {
+            "type": "camp",
+            "count": 4,
+            "faction": "enemy"
+          },
+          {
+            "type": "mine",
+            "resource": "gold",
+            "count": 1
+          },
+          {
+            "type": "mine",
+            "resource": "iron",
+            "count": 1
+          },
+          {
+            "type": "lumber-camp",
+            "resource": "wood",
+            "count": 1
+          },
+          {
+            "type": "quarry",
+            "resource": "stone",
+            "count": 1
+          }
+        ]
+      },
+      {
+        "id": "team-development",
+        "innerRadiusRatio": 0.75,
+        "outerRadiusRatio": 1,
+        "enemyGroupDensityMultiplier": 1,
+        "symmetricTeams": 2,
+        "locations": [
+          {
+            "type": "fort",
+            "count": 1,
+            "state": "rebuild"
+          },
+          {
+            "type": "village",
+            "count": 2,
+            "distribution": "one-per-team"
+          },
+          {
+            "type": "mine",
+            "resource": "gold",
+            "count": 2,
+            "distribution": "one-per-team"
+          },
+          {
+            "type": "mine",
+            "resource": "iron",
+            "count": 2,
+            "distribution": "one-per-team"
+          },
+          {
+            "type": "lumber-camp",
+            "resource": "wood",
+            "count": 2,
+            "distribution": "one-per-team"
+          },
+          {
+            "type": "quarry",
+            "resource": "stone",
+            "count": 2,
+            "distribution": "one-per-team"
+          }
+        ]
+      }
+    ]
+  },
   "locationSlots": [
-    { "id": "refuge", "type": "fort", "roles": ["military", "spawn"], "defaultPlacement": { "strategy": "fixed" } },
-    { "id": "capital", "type": "capital", "roles": ["social", "royal", "quest"], "defaultPlacement": { "strategy": "fixed" } },
-    { "id": "royal-camp", "type": "camp", "roles": ["social", "quest"], "defaultPlacement": { "strategy": "distance", "minimumDistanceMeters": 150, "minimumDistanceMetersByPace": { "calm": 150, "sport": 300 }, "minimumDistanceFromOriginMeters": 75, "minimumDistanceFromOriginMetersByPace": { "calm": 75, "sport": 150 }, "maximumAccuracyMeters": 50, "confirmations": 2 } },
-    { "id": "prospectors-battlefield", "type": "quest", "roles": ["quest", "clue"], "defaultPlacement": { "strategy": "fixed" } },
-    { "id": "gold-mine", "type": "mine", "roles": ["resource", "strategic", "quest"], "defaultPlacement": { "strategy": "fixed" } },
-    { "id": "bandit-camp", "type": "camp", "roles": ["military", "objective"] },
-    { "id": "evacuation-camp", "type": "camp", "roles": ["royal", "evacuation", "quest"], "defaultPlacement": { "strategy": "fixed" } },
-    { "id": "supply-fort", "type": "fort", "roles": ["royal", "military", "strategic", "quest", "capital-approach"], "defaultPlacement": { "strategy": "area-relative", "originLocationSlotId": "capital", "areaRadiusRatio": 0.25, "minimumDistanceMeters": 200, "maximumDistanceMeters": 1500, "directionDegrees": 35 } },
-    { "id": "supply-village-north", "type": "village", "roles": ["royal", "food", "quest"], "defaultPlacement": { "strategy": "area-relative", "originLocationSlotId": "capital", "areaRadiusRatio": 0.14, "maximumDistanceMeters": 1500, "directionDegrees": 0 } },
-    { "id": "supply-village-east", "type": "village", "roles": ["royal", "food", "quest"], "defaultPlacement": { "strategy": "area-relative", "originLocationSlotId": "capital", "areaRadiusRatio": 0.18, "maximumDistanceMeters": 1500, "directionDegrees": 90 } },
-    { "id": "supply-village-south", "type": "village", "roles": ["royal", "food", "quest"], "defaultPlacement": { "strategy": "area-relative", "originLocationSlotId": "capital", "areaRadiusRatio": 0.21, "maximumDistanceMeters": 1500, "directionDegrees": 180 } },
-    { "id": "supply-village-west", "type": "village", "roles": ["royal", "food", "quest"], "defaultPlacement": { "strategy": "area-relative", "originLocationSlotId": "capital", "areaRadiusRatio": 0.24, "maximumDistanceMeters": 1500, "directionDegrees": 270 } },
-    { "id": "royal-gold-mine", "type": "mine", "roles": ["royal", "resource", "gold", "quest"], "defaultPlacement": { "strategy": "area-relative", "originLocationSlotId": "capital", "areaRadiusRatio": 0.25, "minimumDistanceMeters": 250, "maximumDistanceMeters": 1500, "directionDegrees": 220 } },
-    { "id": "opposite-fort", "type": "fort", "roles": ["royal", "military", "strategic", "quest"], "defaultPlacement": { "strategy": "area-relative", "originLocationSlotId": "capital", "areaRadiusRatio": 0.25, "minimumDistanceMeters": 200, "maximumDistanceMeters": 1500, "directionDegrees": 215 } }
+    {"id":"refuge","type":"fort","roles":["military","spawn"],"defaultPlacement":{"strategy":"fixed"},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"capital","type":"capital","roles":["social","royal","quest"],"defaultPlacement":{"strategy":"fixed"},"world":{"role":"starting-point","visibility":"known","lifetime":"persistent"}},
+    {"id":"royal-camp","type":"camp","roles":["social","quest"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.12,"minimumDistanceMeters":150,"maximumDistanceMeters":900,"directionDegrees":55},"appearance":{"on":"QuestAccepted","questId":"missing-prospectors"},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"prospectors-trace-1","type":"quest","roles":["quest","clue"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.18,"minimumDistanceMeters":60,"maximumDistanceMeters":900,"directionDegrees":55},"appearance":{"on":"ActionCompleted","questId":"missing-prospectors","actionId":"question-chief"},"world":{"role":"quest","visibility":"quest","lifetime":"ephemeral","removal":{"questId":"missing-prospectors","actionId":"inspect-first-trace"}}},
+    {"id":"prospectors-trace-2","type":"quest","roles":["quest","clue"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.3,"minimumDistanceMeters":60,"maximumDistanceMeters":900,"directionDegrees":55},"appearance":{"on":"ActionCompleted","questId":"missing-prospectors","actionId":"inspect-first-trace"},"world":{"role":"quest","visibility":"quest","lifetime":"ephemeral","removal":{"questId":"missing-prospectors","actionId":"inspect-second-trace"}}},
+    {"id":"prospectors-battlefield","type":"quest","roles":["quest","clue"],"defaultPlacement":{"strategy":"fixed"},"appearance":{"on":"ActionCompleted","questId":"missing-prospectors","actionId":"inspect-second-trace"},"world":{"role":"quest","visibility":"quest","lifetime":"ephemeral","removal":{"questId":"missing-prospectors","actionId":"search-battlefield"}}},
+    {"id":"gold-mine","type":"mine","roles":["resource","strategic","quest"],"defaultPlacement":{"strategy":"fixed"},"appearance":{"on":"ActionCompleted","questId":"missing-prospectors","actionId":"search-battlefield"},"world":{"role":"world","visibility":"discoverable","lifetime":"persistent"}},
+    {"id":"bandit-camp","type":"camp","roles":["military","objective"],"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"evacuation-camp","type":"camp","roles":["royal","evacuation","quest"],"defaultPlacement":{"strategy":"fixed"},"world":{"role":"world","visibility":"discoverable","lifetime":"persistent"}},
+    {"id":"supply-fort","type":"fort","roles":["royal","military","strategic","quest","capital-approach"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.25,"minimumDistanceMeters":200,"maximumDistanceMeters":1500,"directionDegrees":35},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"royal-gold-mine","type":"mine","roles":["royal","resource","gold","quest"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.25,"minimumDistanceMeters":250,"maximumDistanceMeters":1500,"directionDegrees":220},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"opposite-fort","type":"fort","roles":["royal","military","strategic","quest"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.25,"minimumDistanceMeters":200,"maximumDistanceMeters":1500,"directionDegrees":215},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"capital-resource-gold","type":"mine","roles":["capital-economy","resource","gold"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.3,"maximumDistanceMeters":1200,"directionDegrees":45},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"capital-resource-gold-village","type":"village","roles":["capital-economy","settlement"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital-resource-gold","areaRadiusRatio":0.025,"maximumDistanceMeters":80,"directionDegrees":135},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"capital-resource-iron","type":"mine","roles":["capital-economy","resource","iron"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.3,"maximumDistanceMeters":1200,"directionDegrees":135},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"capital-resource-iron-village","type":"village","roles":["capital-economy","settlement"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital-resource-iron","areaRadiusRatio":0.025,"maximumDistanceMeters":80,"directionDegrees":225},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"capital-resource-wood","type":"lumber-camp","roles":["capital-economy","resource","wood"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.3,"maximumDistanceMeters":1200,"directionDegrees":225},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"capital-resource-wood-village","type":"village","roles":["capital-economy","settlement"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital-resource-wood","areaRadiusRatio":0.025,"maximumDistanceMeters":80,"directionDegrees":315},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"capital-resource-stone","type":"quarry","roles":["capital-economy","resource","stone"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital","areaRadiusRatio":0.3,"maximumDistanceMeters":1200,"directionDegrees":315},"world":{"role":"world","visibility":"known","lifetime":"persistent"}},
+    {"id":"capital-resource-stone-village","type":"village","roles":["capital-economy","settlement"],"defaultPlacement":{"strategy":"area-relative","originLocationSlotId":"capital-resource-stone","areaRadiusRatio":0.025,"maximumDistanceMeters":80,"directionDegrees":405},"world":{"role":"world","visibility":"known","lifetime":"persistent"}}
   ],
+  "worldState": { "flags": { "territory": { "enabled": true, "captureSeconds": 60, "isolationSeconds": 120 }, "capitalAi": { "enabled": true, "resourceRadiusRatio": 0.5, "resourceRadiusMaximumMeters": 600 } } },
   "factions": [
     { "id": "kingdom", "name": "Royaume" },
     { "id": "bandits", "name": "Brigands" },
@@ -39,6 +194,7 @@
     }
   ],
   "phases": [
+    {"id":"capital-reconquest","title":"La capitale du Chaos","description":"Les bannières royales ont été remplacées par celles du Chaos. Coupez ses convois, capturez ses exploitations et développez vos forces avant d’affronter le maréchal Aldren, guerrier de niveau 15, dans la capitale.","objectives":[{"id":"defeat-capital-boss","text":"Vaincre Aldren et reprendre la capitale","trigger":{"type":"battleWon","locationSlotId":"capital","requiresPlayerControl":true},"eventId":"capital-liberated"}],"eventIds":["capital-liberated"],"transitions":[]},
     { "id": "reach-royal-camp", "title": "Les prospecteurs disparus", "description": "Éloignez-vous du point de départ pour rejoindre le camp royal de Valgrise.", "objectives": [{ "id": "reach-royal-camp", "text": "Rejoindre le camp royal", "trigger": { "type": "locationPlaced", "locationSlotId": "royal-camp" }, "eventId": "royal-camp-reached" }], "eventIds": ["royal-camp-reached"], "transitions": [{ "nextPhase": "speak-to-camp-chief" }] },
     { "id": "speak-to-camp-chief", "title": "Les prospecteurs disparus", "description": "Armand de Valgrise vous attend dans la tente de commandement.", "objectives": [{ "id": "speak-to-camp-chief", "text": "Parler au chef du camp", "trigger": { "type": "interactionCompleted", "interactionId": "speak-to-camp-chief", "locationSlotId": "royal-camp", "label": "Questionner Armand sur les prospecteurs", "responseLines": ["Ils étaient six, accompagnés d’un jeune géologue.", "Ils devaient relever le terrain autour des anciennes collines minières et rentrer avant la nuit.", "Nous avons retrouvé leurs premières marques sur le chemin, puis plus rien.", "Suivez leurs traces. Retrouvez mes hommes si vous le pouvez."] }, "eventId": "camp-chief-questioned" }], "eventIds": ["camp-chief-questioned"], "transitions": [{ "nextPhase": "follow-first-trace" }] },
     { "id": "follow-first-trace", "title": "Les traces des prospecteurs", "description": "Approchez-vous du marqueur de piste et examinez les empreintes.", "objectives": [{ "id": "inspect-first-trace", "text": "Examiner les premières traces", "trigger": { "type": "trailPointInspected", "trailId": "prospectors-trail", "traceId": "prospectors-trace-1" }, "eventId": "first-trace-inspected" }], "eventIds": ["first-trace-inspected"], "transitions": [{ "nextPhase": "follow-second-trace" }] },
@@ -56,10 +212,10 @@
     { "id": "second-prologue-complete", "title": "Le prix du salut", "description": "L’évacuation est terminée. Le bilan dépend des habitants, ressources et bâtiments sauvés.", "objectives": [], "eventIds": [], "transitions": [] },
     { "id": "receive-supply-order", "title": "Le ravitaillement", "description": "Les réserves du fortin de Rochegarde s’épuisent. Recevez l’ordre de réunir des vivres dans les villages royaux.", "objectives": [{ "id": "receive-fort-rations", "text": "Recevoir l’ordre de ravitaillement à la capitale", "trigger": { "type": "interactionCompleted", "interactionId": "receive-fort-rations", "locationSlotId": "capital", "label": "Recevoir l’ordre de ravitaillement", "responseLines": ["Le fortin de Rochegarde manque de vivres.", "Quatre villages de la ceinture de la capitale peuvent céder chacun cinq rations.", "Collectez ces réserves puis remettez les vingt rations au commandant du fortin."] }, "eventId": "fort-supply-ordered" }], "eventIds": ["fort-supply-ordered"], "transitions": [{ "nextPhase": "collect-village-rations" }] },
     { "id": "collect-village-rations", "title": "Les greniers du royaume", "description": "Visitez les quatre villages signalés autour de la capitale et récupérez cinq rations dans chacun.", "objectives": [
-      { "id": "collect-north-rations", "text": "Collecter 5 rations à Haut-Pré", "trigger": { "type": "resourceCollection", "interactionId": "collect-north-rations", "locationSlotId": "supply-village-north", "resource": "food", "amount": 5, "label": "Charger 5 rations" }, "eventId": "north-rations-collected" },
-      { "id": "collect-east-rations", "text": "Collecter 5 rations à Belle-Rive", "trigger": { "type": "resourceCollection", "interactionId": "collect-east-rations", "locationSlotId": "supply-village-east", "resource": "food", "amount": 5, "label": "Charger 5 rations" }, "eventId": "east-rations-collected" },
-      { "id": "collect-south-rations", "text": "Collecter 5 rations à Valbois", "trigger": { "type": "resourceCollection", "interactionId": "collect-south-rations", "locationSlotId": "supply-village-south", "resource": "food", "amount": 5, "label": "Charger 5 rations" }, "eventId": "south-rations-collected" },
-      { "id": "collect-west-rations", "text": "Collecter 5 rations aux Chasses-Royales", "trigger": { "type": "resourceCollection", "interactionId": "collect-west-rations", "locationSlotId": "supply-village-west", "resource": "food", "amount": 5, "label": "Charger 5 rations" }, "eventId": "west-rations-collected" }
+      { "id": "collect-north-rations", "text": "Collecter 5 rations à Aurive", "trigger": { "type": "resourceCollection", "interactionId": "collect-north-rations", "locationSlotId": "capital-resource-gold-village", "resource": "food", "amount": 5, "label": "Charger 5 rations" }, "eventId": "north-rations-collected" },
+      { "id": "collect-east-rations", "text": "Collecter 5 rations à Ferrières", "trigger": { "type": "resourceCollection", "interactionId": "collect-east-rations", "locationSlotId": "capital-resource-iron-village", "resource": "food", "amount": 5, "label": "Charger 5 rations" }, "eventId": "east-rations-collected" },
+      { "id": "collect-south-rations", "text": "Collecter 5 rations à Boisclair", "trigger": { "type": "resourceCollection", "interactionId": "collect-south-rations", "locationSlotId": "capital-resource-wood-village", "resource": "food", "amount": 5, "label": "Charger 5 rations" }, "eventId": "south-rations-collected" },
+      { "id": "collect-west-rations", "text": "Collecter 5 rations à Rochevive", "trigger": { "type": "resourceCollection", "interactionId": "collect-west-rations", "locationSlotId": "capital-resource-stone-village", "resource": "food", "amount": 5, "label": "Charger 5 rations" }, "eventId": "west-rations-collected" }
     ], "eventIds": ["north-rations-collected", "east-rations-collected", "south-rations-collected", "west-rations-collected"], "transitions": [{ "nextPhase": "reach-supply-fort" }] },
     { "id": "reach-supply-fort", "title": "La route de Rochegarde", "description": "Transportez les rations jusqu’au fortin royal situé dans la ceinture défensive de la capitale.", "objectives": [{ "id": "reach-supply-fort", "text": "Atteindre le fortin de Rochegarde", "trigger": { "type": "enterLocation", "locationSlotId": "supply-fort" }, "eventId": "supply-fort-reached" }], "eventIds": ["supply-fort-reached"], "transitions": [{ "nextPhase": "deliver-fort-rations" }] },
     { "id": "deliver-fort-rations", "title": "Les réserves du fortin", "description": "Remettez les vingt rations au commandant de Rochegarde.", "objectives": [{ "id": "deliver-fort-rations", "text": "Livrer 20 rations au fortin", "trigger": { "type": "resourceDelivery", "interactionId": "deliver-fort-rations", "locationSlotId": "supply-fort", "playerId": "local", "resource": "food", "amount": 20, "label": "Remettre les rations au seigneur Géraud", "responseLines": ["Le seigneur Géraud fait porter les caisses dans les réserves.", "Les vingt rations sont inventoriées puis distribuées à la garnison.", "Le commandant vous remercie au nom de Rochegarde."] }, "eventId": "fort-rations-delivered" }], "eventIds": ["fort-rations-delivered"], "transitions": [] },
@@ -77,6 +233,8 @@
     { "id": "barbarians", "title": "Les barbares", "description": "Une menace plus grande se révèle.", "objectives": [{ "id": "discover-barbarians", "text": "Découvrir les barbares." }], "eventIds": ["barbarians-revealed"], "transitions": [] }
   ],
   "events": [
+    {"id":"capital-betrayal","effects":[{"type":"corruptCapital"},{"type":"showNarration","text":"Une nouvelle terrible arrive : Aldren a livré la capitale au Chaos. Les convois alimentent désormais ses forges et ses armées. Préparez la reconquête !"},{"type":"offerQuest","questId":"capital-reconquest","title":"La capitale du Chaos","description":"Les bannières royales ont été remplacées par celles du Chaos. Coupez ses convois, capturez ses exploitations et développez vos forces avant d’affronter le maréchal Aldren, guerrier de niveau 15, dans la capitale.","startPhaseId":"capital-reconquest"}]},
+    {"id":"capital-liberated","effects":[{"type":"setFlag","path":"capitalAi.defeated","value":true},{"type":"showNarration","text":"Aldren est vaincu. La capitale est libérée et les forges du Chaos se taisent. La reconquête du royaume est accomplie."}]},
     { "id": "royal-camp-reached", "effects": [{ "type": "showNarration", "text": "Les sentinelles vous reconnaissent et ouvrent le passage. Le capitaine de Valgrise vous attend." }, { "type": "awardHeroExperience", "playerId": "local", "amount": 10 }] },
     { "id": "camp-chief-questioned", "effects": [{ "type": "showNarration", "text": "Armand vous confie la dernière position connue des prospecteurs." }, { "type": "awardHeroExperience", "playerId": "local", "amount": 10 }] },
     { "id": "first-trace-inspected", "effects": [{ "type": "showNarration", "text": "Des empreintes de bottes et les sillons d’un chariot quittent la route. Parmi elles apparaissent des traces de griffes." }, { "type": "awardHeroExperience", "playerId": "local", "amount": 10 }] },
@@ -92,11 +250,11 @@
     { "id": "evacuation-camp-secured", "effects": [{ "type": "showNarration", "text": "Les éclaireurs sont repoussés. Le camp est momentanément sûr : chargez les habitants et récupérez ce qui peut l’être." }, { "type": "awardHeroExperience", "playerId": "local", "amount": 10 }] },
     { "id": "evacuation-departed", "effects": [{ "type": "showNarration", "text": "Vous quittez le camp avec ce que vous avez pu sauver. Le résultat sera calculé lorsque vous atteindrez la capitale." }, { "type": "awardHeroExperience", "playerId": "local", "amount": 10 }] },
     { "id": "evacuation-completed", "effects": [{ "type": "completeEvacuation", "playerId": "local", "evacuationId": "royal-camp-evacuation", "destinationLocationSlotId": "capital" }, { "type": "returnWagons", "playerId": "local", "wagonIds": ["royal-wagon-1", "royal-wagon-2"] }, { "type": "showNarration", "text": "Les portes de la capitale s’ouvrent pour les évacués. Les intendants établissent le bilan de votre mission." }, { "type": "awardHeroExperience", "playerId": "local", "amount": 100 }] },
-    { "id": "fort-supply-ordered", "effects": [{ "type": "showNarration", "text": "Les intendants indiquent Rochegarde et les quatre villages fournisseurs sur votre carte." }, { "type": "revealLocation", "locationSlotId": "supply-fort" }, { "type": "revealLocation", "locationSlotId": "supply-village-north" }, { "type": "revealLocation", "locationSlotId": "supply-village-east" }, { "type": "revealLocation", "locationSlotId": "supply-village-south" }, { "type": "revealLocation", "locationSlotId": "supply-village-west" }] },
-    { "id": "north-rations-collected", "effects": [{ "type": "collectLocationResource", "playerId": "local", "sourceLocationSlotId": "supply-village-north", "resource": "food", "amount": 5 }] },
-    { "id": "east-rations-collected", "effects": [{ "type": "collectLocationResource", "playerId": "local", "sourceLocationSlotId": "supply-village-east", "resource": "food", "amount": 5 }] },
-    { "id": "south-rations-collected", "effects": [{ "type": "collectLocationResource", "playerId": "local", "sourceLocationSlotId": "supply-village-south", "resource": "food", "amount": 5 }] },
-    { "id": "west-rations-collected", "effects": [{ "type": "collectLocationResource", "playerId": "local", "sourceLocationSlotId": "supply-village-west", "resource": "food", "amount": 5 }] },
+    { "id": "fort-supply-ordered", "effects": [{ "type": "showNarration", "text": "Les intendants indiquent Rochegarde et les quatre villages fournisseurs sur votre carte." }, { "type": "revealLocation", "locationSlotId": "supply-fort" }, { "type": "revealLocation", "locationSlotId": "capital-resource-gold-village" }, { "type": "revealLocation", "locationSlotId": "capital-resource-iron-village" }, { "type": "revealLocation", "locationSlotId": "capital-resource-wood-village" }, { "type": "revealLocation", "locationSlotId": "capital-resource-stone-village" }] },
+    { "id": "north-rations-collected", "effects": [{ "type": "collectLocationResource", "playerId": "local", "sourceLocationSlotId": "capital-resource-gold-village", "resource": "food", "amount": 5 }] },
+    { "id": "east-rations-collected", "effects": [{ "type": "collectLocationResource", "playerId": "local", "sourceLocationSlotId": "capital-resource-iron-village", "resource": "food", "amount": 5 }] },
+    { "id": "south-rations-collected", "effects": [{ "type": "collectLocationResource", "playerId": "local", "sourceLocationSlotId": "capital-resource-wood-village", "resource": "food", "amount": 5 }] },
+    { "id": "west-rations-collected", "effects": [{ "type": "collectLocationResource", "playerId": "local", "sourceLocationSlotId": "capital-resource-stone-village", "resource": "food", "amount": 5 }] },
     { "id": "supply-fort-reached", "effects": [{ "type": "showNarration", "text": "Les bannières royales flottent encore sur Rochegarde. Dame Ysilde et sa garnison vous accueillent derrière les remparts." }, { "type": "awardHeroExperience", "playerId": "local", "amount": 20 }] },
     { "id": "fort-rations-delivered", "effects": [{ "type": "depositHeroResource", "playerId": "local", "destinationLocationSlotId": "supply-fort", "resource": "food", "amount": 20 }, { "type": "showNarration", "text": "Les vingt rations rejoignent les réserves de Rochegarde. Le ravitaillement est terminé." }, { "type": "awardHeroExperience", "playerId": "local", "amount": 75 }] },
     { "id": "gold-convoy-ordered", "effects": [{ "type": "revealLocation", "locationSlotId": "royal-gold-mine" }, { "type": "showNarration", "text": "La mine royale apparaît sur votre carte, dans la ceinture proche de la capitale." }] },

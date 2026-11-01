@@ -1,0 +1,425 @@
+{
+  "format": "rpg-gps-editor",
+  "version": 1,
+  "quest": {
+    "schemaVersion": 1,
+    "id": "excalibure",
+    "title": "Excalibure",
+    "description": "à la recherhce d'excalibure",
+    "actions": [
+      {
+        "id": "parler_a_Merlin",
+        "action": "Parler",
+        "label": "Dialoguer et choisir un chemin",
+        "lieu": "broceliande",
+        "interaction": "Parler au vieille hermite de la forêt",
+        "requires": [],
+        "rewards": [],
+        "dialogue": {
+          "id": "dialogue-parler-1",
+          "qui": "merlin",
+          "goal": "conversation-terminee"
+        },
+        "outputs": [
+          "ok"
+        ]
+      },
+      {
+        "id": "atteindre-1",
+        "action": "Atteindre",
+        "label": "Rejoindre un lieu",
+        "lieu": "carrière",
+        "requires": [],
+        "rewards": [
+          {
+            "type": "item",
+            "itemId": "excalibure",
+            "amount": 1
+          }
+        ],
+        "interaction": "retirer l'épée"
+      }
+    ],
+    "links": [
+      {
+        "id": "lien-1",
+        "from": "parler_a_Merlin",
+        "output": "ok",
+        "to": "atteindre-1",
+        "conditions": []
+      }
+    ],
+    "prerequisites": [],
+    "events": [],
+    "publicationCondition": null,
+    "accessConditions": [],
+    "participationModes": [
+      "solo"
+    ],
+    "locationSlotId": "broceliande",
+    "giverNpcId": "merlin",
+    "interactionLabel": "Parler à l'hermite",
+    "dialogueId": null,
+    "natures": [],
+    "type": "simple",
+    "conditions": [],
+    "locationSlots": [],
+    "offer": null,
+    "steps": [],
+    "initialStepId": null,
+    "childQuestIds": [],
+    "completionPolicy": "all",
+    "scenes": [],
+    "presentation": {},
+    "outcomes": {
+      "success": [],
+      "failure": [],
+      "abandoned": []
+    },
+    "transitions": []
+  },
+  "dialogues": {
+    "dialogue-parler-1": {
+      "speakerId": "merlin",
+      "locationId": "broceliande",
+      "initialNodeId": "accueil",
+      "nodes": [
+        {
+          "id": "accueil",
+          "lines": [
+            {
+              "speaker": "Merlin",
+              "text": "Votre conversation commence ici."
+            }
+          ],
+          "choices": [
+            {
+              "id": "continuer",
+              "label": "Continuer",
+              "goal": "ok"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "world": {
+    "scenarioId": "monde-aventure",
+    "name": "Monde de l’aventure",
+    "locationSlots": [
+      {
+        "id": "capital",
+        "type": "capital",
+        "defaultPlacement": {
+          "strategy": "fixed",
+          "position": {
+            "latitude": 48.8584635,
+            "longitude": 2.3478548
+          }
+        },
+        "appearance": {
+          "on": "immediate"
+        },
+        "world": {
+          "role": "starting-point",
+          "visibility": "known",
+          "lifetime": "persistent"
+        }
+      },
+      {
+        "id": "broceliande",
+        "type": "lumber-camp",
+        "defaultPlacement": {
+          "strategy": "fixed",
+          "position": {
+            "latitude": 48.8590424,
+            "longitude": 2.3596351
+          }
+        },
+        "appearance": {
+          "on": "immediate"
+        },
+        "world": {
+          "role": "world",
+          "visibility": "known",
+          "lifetime": "persistent"
+        }
+      },
+      {
+        "id": "carrière",
+        "type": "quarry",
+        "defaultPlacement": {
+          "strategy": "fixed",
+          "position": {
+            "latitude": 48.8569953,
+            "longitude": 2.3539273
+          }
+        },
+        "appearance": {
+          "on": "immediate"
+        },
+        "world": {
+          "role": "world",
+          "visibility": "known",
+          "lifetime": "persistent"
+        }
+      }
+    ],
+    "locations": [
+      {
+        "id": "capital",
+        "name": "Capitale Royale",
+        "type": "capital",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75,
+        "roles": [],
+        "position": {
+          "latitude": 48.8584635,
+          "longitude": 2.3478548
+        }
+      },
+      {
+        "id": "broceliande",
+        "type": "lumber-camp",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75,
+        "roles": [],
+        "name": "Forêt de Broceliande",
+        "position": {
+          "latitude": 48.8590424,
+          "longitude": 2.3596351
+        }
+      },
+      {
+        "id": "carrière",
+        "name": "la carrière",
+        "type": "quarry",
+        "source": "scenario",
+        "interactionRadius": 25,
+        "detectionRadius": 75,
+        "roles": [],
+        "position": {
+          "latitude": 48.8569953,
+          "longitude": 2.3539273
+        }
+      }
+    ],
+    "playArea": null
+  },
+  "editor": {
+    "positions": {
+      "parler_a_Merlin": {
+        "x": 387,
+        "y": 103
+      },
+      "atteindre-1": {
+        "x": 751,
+        "y": 118
+      }
+    },
+    "viewport": {
+      "x": -78.5,
+      "y": 127,
+      "zoom": 1
+    },
+    "map": {
+      "latitude": 48.8566,
+      "longitude": 2.3522,
+      "zoom": 16
+    },
+    "questLayouts": {
+      "hunt": {
+        "positions": {},
+        "viewport": {
+          "x": 115.10445929999989,
+          "y": 114.6830363999999,
+          "zoom": 0.8732691000000004
+        }
+      },
+      "recoon1": {
+        "positions": {},
+        "viewport": {
+          "x": 70,
+          "y": 70,
+          "zoom": 1
+        }
+      },
+      "quete-1": {
+        "positions": {
+          "parler-1": {
+            "x": 257,
+            "y": 118
+          }
+        },
+        "viewport": {
+          "x": 70,
+          "y": 70,
+          "zoom": 1
+        }
+      },
+      "excalibure": {
+        "positions": {
+          "parler_a_Merlin": {
+            "x": 412,
+            "y": 121
+          },
+          "atteindre-1": {
+            "x": 750,
+            "y": 118
+          }
+        },
+        "viewport": {
+          "x": -78.5,
+          "y": 127,
+          "zoom": 1
+        }
+      }
+    }
+  },
+  "assets": {
+    "npcs": [
+      {
+        "id": "merlin",
+        "name": "Merlin",
+        "role": "Interlocuteur",
+        "locationId": "broceliande",
+        "dialogueId": "dialogue-parler-1",
+        "description": "indique le lieu où se trouve excalibure"
+      }
+    ],
+    "groups": [
+      {
+        "id": "ga-1",
+        "type": "army",
+        "owner": {
+          "kind": "faction",
+          "id": "independent"
+        },
+        "position": {
+          "latitude": 48.8566,
+          "longitude": 2.3522
+        },
+        "behavior": "passive",
+        "status": "idle",
+        "army": {
+          "units": []
+        },
+        "cargo": [],
+        "mission": null,
+        "detectionMultiplier": 1,
+        "concealmentMultiplier": 1
+      }
+    ],
+    "items": [
+      {
+        "id": "excalibure",
+        "name": "Excalibure",
+        "category": "equipment",
+        "icon": "◆",
+        "description": "Epée légendaire du roi",
+        "usage": "",
+        "equipmentSlot": "mainHand",
+        "modifiers": {
+          "attack": 5,
+          "defense": 5,
+          "morale": 5,
+          "command": 10,
+          "mobility": 0,
+          "health": 0
+        }
+      }
+    ]
+  },
+  "campaign": {
+    "id": "Kindom1",
+    "name": "La chute du Royaume",
+    "intro": "Une aventure composée de plusieurs quêtes.",
+    "initialQuestIds": [
+      "excalibure"
+    ],
+    "quests": [
+      {
+        "schemaVersion": 1,
+        "id": "excalibure",
+        "title": "Excalibure",
+        "description": "à la recherhce d'excalibure",
+        "actions": [
+          {
+            "id": "parler_a_Merlin",
+            "action": "Parler",
+            "label": "Dialoguer et choisir un chemin",
+            "lieu": "broceliande",
+            "interaction": "Parler au vieille hermite de la forêt",
+            "requires": [],
+            "rewards": [],
+            "dialogue": {
+              "id": "dialogue-parler-1",
+              "qui": "merlin",
+              "goal": "conversation-terminee"
+            },
+            "outputs": [
+              "ok"
+            ]
+          },
+          {
+            "id": "atteindre-1",
+            "action": "Atteindre",
+            "label": "Rejoindre un lieu",
+            "lieu": "carrière",
+            "requires": [],
+            "rewards": [
+              {
+                "type": "item",
+                "itemId": "excalibure",
+                "amount": 1
+              }
+            ],
+            "interaction": "retirer l'épée"
+          }
+        ],
+        "links": [
+          {
+            "id": "lien-1",
+            "from": "parler_a_Merlin",
+            "output": "ok",
+            "to": "atteindre-1",
+            "conditions": []
+          }
+        ],
+        "prerequisites": [],
+        "events": [],
+        "publicationCondition": null,
+        "accessConditions": [],
+        "participationModes": [
+          "solo"
+        ],
+        "locationSlotId": "broceliande",
+        "giverNpcId": "merlin",
+        "interactionLabel": "Parler à l'hermite",
+        "dialogueId": null,
+        "natures": [],
+        "type": "simple",
+        "conditions": [],
+        "locationSlots": [],
+        "offer": null,
+        "steps": [],
+        "initialStepId": null,
+        "childQuestIds": [],
+        "completionPolicy": "all",
+        "scenes": [],
+        "presentation": {},
+        "outcomes": {
+          "success": [],
+          "failure": [],
+          "abandoned": []
+        },
+        "transitions": []
+      }
+    ]
+  },
+  "media": {
+    "images": []
+  }
+}

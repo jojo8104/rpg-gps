@@ -1,0 +1,24 @@
+{
+  "width": 512,
+  "height": 832,
+  "clothingTarget": [16, 320, 480, 480],
+  "bodyTarget": {
+    "male": [106, 285, 300, 240],
+    "female": [106, 265, 300, 240]
+  },
+  "neckProtectedPolygon": [
+    [224, 285],
+    [288, 285],
+    [288, 332],
+    [284, 342],
+    [274, 349],
+    [256, 353],
+    [238, 349],
+    [228, 342],
+    [224, 332]
+  ],
+  "bodyEnvelopeFromY": 348,
+  "atlasColumns": 4,
+  "atlasRows": 2,
+  "bodyAtlasSplitX": 1050
+}

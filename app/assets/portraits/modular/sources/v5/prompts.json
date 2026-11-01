@@ -1,0 +1,7 @@
+{
+  "date": "2026-10-24",
+  "tool": "imagegen intégré",
+  "output": "upper-chest-atlas-v5.png",
+  "prompt": "Production modular anime RPG skin underlayer atlas. Two isolated headless UPPER CHESTS side by side: adult man left, adult woman right, matching the warm peach skin and simple Japanese anime flat cel shading of the supplied female body reference. Draw ONLY the upper chest, collarbones and beginnings of shoulders, starting at the base of the neck, ending well above the breast line. A low neck stump in the center is okay, but NO head, no face, no hair, no clothing, no breasts, no nipples, no arms, no hands. A modest anatomical skin patch to fill the transparent triangular spaces under wide shirt collars. Left man ordinary build, not muscular; right woman ordinary build, collarbones soft. Both front facing, neutral lighting, contours clean. Natural trapezoid shoulder line wider below neck, slim short central neck stump, the bottom is a simple gently curved cut. Keep generous actual transparent gutters around both shapes. Two cells in a single row, same horizontal base and vertical scale. No labels, text, patterns, accessories, checkerboard or background.",
+  "transparent_background": true
+}

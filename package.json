@@ -7,6 +7,7 @@
   },
   "scripts": {
     "wiki:build": "node scripts/build-wiki.mjs",
+    "wiki:export": "node scripts/export-wiki.mjs",
     "start": "node server/server.js",
     "server": "node server/server.js",
     "deploy": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy.ps1",
@@ -18,6 +19,9 @@
     "prettier": "3.6.2"
   },
   "dependencies": {
+    "jsqr": "1.4.0",
+    "polygon-clipping": "0.15.7",
+    "qrcode": "1.5.4",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3"
   }

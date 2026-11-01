@@ -8,6 +8,9 @@ import { WorldState } from "./world-state.js";
 import { BattleEngine } from "./battle-engine.js";
 import { BattleLoot } from "./battle-loot.js";
 import { BattleSite } from "./battle-site.js";
+import { ResourceZone } from "./resource-zone.js";
+import { ItemAcquisitionService } from "./item-acquisition-service.js";
+import { TeamFortQuestService } from "./team-fort-quest.js";
 
 /** État commun des lieux, sérialisable et indépendant de l'interface. */
 export function createMultiplayerWorldState(gameOrLocations, runtimePositions = null) {
@@ -28,9 +31,12 @@ export function createMultiplayerWorldState(gameOrLocations, runtimePositions = 
   if (!game) return state;
   return {
     ...state,
+    territoryState: structuredClone(game.territoryState),
     scenarioState: game.scenarioState?.toJSON() ?? null,
     scenarioRuntime: structuredClone(game.scenarioRuntime),
     worldState: game.worldState.toJSON(),
+    itemAcquisitionState: game.itemAcquisitionService.toJSON(),
+    teamFortQuestState: game.teamFortQuestService.toJSON(),
     availableQuests: structuredClone(game.availableQuests),
     lastQuestResult: structuredClone(game.lastQuestResult),
     questDeadlines: structuredClone(game.questDeadlines),
@@ -39,6 +45,7 @@ export function createMultiplayerWorldState(gameOrLocations, runtimePositions = 
       Object.entries(game.trailStates).map(([id, trail]) => [id, trail.toJSON()]),
     ),
     autonomousGroups: game.autonomousGroups.map((group) => group.toJSON()),
+    resourceZones: game.resourceZones.map((zone) => zone.toJSON()),
     autonomousGroupTraces: game.autonomousGroupTraces.map((trace) => trace.toJSON()),
     watchBeacons: game.watchBeacons.map((beacon) => beacon.toJSON()),
     battles: game.battles.map((battle) => battle.toJSON()),
@@ -60,6 +67,16 @@ export function applyMultiplayerWorldState(game, snapshot) {
     return new Location({ ...entry, garrison: entry.garrison ?? {} });
   });
   game.locations = locations;
+  if (Object.hasOwn(snapshot, "explorationView"))
+    game.explorationView = structuredClone(snapshot.explorationView);
+  if (Object.hasOwn(snapshot, "territoryState"))
+    game.territoryState = structuredClone(snapshot.territoryState);
+  if (Object.hasOwn(snapshot, "teamFortQuestState")) {
+    game.teamFortQuestService = new TeamFortQuestService(snapshot.teamFortQuestState);
+    game.locationAccessPolicy.teamFortQuests = game.teamFortQuestService.quests;
+  }
+  if (Object.hasOwn(snapshot, "itemAcquisitionState"))
+    game.itemAcquisitionService = new ItemAcquisitionService(snapshot.itemAcquisitionState);
   if (Object.hasOwn(snapshot, "worldState"))
     game.worldState = new WorldState(snapshot.worldState ?? {});
   if (game.scenario && snapshot.scenarioState)
@@ -88,6 +105,8 @@ export function applyMultiplayerWorldState(game, snapshot) {
     game.autonomousGroups = snapshot.autonomousGroups.map(
       (group) => new AutonomousGroup(group),
     );
+  if (Array.isArray(snapshot.resourceZones))
+    game.resourceZones = snapshot.resourceZones.map((zone) => new ResourceZone(zone));
   if (Array.isArray(snapshot.autonomousGroupTraces))
     game.autonomousGroupTraces = snapshot.autonomousGroupTraces.map(
       (trace) => new AutonomousGroupTrace(trace),

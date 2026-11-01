@@ -1,0 +1,4 @@
+{
+  "mode": "built-in imagegen",
+  "prompt": "Edit ONLY the FIRST blank face at the top-left of this 4x3 spritesheet. It is the MALE SQUARE-CHIN face and must be MUCH MORE DISTINCTLY SQUARE: broad angular lower jaw, clear jaw corners, and a FLAT HORIZONTAL bottom chin edge spanning approximately 35 to 40 percent of the face's maximum cheek width. Do not make a V chin or narrow pointed tip. Keep the skull/forehead width, height, ears, skin tone and position exactly unchanged; only reshape the lower third of this male face. The jaw should look strong and adult but still pleasant Japanese anime. Preserve absolutely every other sprite including the corrected square female face, scarves, bandanas and silver-white hair unchanged. No facial features or neck. Genuine transparent alpha."
+}

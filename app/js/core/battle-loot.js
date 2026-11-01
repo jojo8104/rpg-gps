@@ -1,8 +1,17 @@
 import { getItemDefinition } from "./item-catalog.js";
+import { isBagFreeDocument } from "./item-baggage.js";
 
 /** Butin attribué à la fin d'un combat, sans présence ni contrainte géographique. */
 export class BattleLoot {
-  constructor({ id, battleId, entries, shares, status = "AVAILABLE", collectionLog = [], now = () => Date.now() }) {
+  constructor({
+    id,
+    battleId,
+    entries,
+    shares,
+    status = "AVAILABLE",
+    collectionLog = [],
+    now = () => Date.now(),
+  }) {
     this.id = requireText(id, "L'identifiant du butin");
     this.battleId = requireText(battleId, "La bataille");
     this.entries = entries.map((entry) =>
@@ -25,7 +34,7 @@ export class BattleLoot {
     this.collectionLog = structuredClone(collectionLog);
   }
 
-  collect({ playerId, bag, selection }) {
+  collect({ playerId, bag, selection, allowPartial = false }) {
     if (!this.shares.some((share) => share.playerId === playerId))
       return { success: false, reason: "not_eligible", collected: [] };
     const inventory = bagState(bag);
@@ -35,7 +44,7 @@ export class BattleLoot {
     for (const entry of this.entries) {
       const allocated = entry.allocations[playerId] ?? 0;
       if (!entry.portable || allocated <= 0) continue;
-      const requestedQuantity = requested[entry.id] ?? 0;
+      let requestedQuantity = requested[entry.id] ?? 0;
       if (requestedQuantity === 0) continue;
       if (requestedQuantity > allocated || requestedQuantity > entry.quantity)
         return {
@@ -44,17 +53,28 @@ export class BattleLoot {
           collected: [],
         };
       const bundleSize = getItemDefinition(entry.itemId)?.bundleSize ?? 1;
+      const bagFree = isBagFreeDocument(entry.itemId);
       const currentQuantity = inventory.quantitiesByItem[entry.itemId] ?? 0;
       const currentSlots = inventory.slotsByItem[entry.itemId] ?? 0;
-      const maximumQuantity =
-        currentSlots * bundleSize + remainingSlots * bundleSize;
+      const maximumQuantity = bagFree
+        ? Infinity
+        : currentSlots * bundleSize + remainingSlots * bundleSize;
+      if (allowPartial) {
+        requestedQuantity = Math.min(
+          requestedQuantity,
+          Math.max(0, maximumQuantity - currentQuantity),
+        );
+        if (requestedQuantity === 0) continue;
+      }
       if (requestedQuantity > Math.max(0, maximumQuantity - currentQuantity))
         return { success: false, reason: "insufficient_slots", collected: [] };
-      const requiredSlots = Math.max(
-        0,
-        Math.ceil((currentQuantity + requestedQuantity) / bundleSize) -
-          currentSlots,
-      );
+      const requiredSlots = bagFree
+        ? 0
+        : Math.max(
+            0,
+            Math.ceil((currentQuantity + requestedQuantity) / bundleSize) -
+              currentSlots,
+          );
       remainingSlots -= requiredSlots;
       inventory.quantitiesByItem[entry.itemId] =
         currentQuantity + requestedQuantity;
@@ -67,7 +87,20 @@ export class BattleLoot {
       });
     }
     if (planned.length === 0)
-      return { success: false, reason: "empty_selection", collected: [] };
+      return {
+        success: false,
+        reason:
+          allowPartial &&
+          this.entries.some(
+            (entry) =>
+              entry.portable &&
+              (entry.allocations[playerId] ?? 0) > 0 &&
+              (requested[entry.id] ?? 0) > 0,
+          )
+            ? "insufficient_slots"
+            : "empty_selection",
+        collected: [],
+      };
     const collected = planned.map(({ entry, ...item }) => {
       entry.quantity -= item.quantity;
       entry.allocations[playerId] -= item.quantity;

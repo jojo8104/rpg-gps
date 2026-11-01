@@ -1,10 +1,16 @@
 /** Résout les captures simples sans dépendre de l'interface ou du GPS. */
 export class LocationCaptureService {
-  getRequirement({ location, relation, isQuestCompleted = () => false }) {
+  getRequirement({
+    location,
+    relation,
+    canCapture = true,
+    isQuestCompleted = () => false,
+  }) {
     if (location.features.capturable !== true)
       return { state: "not_capturable" };
     if (relation === "owned" || relation === "allied")
       return { state: "already_controlled" };
+    if (!canCapture) return { state: "capture_forbidden" };
     const objectiveId = location.capture.questObjectiveId;
     if (objectiveId !== null && !isQuestCompleted(objectiveId))
       return { state: "quest_required", objectiveId };
@@ -19,10 +25,12 @@ export class LocationCaptureService {
     relation,
     isQuestCompleted = () => false,
     afterBattle = false,
+    canCapture = true,
   }) {
     const requirement = this.getRequirement({
       location,
       relation,
+      canCapture,
       isQuestCompleted,
     });
     if (!afterBattle && requirement.state !== "can_capture")

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" role="img" aria-labelledby="title">
+<title id="title">Mine d’or : écu, pioche et pelle croisées, scintillement</title>
+<rect width="200" height="220" fill="white"/>
+<path d="M22 18H178V100Q178 164 100 203Q22 164 22 100Z" fill="white" stroke="black" stroke-width="7" stroke-linejoin="round"/>
+<path d="M34 30H166V100Q166 154 100 189Q34 154 34 100Z" fill="none" stroke="black" stroke-width="2"/>
+<g stroke="black" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">
+<path d="M62 54L143 135L136 142L55 61Z" fill="white"/>
+<path d="M45 52Q69 35 95 65L73 56L49 76L58 57Z" fill="black"/>
+<path d="M140 48L150 58L138 70L128 60ZM134 65L140 71L82 129L76 123Z" fill="white"/>
+<path d="M78 116L91 129L73 149Q58 149 57 133Z" fill="black"/>
+</g>
+<path d="M103 144L108 157L121 162L108 167L103 180L98 167L85 162L98 157Z" fill="black"/>
+</svg>

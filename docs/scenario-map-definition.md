@@ -1,5 +1,21 @@
 # Carte du scénario
 
+## Maintenance des tests des lieux partagés
+
+Les villages fournisseurs sont les quatre villages économiques existants :
+Aurive, Ferrières, Boisclair et Rochevive, identifiés par
+`capital-resource-{gold,iron,wood,stone}-village`.
+
+Le module historique des Greniers réutilise Aurive depuis le scénario principal.
+Ses tests isolés déclarent explicitement cet emplacement partagé ; le test de
+composition vérifie qu’il n’est pas dupliqué. Les contrôles de réquisition
+et de parité GPS/simulation restent présents. Les trois parcours historiques
+d’évacuation, les trois parcours du messager et le briefing historique du
+maréchal ont été retirés des tests : ils dépendaient de lieux retirés du monde
+initial et du système de quêtes désactivé. Les tests des services génériques
+(chariots, échéances, démantèlement et évaluation) sont conservés. Ce nettoyage
+ne réactive ni ne supprime de fonctionnalité dans le moteur.
+
 `data/scenarios/chaos.json` porte désormais `mapDefinition`, conservée par
 `Scenario.toJSON()` et vérifiée lors de la construction du moteur, y compris
 depuis un instantané serveur.
@@ -7,7 +23,19 @@ depuis un instantané serveur.
 `requiredLocationSlotIds` désigne le minimum obligatoire : capitale, village
 et mine produisant de l’or. Ces identifiants référencent `locationSlots` ;
 les bindings établissent leur correspondance avec les lieux du catalogue.
-Les autres lieux des quêtes existantes restent conservés.
+Le monde initial est maintenant limité par `initialLocationSlotIds` à dix lieux :
+la capitale, Aurive, Ferrières, Boisclair et Rochevive, quatre exploitations
+(or, fer, bois, pierre), et le fort de Rochegarde (`supply-fort`). Ces dix slots
+sont tous obligatoires. Aucun autre lieu allié, neutre ou ennemi n’est créé au
+départ, même si sa quête est retenue dans la préparation. Retirer Ravitaillement
+ne retire pas Rochegarde ni les villages du monde initial.
+
+La sélection s’applique à la création du moteur en GPS et en simulation, avant
+le placement et la génération économique. Les définitions supplémentaires restent
+dans les catalogues pour de futurs ajouts par les quêtes ; elles ne sont pas
+simplement cachées dans le monde initial. Les missions nécessitant ces lieux
+supplémentaires ne sont pas disponibles tant que leur création n’est pas raccordée.
+La recharge d’une sauvegarde existante ne purge pas ses lieux.
 
 Le setup ne crée plus de copies selon la densité, de lieux supplémentaires
 réservés à la simulation, de GA génériques ou de zones de prospection par défaut.
@@ -19,12 +47,12 @@ Les sauvegardes existantes ne sont pas purgées.
 La fiche sépare désormais le rôle (`world.role`), la visibilité
 (`world.visibility`) et la durée de vie (`world.lifetime`) du placement.
 
-| Cas | Rôle | Visibilité | Durée de vie |
-| --- | --- | --- | --- |
-| Capitale, point de départ | `starting-point` | `known` | `persistent` |
-| Monde connu : productions, villages, forts, camps | `world` | `known` | `persistent` |
-| Lieux durables à découvrir | `world` | `discoverable` | `persistent` |
-| Traces, objets, personnages de quête représentés par un lieu | `quest` | `quest` | `ephemeral` |
+| Cas                                                          | Rôle             | Visibilité     | Durée de vie |
+| ------------------------------------------------------------ | ---------------- | -------------- | ------------ |
+| Capitale, point de départ                                    | `starting-point` | `known`        | `persistent` |
+| Monde connu : productions, villages, forts, camps            | `world`          | `known`        | `persistent` |
+| Lieux durables à découvrir                                   | `world`          | `discoverable` | `persistent` |
+| Traces, objets, personnages de quête représentés par un lieu | `quest`          | `quest`        | `ephemeral`  |
 
 Le monde connu est affiché dès placement. Un lieu à découvrir peut déjà avoir
 des coordonnées : le serveur le découvre à portée de détection du héros, ou
@@ -158,13 +186,6 @@ modifient ni les permissions, ni les distances, ni les règles de jeu.
 
 ## Contrat d’apparition
 
-Le test du briefing historique du maréchal vérifie le rôle mondial actuel de
-Valgrise : `world.visibility: known` rend ce lieu durable visible dans la
-projection et le journal, indépendamment de l’acceptation de la quête. Le test
-vérifie explicitement ce contrat, le placement et la poursuite du briefing.
-Les marqueurs configurés avec une visibilité de quête attendent toujours leur
-déclencheur. Cette correction de test ne modifie aucune règle ni récompense.
-
 La position et le statut placed n’impliquent pas l’apparition d’un lieu soumis
 à appearance. Le contrat accepte immediate, QuestAccepted avec questId, et
 ActionCompleted avec questId et actionId. La règle est validée et sérialisée
@@ -173,3 +194,14 @@ lorsque la quête est disponible. Le serveur conserve les participants ayant
 débloqué le lieu et filtre carte, présence et projection pour chaque joueur.
 Voir missing-prospectors.md pour un exemple. La préparation valide les positions
 sans faire apparaître prématurément les lieux conditionnels.
+
+## Placements différés choisis en préparation (11 octobre 2026)
+
+Les overrides `player-walk` et `validated-cell` produisent un placement `player-pending`, sans position officielle. `player-walk` accepte `walkingDistanceMeters` (300 par défaut, 10 à 10 000). Le point de départ ne peut pas utiliser ces stratégies. Les options du catalogue les excluent aussi des lieux `capital-economy`. Les règles d’apparition du scénario restent appliquées ; une visibilité « à découvrir » ne bloque pas la participation au placement, mais le placement ne révèle pas automatiquement le lieu à tous. Le service serveur de placement place atomiquement le lieu après contrôle de la zone et de l’espacement, puis son état devient `placed`. Le mode `validated-cell` consomme une case validée par un repérage de l’équipe et place le lieu au centre. Les cases utilisent le quadrillage borné du terrain (au plus 48 × 48), avec centre et deux coins à l’intérieur du terrain sans exclusion.
+
+## Atelier visuel du monde
+
+L’atelier à `/editor/` propose Monde & carte : lieux logiques, placements GPS,
+play area et exclusions. Il réutilise les validations serveur de zone et
+d’espacement et exporte des définitions à intégrer aux catalogues et bindings.
+Aucune règle de partie ne change. Voir [le guide de l’atelier](quest-editor.md).

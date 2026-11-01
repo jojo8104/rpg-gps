@@ -1,0 +1,91 @@
+{
+  "date": "2026-10-25",
+  "tool": "image_gen built-in",
+  "transparent_background": true,
+  "assets": [
+    {
+      "file": "housing.png",
+      "prompt": "Use case: stylized-concept. Generate ONE game building icon: a cluster of two canvas dwelling tents. Polished hand-painted medieval fantasy strategy game asset, matching warm timber, terracotta, golden lit windows, dark brown outlines, detailed but readable at 48 pixels, three-quarter isometric view. Single centered building occupies 85% of square canvas with ample clear margin. Genuine transparent background, no tile, no frame, no backdrop, no text, no watermark. Save as PNG."
+    },
+    {
+      "file": "barricades.png",
+      "prompt": "Use case: stylized-concept. Asset type: ONE transparent PNG building icon for medieval fantasy strategy game. Subject: a defensive wooden barricade made of crossed logs. Polished hand-painted miniature, three-quarter isometric view, chunky readable silhouette at 48 pixels, warm golden lighting, rich brown timber, stone and terracotta, crisp dark outlines, matching classic fantasy game building icons. Single centered structure occupying 85% of square canvas, margin on all sides. Transparent background. No tile, no frame, no scenery, no text, no watermark."
+    },
+    {
+      "file": "depot.png",
+      "prompt": "Use case: stylized-concept. Asset type: ONE transparent PNG building icon for medieval fantasy strategy game. Subject: a timber storage warehouse with crates and sacks. Polished hand-painted miniature, three-quarter isometric view, chunky readable silhouette at 48 pixels, warm golden lighting, rich brown timber, stone and terracotta, crisp dark outlines, matching classic fantasy game building icons. Single centered structure occupying 85% of square canvas, margin on all sides. Transparent background. No tile, no frame, no scenery, no text, no watermark."
+    },
+    {
+      "file": "trading-post.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a merchant trading post with awning, goods and brass balance scales. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "watch-post.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a wooden watchtower with ladder and lookout platform. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "defense-tower.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a fortified stone defensive tower with battlements. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "healing-tent.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a cream canvas healer tent with herb bundles and medicine emblem. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "hunting-lodge.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a timber hunting lodge with bow and quiver sign. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "prospecting-post.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a prospectors hut with pickaxe, mineral samples and rolled maps. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "messenger-relay.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a messenger relay station with mail satchels and brass horn sign. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "stable.png",
+      "prompt": "Use case: stylized-concept. Asset type: ONE transparent PNG building icon for medieval fantasy strategy game. Subject: a timber stable with a horse visible at the open stall. Polished hand-painted miniature, three-quarter isometric view, chunky readable silhouette at 48 pixels, warm golden lighting, rich brown timber, stone and terracotta, crisp dark outlines, matching classic fantasy game building icons. Single centered structure occupying 85% of square canvas, margin on all sides. Transparent background. No tile, no frame, no scenery, no text, no watermark."
+    },
+    {
+      "file": "armorers.png",
+      "prompt": "Use case: stylized-concept. Asset type: ONE transparent PNG building icon for medieval fantasy strategy game. Subject: an armorer workshop displaying a steel breastplate and shield. Polished hand-painted miniature, three-quarter isometric view, chunky readable silhouette at 48 pixels, warm golden lighting, rich brown timber, stone and terracotta, crisp dark outlines, matching classic fantasy game building icons. Single centered structure occupying 85% of square canvas, margin on all sides. Transparent background. No tile, no frame, no scenery, no text, no watermark."
+    },
+    {
+      "file": "archery-range.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: an archery training range with straw targets and bow rack. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "palisades.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a section of sharpened timber palisade with wooden gate. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "ramparts.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: massive stone ramparts with two crenellated towers and a gate. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "chapel.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a small stone chapel with bell tower and stained glass. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "habitation.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: two modest timber and plaster dwellings with terracotta roofs. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "palace.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: an elegant royal stone palace with towers and blue gold banners. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "houses.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a group of three town houses with terracotta roofs. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "brewery.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a timber brewery with copper brewing kettle, barrels and hops. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    },
+    {
+      "file": "military-school.png",
+      "prompt": "Use case: stylized-concept. ONE PNG medieval fantasy strategy game building icon: a stone military academy with training courtyard, sword shield emblem and banners. Hand painted isometric miniature, warm timber, terracotta roofs and stone, golden light, crisp dark outlines. Simple readable silhouette at 48px. Centered whole structure with 10% margin, transparent background. No frame, text, ground scenery or watermark."
+    }
+  ]
+}

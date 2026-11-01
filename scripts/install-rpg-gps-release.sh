@@ -66,6 +66,7 @@ echo "Activation de $release_id"
 ln -sfn "$release_directory" "$current_link"
 
 if ! systemctl restart "$SERVICE_NAME"; then
+  journalctl -u "$SERVICE_NAME" -n 40 --no-pager >&2 || true
   echo "Le redémarrage a échoué, restauration de la version précédente." >&2
   if [[ -n "$previous_release" ]]; then
     ln -sfn "$previous_release" "$current_link"
@@ -84,6 +85,9 @@ for _ in {1..10}; do
 done
 
 if [[ "$healthy" != true ]]; then
+  echo "Diagnostic du service avant restauration :" >&2
+  systemctl --no-pager --full status "$SERVICE_NAME" >&2 || true
+  journalctl -u "$SERVICE_NAME" -n 40 --no-pager >&2 || true
   echo "Le contrôle de santé a échoué, restauration de la version précédente." >&2
   if [[ -n "$previous_release" ]]; then
     ln -sfn "$previous_release" "$current_link"

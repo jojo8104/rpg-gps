@@ -4,21 +4,104 @@ import { Hero } from "../app/js/core/hero.js";
 import { HeroClassFeatureService } from "../app/js/core/hero-class-feature-service.js";
 import { Game } from "../app/js/core/game.js";
 
+test("les commandes des pouvoirs recalculent la portée et la recharge sur le moteur officiel", () => {
+  const game = new Game({
+    setup: {
+      id: "powers",
+      name: "Pouvoirs",
+      mode: "quick",
+      scenarioId: "none",
+      playerCount: 1,
+      participants: [{ playerId: "p", name: "Mage" }],
+      playArea: {
+        id: "area",
+        name: "Zone",
+        polygon: [
+          { latitude: 0, longitude: 0 },
+          { latitude: 0, longitude: 1 },
+          { latitude: 1, longitude: 0 },
+        ],
+      },
+    },
+    coordinateMode: "simulation",
+    now: () => 1000,
+    heroClasses: [
+      {
+        id: "mage",
+        name: "Mage",
+        features: {
+          divinationRadius: 20,
+          divinationDurationMs: 60000,
+          divinationCooldownMs: 300000,
+          astralReachBonus: 5,
+          astralDurationMs: 300000,
+          astralCooldownMs: 300000,
+        },
+      },
+    ],
+    locations: [
+      {
+        id: "target",
+        name: "Lieu",
+        type: "village",
+        source: "test",
+        position: { latitude: 10, longitude: 0 },
+      },
+    ],
+  });
+  const hero = game.chooseHero("p", { name: "Mage", classId: "mage" });
+  hero.updatePosition({ latitude: 0, longitude: 0 });
+  game.start();
+  game.getLocation("target").position = { latitude: 10, longitude: 0 };
+  const input = { playerId: "p", heroId: hero.id };
+  assert.equal(
+    game.activateHeroDivination({
+      ...input,
+      center: { latitude: 0, longitude: 0 },
+    }).success,
+    true,
+  );
+  assert.equal(game.getPlayer("p").knowsLocation("target"), true);
+  assert.equal(
+    game.activateHeroDivination({
+      ...input,
+      center: { latitude: 0, longitude: 0 },
+    }).reason,
+    "ability_on_cooldown",
+  );
+  assert.equal(game.activateHeroAstralTravel(input).success, true);
+  game.getLocation("target").position = { latitude: 100, longitude: 0 };
+  assert.equal(game.selectHeroAstralTarget({ ...input, kind: "location", targetId: "target", distance: 1 }).reason, "target_out_of_astral_reach");
+  game.getLocation("target").position = { latitude: 4, longitude: 0 };
+  assert.equal(game.selectHeroAstralTarget({ ...input, kind: "location", targetId: "target" }).success, true);
+  assert.equal(
+    game.activateHeroAstralTravel({
+      ...input,
+      playerId: "other",
+      locationId: "target",
+    }).success,
+    false,
+  );
+});
+
 const classes = [
   {
     id: "ranger",
     features: {
-      visionRadius: 75,
+      visionRadius: 45,
+      maximumVisionRadius: 75,
+      maximumVisionLevel: 20,
       detectionMultiplier: 1.5,
       concealmentMultiplier: 0.65,
       informationLevelBonus: 1,
       ignoresAmbushPenalty: true,
+      watchBeaconRadiusByRank: { novice: 30, advanced: 30, master: 45 },
     },
   },
   {
     id: "mage",
     features: {
-      visionRadius: 45,
+      visionRadius: 30,
       divinationDiameterByGrade: {
         captain: 45,
         banneret: 75,
@@ -58,7 +141,15 @@ test("l'éclaireur détecte plus loin, lit mieux et ignore le délai d'embuscade
     classId: "ranger",
   });
   assert.equal(service.detectionRadius(hero, 100), 150);
+  assert.equal(service.visionRadius(hero), 45);
+  hero.level = 10;
+  assert.ok(service.visionRadius(hero) > 59);
+  assert.ok(service.visionRadius(hero) < 60);
+  hero.level = 20;
   assert.equal(service.visionRadius(hero), 75);
+  assert.equal(service.watchBeaconRadius(hero), 30);
+  hero.aptitudeRanks.ranger_watch_beacon = "master";
+  assert.equal(service.watchBeaconRadius(hero), 45);
   assert.equal(service.detectionMultiplier(hero), 1.5);
   assert.equal(service.signatureMultiplier(hero), 0.65);
   assert.equal(service.informationLevel(hero, 2), 3);

@@ -1,3 +1,4 @@
+import { formatInteger } from "./number-format.js";
 import { UNIT_RANKS } from "../core/rank-system.js";
 
 export function unitExperienceProgress(unit) {
@@ -9,7 +10,7 @@ export function unitExperienceProgress(unit) {
       currentRank,
       nextRank,
       value: 100,
-      label: `${unit.experience} XP · grade maximal`,
+      label: `${formatInteger(unit.experience)} XP · grade maximal`,
     };
   const interval = Math.max(1, nextRank.experience - currentRank.experience);
   const earned = Math.max(0, unit.experience - currentRank.experience);
@@ -18,7 +19,7 @@ export function unitExperienceProgress(unit) {
     currentRank,
     nextRank,
     value,
-    label: `${unit.experience}/${nextRank.experience} XP`,
+    label: `${formatInteger(unit.experience)}/${formatInteger(nextRank.experience)} XP`,
   };
 }
 

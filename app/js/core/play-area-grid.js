@@ -137,7 +137,7 @@ export class PlayAreaGrid {
           latitude: (south + north) / 2,
           longitude: (west + east) / 2,
         };
-        if (!this.playArea.contains(center)) continue;
+        if (!this.playArea.allowsPlacement(center)) continue;
         cells.push({
           id: `cell-${row}-${column}`,
           row,

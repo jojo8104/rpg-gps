@@ -1,0 +1,7 @@
+{
+  "date": "2026-10-25",
+  "tool": "imagegen intégré",
+  "output": "beard-v6.png",
+  "prompt": "Use case precise-object-edit. Edit target image1 is the old oversized brown beard layer; image2 is the exact male blank anime head whose jaw must fit the NEW beard. Create ONE isolated short neatly trimmed brown beard and modest connected moustache for this ordinary adult male oval jaw. Front facing, symmetrical, narrow tapered sideburns starting on lower cheeks, a tidy rounded chin following the jaw, very short hairs, not a long triangular dwarf beard and not broad bushy mutton chops. Keep the central mouth/lip opening transparent so a separate mouth layer remains visible. The beard must hug an ordinary slim adult man's chin without floating past the cheek edges. Match the clean simple anime outlines and light flat cel shading of the reference, muted warm brown. Output only facial hair, NO skin, NO head, NO lips, no neck, no clothes, no text or checkerboard. Actual transparent background with generous empty margins. One compact beard asset centered, not a sheet of variants.",
+  "transparent_background": true
+}

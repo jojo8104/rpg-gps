@@ -32,6 +32,10 @@ export class EquipmentService {
       requestedSlot ?? this.firstCompatibleFreeSlot(hero, definition);
     if (!slot || !this.isCompatible(definition, slot))
       return { success: false, reason: "incompatible_slot" };
+    const reason = this.equipmentRestriction(hero, definition, slot);
+    if (reason) return { success: false, reason };
+    if (entry.quantity !== 1)
+      return { success: false, reason: "invalid_equipment_quantity" };
     const previousItemId = hero.equipment[slot] ?? null;
     hero.carriedLoot.splice(index, 1);
     if (previousItemId)
@@ -84,7 +88,26 @@ export class EquipmentService {
       });
     });
     hero.equipmentModifiers = totals;
+    hero.maxHealth = Math.max(1, hero.finalStats.health);
+    hero.health = Math.min(hero.health, hero.maxHealth);
     return totals;
+  }
+
+  equipmentRestriction(hero, definition, slot) {
+    // Les anciens héros sans classe restent compatibles avec les sauvegardes.
+    const classId = ({ fighter: "warrior", scout: "ranger" })[hero.classId] ?? hero.classId;
+    if (classId && definition.allowedClasses && !definition.allowedClasses.includes(classId))
+      return "class_restricted";
+    if (definition.hands === 2 && hero.equipment.offHand)
+      return "requires_both_hands";
+    if (slot === "offHand" && getItemDefinition(hero.equipment.mainHand)?.hands === 2)
+      return "requires_both_hands";
+    const others = Object.entries(hero.equipment).filter(([id]) => id !== slot).map(([, id]) => getItemDefinition(id));
+    if (definition.family === "cloak" && others.some((item) => item?.family === "cloak"))
+      return "one_cloak_only";
+    if (definition.family === "ring" && others.some((item) => item?.id === definition.id))
+      return "duplicate_ring";
+    return null;
   }
 
   isCompatible(definition, slot) {

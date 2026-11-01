@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Atelier des portraits — RPG GPS</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #eee0bf;
+        color: #35291e;
+        font-family: system-ui, sans-serif;
+      }
+      main {
+        max-width: 1200px;
+        margin: auto;
+      }
+      h1 {
+        margin-bottom: 8px;
+      }
+      h2 {
+        margin-top: 32px;
+      }
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+      }
+      figure {
+        margin: 0;
+        overflow: hidden;
+        background: #fff4dc;
+        border: 1px solid #af9569;
+        border-radius: 12px;
+      }
+      figure > img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+      }
+      .portrait {
+        aspect-ratio: 4 / 5;
+      }
+      figcaption {
+        padding: 10px;
+        font-size: 14px;
+      }
+      button {
+        padding: 10px 16px;
+        background: #30564d;
+        color: white;
+        border: 0;
+        border-radius: 7px;
+        cursor: pointer;
+      }
+      .status {
+        font-weight: bold;
+      }
+      .layer {
+        aspect-ratio: 4 / 5;
+        background: repeating-conic-gradient(#ddd 0% 25%, #fff 0% 50%) 0 / 20px
+          20px;
+      }
+      .layer img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .portrait--anatomy {
+        aspect-ratio: 8 / 13;
+      }
+      .sprite-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(80px, 1fr));
+        gap: 10px;
+      }
+      .sprite-frame {
+        position: relative;
+        width: 80px;
+        height: 84px;
+        margin: auto;
+      }
+      .sprite-frame > span {
+        position: absolute;
+        background-repeat: no-repeat;
+        image-rendering: pixelated;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Atelier des portraits</h1>
+      <p>
+        <a href="portrait-editor.html"
+          >Ouvrir l’éditeur de personnages et de calques</a
+        >
+      </p>
+      <p>
+        Portraits des héros et assemblages de PNJ utilisant les mêmes calques
+        que les dialogues. Cet atelier ne modifie aucune partie.
+      </p>
+      <p class="status" id="status" role="status">Chargement des images…</p>
+      <h2>Les six héros</h2>
+      <div class="gallery" id="heroes"></div>
+      <h2>Personnages et lieux</h2>
+      <button id="next" type="button">Voir d’autres assemblages</button>
+      <button id="dialogue-preview" type="button">
+        Ouvrir un dialogue de contrôle
+      </button>
+      <label for="dialogue-scene">Lieu du dialogue</label>
+      <select id="dialogue-scene">
+        <option value="forge">Forge — exemple de la photo</option>
+        <option value="mine">Mine</option>
+      </select>
+      <label for="dialogue-gender">Personnage du dialogue</label>
+      <select id="dialogue-gender">
+        <option value="female">Femme</option>
+        <option value="male">Homme</option>
+      </select>
+      <label for="dialogue-content">Contenu de contrôle</label>
+      <select id="dialogue-content">
+        <option value="normal">Dialogue normal</option>
+        <option value="short">Texte court</option>
+        <option value="long">Texte long</option>
+        <option value="choices">Douze choix</option>
+      </select>
+      <p>
+        Les identités restent stables pour un même lot. Les responsables portent
+        une tenue adaptée à leur activité.
+      </p>
+      <div id="npcs"></div>
+      <h2>Vérification des dix-huit tenues</h2>
+      <p>
+        Mêmes têtes fines pour comparer les proportions, les épaules et les bras
+        de chaque tenue.
+      </p>
+      <div class="gallery" id="wardrobe"></div>
+      <h2>Une coupe indépendante du visage</h2>
+      <p>
+        Chaque série conserve exactement le même visage et la même tenue. Seule
+        la coiffure change, dans sa bibliothèque.
+      </p>
+      <div class="gallery" id="hairstyles"></div>
+      <h2>Exemple de calques séparés</h2>
+      <label for="layer-gender">Bibliothèque des calques</label>
+      <select id="layer-gender">
+        <option value="male">Masculine</option>
+        <option value="female">Féminine</option>
+      </select>
+      <div class="gallery" id="layers"></div>
+      <h2>Marche du Mage masculin sans chapeau</h2>
+      <div class="sprite-grid" id="mage-sprites"></div>
+    </main>
+    <section
+      id="dialogue-check"
+      class="dialogue-view"
+      hidden
+      aria-label="Dialogue de contrôle"
+    ></section>
+    <script type="module" src="js/ui/portrait-lab.js"></script>
+  </body>
+</html>

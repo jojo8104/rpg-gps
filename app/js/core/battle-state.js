@@ -3,18 +3,14 @@ export class BattleState {
     id,
     teams,
     loot = [],
-    aptitudeDefinitions = [],
     config = {},
     now = () => Date.now(),
     status = "ready",
-    elapsedMs = 0,
-    countdownRemainingMs = 0,
     startedAt = null,
     finishedAt = null,
     winnerTeamId = null,
     contributions = null,
     eventLog = [],
-    randomState = null,
   }) {
     if (typeof id !== "string" || id.trim() === "")
       throw new TypeError("L'identifiant de bataille est requis.");
@@ -22,48 +18,20 @@ export class BattleState {
       throw new RangeError("Une bataille oppose exactement deux équipes.");
     this.id = id;
     this.config = {
-      tickMs: positive(config.tickMs ?? 500, "tickMs"),
-      advanceTravelBaseMs: positive(
-        config.advanceTravelBaseMs ?? 24_000,
-        "advanceTravelBaseMs",
-      ),
-      unitHealthPerSurvivor: positive(
-        config.unitHealthPerSurvivor ?? 10,
-        "unitHealthPerSurvivor",
-      ),
-      defenseBase: positive(config.defenseBase ?? 5, "defenseBase"),
-      reinforcementDelayMs: nonNegative(
-        config.reinforcementDelayMs ?? 3_000,
-        "reinforcementDelayMs",
-      ),
-      pursuitLossRate: nonNegative(
-        config.pursuitLossRate ?? 0.2,
-        "pursuitLossRate",
-      ),
-      breakthroughHeroDamageMultiplier: positive(
-        config.breakthroughHeroDamageMultiplier ?? 1.5,
-        "breakthroughHeroDamageMultiplier",
-      ),
-      retreatCommandCost: positiveInteger(
-        config.retreatCommandCost ?? 1,
-        "retreatCommandCost",
-      ),
-      countdownMs: nonNegative(config.countdownMs ?? 0, "countdownMs"),
+      tactical: config.tactical === true,
+      humanPlayerIds: Array.isArray(config.humanPlayerIds)
+        ? [...config.humanPlayerIds]
+        : [],
       ambushTeamId:
         config.ambushTeamId === null || config.ambushTeamId === undefined
           ? null
           : requireText(config.ambushTeamId, "L'équipe d'embuscade"),
-      ambushDefenderRevealDelayMs: nonNegative(
-        config.ambushDefenderRevealDelayMs ?? 1_500,
-        "ambushDefenderRevealDelayMs",
-      ),
       randomSeed: nonNegativeInteger(
         config.randomSeed ?? stableSeed(id),
         "randomSeed",
       ),
     };
     this.teams = createTeams(teams);
-    this.aptitudeDefinitions = createAptitudeDefinitions(aptitudeDefinitions);
     if (
       this.config.ambushTeamId !== null &&
       !this.teams.some((team) => team.id === this.config.ambushTeamId)
@@ -80,26 +48,17 @@ export class BattleState {
         ]),
       ),
     );
-    if (!["ready", "countdown", "active", "finished"].includes(status))
+    if (!["ready", "active", "finished"].includes(status))
       throw new RangeError("Le statut de bataille est invalide.");
     this.status = status;
-    this.elapsedMs = nonNegative(elapsedMs, "Le temps écoulé");
-    this.countdownRemainingMs = nonNegative(
-      countdownRemainingMs,
-      "Le compte à rebours",
-    );
     this.startedAt = startedAt;
     this.finishedAt = finishedAt;
     this.winnerTeamId = winnerTeamId;
-    if (contributions !== null) this.contributions = structuredClone(contributions);
+    if (contributions !== null)
+      this.contributions = structuredClone(contributions);
     if (!Array.isArray(eventLog))
       throw new TypeError("Le journal de bataille doit être une liste.");
     this.eventLog = structuredClone(eventLog);
-    this.randomState = nonNegativeInteger(
-      randomState ?? this.config.randomSeed,
-      "L’état aléatoire",
-    ) >>> 0;
-    restoreRuntimeState(this.teams, teams);
     this.now = now;
   }
 
@@ -127,43 +86,14 @@ export class BattleState {
       config: structuredClone(this.config),
       teams: structuredClone(this.teams),
       status: this.status,
-      elapsedMs: this.elapsedMs,
-      countdownRemainingMs: this.countdownRemainingMs,
       startedAt: this.startedAt,
       finishedAt: this.finishedAt,
       winnerTeamId: this.winnerTeamId,
       loot: structuredClone(this.loot),
-      aptitudeDefinitions: structuredClone(this.aptitudeDefinitions),
       contributions: structuredClone(this.contributions),
       eventLog: structuredClone(this.eventLog),
-      randomState: this.randomState,
     };
   }
-}
-
-function restoreRuntimeState(teams, snapshots) {
-  teams.forEach((team, teamIndex) => {
-    const source = snapshots[teamIndex];
-    team.reinforcements = structuredClone(source.reinforcements ?? []);
-    [...team.heroes, ...team.units].forEach((entity) => {
-      const original = [...(source.heroes ?? []), ...(source.units ?? [])].find(
-        (candidate) => candidate.id === entity.id,
-      );
-      if (!original) return;
-      entity.targetId = original.targetId ?? null;
-      entity.attackCooldownMs = nonNegative(
-        original.attackCooldownMs ?? 0,
-        "Le délai d’attaque",
-      );
-      entity.progress = nonNegative(original.progress ?? 0, "La progression");
-      if (entity.kind === "unit" && Number.isInteger(original.lane))
-        entity.lane = original.lane;
-    });
-    team.lines = Array.from({ length: 3 }, (_, index) => ({
-      index,
-      heroId: team.heroes.find((hero) => hero.lane === index)?.id ?? null,
-    }));
-  });
 }
 
 function createLoot(loot) {
@@ -188,29 +118,17 @@ function createTeams(teams) {
       throw new RangeError("Les équipes doivent être uniques.");
     teamIds.add(input.id);
     const heroInputs = input.heroes ?? [];
-    const laneLayouts = { 1: [1], 2: [0, 2], 3: [0, 1, 2] };
-    const heroes = heroInputs.map((hero, index) =>
-      createHero(hero, laneLayouts[heroInputs.length]?.[index], entityIds),
-    );
+    const heroes = heroInputs.map((hero) => createHero(hero, entityIds));
     if (heroes.length === 0 || heroes.length > 3)
       throw new RangeError("Une équipe doit avoir entre un et trois héros.");
-    const heroByPlayer = new Map(heroes.map((hero) => [hero.playerId, hero]));
     const units = (input.units ?? []).map((unit) =>
-      createUnit(
-        unit,
-        heroByPlayer.get(unit.playerId)?.lane ?? null,
-        entityIds,
-      ),
+      createUnit(unit, entityIds),
     );
     return {
       id: input.id,
+      aiStyle: input.aiStyle ?? null,
       heroes,
       units,
-      lines: Array.from({ length: 3 }, (_, index) => ({
-        index,
-        heroId: heroes.find((hero) => hero.lane === index)?.id ?? null,
-      })),
-      reinforcements: [],
     };
   });
 }
@@ -231,16 +149,10 @@ function common(entity, kind, ids) {
     speed: positive(entity.speed ?? 1, "La vitesse"),
     range: positive(entity.range ?? 1, "La portée"),
     state: entity.state ?? "active",
-    targetId: null,
-    attackCooldownMs: 0,
-    progress: 0,
-    activeEffects: Array.isArray(entity.activeEffects)
-      ? structuredClone(entity.activeEffects)
-      : [],
   };
 }
 
-function createHero(entity, lane, ids) {
+function createHero(entity, ids) {
   const base = common(entity, "hero", ids);
   const maxHealth = positive(entity.maxHealth ?? 20, "Les PV maximum");
   const maxCommandPoints = positiveInteger(
@@ -254,8 +166,11 @@ function createHero(entity, lane, ids) {
       maxHealth,
       nonNegative(entity.health ?? maxHealth, "Les PV"),
     ),
-    lane,
     command: maxCommandPoints,
+    tacticalCommand: nonNegative(
+      entity.tacticalCommand ?? maxCommandPoints,
+      "Le commandement tactique",
+    ),
     maxCommandPoints,
     commandPoints: Math.min(
       maxCommandPoints,
@@ -264,16 +179,12 @@ function createHero(entity, lane, ids) {
         "Les points de commandement",
       ),
     ),
-    skillIds: normalizeIds(entity.skillIds ?? entity.abilityIds ?? []),
-    specialPowerIds: normalizeIds(entity.specialPowerIds ?? []),
-    aptitudeRanks: createAptitudeRanks(entity.aptitudeRanks ?? {}),
   };
 }
 
-function createUnit(entity, lane, ids) {
+function createUnit(entity, ids) {
   const base = common(entity, "unit", ids);
   const maxQuantity = positiveInteger(entity.maxQuantity, "L'effectif maximal");
-  const retreat = entity.retreat ?? {};
   const quantity = Math.min(
     maxQuantity,
     nonNegativeInteger(entity.quantity, "L'effectif"),
@@ -296,25 +207,10 @@ function createUnit(entity, lane, ids) {
     healthPerSoldier,
   );
   const counts = healthCounts(soldierHealth, combatHealthThreshold);
-  const damageMin = positive(
-    entity.damageMin ?? Math.max(1, Math.floor(base.attack / 2)),
-    "Les degats minimum",
-  );
-  const damageMax = positive(
-    entity.damageMax ?? Math.max(1, base.attack),
-    "Les degats maximum",
-  );
-  if (damageMax < damageMin)
-    throw new RangeError(
-      "Les degats maximum doivent etre superieurs aux degats minimum.",
-    );
   return {
     ...base,
     typeId: entity.typeId ?? null,
-    heroSourceId:
-      entity.heroSourceId === undefined || entity.heroSourceId === null
-        ? null
-        : requireText(entity.heroSourceId, "Le héros commandant"),
+    battleSlot: entity.battleSlot ?? null,
     heroSourceId:
       entity.heroSourceId === undefined || entity.heroSourceId === null
         ? null
@@ -328,47 +224,19 @@ function createUnit(entity, lane, ids) {
     soldierHealth,
     combatantCount: counts.combatants,
     woundedCount: counts.wounded,
-    deadCount: counts.dead,
-    damageMin,
-    damageMax,
-    attackIntervalMs: positive(
-      entity.attackIntervalMs ?? Math.max(350, 1_500 - base.speed * 100),
-      "La cadence d'attaque",
-    ),
-    damageCursor: nonNegativeInteger(
-      entity.damageCursor ?? 0,
-      "Le curseur de degats",
-    ),
+    deadCount: Math.max(counts.dead, entity.deadCount ?? 0),
     morale: nonNegative(entity.morale ?? 5, "Le moral"),
-    specialPowerIds: normalizeIds(entity.specialPowerIds ?? []),
-    lane,
-    behavior: entity.behavior ?? "advance",
     symbol: entity.symbol ?? "U",
-    retreating:
-      entity.retreating === true ||
-      (counts.alive > 0 && counts.combatants === 0),
-    retreatReason:
-      entity.retreatReason ??
-      (counts.alive > 0 && counts.combatants === 0 ? "rout" : null),
-    retreat: {
-      speed: positive(retreat.speed ?? base.speed, "La vitesse de retraite"),
-      defense: nonNegative(
-        retreat.defense ?? base.defense,
-        "La defense de retraite",
-      ),
-      attack: nonNegative(
-        retreat.attack ?? base.attack,
-        "L'attaque de retraite",
-      ),
-      range: positive(retreat.range ?? base.range, "La portee de retraite"),
-    },
   };
 }
 
 function createSoldierHealth(values, quantity, maximum) {
   if (values === undefined || values === null)
     return Array(quantity).fill(maximum);
-  if (!Array.isArray(values) || values.length !== quantity)
+  if (
+    !Array.isArray(values) ||
+    values.filter((health) => health > 0).length !== quantity
+  )
     throw new RangeError(
       "Les PV des soldats ne correspondent pas a l'effectif.",
     );
@@ -436,28 +304,4 @@ function normalizeIds(values) {
   return [
     ...new Set(values.map((value) => requireText(value, "Un identifiant"))),
   ];
-}
-function createAptitudeDefinitions(values) {
-  if (!Array.isArray(values))
-    throw new TypeError("Les définitions d'aptitude doivent être une liste.");
-  const ids = new Set();
-  return values.map((definition) => {
-    if (!definition || typeof definition !== "object")
-      throw new TypeError("Une définition d'aptitude est invalide.");
-    const id = requireText(definition.id, "L'identifiant d'aptitude");
-    if (ids.has(id))
-      throw new RangeError("Les définitions d'aptitude doivent être uniques.");
-    ids.add(id);
-    return structuredClone(definition);
-  });
-}
-function createAptitudeRanks(value) {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    throw new TypeError("Les rangs d'aptitude sont invalides.");
-  return Object.fromEntries(
-    Object.entries(value).map(([id, rank]) => [
-      requireText(id, "Une aptitude"),
-      requireText(rank, "Un rang d'aptitude"),
-    ]),
-  );
 }

@@ -1,6 +1,47 @@
+import { campDevelopmentState } from "./camp-development-state.js";
+import { CampInstallationService } from "./camp-installation-service.js";
+import { reconcileClosedExceptionalSites } from "./exceptional-site-closure.js";
+import { ExceptionalSiteResolutionService } from "./exceptional-site-resolution-service.js";
+import { ExceptionalExpeditionService } from "./exceptional-expedition-service.js";
+import { retireInteriorExceptionalSites } from "./exploration-exterior-migration.js";
+import { ExteriorSearchService } from "./exterior-search-service.js";
+import { astralTargetInReach } from "./astral-interaction.js";
+import { publishExplorationAnnouncements } from "./exploration-announcements.js";
+import { ExplorationClueService } from "./exploration-clue-service.js";
+import { ExplorationRumorService } from "./exploration-rumor-service.js";
+import { ExplorationDiscoveryService } from "./exploration-discovery-service.js";
+import { tacticalBonusLoot } from "./tactical-bonuses.js";
+import { validateScenarioMapLocations } from "./scenario-map-definition.js";
+import { setArmyFormation } from "./army-formation.js";
+import {
+  questSystemUnavailable,
+  isSuspendedQuestGroup,
+} from "./quest-system-policy.js";
+import {
+  LocationWatchService,
+  locationWatchZones,
+  watchDistance,
+} from "./location-watch-service.js";
+import { buildingConversation } from "./building-dialogue-catalog.js";
+import {
+  accrueLocationTaxes,
+  locationTaxState,
+} from "./location-tax-service.js";
+import {
+  awardCampActivityExperience,
+  campProductionExperience,
+} from "./camp-activity-experience.js";
+import { PlayerSocialService, alliedPlayers } from "./player-social-service.js";
 import { GameSetup } from "./game-setup.js";
+import { selectInitialScenarioWorld } from "./initial-scenario-world.js";
 import { Hero } from "./hero.js";
 import { Location } from "./location.js";
+import { LocationRangePolicy } from "./location-range-policy.js";
+import { simulationRadii } from "./simulation-config.js";
+import {
+  mapLocationDiscoverable,
+  playerMapVisibility,
+} from "./player-map-visibility.js";
 import { Player } from "./player.js";
 import { RecruitmentService } from "./recruitment-service.js";
 import { BattleService } from "./battle-service.js";
@@ -28,10 +69,18 @@ import { EquipmentService } from "./equipment-service.js";
 import { getItemDefinition } from "./item-catalog.js";
 import { HeroRecoveryService } from "./hero-recovery-service.js";
 import { AutonomousGroup } from "./autonomous-group.js";
+import { RepressionQuest } from "./repression-quest.js";
 import { AutonomousGroupService } from "./autonomous-group-service.js";
 import { AutonomousInterceptionService } from "./autonomous-interception-service.js";
 import { AutonomousGroupTrace } from "./autonomous-group-trace.js";
+import { TradingConvoyService } from "./trading-convoy-service.js";
+import { PlayerPlacementService } from "./player-placement-service.js";
+import { ProspectingService } from "./prospecting-service.js";
+import { ResourceZone } from "./resource-zone.js";
+import { ExplorationState } from "./exploration-state.js";
 import { LocationChiefService } from "./location-chief-service.js";
+import { SideQuestService } from "./side-quest-service.js";
+import { sideQuestTemplates } from "./side-quest-catalog.js";
 import { ChiefTradeService } from "./chief-trade-service.js";
 import { MarketService } from "./market-service.js";
 import { QuestRuntime } from "./quest-runtime.js";
@@ -46,7 +95,20 @@ import { WorldState } from "./world-state.js";
 import { UNIT_RANKS } from "./rank-system.js";
 import { ScoutWatchBeacon } from "./scout-watch-beacon.js";
 import { BattleEngine } from "./battle-engine.js";
+import { AmbushService } from "./ambush-service.js";
 import { BattleLoot } from "./battle-loot.js";
+import { CapitalAiService } from "./capital-ai-service.js";
+import { TerritoryService } from "./territory-service.js";
+import {
+  LocationSpacingPolicy,
+  placedLocations,
+} from "./location-spacing-policy.js";
+import { TavernNpcService } from "./tavern-npc-service.js";
+import { ItemAcquisitionService } from "./item-acquisition-service.js";
+import {
+  TeamFortQuestService,
+  startLocalTeamFortTest,
+} from "./team-fort-quest.js";
 
 /** État actif d'une partie, indépendant de l'interface et des services navigateur. */
 export class Game {
@@ -60,22 +122,66 @@ export class Game {
     locations = [],
     autonomousGroups = [],
     autonomousGroupTraces = [],
+    tradingConvoyConfig = null,
+    prospectingConfig = null,
+    resourceZones = [],
+    explorationState = null,
     watchBeacons = [],
     coordinateMode = "gps",
     scenarioStartsActive = true,
+    questSystemEnabled = true,
+    tacticalBattles = false,
+    questEngineState = null,
+    territoryState = null,
     scenarioStateSnapshot = null,
     worldStateSnapshot = null,
+    tavernNpcState = null,
+    itemAcquisitionState = null,
+    teamFortQuestState = [],
     trailStateSnapshots = null,
     scenarioRuntimeSnapshot = null,
     now = () => Date.now(),
     idGenerator = Game.#defaultIdGenerator,
   }) {
+    if (
+      scenarioRuntimeSnapshot === null &&
+      scenario?.mapDefinition?.initialLocationSlotIds
+    ) {
+      const initial = selectInitialScenarioWorld(
+        scenario,
+        scenarioLocationBindings,
+        locations,
+      );
+      scenario = initial.scenario;
+      scenarioLocationBindings = initial.bindings;
+      locations = initial.locations;
+    }
     this.setup = setup instanceof GameSetup ? setup : new GameSetup(setup);
+    this.tacticalBattles = tacticalBattles === true;
     if (!["gps", "simulation"].includes(coordinateMode))
       throw new RangeError(
         "Le mode de coordonnées doit être gps ou simulation.",
       );
     this.coordinateMode = coordinateMode;
+    this.explorationState = new ExplorationState(
+      explorationState instanceof ExplorationState
+        ? explorationState.toJSON()
+        : explorationState,
+    );
+    retireInteriorExceptionalSites(this.explorationState);
+    // Vue officielle reçue par le navigateur ; jamais réinjectée dans la sauvegarde privée.
+    this.explorationView = null;
+    this.explorationClueService = new ExplorationClueService(this);
+    this.explorationRumorService = new ExplorationRumorService(this);
+    this.explorationDiscoveryService = new ExplorationDiscoveryService(this);
+    this.exteriorSearchService = new ExteriorSearchService(this);
+    this.exceptionalExpeditionService = new ExceptionalExpeditionService(this);
+    this.exceptionalSiteResolutionService = new ExceptionalSiteResolutionService(this);
+    this.campInstallationService = new CampInstallationService(this);
+    this.questSystemEnabled = questSystemEnabled !== false;
+    this.questEngineState = structuredClone(questEngineState);
+    this.territoryState = structuredClone(territoryState);
+    this.territoryService = new TerritoryService();
     this.heroClasses = Game.#createHeroClassMap(heroClasses);
     this.heroClassFeatureService = new HeroClassFeatureService({
       classDefinitions: this.heroClasses,
@@ -85,12 +191,25 @@ export class Game {
       aptitudeDefinitions: heroAptitudes,
       now,
     });
-    this.heroTravelExperienceService = new HeroTravelExperienceService();
+    this.heroTravelExperienceService = new HeroTravelExperienceService(
+      coordinateMode === "simulation"
+        ? {
+            distanceFn: (a, b) =>
+              Math.hypot(b.latitude - a.latitude, b.longitude - a.longitude) *
+              10,
+          }
+        : {},
+    );
     this.unitDefinitions = Game.#createUnitDefinitionMap(unitDefinitions);
     this.recruitmentService = new RecruitmentService(this.unitDefinitions);
     this.locationAccessPolicy = new LocationAccessPolicy({
       participants: this.setup.participants,
+      rules: this.setup.rules,
     });
+    this.teamFortQuestService = new TeamFortQuestService(teamFortQuestState);
+    this.locationAccessPolicy.teamFortQuests = this.questSystemEnabled
+      ? this.teamFortQuestService.quests
+      : [];
     this.locationCaptureService = new LocationCaptureService();
     this.locationProgressionService = new LocationProgressionService({
       mode: this.setup.rules.locationMode,
@@ -98,22 +217,65 @@ export class Game {
     this.campImprovementService = new CampImprovementService({
       progressionService: this.locationProgressionService,
     });
-    this.battleService = new BattleService(this.unitDefinitions, [
-      ...this.heroProgressionService.aptitudes.values(),
-    ]);
+    this.battleService = new BattleService(this.unitDefinitions);
     this.battleConsequenceService = new BattleConsequenceService();
     this.lootDistributionService = new LootDistributionService();
     this.inventoryService = new InventoryService({ idGenerator });
     this.equipmentService = new EquipmentService();
+    this.itemAcquisitionService = new ItemAcquisitionService(
+      itemAcquisitionState,
+    );
+    this.capitalAiService = new CapitalAiService();
     this.heroRecoveryService = new HeroRecoveryService();
     this.locationChiefService = new LocationChiefService();
+    this.sideQuestService = new SideQuestService({
+      now,
+      gainExperience: (hero, amount, source) =>
+        this.gainHeroExperience({ heroId: hero.id, amount, source }),
+      getTemplates: (hero, location) =>
+        sideQuestTemplates({
+          unitDefinitions: [...this.unitDefinitions.values()],
+          canGarrison:
+            this.locationAccessPolicy.can(
+              hero.playerId,
+              location,
+              "garrison",
+            ) && location.garrison.units.length < location.defenseSlots,
+        }),
+      garrisonUnit: (hero, location, unit) =>
+        this.garrisonUnit({
+          playerId: hero.playerId,
+          heroId: hero.id,
+          locationId: location.id,
+          unitId: unit.id,
+        }),
+      afterDeposit: (location) =>
+        this.tavernNpcService.applyLocationWorkers(location),
+      afterComplete: (hero, location, quest) => {
+        awardCampActivityExperience(
+          this.locationProgressionService,
+          this.getLocation(quest.locationId),
+          "sideQuest",
+        );
+        this.itemAcquisitionService.unlock({
+          source: "sideQuest",
+          key: `${location.id}:${quest.source ?? "chief"}`,
+          heroId: hero.id,
+          classId: hero.classId,
+        });
+      },
+    });
     this.chiefTradeService = new ChiefTradeService();
-    this.marketService = new MarketService();
+    this.locationWatchService = new LocationWatchService();
+    this.marketService = new MarketService({ now: () => this.now() });
+    this.tavernNpcService = new TavernNpcService(tavernNpcState);
     this.locationDismantlingService = new LocationDismantlingService();
     this.resultEvaluationService = new ResultEvaluationService();
     this.evacuationStates = {};
     this.questDeadlines = {};
     this.availableQuests = [];
+    this.playerSessions = [];
+    this.playerSocialService = new PlayerSocialService();
     this.questSequence = [];
     this.lastQuestResult = null;
     this.engagementService = new EngagementService({
@@ -157,6 +319,11 @@ export class Game {
             this.scenario,
             this.locations,
           );
+    validateScenarioMapLocations(
+      this.scenario,
+      this.scenarioLocationBindings,
+      this.locations,
+    );
     this.scenarioEffectResolver = new ScenarioEffectResolver();
     this.questRuntime = new QuestRuntime();
     this.scenarioRuntimeBuilder = new ScenarioRuntimeBuilder();
@@ -167,6 +334,7 @@ export class Game {
             setup: this.setup,
             bindings: this.scenarioLocationBindings,
             locations: this.locations,
+            coordinateMode: this.coordinateMode,
           })
         : structuredClone(scenarioRuntimeSnapshot);
     Object.values(this.scenarioRuntime?.placements ?? {})
@@ -181,8 +349,19 @@ export class Game {
     this.activeScenarioEventId = null;
     this.now = now;
     this.idGenerator = idGenerator;
+    this.tradingConvoyService = new TradingConvoyService({
+      ...(tradingConvoyConfig === null ? {} : { config: tradingConvoyConfig }),
+      idGenerator,
+    });
+    this.playerPlacementService = new PlayerPlacementService();
+    this.prospectingService = new ProspectingService({
+      ...(prospectingConfig === null ? {} : { config: prospectingConfig }),
+      idGenerator,
+    });
     this.autonomousGroupService = new AutonomousGroupService({
       idGenerator,
+      convoyService: this.tradingConvoyService,
+      prospectingService: this.prospectingService,
       interceptionService: new AutonomousInterceptionService({
         engagementRadiusMeters: this.setup.rules.engagementRadiusMeters,
         minimumReactionMs:
@@ -204,6 +383,11 @@ export class Game {
       throw new TypeError("Les groupes autonomes doivent être une liste.");
     this.autonomousGroups = [];
     autonomousGroups.forEach((group) => this.addAutonomousGroup(group));
+    if (!Array.isArray(resourceZones))
+      throw new TypeError("Les zones de ressources doivent être une liste.");
+    this.resourceZones = resourceZones.map((zone) =>
+      zone instanceof ResourceZone ? zone : new ResourceZone(zone),
+    );
     if (!Array.isArray(autonomousGroupTraces))
       throw new TypeError(
         "Les traces de groupes autonomes doivent être une liste.",
@@ -227,7 +411,13 @@ export class Game {
   // Joueurs, héros et progression individuelle.
   chooseHero(
     playerId,
-    { name, classId, appearanceId = null, firstAptitudeId = null },
+    {
+      name,
+      classId,
+      gender = null,
+      appearanceId = null,
+      firstAptitudeId = null,
+    },
   ) {
     if (this.status !== "preparing")
       throw new Error("Le héros ne peut être choisi qu'avant le démarrage.");
@@ -245,6 +435,7 @@ export class Game {
       playerId: player.id,
       name,
       classId,
+      gender,
       skillIds: heroClass.abilityIds,
       baseStats: heroClass.baseStats,
       maxHealth: heroClass.baseStats.health,
@@ -390,8 +581,13 @@ export class Game {
     if (this.players.some((player) => player.heroIds.length === 0))
       throw new Error("Chaque joueur doit choisir au moins un héros.");
     this.#grantStartingForces();
+    this.heroes.forEach((hero) => {
+      hero.experience = 0;
+      hero.xpHistory = [];
+    });
     this.status = "started";
     this.startedAt = this.now();
+    this.capitalAiService.initialize(this);
     return true;
   }
 
@@ -403,10 +599,20 @@ export class Game {
   }
 
   update() {
+    if (this.status === "started") {
+      this.exteriorSearchService.refresh();
+      this.exceptionalExpeditionService.refresh();
+    }
+    if (this.status === "started")
+      publishExplorationAnnouncements(this.explorationState, this.now());
     let watchBeaconEvents = [];
     if (this.status === "started" && this.getRemainingTimeMilliseconds() === 0)
       this.finish("time_limit");
-    if (this.status === "started") this.advanceAutonomousGroups(this.now());
+    if (this.status === "started") {
+      this.advanceAutonomousGroups(this.now());
+      this.exceptionalSiteResolutionService.update();
+      this.campInstallationService.update();
+    }
     if (this.status === "started")
       watchBeaconEvents = this.scanWatchBeacons(this.now());
     if (this.status === "started")
@@ -429,8 +635,33 @@ export class Game {
 
   // Déplacement, interception et résolution des groupes non joueurs.
   advanceAutonomousGroups(now = this.now()) {
+    this.capitalAiService.update(this, now);
+    if (this.status === "finished") return { events: [], traces: [] };
+    for (const group of this.autonomousGroups) {
+      if (
+        group.mission?.managedBy === "prospecting_post" &&
+        ["destroyed", "mission_failed"].includes(group.status) &&
+        group.mission.populationAway > 0
+      ) {
+        const origin = this.getLocation(group.originLocationId);
+        if (origin)
+          origin.statistics.prospectingPopulationAway = Math.max(
+            0,
+            (origin.statistics.prospectingPopulationAway ?? 0) -
+              group.mission.populationAway,
+          );
+        group.mission.populationAway = 0;
+        group.mission.active = false;
+      }
+    }
+    this.locationWatchService.update(this, now);
     const targets = this.heroes
-      .filter((hero) => hero.state === "active" && hero.position !== null)
+      .filter(
+        (hero) =>
+          hero.state === "active" &&
+          hero.position !== null &&
+          this.getPlayer(hero.playerId) !== null,
+      )
       .map((hero) => ({
         id: hero.id,
         kind: "hero",
@@ -441,8 +672,16 @@ export class Game {
           this.heroClassFeatureService.signatureMultiplier(hero),
       }));
     const result = this.autonomousGroupService.advance({
-      groups: this.autonomousGroups,
+      groups: this.autonomousGroups.filter(
+        (group) => !isSuspendedQuestGroup(this, group),
+      ),
       locations: this.locations,
+      resourceZones: this.resourceZones,
+      inspectExplorationSegment: (group, segment) =>
+        this.explorationDiscoveryService.inspectProspectingSegment(
+          group,
+          segment,
+        ),
       targets,
       playArea: this.setup.playArea,
       now,
@@ -453,11 +692,31 @@ export class Game {
       (trace) => trace.getScore(now) > 0,
     );
     result.events.forEach((event) => {
+      if (event.type === "relay_messenger_arrived") {
+        const group = this.getAutonomousGroup(event.groupId);
+        const target = this.getHero(group.mission.targetId);
+        if (
+          target?.state === "active" &&
+          watchDistance(this.coordinateMode, group.position, target.position) <=
+            (this.coordinateMode === "simulation" ? 1 : 5)
+        ) {
+          group.status = "completed";
+          this.locationWatchService.deliver(this, group.id, now);
+        } else group.status = "idle";
+      }
+
+      if (event.type === "resource_zone_discovered")
+        this.#resolveResourceZoneDiscovery(event);
       const evacuationAttack = this.#resolveUnopposedEvacuationAttack(event);
       const battle = evacuationAttack.handled
         ? null
         : this.#createBattleFromAutonomousEvent(event);
       if (battle !== null) event.battleId = battle.id;
+      if (
+        event.type === "autonomous_group_location_attack_requested" &&
+        battle === null
+      )
+        this.locationWatchService.attack(this, event.locationId, event.groupId);
       if (evacuationAttack.outcome !== null)
         event.evacuationOutcome = evacuationAttack.outcome;
       this.eventLog.push(structuredClone(event));
@@ -535,7 +794,8 @@ export class Game {
     if (!beaconPosition)
       return { success: false, reason: "hero_position_unknown" };
     const now = this.now();
-    const beaconRadius = radius ?? features.watchBeaconRadius ?? 75;
+    const beaconRadius =
+      radius ?? this.heroClassFeatureService.watchBeaconRadius(hero);
     const maximum = features.maximumWatchBeacons ?? 3;
     if (
       !Number.isFinite(beaconRadius) ||
@@ -673,11 +933,13 @@ export class Game {
 
   // Runtime narratif : placements, événements, choix et séquence de quêtes.
   completeScenarioObjective(objectiveId) {
+    if (!this.questSystemEnabled) return false;
     if (this.scenarioState === null) return false;
     return this.scenarioState.completeObjective(objectiveId);
   }
 
   startScenarioRuntime(position) {
+    if (!this.questSystemEnabled) return [];
     if (
       this.scenario !== null &&
       this.scenarioState?.getCurrentPhaseState().status === "locked"
@@ -710,6 +972,8 @@ export class Game {
   }
 
   startCurrentScenarioPlacements(position) {
+    if (!this.questSystemEnabled) return [];
+    RepressionQuest.preparePlacements(this);
     return this.scenarioRuntimeBuilder.start(
       this.scenarioRuntime,
       position,
@@ -718,33 +982,76 @@ export class Game {
   }
 
   updateScenarioPosition({ position, accuracy = null }) {
+    if (!this.questSystemEnabled) return [];
+    RepressionQuest.preparePlacements(this);
     if (!this.setup.playArea.contains(position)) return [];
     this.scenarioRuntimeBuilder.start(
       this.scenarioRuntime,
       position,
       this.scenarioState?.currentPhaseId ?? null,
     );
-    return this.scenarioRuntimeBuilder.update(this.scenarioRuntime, {
+    return RepressionQuest.updatePlacements(
+      this,
+      this.scenarioRuntimeBuilder.update(this.scenarioRuntime, {
+        position,
+        accuracy,
+        distanceFn:
+          RepressionQuest.enabled(this) &&
+          ["locate-village", "return-journey"].includes(
+            this.scenarioState?.currentPhaseId,
+          ) &&
+          this.coordinateMode === "simulation"
+            ? (a, b) => RepressionQuest.distance(this, a, b)
+            : undefined,
+      }),
       position,
-      accuracy,
-    });
+    );
   }
 
   placeScenarioLocation({ locationSlotId, position }) {
-    if (!this.setup.playArea.contains(position))
+    if (!this.questSystemEnabled) return questSystemUnavailable();
+    const encounter = RepressionQuest.placement(this, locationSlotId, position);
+    if (!encounter.success) return encounter;
+    if (!this.setup.playArea.allowsPlacement(position))
       return { success: false, reason: "outside_play_area" };
+    const targetPlacement = this.scenarioRuntime?.placements[locationSlotId];
+    const targetLocation = targetPlacement
+      ? this.getLocation(targetPlacement.locationId)
+      : null;
+    if (targetLocation) {
+      if (
+        !this.setup.playArea.allowsPlacement(
+          encounter.villagePosition ?? position,
+        )
+      )
+        return { success: false, reason: "outside_play_area" };
+      const spacing = new LocationSpacingPolicy({
+        setup: this.setup,
+        coordinateMode: this.coordinateMode,
+      });
+      const spaced = spacing.check(
+        targetLocation,
+        encounter.villagePosition ?? position,
+        placedLocations(this),
+      );
+      if (!spaced.success) return spaced;
+    }
     const result = this.scenarioRuntimeBuilder.place(
       this.scenarioRuntime,
       locationSlotId,
-      position,
+      encounter.villagePosition ?? position,
     );
     if (!result.success) return result;
+    if (encounter.villagePosition)
+      this.worldState.set("repression.provostPosition", { ...position });
     const moved = this.updateLocationPosition({
       locationId: result.locationId,
       position: result.position,
     });
     if (!moved.success) return moved;
     const location = this.getLocation(result.locationId);
+    // Le lieu placé doit être présent dans la réponse officielle de cette commande.
+    this.players.forEach((player) => player.discoverLocation(location.id, 3));
     this.eventLog.push({
       type: "scenario_location_placed",
       locationSlotId,
@@ -760,12 +1067,28 @@ export class Game {
     return { ...result, quest };
   }
 
+  playerPlacementCommand(args) {
+    return this.playerPlacementService.command(
+      this,
+      args,
+      args.officialPosition,
+    );
+  }
+
   updateLocationPosition({ locationId, position }) {
-    if (!this.setup.playArea.contains(position))
+    if (!this.setup.playArea.allowsPlacement(position))
       return { success: false, reason: "outside_play_area" };
     const location = this.getLocation(locationId);
     if (location === null)
       return { success: false, reason: "location_not_found" };
+    if (this.status !== undefined) {
+      const spacing = new LocationSpacingPolicy({
+        setup: this.setup,
+        coordinateMode: this.coordinateMode,
+      });
+      const result = spacing.check(location, position, placedLocations(this));
+      if (!result.success) return result;
+    }
     location.position = {
       latitude: position.latitude,
       longitude: position.longitude,
@@ -776,15 +1099,76 @@ export class Game {
     const placement = binding
       ? this.scenarioRuntime?.placements[binding.locationSlotId]
       : null;
+    if (placement?.status === "setup-pending") placement.status = "placed";
     if (placement?.status === "placed")
       placement.position = { ...location.position };
     return { success: true, locationId, position: { ...location.position } };
   }
 
+  /** Placement atomique d'un ensemble : aucune modification partielle en cas de refus. */
+  updateLocationPositions(placements) {
+    const movingIds = new Set(placements.map((entry) => entry.locationId));
+    if (movingIds.size !== placements.length)
+      return { success: false, reason: "duplicate_location" };
+    const planned = [];
+    for (const entry of placements) {
+      const location = this.getLocation(entry.locationId);
+      if (!location) return { success: false, reason: "location_not_found" };
+      if (!this.setup.playArea.allowsPlacement(entry.position))
+        return { success: false, reason: "outside_play_area" };
+      planned.push({ ...location, position: { ...entry.position } });
+    }
+    const spacing = new LocationSpacingPolicy({
+      setup: this.setup,
+      coordinateMode: this.coordinateMode,
+    });
+    const others = [
+      ...placedLocations(this).filter(
+        (location) => !movingIds.has(location.id),
+      ),
+      ...planned,
+    ];
+    for (const location of planned) {
+      const result = spacing.check(location, location.position, others);
+      if (!result.success) return result;
+    }
+    for (const entry of placements) {
+      this.getLocation(entry.locationId).position = { ...entry.position };
+      for (const placement of Object.values(
+        this.scenarioRuntime?.placements ?? {},
+      ))
+        if (
+          placement.locationId === entry.locationId &&
+          placement.status === "placed"
+        )
+          placement.position = { ...entry.position };
+    }
+    return { success: true };
+  }
+
   dispatchQuestEvent(event) {
+    if (event.type === "LocationEntered") {
+      const visitor = this.getHero(event.actorId);
+      const visited = this.getLocation(event.locationId);
+      if (visitor && visited?.heroIds.includes(visitor.id))
+        this.itemAcquisitionService.recordVisit(visitor, visited);
+    }
+    if (!this.questSystemEnabled) {
+      if (event.type === "LocationEntered" && event.actorId)
+        this.trainHeroAtLocation({
+          heroId: event.actorId,
+          locationId: event.locationId,
+        });
+      return null;
+    }
+    this.activeQuestActorId = event.actorId ?? this.activeQuestActorId;
+    RepressionQuest.arrival(this, event);
     if (this.#failExpiredQuestDeadline()) return null;
     if (event.type === "LocationEntered" && event.actorId)
-      this.trainHeroAtLocation({ heroId: event.actorId, locationId: event.locationId });
+      this.trainHeroAtLocation({
+        heroId: event.actorId,
+        locationId: event.locationId,
+      });
     if (
       event.type === "LocationEntered" &&
       this.scenarioState?.currentPhaseId === "prepare-evacuation"
@@ -811,7 +1195,11 @@ export class Game {
         }
       }
     }
-    return this.questRuntime.dispatch(event, this);
+    return RepressionQuest.settleArrival(
+      this,
+      event,
+      this.questRuntime.dispatch(event, this),
+    );
   }
 
   trainHeroAtLocation({ heroId, locationId }) {
@@ -819,18 +1207,47 @@ export class Game {
     const location = this.getLocation(locationId);
     if (hero === null || location === null)
       return { success: false, reason: "hero_or_location_not_found" };
+    if (
+      hero.state !== "active" ||
+      !location.heroIds.includes(hero.id) ||
+      !this.locationAccessPolicy.can(hero.playerId, location, "train")
+    )
+      return { success: false, reason: "location_access_denied" };
     const visits = (hero.classFeatureState.infrastructureTraining ??= {});
     const results = [];
-    const train = (buildingId, allowedAptitudeIds) => {
+    if ((location.infrastructure.tavern ?? 0) > 0) {
+      const tavernState = (hero.classFeatureState.tavernMorale ??= {});
+      if (!tavernState.active) {
+        const value = location.infrastructure.tavern;
+        hero.recordMoraleFactor("location", value, `tavern:${location.id}`);
+        tavernState.active = { locationId: location.id, value };
+        results.push({ buildingId: "tavern", morale: value });
+      }
+    }
+    if (
+      (location.infrastructure.healing_tent ?? 0) >= 2 &&
+      !hero.classFeatureState.healingMorale
+    ) {
+      hero.recordMoraleFactor("location", 1, "healing_tent");
+      hero.classFeatureState.healingMorale = true;
+      results.push({ buildingId: "healing_tent", morale: 1 });
+    }
+    const train = (
+      buildingId,
+      allowedAptitudeIds,
+      maximum = location.infrastructure[buildingId] ?? 0,
+    ) => {
       if ((location.infrastructure[buildingId] ?? 0) <= 0) return;
       const visitId = `${location.id}:${buildingId}`;
-      if (visits[visitId]) return;
-      visits[visitId] = true;
+      const completed = Number(visits[visitId] ?? 0);
+      if (completed >= maximum) return;
+      visits[visitId] = completed + 1;
       hero.statGrowth.attack += 1;
       hero.statGrowth.defense += 1;
-      const aptitudeId = allowedAptitudeIds.find(
-        (id) => !Object.hasOwn(hero.aptitudeRanks, id),
-      ) ?? null;
+      const aptitudeId =
+        allowedAptitudeIds.find(
+          (id) => !Object.hasOwn(hero.aptitudeRanks, id),
+        ) ?? null;
       if (aptitudeId) {
         hero.aptitudeRanks[aptitudeId] = "novice";
         const aptitude = this.heroProgressionService.aptitudes.get(aptitudeId);
@@ -841,23 +1258,27 @@ export class Game {
       results.push({ buildingId, aptitudeId, attack: 1, defense: 1 });
     };
     const heroClass = this.heroClasses.get(hero.classId);
+    train("barracks", [], 1);
     train("military_school", [
       ...(heroClass?.aptitudeIds ?? []),
       ...(heroClass?.commonAptitudeIds ?? []),
     ]);
     if (hero.classId === "mage")
       train("magic_academy", heroClass?.aptitudeIds ?? []);
-    results.forEach((result) => this.eventLog.push({
-      type: "hero_infrastructure_training",
-      heroId,
-      locationId,
-      ...result,
-      at: this.now(),
-    }));
+    results.forEach((result) =>
+      this.eventLog.push({
+        type: "hero_infrastructure_training",
+        heroId,
+        locationId,
+        ...result,
+        at: this.now(),
+      }),
+    );
     return { success: results.length > 0, results };
   }
 
   getQuestChoices() {
+    if (!this.questSystemEnabled) return [];
     const phase = this.scenario?.getPhase(this.scenarioState?.currentPhaseId);
     if (!phase || this.scenarioState.getCurrentPhaseState().status !== "active")
       return [];
@@ -866,7 +1287,17 @@ export class Game {
       .map((choice) => ({ id: choice.id, label: choice.label }));
   }
 
-  selectQuestChoice(choiceId) {
+  selectQuestChoice(choiceId, { heroId = null } = {}) {
+    if (!this.questSystemEnabled) return questSystemUnavailable();
+    if (heroId) this.activeQuestActorId = heroId;
+    if (
+      !RepressionQuest.choiceAllowed(
+        this,
+        choiceId,
+        RepressionQuest.actor(this),
+      )
+    )
+      return { success: false, reason: "quest_interaction_out_of_range" };
     const phase = this.scenario?.getPhase(this.scenarioState?.currentPhaseId);
     const state = this.scenarioState?.getCurrentPhaseState();
     if (!phase || state?.status !== "active")
@@ -914,6 +1345,7 @@ export class Game {
   }
 
   inspectTrailPoint(traceId) {
+    if (!this.questSystemEnabled) return null;
     const trail =
       this.scenario?.trails.find((candidate) =>
         candidate.points.some((point) => point.traceId === traceId),
@@ -934,6 +1366,7 @@ export class Game {
   }
 
   getActiveQuest() {
+    if (!this.questSystemEnabled) return null;
     if (this.scenario === null || this.scenarioState === null) return null;
     const phase = this.scenario.getPhase(this.scenarioState.currentPhaseId);
     const state = this.scenarioState.getCurrentPhaseState();
@@ -947,11 +1380,41 @@ export class Game {
     };
   }
 
+  /** Commande serveur : le Proxy réseau transmet l'intention ; aucun secours local. */
+  questEngineCommand() {
+    throw new Error("Le nouveau moteur exige une session serveur officielle.");
+  }
+
+  getQuestEngineView() {
+    return this.questEngineState?.view ?? null;
+  }
+
   completeCurrentScenarioPhase() {
-    return this.scenarioState?.completeCurrentPhase() ?? false;
+    if (!this.questSystemEnabled) return false;
+    const phase = this.scenario?.getPhase(this.scenarioState?.currentPhaseId);
+    const completed = this.scenarioState?.completeCurrentPhase() ?? false;
+    if (
+      completed &&
+      phase &&
+      phase.transitions.length === 0 &&
+      phase.choices.length === 0
+    ) {
+      const actor =
+        this.getHero(this.activeQuestActorId) ??
+        this.heroes.find((hero) => hero.playerId === "local");
+      if (actor)
+        this.itemAcquisitionService.unlock({
+          source: "mainQuest",
+          key: `${this.scenario.id}:${phase.id}`,
+          heroId: actor.id,
+          classId: actor.classId,
+        });
+    }
+    return completed;
   }
 
   configureQuestSequence(quests) {
+    if (!this.questSystemEnabled) return false;
     if (this.scenario === null || !Array.isArray(quests) || quests.length < 1)
       throw new RangeError("La séquence exige au moins une quête.");
     const usedPhaseIds = new Set();
@@ -991,6 +1454,7 @@ export class Game {
   }
 
   advanceQuestSequence({ outcome = "completed" } = {}) {
+    if (!this.questSystemEnabled) return null;
     if (
       this.questSequence.length < 1 ||
       this.scenario === null ||
@@ -1020,10 +1484,22 @@ export class Game {
       at: this.now(),
     };
     this.eventLog.push(result);
+    if (
+      current.id === "granaries-of-the-king" &&
+      this.worldState.get("capitalAi.enabled") &&
+      !this.worldState.get("capitalAi.hostile")
+    ) {
+      const betrayal = this.scenario.getEvent("capital-betrayal");
+      if (betrayal) {
+        this.scenarioEffectResolver.apply(betrayal, this);
+        this.acceptAvailableQuest("capital-reconquest");
+      }
+    }
     return result;
   }
 
   settleQuestSequenceTerminalPhase() {
+    if (!this.questSystemEnabled) return null;
     const phase = this.scenario?.getPhase(this.scenarioState?.currentPhaseId);
     if (
       !phase ||
@@ -1036,7 +1512,29 @@ export class Game {
     return this.advanceQuestSequence({ outcome: "completed" });
   }
 
+  prepareTestQuest({ playerId, heroId, questId, participantCount }) {
+    if (!this.questSystemEnabled) return questSystemUnavailable();
+    const hero = this.getHero(heroId);
+    if (!hero || hero.playerId !== playerId)
+      return { success: false, reason: "hero_not_found" };
+    if (questId === "team-fort-test")
+      return startLocalTeamFortTest(this, {
+        heroId,
+        participantCount,
+        position: hero.position,
+      });
+    const quest = this.questSequence.find(
+      (candidate) => candidate.id === questId,
+    );
+    if (!quest) return { success: false, reason: "quest_not_found" };
+    if (this.getActiveQuest()) this.abandonCurrentQuest();
+    if (!this.availableQuests.some((offer) => offer.id === quest.id))
+      this.offerQuest(quest);
+    return { success: true };
+  }
+
   offerQuest({ id, title, description, startPhaseId, briefingLines = [] }) {
+    if (!this.questSystemEnabled) return false;
     if (
       this.scenario?.getPhase(startPhaseId) === null ||
       this.availableQuests.some((quest) => quest.id === id)
@@ -1059,6 +1557,7 @@ export class Game {
   }
 
   getAvailableQuests() {
+    if (!this.questSystemEnabled) return [];
     return this.availableQuests.map((quest) => ({
       ...quest,
       briefingLines: [...quest.briefingLines],
@@ -1066,10 +1565,12 @@ export class Game {
   }
 
   getLastQuestResult() {
+    if (!this.questSystemEnabled) return null;
     return this.lastQuestResult === null ? null : { ...this.lastQuestResult };
   }
 
   acceptAvailableQuest(questId) {
+    if (!this.questSystemEnabled) return questSystemUnavailable();
     const index = this.availableQuests.findIndex(
       (quest) => quest.id === questId,
     );
@@ -1117,10 +1618,12 @@ export class Game {
   }
 
   abandonCurrentQuest() {
+    if (!this.questSystemEnabled) return questSystemUnavailable();
     return this.failCurrentQuest({ reason: "abandoned" });
   }
 
   failCurrentQuest({ reason = "failed" } = {}) {
+    if (!this.questSystemEnabled) return null;
     if (
       this.scenario === null ||
       this.scenarioState === null ||
@@ -1171,6 +1674,7 @@ export class Game {
   }
 
   getQuestInteractionsForLocation(locationId) {
+    if (!this.questSystemEnabled) return [];
     const active = this.getActiveQuest();
     if (active === null) return [];
     const binding = this.scenarioLocationBindings.find(
@@ -1198,6 +1702,7 @@ export class Game {
   }
 
   triggerScenarioEvent(eventId) {
+    if (!this.questSystemEnabled) return null;
     if (this.scenario === null || this.scenarioState === null) return null;
     const event = this.scenarioState.triggerEvent(this.scenario, eventId);
     if (event === null) return null;
@@ -1213,6 +1718,7 @@ export class Game {
   }
 
   advanceScenario(nextPhaseId) {
+    if (!this.questSystemEnabled) return false;
     if (this.scenario === null || this.scenarioState === null) return false;
     return this.scenarioState.advance(this.scenario, nextPhaseId);
   }
@@ -1225,17 +1731,22 @@ export class Game {
       : this.locationAccessPolicy.getRelation(playerId, location);
   }
 
-  getCampDevelopment(locationId) {
+  getCampDevelopment(locationId, heroId = null) {
     const location = this.getLocation(locationId);
-    if (location === null || location.type !== "camp") return null;
-    return {
-      ...this.campImprovementService.getState(location),
-      levelUp: this.campImprovementService.getLevelUpStatus(location),
-      evolutions: this.campImprovementService.getEvolutionState(location),
-      experience: location.progression.experience,
-      experienceRequired:
-        this.locationProgressionService.getExperienceRequired(location),
-    };
+    if (
+      location === null ||
+      !["camp", "village", "town", "capital", "fort"].includes(location.type)
+    )
+      return null;
+    if(this.explorationView && location.terrain)return structuredClone(this.explorationView.campDevelopments?.find(entry=>entry.locationId===locationId && entry.heroId===heroId)?.development ?? null);
+    const candidate = this.getHero(heroId);
+    const hero =
+      candidate &&
+      location.heroIds.includes(candidate.id) &&
+      this.locationAccessPolicy.can(candidate.playerId, location, "build")
+        ? candidate
+        : null;
+    return campDevelopmentState(location,hero,this.campImprovementService,this.locationProgressionService);
   }
 
   gainLocationExperience({ locationId, amount, source = "activity" }) {
@@ -1256,6 +1767,7 @@ export class Game {
     const player = this.getPlayer(playerId);
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
+    if(location?.terrain && !this.campInstallationService.canInteract(hero,location))return {success:false,reason:"hero_not_at_location"};
     if (
       player === null ||
       hero === null ||
@@ -1264,9 +1776,13 @@ export class Game {
       !location.heroIds.includes(hero.id)
     )
       return { success: false, reason: "hero_not_at_location" };
-    if (this.getLocationRelation(player.id, location.id) !== "owned")
+    if (!this.locationAccessPolicy.can(player.id, location, "build"))
       return { success: false, reason: "location_not_owned" };
-    const result = this.campImprovementService.build(location, improvementId);
+    const result = this.campImprovementService.build(
+      location,
+      improvementId,
+      hero,
+    );
     if (result.success)
       this.eventLog.push({
         type: "camp_improvement_built",
@@ -1284,6 +1800,7 @@ export class Game {
     const player = this.getPlayer(playerId);
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
+    if(location?.terrain && !this.campInstallationService.canInteract(hero,location))return {success:false,reason:"hero_not_at_location"};
     if (
       player === null ||
       hero === null ||
@@ -1294,7 +1811,7 @@ export class Game {
       return { success: false, reason: "hero_not_at_location" };
     if (this.getLocationRelation(player.id, location.id) !== "owned")
       return { success: false, reason: "location_not_owned" };
-    const result = this.campImprovementService.levelUp(location);
+    const result = this.campImprovementService.levelUp(location, hero);
     if (result.success)
       this.eventLog.push({
         type: "camp_level_up",
@@ -1311,6 +1828,7 @@ export class Game {
     const player = this.getPlayer(playerId);
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
+    if(location?.terrain && !this.campInstallationService.canInteract(hero,location))return {success:false,reason:"hero_not_at_location"};
     if (
       player === null ||
       hero === null ||
@@ -1319,9 +1837,16 @@ export class Game {
       !location.heroIds.includes(hero.id)
     )
       return { success: false, reason: "hero_not_at_location" };
-    if (this.getLocationRelation(player.id, location.id) !== "owned")
+    if (!this.locationAccessPolicy.can(player.id, location, "build"))
       return { success: false, reason: "location_not_owned" };
-    const result = this.campImprovementService.evolve(location, branchId);
+    if (
+      branchId !== "fort" &&
+      this.teamFortQuestService.quests.some(
+        (quest) => quest.locationId === locationId && quest.status === "active",
+      )
+    )
+      return { success: false, reason: "team_fort_requires_fort" };
+    const result = this.campImprovementService.evolve(location, branchId, hero);
     if (result.success)
       this.eventLog.push({
         type: "camp_evolved",
@@ -1332,10 +1857,17 @@ export class Game {
         evolvedTo: result.evolvedTo,
         at: this.now(),
       });
+    if (result.success) this.teamFortQuestService.check(this);
     return result;
   }
 
   canPerformLocationAction({ playerId, locationId, action }) {
+    const repressionAccess = RepressionQuest.actionAllowed(
+      this,
+      locationId,
+      action,
+    );
+    if (repressionAccess !== null) return repressionAccess;
     const location = this.getLocation(locationId);
     if (location === null) return false;
     const temporarilyAuthorized =
@@ -1353,24 +1885,301 @@ export class Game {
     return true;
   }
 
-  getLocationChiefConversation({ playerId, locationId }) {
+  tradeAtLocation({ playerId, heroId, locationId, ...transaction }) {
+    const hero = this.getHero(heroId);
+    const location = this.getLocation(locationId);
+    if (
+      !hero ||
+      !location ||
+      hero.playerId !== playerId ||
+      !location.heroIds.includes(heroId) ||
+      !this.locationAccessPolicy.can(playerId, location, "trade")
+    )
+      return { success: false, reason: "market_unavailable" };
+    const result = this.marketService.execute({
+      ...transaction,
+      hero,
+      location,
+      preview: false,
+    });
+    if (result.success)
+      result.locationExperienceGained = awardCampActivityExperience(
+        this.locationProgressionService,
+        location,
+        "trade",
+        result.lots,
+      );
+    if (result.success)
+      this.eventLog.push({
+        type: "market_trade",
+        playerId,
+        heroId,
+        locationId,
+        ...result,
+        at: this.now(),
+      });
+    return result;
+  }
+
+  getLocationChiefConversation({
+    playerId,
+    locationId,
+    heroId = null,
+    source = "chief",
+  }) {
+    if (source === "forge") {
+      const context = this.itemAcquisitionContext({
+        playerId,
+        heroId,
+        locationId,
+      });
+      if (
+        !context ||
+        !context.canTrade ||
+        !(context.location.infrastructure.forge >= 1)
+      )
+        return null;
+      const remaining = Math.max(
+        0,
+        3 - (this.itemAcquisitionService.state.forgeUses[locationId] ?? 0),
+      );
+      return buildingConversation({
+        buildingId: "forge",
+        location: context.location,
+        remaining,
+        options: this.itemAcquisitionService
+          .offers(context)
+          .filter((offer) => ["forge", "supply"].includes(offer.source))
+          .map((offer) => ({
+            id: `item:${offer.id}`,
+            kind: "equipment",
+            itemId: offer.itemId,
+            label: offer.label,
+          })),
+      });
+    }
+    if (source === "equipment") {
+      const context = this.itemAcquisitionContext({
+        playerId,
+        heroId,
+        locationId,
+      });
+      if (!context) return null;
+      const visits = this.itemAcquisitionService.state.visits[heroId] ?? [];
+      const treasureLocation = visits[2] ? this.getLocation(visits[2]) : null;
+      return {
+        locationId,
+        name: `Équipements · ${context.location.name}`,
+        title: "Équipements",
+        portrait: null,
+        openingLines: [
+          `Les équipements sont en stock limité pour toute la partie. La forge accepte trois commandes au total ; les outils d’exploration restent disponibles à volonté pour 2 or dès le niveau 1. Fragments de carte : ${Math.min(3, visits.length)}/3. ${treasureLocation ? `Trésor repéré : ${treasureLocation.name}.` : "Visitez trois lieux distincts pour localiser un trésor au troisième lieu."} Les récompenses sont à retirer ici depuis tout lieu accessible. Une prospection révèle un gisement ; elle ne construit pas de mine et ne donne pas d’équipement.`,
+        ],
+        options: [
+          ...this.explorationClueService.offers(context, source),
+          ...this.itemAcquisitionService.offers(context).map((offer) => ({
+            id: `item:${offer.id}`,
+            kind: "equipment",
+            itemId: offer.itemId,
+            label: offer.label,
+          })),
+        ],
+      };
+    }
+    if (RepressionQuest.actionAllowed(this, locationId, "talkChief") === false)
+      return null;
     const location = this.getLocation(locationId);
     if (
       location === null ||
-      !this.locationAccessPolicy.can(playerId, location, "talkChief")
+      !["chief", "tavern"].includes(source) ||
+      !this.locationAccessPolicy.can(
+        playerId,
+        location,
+        source === "tavern" ? "visitTavern" : "talkChief",
+      )
     )
       return null;
-    return this.locationChiefService.getConversation({
-      location,
-      canTrade: this.locationAccessPolicy.can(playerId, location, "trade"),
-      currentPhaseId: this.scenarioState?.currentPhaseId ?? null,
-      currentPhaseStatus:
-        this.scenarioState?.getCurrentPhaseState().status ?? null,
-      isObjectiveCompleted: (id) => this.isObjectiveCompleted(id),
-    });
+    const conversation = (source === "chief"
+      ? this.locationChiefService.getConversation({
+          location,
+          canTrade: this.locationAccessPolicy.can(playerId, location, "trade"),
+          questsEnabled: this.questSystemEnabled,
+          currentPhaseId: this.questSystemEnabled
+            ? (this.scenarioState?.currentPhaseId ?? null)
+            : null,
+          currentPhaseStatus:
+            this.scenarioState?.getCurrentPhaseState().status ?? null,
+          isObjectiveCompleted: (id) => this.isObjectiveCompleted(id),
+        })
+      : buildingConversation({ buildingId: "tavern", location })) ?? {
+      locationId,
+      name:
+        source === "tavern"
+          ? `Taverne de ${location.name}`
+          : `Chef de ${location.name}`,
+      title: source === "tavern" ? "Tavernier" : "Chef du village",
+      portrait: null,
+      openingLines: ["Une petite mission vous intéresse ?"],
+      options: [],
+    };
+    const questHero = heroId
+      ? this.getHero(heroId)
+      : this.heroes.find((entry) => entry.playerId === playerId);
+    if (
+      this.questSystemEnabled &&
+      source === "chief" &&
+      questHero?.playerId === playerId
+    )
+      conversation.options.push(
+        ...this.teamFortQuestService.options(this, questHero, location),
+      );
+    if (
+      this.questSystemEnabled &&
+      questHero?.playerId === playerId &&
+      (["camp", "village"].includes(location.type) || source === "tavern")
+    )
+      conversation.options.push(
+        ...this.sideQuestService.options(
+          questHero,
+          location,
+          source,
+          this.locations.filter((entry) =>
+            this.locationAccessPolicy.can(playerId, entry, "talkChief"),
+          ),
+        ),
+      );
+    if (source === "tavern") {
+      const itemContext = this.itemAcquisitionContext({
+        playerId,
+        heroId: questHero?.id,
+        locationId,
+      });
+      if (itemContext)
+        conversation.options.push(
+          ...this.explorationClueService.offers(itemContext, source),
+          ...this.itemAcquisitionService
+            .offers(itemContext)
+            .filter((offer) => offer.source === "fence")
+            .map((offer) => ({
+              id: `item:${offer.id}`,
+              kind: "equipment",
+              itemId: offer.itemId,
+              label: offer.label,
+            })),
+        );
+      const board = this.getTavernNpcOffers({ playerId, locationId });
+      conversation.options.push(
+        ...(board.offers ?? []).map((npc) => ({
+          id: `tavern-npc:${npc.id}`,
+          kind: "tavern_npc",
+          appearance: npc.appearance,
+          label: `${npc.name} · ${
+            npc.questId
+              ? "quête requise"
+              : Object.entries(npc.costs)
+                  .map(([id, amount]) => `${amount} ${id}`)
+                  .join(" · ")
+          }`,
+        })),
+      );
+    }
+    const rumorContext = questHero
+      ? this.itemAcquisitionContext({
+          playerId,
+          heroId: questHero.id,
+          locationId,
+        })
+      : null;
+    if (rumorContext)
+      conversation.options.push(
+        ...this.explorationRumorService.offers(rumorContext, source),
+      );
+    return conversation;
   }
 
-  selectLocationChiefOption({ playerId, heroId, locationId, optionId }) {
+  selectLocationChiefOption({
+    playerId,
+    heroId,
+    locationId,
+    optionId,
+    source = "chief",
+  }) {
+    if (
+      typeof optionId === "string" &&
+      (optionId.startsWith("rumor-action:") ||
+        optionId.startsWith("tavern-rumor:"))
+    ) {
+      const context = this.itemAcquisitionContext({
+        playerId,
+        heroId,
+        locationId,
+      });
+      return context
+        ? this.explorationRumorService.select(context, source, optionId)
+        : { success: false, reason: "rumor_unavailable" };
+    }
+    if (typeof optionId === "string" && optionId.startsWith("clue-action:")) {
+      const context = this.itemAcquisitionContext({
+        playerId,
+        heroId,
+        locationId,
+      });
+      return context
+        ? this.explorationClueService.select(context, source, optionId)
+        : { success: false, reason: "clue_offer_unavailable" };
+    }
+    if (!this.questSystemEnabled && /^(side:|team-fort:|quest:)/.test(optionId))
+      return questSystemUnavailable();
+    if (
+      ["equipment", "tavern", "forge"].includes(source) &&
+      optionId.startsWith("item:")
+    ) {
+      const context = this.itemAcquisitionContext({
+        playerId,
+        heroId,
+        locationId,
+      });
+      if (
+        !context ||
+        (source === "tavern" &&
+          (!context.canTavern || !optionId.startsWith("item:fence:")))
+      )
+        return { success: false, reason: "item_offer_unavailable" };
+      if (
+        source === "forge" &&
+        (!context.canTrade ||
+          !(context.location.infrastructure.forge >= 1) ||
+          !this.itemAcquisitionService
+            .offers(context)
+            .some(
+              (offer) =>
+                `item:${offer.id}` === optionId &&
+                ["forge", "supply"].includes(offer.source),
+            ))
+      )
+        return { success: false, reason: "item_offer_unavailable" };
+      const result = this.itemAcquisitionService.acquire(
+        context,
+        optionId.slice(5),
+      );
+      if (result.success) {
+        this.eventLog.push({
+          type: "hero_item_acquired",
+          playerId,
+          heroId,
+          locationId,
+          ...result,
+          at: this.now(),
+        });
+        this.dispatchQuestEvent({
+          type: "ItemAcquired",
+          actorId: heroId,
+          locationId,
+          itemId: result.itemId,
+        });
+      }
+      return result;
+    }
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
     if (
@@ -1378,9 +2187,51 @@ export class Game {
       location === null ||
       hero.playerId !== playerId ||
       !location.heroIds.includes(hero.id) ||
-      !this.locationAccessPolicy.can(playerId, location, "talkChief")
+      !["chief", "tavern"].includes(source) ||
+      !this.locationAccessPolicy.can(
+        playerId,
+        location,
+        source === "tavern" ? "visitTavern" : "talkChief",
+      )
     )
       return { success: false, reason: "chief_unavailable" };
+    if (source === "chief" && optionId.startsWith("team-fort:"))
+      return this.teamFortQuestService.select(this, hero, location, optionId);
+    if (
+      optionId.startsWith("side:") &&
+      (["camp", "village"].includes(location.type) || source === "tavern")
+    )
+      return this.sideQuestService.select(
+        hero,
+        location,
+        source,
+        this.locations.filter((entry) =>
+          this.locationAccessPolicy.can(playerId, entry, "talkChief"),
+        ),
+        optionId,
+      );
+    if (source === "tavern" && optionId.startsWith("tavern-npc:")) {
+      const result = this.acquireTavernNpc({
+        playerId,
+        heroId,
+        locationId,
+        npcId: optionId.slice("tavern-npc:".length),
+      });
+      if (result.success)
+        result.message =
+          result.npc.kind === "trainer"
+            ? `${result.npc.name} vous forme : ${result.effect.heroStat} +${result.effect.statBonus}, +${result.effect.heroExperience} XP.`
+            : `${result.npc.name} rejoint vos bagages.`;
+      return result;
+    }
+    if (source !== "chief")
+      return { success: false, reason: "chief_option_unavailable" };
+    if (
+      optionId.startsWith("trade-offer:") &&
+      (!location.chief ||
+        !this.locationAccessPolicy.can(playerId, location, "trade"))
+    )
+      return { success: false, reason: "trade_offer_unavailable" };
     const result = optionId.startsWith("trade-offer:")
       ? this.chiefTradeService.execute({
           hero,
@@ -1391,12 +2242,36 @@ export class Game {
           location,
           optionId,
           canTrade: this.locationAccessPolicy.can(playerId, location, "trade"),
-          currentPhaseId: this.scenarioState?.currentPhaseId ?? null,
+          questsEnabled: this.questSystemEnabled,
+          currentPhaseId: this.questSystemEnabled
+            ? (this.scenarioState?.currentPhaseId ?? null)
+            : null,
           currentPhaseStatus:
             this.scenarioState?.getCurrentPhaseState().status ?? null,
           isObjectiveCompleted: (id) => this.isObjectiveCompleted(id),
         });
+    if (result.success && result.kind === "secondary_quest") {
+      const phase = this.scenario?.getPhase(result.questId);
+      if (phase) {
+        this.offerQuest({
+          id: result.questId,
+          title: phase.title,
+          description: phase.description,
+          startPhaseId: phase.id,
+        });
+        result.message = phase.title;
+        result.lines = [
+          phase.description,
+          "La mission est disponible dans votre journal de quêtes.",
+        ];
+      }
+    }
     if (result.success && optionId.startsWith("trade-offer:")) {
+      result.locationExperienceGained = awardCampActivityExperience(
+        this.locationProgressionService,
+        location,
+        "trade",
+      );
       result.kind = "trade_offer";
       result.message = `Échange conclu. Il reste ${result.remaining} troc(s).`;
       result.lines = [result.message];
@@ -1417,14 +2292,27 @@ export class Game {
   getLocationCaptureRequirement({ playerId, locationId }) {
     const location = this.getLocation(locationId);
     if (location === null) return { state: "location_not_found" };
+    if (
+      location.heroIds.includes("capital-marshal") &&
+      this.getHero("capital-marshal")?.state === "active" &&
+      this.locationAccessPolicy.getRelation(playerId, location) === "enemy"
+    )
+      return { state: "battle_required" };
     return this.locationCaptureService.getRequirement({
       location,
       relation: this.locationAccessPolicy.getRelation(playerId, location),
+      canCapture: this.locationAccessPolicy.canCapture(playerId, location),
       isQuestCompleted: (id) => this.isObjectiveCompleted(id),
     });
   }
 
   attemptLocationCapture({ playerId, heroId, locationId }) {
+    const access = RepressionQuest.actionAllowed(this, locationId, "attack");
+    if (access !== null)
+      return {
+        success: false,
+        reason: access ? "battle_required" : "quest_locked",
+      };
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
     if (
@@ -1434,10 +2322,17 @@ export class Game {
       !location.heroIds.includes(hero.id)
     )
       return { success: false, reason: "hero_not_at_location" };
+    if (
+      location.heroIds.includes("capital-marshal") &&
+      this.getHero("capital-marshal")?.state === "active" &&
+      this.locationAccessPolicy.getRelation(playerId, location) === "enemy"
+    )
+      return { success: false, reason: "battle_required" };
     const result = this.locationCaptureService.capture({
       location,
       playerId,
       relation: this.locationAccessPolicy.getRelation(playerId, location),
+      canCapture: this.locationAccessPolicy.canCapture(playerId, location),
       isQuestCompleted: (id) => this.isObjectiveCompleted(id),
     });
     if (result.success)
@@ -1518,7 +2413,7 @@ export class Game {
     const player = this.getPlayer(playerId);
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
-    return this.recruitmentService.recruit({
+    const result = this.recruitmentService.recruit({
       player,
       hero,
       location,
@@ -1526,6 +2421,13 @@ export class Game {
       idGenerator: this.idGenerator,
       number: this.#nextUnitNumber(player.id, unitTypeId),
     });
+    if (result.success)
+      result.locationExperienceGained = awardCampActivityExperience(
+        this.locationProgressionService,
+        location,
+        "recruitment",
+      );
+    return result;
   }
 
   completeHeroUnits({ playerId, heroId, locationId }) {
@@ -1543,10 +2445,10 @@ export class Game {
     });
     const result = this.recruitmentService.completeUnits({ hero, location });
     const added = result.reinforced.reduce((sum, unit) => sum + unit.added, 0);
-    if (result.success && location.type === "camp" && added > 0)
-      this.locationProgressionService.awardExperience(
+    if (result.success && added > 0)
+      result.locationExperienceGained = awardCampActivityExperience(
+        this.locationProgressionService,
         location,
-        added / 5,
         "reinforcement",
       );
     return { ...result, costs: quote.costs };
@@ -1569,11 +2471,12 @@ export class Game {
       return { success: false, reason: "hero_not_at_location" };
     const quantities = {};
     for (const unit of hero.army.units) {
-      const available = Math.floor(location.recruitment.stock[unit.typeId] ?? 0);
+      const available = Math.floor(
+        location.recruitment.stock[unit.typeId] ?? 0,
+      );
       const quantity = Math.min(unit.missingQuantity, available);
       if (quantity > 0)
-        quantities[unit.typeId] =
-          (quantities[unit.typeId] ?? 0) + quantity;
+        quantities[unit.typeId] = (quantities[unit.typeId] ?? 0) + quantity;
     }
     const soldiers = Object.values(quantities).reduce(
       (sum, value) => sum + value,
@@ -1624,14 +2527,23 @@ export class Game {
       (sum, result) => sum + result.restoredHealth,
       0,
     );
-    if (restoredHealth > 0 && location.type === "camp")
-      this.locationProgressionService.awardExperience(
-        location,
-        restoredHealth / 20,
-        "healing",
-      );
+    const locationExperienceGained =
+      restoredHealth > 0
+        ? awardCampActivityExperience(
+            this.locationProgressionService,
+            location,
+            "healing",
+          )
+        : 0;
     return restoredHealth > 0
-      ? { success: true, timeUnits, restoredHealth, units, costs: quote.costs }
+      ? {
+          success: true,
+          timeUnits,
+          restoredHealth,
+          units,
+          costs: quote.costs,
+          locationExperienceGained,
+        }
       : {
           success: false,
           reason: "no_wounded_soldiers",
@@ -1664,8 +2576,7 @@ export class Game {
           .length,
       0,
     );
-    if (soldiers <= 0)
-      return { success: false, reason: "no_wounded_soldiers" };
+    if (soldiers <= 0) return { success: false, reason: "no_wounded_soldiers" };
     const costs = { gold: soldiers };
     return hero.getResourceAmount("gold") < costs.gold
       ? {
@@ -1704,6 +2615,42 @@ export class Game {
     return { success: true, collected };
   }
 
+  collectLocationTaxes({ playerId, heroId, locationId }) {
+    const player = this.getPlayer(playerId);
+    const hero = this.getHero(heroId);
+    const location = this.getLocation(locationId);
+    if (
+      !player ||
+      !hero ||
+      !location ||
+      hero.playerId !== player.id ||
+      !location.heroIds.includes(hero.id)
+    )
+      return { success: false, reason: "hero_not_at_location" };
+    if (this.locationAccessPolicy.getRelation(player.id, location) !== "owned")
+      return { success: false, reason: "location_access_denied" };
+    const tax = locationTaxState(location);
+    if (!tax.eligible || location.state !== "active")
+      return { success: false, reason: "location_not_taxable" };
+    if (tax.available < 1) return { success: false, reason: "empty_taxes" };
+    hero.addResource("gold", tax.available);
+    location.taxes.accrued =
+      Math.round((tax.accrued - tax.available) * 1000) / 1000;
+    if (this.setup.rules.locationMode === "expert") {
+      const previousContentment = location.contentment ?? 50;
+      location.contentment = previousContentment;
+      const penalty = Math.min(5, Math.ceil(tax.available / 10));
+      const contentment = location.adjustContentment(-penalty);
+      return {
+        success: true,
+        collected: { gold: tax.available },
+        contentment,
+        contentmentDelta: contentment - previousContentment,
+      };
+    }
+    return { success: true, collected: { gold: tax.available } };
+  }
+
   depositLocationResource({
     playerId,
     heroId,
@@ -1730,6 +2677,7 @@ export class Game {
     const deposited = location.depositResource(resourceName, requested);
     if (deposited <= 0) return { success: false, reason: "storage_full" };
     hero.spendResource(resourceName, deposited);
+    this.tavernNpcService.applyLocationWorkers(location);
     return { success: true, resourceName, deposited };
   }
 
@@ -1751,6 +2699,8 @@ export class Game {
     if (index === -1) return { success: false, reason: "item_not_carried" };
     const [item] = hero.carriedLoot.splice(index, 1);
     location.depositItem(item);
+    const clue = this.explorationClueService.find(item.itemId);
+    if (clue) clue.holder = { kind: "location", id: location.id };
     return { success: true, item: { ...item } };
   }
 
@@ -1809,6 +2759,7 @@ export class Game {
         reason:
           direction === "to_location" ? "nothing_to_deposit" : "empty_stock",
       };
+    this.tavernNpcService.applyLocationWorkers(location);
     const contentmentDelta =
       Math.min(5, Math.max(1, Math.ceil(transferred / 10))) *
       (direction === "to_location" ? 1 : -1);
@@ -2185,6 +3136,7 @@ export class Game {
   }
 
   #canOperateEvacuationSource(playerId, locationId) {
+    if (!this.questSystemEnabled) return false;
     if (
       this.getPlayer(playerId) === null ||
       !["reach-evacuation-camp", "prepare-evacuation"].includes(
@@ -2202,6 +3154,7 @@ export class Game {
   }
 
   #failExpiredQuestDeadline() {
+    if (!this.questSystemEnabled) return null;
     const expired = [
       ...Object.values(this.evacuationStates),
       ...Object.values(this.questDeadlines),
@@ -2218,6 +3171,7 @@ export class Game {
   }
 
   #resolveUnopposedEvacuationAttack(event) {
+    if (!this.questSystemEnabled) return { handled: false, outcome: null };
     if (event.type !== "autonomous_group_location_attack_requested")
       return { handled: false, outcome: null };
     const state = Object.values(this.evacuationStates).find(
@@ -2289,6 +3243,43 @@ export class Game {
   }
 
   // Équipement, production et récupération à chaque cycle.
+  itemAcquisitionContext({ playerId, heroId, locationId }) {
+    const hero = this.getHero(heroId),
+      location = this.getLocation(locationId);
+    if (
+      !hero ||
+      !location ||
+      hero.playerId !== playerId ||
+      !location.heroIds.includes(heroId) ||
+      hero.state !== "active" ||
+      this.#isHeroBusy(heroId) ||
+      location.state === "destroyed" ||
+      this.locationAccessPolicy.getRelation(playerId, location) === "enemy" ||
+      RepressionQuest.actionAllowed(this, locationId, "talkChief") === false
+    )
+      return null;
+    return {
+      hero,
+      location,
+      canTrade: this.locationAccessPolicy.can(playerId, location, "trade"),
+      canManageReserves: this.locationAccessPolicy.can(
+        playerId,
+        location,
+        "manageReserves",
+      ),
+      canTalkChief: this.locationAccessPolicy.can(
+        playerId,
+        location,
+        "talkChief",
+      ),
+      canTavern: this.locationAccessPolicy.can(
+        playerId,
+        location,
+        "visitTavern",
+      ),
+    };
+  }
+
   equipHeroItem({ playerId, heroId, packageId, slot = null }) {
     const hero = this.getHero(heroId);
     if (hero === null || hero.playerId !== playerId)
@@ -2337,6 +3328,7 @@ export class Game {
     return this.locations
       .map((location) => {
         location.advanceAbandonment(cycles);
+        const taxes = accrueLocationTaxes(location, cycles);
         const modifier = location.getContentmentModifier(
           this.setup.rules.enableContentment,
         );
@@ -2357,13 +3349,12 @@ export class Game {
           modifier,
         );
         if (location.type === "camp") {
-          const activity =
-            (produced.food ?? 0) / 10 +
-            Object.values(producedRecruits).reduce(
-              (sum, amount) => sum + amount,
-              0,
-            ) /
-              5;
+          const activity = campProductionExperience(
+            produced,
+            producedRecruits,
+            cycles,
+            market.surplus,
+          );
           if (activity > 0)
             this.locationProgressionService.awardExperience(
               location,
@@ -2374,6 +3365,7 @@ export class Game {
         return {
           locationId: location.id,
           contentmentModifier: modifier,
+          taxes,
           produced,
           producedRecruits,
           populationGrowth,
@@ -2385,7 +3377,8 @@ export class Game {
           Object.keys(result.produced).length > 0 ||
           Object.keys(result.producedRecruits).length > 0 ||
           result.populationGrowth.gained > 0 ||
-          result.market.gold > 0,
+          result.market.gold > 0 ||
+          result.taxes > 0,
       );
   }
 
@@ -2396,11 +3389,98 @@ export class Game {
     this.locations.forEach((location) =>
       this.chiefTradeService.refresh(location),
     );
+    const tavernNpcs = this.tavernNpcService.advance(this.locations, cycles);
     return {
       locations,
+      tavernNpcs,
       recoveredUnits: this.recoverUnits(cycles),
       heroes: this.recoverHeroes(cycles),
     };
+  }
+
+  getTavernNpcOffers({ playerId, locationId }) {
+    const location = this.getLocation(locationId);
+    if (
+      !location ||
+      !this.locationAccessPolicy.can(playerId, location, "visitTavern")
+    )
+      return { success: false, reason: "tavern_unavailable", offers: [] };
+    if (!Object.hasOwn(this.tavernNpcService.state.assignments, location.id))
+      this.tavernNpcService.rotate(this.locations);
+    return { success: true, offers: this.tavernNpcService.getOffers(location) };
+  }
+
+  acquireTavernNpc({ playerId, heroId, locationId, npcId }) {
+    const hero = this.getHero(heroId);
+    const location = this.getLocation(locationId);
+    if (
+      !hero ||
+      hero.playerId !== playerId ||
+      !location?.heroIds.includes(heroId)
+    )
+      return { success: false, reason: "hero_not_at_location" };
+    if (!this.locationAccessPolicy.can(playerId, location, "visitTavern"))
+      return { success: false, reason: "tavern_unavailable" };
+    const offer = this.tavernNpcService
+      .getOffers(location)
+      .find((npc) => npc.id === npcId);
+    if (
+      offer &&
+      offer.kind !== "trainer" &&
+      this.#heroResourceCapacity(hero, offer.effect.itemId, 1) < 1
+    )
+      return { success: false, reason: "insufficient_slots" };
+    const result = this.tavernNpcService.acquire({
+      location,
+      locations: this.locations,
+      hero,
+      npcId,
+    });
+    if (result.success && result.effect.heroExperience)
+      this.gainHeroExperience({
+        heroId,
+        amount: result.effect.heroExperience,
+        source: `mentor:${npcId}`,
+      });
+    if (result.success)
+      this.eventLog.push({
+        type: "tavern_npc_acquired",
+        playerId,
+        heroId,
+        locationId,
+        npcId,
+        effect: result.effect,
+        at: this.now(),
+      });
+    return result;
+  }
+
+  applyOfficerToUnit({ playerId, heroId, unitId, officerItemId }) {
+    const hero = this.getHero(heroId);
+    const unit = hero?.army.getUnit(unitId) ?? null;
+    const experience =
+      { officer_drill: 40, officer_veteran: 80 }[officerItemId] ?? 0;
+    if (!hero || hero.playerId !== playerId || !unit || experience === 0)
+      return { success: false, reason: "invalid_officer_assignment" };
+    if (hero.getResourceAmount(officerItemId) < 1)
+      return { success: false, reason: "officer_not_carried" };
+    hero.spendResource(officerItemId, 1);
+    const progression = unit.addExperience(experience);
+    const result = {
+      success: true,
+      unitId,
+      officerItemId,
+      experienceGained: experience,
+      progression,
+    };
+    this.eventLog.push({
+      type: "officer_applied_to_unit",
+      playerId,
+      heroId,
+      ...result,
+      at: this.now(),
+    });
+    return result;
   }
 
   recoverUnits(cycles = 1) {
@@ -2429,6 +3509,12 @@ export class Game {
 
   recoverHeroes(cycles = 1) {
     return this.heroes.map((hero) => {
+      if (RepressionQuest.blocksRevival(this, hero))
+        return {
+          heroId: hero.id,
+          restoredHealth: 0,
+          reason: "repression_prisoner",
+        };
       if (this.#isHeroBusy(hero.id))
         return {
           heroId: hero.id,
@@ -2438,13 +3524,24 @@ export class Game {
           reason: "hero_busy",
         };
       const base = this.getHeroBaseLocation(hero.id);
-      if (hero.state === "ghost" && base?.heroIds.includes(hero.id)) {
-        const revival = this.heroRecoveryService.reviveAtBase(hero);
+      const chapel =
+        this.locations.find(
+          (location) =>
+            location.heroIds.includes(hero.id) &&
+            (location.infrastructure.chapel ?? 0) > 0 &&
+            this.locationAccessPolicy.can(hero.playerId, location, "heal"),
+        ) ?? null;
+      const revivalLocation = base?.heroIds.includes(hero.id) ? base : chapel;
+      if (hero.state === "ghost" && revivalLocation) {
+        const revival = this.heroRecoveryService.reviveAtBase(
+          hero,
+          revivalLocation,
+        );
         if (revival.success)
           this.eventLog.push({
             type: "hero_revived_at_base",
             heroId: hero.id,
-            locationId: base.id,
+            locationId: revivalLocation.id,
             health: revival.health,
             at: this.now(),
           });
@@ -2453,7 +3550,7 @@ export class Game {
           restoredHealth: revival.health ?? 0,
           naturalHealing: 0,
           locationHealing: 0,
-          locationId: base.id,
+          locationId: revivalLocation.id,
           revived: revival.success,
         };
       }
@@ -2549,17 +3646,23 @@ export class Game {
   }
 
   reviveHeroAtBase({ heroId, locationId }) {
+    if (RepressionQuest.blocksRevival(this, this.getHero(heroId)))
+      return { success: false, reason: "repression_prisoner" };
     const hero = this.getHero(heroId);
     const location = this.getLocation(locationId);
     const base = this.getHeroBaseLocation(heroId);
     if (
       hero === null ||
       location === null ||
-      base?.id !== location.id ||
+      (base?.id !== location.id &&
+        !(
+          (location.infrastructure.chapel ?? 0) > 0 &&
+          this.locationAccessPolicy.can(hero?.playerId, location, "heal")
+        )) ||
       !location.heroIds.includes(hero.id)
     )
       return { success: false, reason: "hero_not_at_base" };
-    const result = this.heroRecoveryService.reviveAtBase(hero);
+    const result = this.heroRecoveryService.reviveAtBase(hero, location);
     if (result.success)
       this.eventLog.push({
         type: "hero_revived_at_base",
@@ -2595,6 +3698,7 @@ export class Game {
       return false;
     hero.removeUnit(unitId);
     location.garrison.addUnit(unit);
+    this.teamFortQuestService.check(this);
     return true;
   }
 
@@ -2652,6 +3756,59 @@ export class Game {
     return { success: true, unit: unit.toJSON() };
   }
 
+  playerSocialCommand(input) {
+    return this.playerSocialService.execute(this, input);
+  }
+
+  createPlayerEncounterBattle({ attackerHeroId, targetHeroId }) {
+    if (!this.setup.rules.allowPvP)
+      return { success: false, reason: "pvp_disabled" };
+    const attacker = this.getHero(attackerHeroId);
+    const target = this.getHero(targetHeroId);
+    if (!attacker || !target || attacker.id === target.id)
+      return { success: false, reason: "invalid_target" };
+    if (this.#areAlliedPlayers(attacker.playerId, target.playerId))
+      return { success: false, reason: "allied_target" };
+    if (attacker.state !== "active" || target.state !== "active")
+      return { success: false, reason: "inactive_hero" };
+    if (!attacker.position || !target.position)
+      return { success: false, reason: "position_unknown" };
+    if (
+      this.battles.some(
+        (b) =>
+          b.status !== "finished" &&
+          b.teams.some((t) =>
+            t.heroes.some((h) => [attacker.id, target.id].includes(h.sourceId)),
+          ),
+      )
+    )
+      return { success: false, reason: "already_in_battle" };
+    const distance =
+      this.coordinateMode === "gps"
+        ? distanceMeters(attacker.position, target.position)
+        : Math.hypot(
+            attacker.position.latitude - target.position.latitude,
+            attacker.position.longitude - target.position.longitude,
+          );
+    if (
+      distance > this.setup.rules.engagementRadiusMeters &&
+      !astralTargetInReach(this, attacker, "hero", target)
+    )
+      return { success: false, reason: "out_of_range" };
+    const battle = this.createBattle({
+      teamParticipants: [
+        { id: `player-${attacker.playerId}`, heroIds: [attacker.id] },
+        { id: `player-${target.playerId}`, heroIds: [target.id] },
+      ],
+      position: { ...attacker.position },
+    });
+    return { success: true, battle };
+  }
+
+  setArmyFormation(input) {
+    return setArmyFormation(this, input);
+  }
+
   createBattle({
     teamParticipants,
     loot = [],
@@ -2660,6 +3817,17 @@ export class Game {
     sourceEnemyTeamId = null,
     config = {},
   }) {
+    if (
+      RepressionQuest.actionAllowed(this, sourceLocationId, "attack") === false
+    )
+      throw new Error(
+        "Parlez au prévôt et choisissez votre intervention avant le combat.",
+      );
+    teamParticipants = RepressionQuest.battleTeams(
+      this,
+      sourceLocationId,
+      teamParticipants,
+    );
     if (this.status !== "started")
       throw new Error("La partie doit être démarrée pour créer une bataille.");
     if (
@@ -2675,11 +3843,25 @@ export class Game {
       game: this,
       teamParticipants,
       loot,
-      config: { countdownMs: 3_000, ...config },
+      config: {
+        ...config,
+        tactical: config.tactical ?? this.tacticalBattles,
+        // The launch includes the built-in brigand as a participant, but it is AI.
+        humanPlayerIds: this.setup.participants
+          .filter((entry) => entry.playerId !== "bandits")
+          .map((entry) => entry.playerId),
+      },
       now: this.now,
     });
     battle.lootPosition = position === null ? null : { ...position };
     battle.sourceLocationId = sourceLocationId;
+    for (const locationId of new Set(
+      [
+        sourceLocationId,
+        ...teamParticipants.map((team) => team.locationId),
+      ].filter(Boolean),
+    ))
+      this.locationWatchService.attack(this, locationId, battle.id);
     battle.sourceEnemyTeamId = sourceEnemyTeamId;
     if (position !== null) {
       const participantPlayerIds = teamParticipants
@@ -2698,6 +3880,27 @@ export class Game {
       );
     }
     battle.start();
+    for (const team of teamParticipants) {
+      if (team.autonomousGroupId) {
+        const group = this.getAutonomousGroup(team.autonomousGroupId);
+        if (group) group.status = "interrupted";
+      }
+    }
+    if (config.ambushTeamId) {
+      const attacker = battle.teams.find(
+        (team) => team.id === config.ambushTeamId,
+      );
+      new AmbushService().applyEffects({
+        battle,
+        attackerTeamId: config.ambushTeamId,
+        sourceHeroId: attacker?.heroes[0]?.sourceId ?? null,
+        effects: config.ambushEffects ?? {
+          rounds: 1,
+          attackerAttackMultiplier: 1.15,
+          defenderDefenseMultiplier: 0.9,
+        },
+      });
+    }
     this.battles.push(battle);
     return battle;
   }
@@ -2711,7 +3914,8 @@ export class Game {
       second?.state === "active" &&
       !this.#isOnPursuitCooldown(first) &&
       !this.#isOnPursuitCooldown(second) &&
-      this.engagementService.canEngage(first, second)
+      (this.engagementService.canEngage(first, second) ||
+        astralTargetInReach(this, first, "hero", second))
     );
   }
 
@@ -2748,11 +3952,37 @@ export class Game {
   }
 
   resolveBattle(battleId) {
+    const existingReport = this.battleReports.find(
+      (report) =>
+        report.battleId === battleId && Array.isArray(report.heroProgression),
+    );
+    if (existingReport) return structuredClone(existingReport);
     const battle = this.battles.find((item) => item.id === battleId);
     if (battle === undefined) throw new RangeError("La bataille n'existe pas.");
-    this.#resolveFleePursuits(battle);
+
     const droppedLoot = this.#extractDroppedEquipment(battle);
     const outcome = this.battleService.applyOutcome({ game: this, battle });
+    battle.teams.forEach((team) =>
+      team.heroes.forEach((snapshot) => {
+        const hero = this.getHero(snapshot.sourceId);
+        if (hero?.classFeatureState.healingMorale) {
+          hero.moraleHistory = hero.moraleHistory.filter(
+            (factor) => factor.reason !== "healing_tent",
+          );
+          delete hero.classFeatureState.healingMorale;
+        }
+        const active = hero?.classFeatureState.tavernMorale?.active;
+        if (!active) return;
+        hero.moraleHistory = hero.moraleHistory.filter(
+          (factor) =>
+            !(
+              factor.source === "location" &&
+              factor.reason === `tavern:${active.locationId}`
+            ),
+        );
+        delete hero.classFeatureState.tavernMorale.active;
+      }),
+    );
     const consequences = this.battleConsequenceService.resolve({
       game: this,
       battle,
@@ -2792,15 +4022,69 @@ export class Game {
         });
       }),
     );
+    const duelSpoils = [];
+    if (battle.duel?.mode === "DUEL") {
+      for (const player of battle.duel.players) {
+        const snapshot = battle.teams.find((team) => team.id === player.id)
+          ?.heroes[0];
+        const participant = snapshot ? this.getHero(snapshot.sourceId) : null;
+        if (!participant) continue;
+        if (player.spoils.gold > 0)
+          participant.addResource("gold", player.spoils.gold);
+        if (player.spoils.wood > 0)
+          participant.addResource("wood", player.spoils.wood);
+        if (player.spoils.xp > 0)
+          this.gainHeroExperience({
+            heroId: participant.id,
+            amount: player.spoils.xp,
+            source: `battle-duel:${battle.id}`,
+          });
+        duelSpoils.push({ heroId: participant.id, ...player.spoils });
+      }
+    }
+    if (!enemyVictory) this.explorationClueService.unlockBattleLoot(battle);
     const battleLoot = enemyVictory
       ? null
       : this.lootDistributionService.createReward({
           id: this.idGenerator("battle-loot"),
           battle,
-          extraLoot: droppedLoot,
+          extraLoot: [...droppedLoot, ...tacticalBonusLoot(battle)],
           now: this.now,
         });
-    if (battleLoot !== null) this.battleLoot.push(battleLoot);
+    if (battleLoot !== null) {
+      this.battleLoot.push(battleLoot);
+      for (const share of battleLoot.shares) {
+        this.collectBattleLoot({
+          battleId: battle.id,
+          playerId: share.playerId,
+          heroId: share.heroId,
+          selection: Object.fromEntries(
+            battleLoot.entries.map((entry) => [
+              entry.id,
+              entry.allocations[share.playerId] ?? 0,
+            ]),
+          ),
+        });
+      }
+    }
+    if (
+      !enemyVictory &&
+      battle.sourceEnemyTeamId &&
+      battle.winnerTeamId &&
+      battle.sourceLocationId
+    ) {
+      const winner = battle.teams
+        .find((team) => team.id === battle.winnerTeamId)
+        ?.heroes.map((snapshot) => this.getHero(snapshot.sourceId))
+        .find((hero) => hero?.state === "active");
+      if (winner)
+        this.itemAcquisitionService.unlock({
+          source: "battle",
+          key: battle.sourceLocationId,
+          heroId: winner.id,
+          classId: winner.classId,
+        });
+    }
     if (enemyVictory)
       this.battleSites = this.battleSites.filter(
         (site) => site.battleId !== battle.id,
@@ -2817,7 +4101,7 @@ export class Game {
         state.completedAt === undefined &&
         state.failedAt === undefined,
     );
-    if (evacuation) {
+    if (this.questSystemEnabled && evacuation) {
       evacuation.attackedAt = this.now();
       evacuation.battleId = battle.id;
       evacuation.battleWon = !enemyVictory;
@@ -2831,6 +4115,7 @@ export class Game {
       ...outcome,
       consequences,
       heroProgression,
+      duelSpoils,
       enemySalvage,
       battleLoot: battleLoot?.toJSON() ?? null,
       destroyedLocationId,
@@ -2866,37 +4151,17 @@ export class Game {
       playerId,
       bag: this.inventoryService.getHeroBagState(hero),
       selection,
+      allowPartial: true,
     });
     if (result.success) this.#storeCollectedLoot(hero, result.collected);
+    for (const report of this.battleReports) {
+      if (report.battleId === battleId) report.battleLoot = reward.toJSON();
+    }
     return {
       ...result,
       battleId,
       depleted: reward.status === "COLLECTED",
       battleLoot: reward.toJSON(),
-    };
-  }
-
-  surrenderBattle({ battleId, teamId }) {
-    const battle = this.battles.find((item) => item.id === battleId);
-    if (battle === undefined)
-      return { success: false, reason: "battle_not_found" };
-    return battle.surrender(teamId);
-  }
-
-  fleeBattleHero({ battleId, heroId }) {
-    const battle = this.battles.find((item) => item.id === battleId);
-    const hero = this.getHero(heroId);
-    const battleHero = battle?.getEntity(`battle-hero-${heroId}`) ?? null;
-    if (
-      !battle ||
-      !hero ||
-      !["countdown", "active"].includes(battle.status) ||
-      battleHero?.state !== "active"
-    )
-      return { success: false, reason: "hero_cannot_flee" };
-    return {
-      success: true,
-      ...this.#finalizeHeroFlee(battle, hero, battleHero, "player_action"),
     };
   }
 
@@ -2919,6 +4184,9 @@ export class Game {
     const team = battle.teams.find((item) => item.id === teamId);
     if (
       team === undefined ||
+      !team.heroes.some((participant) =>
+        this.#areAlliedPlayers(hero.playerId, participant.playerId),
+      ) ||
       !this.setup.participants.some(
         (participant) => participant.playerId === hero.playerId,
       )
@@ -2942,187 +4210,7 @@ export class Game {
     )
       return { state: "ignored" };
     hero.updatePosition(position);
-    const battleHero = battle.getEntity(`battle-hero-${heroId}`);
-    if (
-      !this.engagementService.isOutsideBattleZone(
-        hero.position,
-        battle.engagementContext,
-      )
-    ) {
-      battleHero.fleeConfirmations = 0;
-      return { state: "inside" };
-    }
-    battleHero.fleeConfirmations = (battleHero.fleeConfirmations ?? 0) + 1;
-    if (
-      battleHero.fleeConfirmations <
-      this.engagementService.config.fleeConfirmations
-    ) {
-      battle.eventLog.push({
-        type: "potential_flee",
-        heroId: hero.id,
-        confirmations: battleHero.fleeConfirmations,
-        at: this.now(),
-      });
-      return {
-        state: "potential_flee",
-        confirmations: battleHero.fleeConfirmations,
-      };
-    }
-    return this.#finalizeHeroFlee(battle, hero, battleHero, "gps_exit");
-  }
-
-  #finalizeHeroFlee(battle, hero, battleHero, trigger) {
-    battleHero.state = "fled";
-    battle.eventLog.push({
-      type: "flee_validated",
-      heroId: hero.id,
-      trigger,
-      at: this.now(),
-    });
-    this.#removeHeroCommand(battle, battleHero);
-    hero.pursuitCooldownUntil =
-      this.now() + this.setup.rules.pursuitCooldownMinutes * 60_000;
-    this.#checkBattleAfterFlee(battle);
-    return { state: "fled", battleFinished: battle.status === "finished" };
-  }
-
-  #checkBattleAfterFlee(battle) {
-    const activeTeams = battle.teams.filter((team) =>
-      team.heroes.some((hero) => hero.state === "active"),
-    );
-    if (activeTeams.length > 1) return;
-    battle.status = "finished";
-    battle.finishedAt = this.now();
-    battle.winnerTeamId = activeTeams[0]?.id ?? null;
-    battle.eventLog.push({
-      type: "battle_finished",
-      winnerTeamId: battle.winnerTeamId,
-      at: this.now(),
-    });
-  }
-
-  #resolveFleePursuits(battle) {
-    if (battle.status !== "finished" || battle.winnerTeamId === null) return [];
-    const winner = battle.teams.find((team) => team.id === battle.winnerTeamId);
-    if (!winner) return [];
-    const winnerUnits = winner.units.filter(
-      (unit) => unit.state === "active" && unit.quantity > 0,
-    );
-    const winnerSpeed = armySpeed(
-      winnerUnits,
-      (unit) => battle.getEffectiveStat(unit.id, "speed") ?? unit.speed,
-    );
-    const reports = [];
-    battle.teams
-      .filter((team) => team.id !== winner.id)
-      .forEach((loser) => {
-        loser.heroes
-          .filter((hero) => hero.state === "fled")
-          .forEach((fleeingHero) => {
-            if (
-              battle.eventLog.some(
-                (event) =>
-                  event.type === "flee_pursuit_resolved" &&
-                  event.heroId === fleeingHero.sourceId,
-              )
-            )
-              return;
-            const fleeingUnits = loser.units.filter(
-              (unit) =>
-                unit.heroSourceId === fleeingHero.sourceId &&
-                ["active", "fled"].includes(unit.state) &&
-                unit.quantity > 0,
-            );
-            const loserSpeed = armySpeed(
-              fleeingUnits,
-              (unit) => battle.getEffectiveStat(unit.id, "speed") ?? unit.speed,
-            );
-            const rounds = pursuitRounds(winnerSpeed, loserSpeed);
-            let attacks = 0;
-            let damage = 0;
-            let losses = 0;
-            for (let round = 1; round <= rounds; round += 1) {
-              winnerUnits
-                .filter((unit) => unit.state === "active" && unit.quantity > 0)
-                .forEach((attacker) => {
-                  const target = fleeingUnits
-                    .filter(
-                      (unit) =>
-                        ["active", "fled"].includes(unit.state) &&
-                        unit.quantity > 0,
-                    )
-                    .sort(
-                      (first, second) =>
-                        (battle.getEffectiveStat(first.id, "speed") ??
-                          first.speed) -
-                          (battle.getEffectiveStat(second.id, "speed") ??
-                            second.speed) || first.id.localeCompare(second.id),
-                    )[0];
-                  if (!target) return;
-                  const result = battle.resolvePursuitAttack(
-                    attacker.id,
-                    target.id,
-                  );
-                  if (!result.success) return;
-                  attacks += 1;
-                  damage += result.damage;
-                  losses += result.losses;
-                });
-            }
-            fleeingUnits
-              .filter((unit) => unit.state !== "defeated")
-              .forEach((unit) => {
-                unit.state = "fled";
-                unit.lane = null;
-                unit.targetId = null;
-                unit.retreating = false;
-                unit.retreatReason = null;
-              });
-            const report = {
-              type: "flee_pursuit_resolved",
-              heroId: fleeingHero.sourceId,
-              winnerTeamId: winner.id,
-              winnerSpeed,
-              loserSpeed,
-              speedDifference: winnerSpeed - loserSpeed,
-              rounds,
-              attacks,
-              damage,
-              losses,
-              at: this.now(),
-            };
-            battle.eventLog.push(report);
-            reports.push(report);
-          });
-      });
-    return reports;
-  }
-
-  #removeHeroCommand(battle, fleeingBattleHero) {
-    const team = battle.getTeamForEntity(fleeingBattleHero.id);
-    team.units
-      .filter(
-        (unit) =>
-          unit.heroSourceId === fleeingBattleHero.sourceId &&
-          unit.state === "active",
-      )
-      .forEach((unit) => {
-        unit.commandDisabled = true;
-        unit.morale = Math.max(0, (unit.morale ?? 5) - 1);
-        unit.currentOrder ??= { type: "hold" };
-        unit.state = "fled";
-        unit.lane = null;
-        unit.targetId = null;
-        unit.retreating = false;
-        unit.retreatReason = null;
-        battle.eventLog.push({
-          type: "command_lost",
-          heroId: fleeingBattleHero.sourceId,
-          unitId: unit.sourceId,
-          morale: unit.morale,
-          at: this.now(),
-        });
-      });
+    return { state: "inside" };
   }
 
   #isOnPursuitCooldown(hero) {
@@ -3130,6 +4218,7 @@ export class Game {
   }
 
   #destroyDefeatedEnemySource(battle) {
+    if (battle.sourceEnemyTeamId?.startsWith("autonomous-")) return null;
     if (
       battle.sourceLocationId === null ||
       battle.sourceEnemyTeamId === null ||
@@ -3170,15 +4259,33 @@ export class Game {
     if (
       battle.sourceLocationId === null ||
       battle.sourceEnemyTeamId === null ||
-      battle.winnerTeamId === null ||
-      battle.winnerTeamId === battle.sourceEnemyTeamId
+      battle.winnerTeamId === null
+    )
+      return null;
+    if (
+      battle.sourceEnemyTeamId.startsWith("autonomous-") &&
+      battle.winnerTeamId !== battle.sourceEnemyTeamId
     )
       return null;
     const location = this.getLocation(battle.sourceLocationId);
     const winner = battle.teams.find((team) => team.id === battle.winnerTeamId);
+    if (
+      winner?.heroes.some(
+        (snapshot) => snapshot.sourceId === `location-${location?.id}`,
+      )
+    )
+      return null;
     const playerId =
       winner?.heroes
-        .map((snapshot) => this.getHero(snapshot.sourceId)?.playerId)
+        .map((snapshot) => {
+          const hero = this.getHero(snapshot.sourceId);
+          if (hero) return hero.playerId;
+          if (!snapshot.sourceId.startsWith("autonomous-group-")) return null;
+          const group = this.getAutonomousGroup(
+            snapshot.sourceId.slice("autonomous-group-".length),
+          );
+          return group ? this.getAutonomousControllerId(group) : null;
+        })
         .find(Boolean) ?? null;
     if (
       location === null ||
@@ -3190,6 +4297,7 @@ export class Game {
       location,
       playerId,
       relation: this.locationAccessPolicy.getRelation(playerId, location),
+      canCapture: this.locationAccessPolicy.canCapture(playerId, location),
       isQuestCompleted: (id) => this.isObjectiveCompleted(id),
       afterBattle: true,
     });
@@ -3239,6 +4347,344 @@ export class Game {
     this.autonomousGroups.push(candidate);
     return true;
   }
+
+  getLocationWatchZones(playerId) {
+    return locationWatchZones(this, playerId);
+  }
+
+  sendRelayMessage({ playerId, heroId, locationId, recipientPlayerId, text }) {
+    const location = this.getLocation(locationId),
+      hero = this.getHero(heroId);
+    if (
+      !hero ||
+      hero.playerId !== playerId ||
+      hero.state !== "active" ||
+      !location?.heroIds.includes(heroId) ||
+      location.ownerId !== playerId
+    )
+      return { success: false, reason: "location_access_denied" };
+    return this.locationWatchService.send(this, {
+      location,
+      recipientPlayerId,
+      text,
+    });
+  }
+
+  divineAtAcademy({ playerId, heroId, locationId }) {
+    const hero = this.getHero(heroId),
+      location = this.getLocation(locationId),
+      player = this.getPlayer(playerId);
+    if (
+      !hero ||
+      hero.playerId !== playerId ||
+      hero.state !== "active" ||
+      !location?.heroIds.includes(heroId) ||
+      !(location.infrastructure.magic_academy > 0) ||
+      !this.locationAccessPolicy.can(playerId, location, "train")
+    )
+      return { success: false, reason: "location_access_denied" };
+    if (hero.getResourceAmount("gold") < 50)
+      return { success: false, reason: "insufficient_resources" };
+    const radius = this.coordinateMode === "simulation" ? 60 : 450;
+    const revealedLocationIds = this.locations
+      .filter(
+        (site) =>
+          watchDistance(
+            this.coordinateMode,
+            location.position,
+            site.position,
+          ) <= radius,
+      )
+      .filter((site) => player.discoverLocation(site.id, 1))
+      .map((site) => site.id);
+    hero.spendResource("gold", 50);
+    hero.classFeatureState.divinationVision = {
+      center: { ...location.position },
+      radius,
+      activatedAt: this.now(),
+      expiresAt: this.now() + 60_000,
+    };
+    return {
+      success: true,
+      revealedLocationIds,
+      cost: 50,
+      durationMs: 60_000,
+      radius,
+    };
+  }
+
+  activateHeroDivination({ playerId, heroId, center }) {
+    const hero = this.getHero(heroId),
+      player = this.getPlayer(playerId);
+    if (
+      !hero ||
+      hero.playerId !== playerId ||
+      hero.state !== "active" ||
+      this.#isHeroBusy(heroId)
+    )
+      return {
+        success: false,
+        reason: "ability_unavailable",
+        revealedLocationIds: [],
+      };
+    if (
+      !Number.isFinite(center?.latitude) ||
+      !Number.isFinite(center?.longitude)
+    )
+      return {
+        success: false,
+        reason: "invalid_position",
+        revealedLocationIds: [],
+      };
+    return this.heroClassFeatureService.divine(hero, {
+      player,
+      locations: this.locations.filter((location) =>
+        mapLocationDiscoverable(location, this, player.id),
+      ),
+      center,
+      distanceFn: (first, second) => this.#worldDistance(first, second),
+    });
+  }
+
+  activateHeroAstralTravel({ playerId, heroId }) {
+    const hero = this.getHero(heroId);
+    if (
+      !hero ||
+      hero.playerId !== playerId ||
+      hero.state !== "active" ||
+      this.#isHeroBusy(heroId) ||
+      !hero.position
+    )
+      return { success: false, reason: "ability_unavailable" };
+    return this.heroClassFeatureService.beginAstralTravel(hero);
+  }
+
+  selectHeroAstralTarget({ playerId, heroId, kind, targetId }) {
+    const hero = this.getHero(heroId);
+    const travel = this.heroClassFeatureService.activeAstralTravel(hero);
+    if (
+      !travel ||
+      hero.playerId !== playerId ||
+      hero.state !== "active" ||
+      this.#isHeroBusy(heroId)
+    )
+      return { success: false, reason: "ability_unavailable" };
+    const target =
+      kind === "location"
+        ? this.getLocation(targetId)
+        : kind === "hero"
+          ? this.getHero(targetId)
+          : kind === "group"
+            ? this.getAutonomousGroup(targetId)
+            : null;
+    const visibility = playerMapVisibility(this.toJSON(), playerId, this.now());
+    const visible =
+      kind === "location"
+        ? visibility.locations.has(targetId)
+        : kind === "group"
+          ? visibility.autonomousGroups.has(targetId)
+          : kind === "hero" &&
+            target?.id !== hero.id &&
+            target?.state === "active" &&
+            (alliedPlayers(this, playerId, target.playerId) ||
+              this.#worldDistance(hero.position, target.position) <=
+                this.heroClassFeatureService.visionRadius(hero) ||
+              watchedPosition(this, playerId, target.position));
+    if (!target?.position || !visible)
+      return { success: false, reason: "invalid_target" };
+    if (this.#worldDistance(hero.position, target.position) > travel.reachBonus)
+      return { success: false, reason: "target_out_of_astral_reach" };
+    hero.classFeatureState.astralTravel = {
+      ...travel,
+      targetKind: kind,
+      targetId,
+      locationId: kind === "location" ? targetId : null,
+      targetPosition: { ...target.position },
+    };
+    return { success: true, kind, targetId, playerId: target.playerId ?? null };
+  }
+
+  getTradingConvoyOptions({ playerId, originLocationId }) {
+    return this.tradingConvoyService.getOptions({
+      locations: this.locations,
+      groups: this.autonomousGroups,
+      playerId,
+      originLocationId,
+    });
+  }
+
+  foundResourceCamp(request) { return this.campInstallationService.found(request); }
+  sendCampInstallation(request) { return this.campInstallationService.send(request); }
+  claimCampInstallation(request) { const m=this.explorationState.expeditions.find(m=>m.id===request.expeditionId && m.kind==="installation"); return m ? this.exceptionalSiteResolutionService.claim(request) : {success:false,reason:"expedition_unavailable"}; }
+  resolveExceptionalExpedition(request) { return this.exceptionalSiteResolutionService.resolve(request); }
+  claimExceptionalExpedition(request) { return this.exceptionalSiteResolutionService.claim(request); }
+  prepareExceptionalExpedition(request) { return this.exceptionalExpeditionService.prepare(request); }
+  departExceptionalExpedition(request) { return this.exceptionalExpeditionService.depart(request); }
+  cancelExceptionalExpedition(request) { return this.exceptionalExpeditionService.cancel(request); }
+
+  beginExteriorSearch(request) {
+    return this.exteriorSearchService.begin(request);
+  }
+  prepareExteriorSearch(request) {
+    return this.exteriorSearchService.prepare(request);
+  }
+  validateExteriorSearch(request) {
+    return this.exteriorSearchService.validate(request);
+  }
+  cancelExteriorSearch(request) {
+    return this.exteriorSearchService.cancel(request);
+  }
+
+  getProspectingOptions({ playerId, originLocationId }) {
+    return this.prospectingService.getOptions({
+      locations: this.locations,
+      groups: this.autonomousGroups,
+      playerId,
+      originLocationId,
+    });
+  }
+
+  createProspectingExpedition({
+    playerId,
+    heroId,
+    originLocationId,
+    specialistId,
+    food = 5,
+    beer = 0,
+    horses = 0,
+  }) {
+    const hero = this.getHero(heroId);
+    const origin = this.getLocation(originLocationId);
+    if (
+      !hero ||
+      hero.playerId !== playerId ||
+      !origin ||
+      !origin.heroIds.includes(heroId)
+    )
+      return { success: false, reason: "hero_not_at_origin" };
+    const result = this.prospectingService.create({
+      locations: this.locations,
+      playerId,
+      originLocationId,
+      specialistId,
+      food,
+      beer,
+      horses,
+      coordinateMode: this.coordinateMode,
+      playArea: this.setup.playArea,
+      now: this.now(),
+    });
+    if (!result.success) return result;
+    this.addAutonomousGroup(result.group);
+    const event = {
+      type: "prospecting_expedition_created",
+      playerId,
+      heroId,
+      groupId: result.group.id,
+      originLocationId,
+      specialistId,
+      food,
+      cost: result.cost,
+      maximumRadius: result.maximumRadius,
+      at: this.now(),
+    };
+    this.eventLog.push(event);
+    return {
+      success: true,
+      groupId: result.group.id,
+      cost: result.cost,
+      maximumRadius: result.maximumRadius,
+      event,
+    };
+  }
+
+  addResourceZone(zone) {
+    const candidate =
+      zone instanceof ResourceZone ? zone : new ResourceZone(zone);
+    if (this.resourceZones.some((entry) => entry.id === candidate.id))
+      return false;
+    this.resourceZones.push(candidate);
+    return true;
+  }
+
+  #resolveResourceZoneDiscovery(event) {
+    const player = this.getPlayer(event.playerId);
+    if (!player) return;
+    player.receiveInformation({
+      id: this.idGenerator("information"),
+      kind: "prospecting_report",
+      sourceGroupId: event.groupId,
+      locationIds:
+        event.locationId && this.getLocation(event.locationId)
+          ? [event.locationId]
+          : [],
+      zoneId: event.zoneId,
+      resourceId: event.resourceId,
+      createdAt: event.at,
+    });
+  }
+
+  createTradingConvoy({
+    playerId,
+    heroId,
+    originLocationId,
+    destinationLocationId,
+    resourceId,
+  }) {
+    const hero = this.getHero(heroId);
+    const origin = this.getLocation(originLocationId);
+    if (
+      !hero ||
+      hero.playerId !== playerId ||
+      !origin ||
+      !origin.heroIds.includes(heroId)
+    )
+      return { success: false, reason: "hero_not_at_origin" };
+    const result = this.tradingConvoyService.create({
+      locations: this.locations,
+      playerId,
+      originLocationId,
+      destinationLocationId,
+      resourceId,
+      coordinateMode: this.coordinateMode,
+      now: this.now(),
+    });
+    if (!result.success) return result;
+    this.addAutonomousGroup(result.group);
+    const event = {
+      type: "trading_convoy_created",
+      playerId,
+      heroId,
+      groupId: result.group.id,
+      originLocationId,
+      destinationLocationId,
+      resourceId,
+      cost: result.cost,
+      at: this.now(),
+    };
+    this.eventLog.push(event);
+    return {
+      success: true,
+      groupId: result.group.id,
+      cost: result.cost,
+      event,
+    };
+  }
+
+  stopTradingConvoy({ playerId, groupId }) {
+    const group = this.getAutonomousGroup(groupId);
+    if (!group || group.owner.kind !== "player" || group.owner.id !== playerId)
+      return { success: false, reason: "convoy_not_owned" };
+    const result = this.tradingConvoyService.stop(group, this.now());
+    if (result.success)
+      this.eventLog.push({
+        type: "trading_convoy_stopped",
+        playerId,
+        groupId,
+        at: this.now(),
+      });
+    return result;
+  }
   removeAutonomousGroup(groupId) {
     const index = this.autonomousGroups.findIndex(
       (group) => group.id === groupId,
@@ -3274,6 +4720,9 @@ export class Game {
 
   toJSON() {
     return {
+      questEngineState: structuredClone(this.questEngineState),
+      questSystemEnabled: this.questSystemEnabled,
+      tacticalBattles: this.tacticalBattles,
       setup: this.setup.toJSON(),
       heroClasses: [...this.heroClasses.values()].map((heroClass) =>
         structuredClone(heroClass),
@@ -3287,6 +4736,8 @@ export class Game {
           : structuredClone(definition),
       ),
       coordinateMode: this.coordinateMode,
+      playerSessions: structuredClone(this.playerSessions),
+      territoryState: structuredClone(this.territoryState),
       players: this.players.map((player) => player.toJSON()),
       heroes: this.heroes.map((hero) => hero.toJSON()),
       locations: this.locations.map((location) => location.toJSON()),
@@ -3305,6 +4756,9 @@ export class Game {
       ),
       worldState: this.worldState.toJSON(),
       availableQuests: this.availableQuests.map((quest) => ({ ...quest })),
+      tavernNpcState: this.tavernNpcService.toJSON(),
+      itemAcquisitionState: this.itemAcquisitionService.toJSON(),
+      teamFortQuestState: this.teamFortQuestService.toJSON(),
       questSequence: this.questSequence.map((quest) => ({
         ...quest,
         phaseIds: [...quest.phaseIds],
@@ -3326,6 +4780,10 @@ export class Game {
         structuredClone(report),
       ),
       autonomousGroups: this.autonomousGroups.map((group) => group.toJSON()),
+      tradingConvoyConfig: structuredClone(this.tradingConvoyService.config),
+      prospectingConfig: structuredClone(this.prospectingService.config),
+      resourceZones: this.resourceZones.map((zone) => zone.toJSON()),
+      explorationState: this.explorationState.toJSON(),
       watchBeacons: this.watchBeacons.map((beacon) => beacon.toJSON()),
       autonomousGroupTraces: this.autonomousGroupTraces.map((trace) =>
         trace.toJSON(),
@@ -3347,12 +4805,25 @@ export class Game {
       unitDefinitions: snapshot.unitDefinitions ?? [],
       locations: snapshot.locations ?? [],
       autonomousGroups: snapshot.autonomousGroups ?? [],
+      tradingConvoyConfig: snapshot.tradingConvoyConfig ?? null,
+      prospectingConfig: snapshot.prospectingConfig ?? null,
+      resourceZones: snapshot.resourceZones ?? [],
+      explorationState: snapshot.explorationState ?? null,
       autonomousGroupTraces: snapshot.autonomousGroupTraces ?? [],
       watchBeacons: snapshot.watchBeacons ?? [],
       coordinateMode: snapshot.coordinateMode ?? "gps",
       scenarioStartsActive: false,
+      tacticalBattles:
+        options.tacticalBattles ?? snapshot.tacticalBattles ?? false,
+      questEngineState: snapshot.questEngineState ?? null,
+      territoryState: snapshot.territoryState ?? null,
+      questSystemEnabled:
+        options.questSystemEnabled ?? snapshot.questSystemEnabled ?? true,
       scenarioStateSnapshot: snapshot.scenarioState,
       worldStateSnapshot: snapshot.worldState,
+      tavernNpcState: snapshot.tavernNpcState ?? null,
+      itemAcquisitionState: snapshot.itemAcquisitionState ?? null,
+      teamFortQuestState: snapshot.teamFortQuestState ?? [],
       trailStateSnapshots: snapshot.trailStates,
       scenarioRuntimeSnapshot: snapshot.scenarioRuntime,
       ...(typeof options.now === "function" ? { now: options.now } : {}),
@@ -3360,6 +4831,8 @@ export class Game {
         ? { idGenerator: options.idGenerator }
         : {}),
     });
+    game.playerSessions = structuredClone(snapshot.playerSessions ?? []);
+    game.explorationView = structuredClone(snapshot.explorationView ?? null);
     game.players = (snapshot.players ?? []).map((player) => new Player(player));
     game.heroes = (snapshot.heroes ?? []).map((hero) => new Hero(hero));
     game.locations = (snapshot.locations ?? []).map(
@@ -3376,7 +4849,18 @@ export class Game {
     game.activeScenarioEventId = snapshot.activeScenarioEventId ?? null;
     game.evacuationStates = structuredClone(snapshot.evacuationStates ?? {});
     game.questDeadlines = structuredClone(snapshot.questDeadlines ?? {});
-    game.battles = (snapshot.battles ?? []).map(
+    // Un combat hors du format courant ne doit pas empêcher la reprise du monde.
+    // Aucun résultat ni récompense n'est inventé pour les combats écartés.
+    const battleSnapshots = snapshot.battles ?? [];
+    const discardedBattles = battleSnapshots.filter(
+      (battle) => !BattleEngine.canRestoreSnapshot(battle),
+    );
+    const discardedActiveBattleIds = new Set(
+      discardedBattles
+        .filter((battle) => battle.status !== "finished")
+        .map((battle) => battle.id),
+    );
+    game.battles = battleSnapshots.filter(BattleEngine.canRestoreSnapshot).map(
       (battle) =>
         new BattleEngine({
           ...battle,
@@ -3391,13 +4875,23 @@ export class Game {
           ...(typeof options.now === "function" ? { now: options.now } : {}),
         }),
     );
-    game.battleSites = (snapshot.battleSites ?? []).map(
-      (site) =>
-        new BattleSite({
-          ...site,
-          ...(typeof options.now === "function" ? { now: options.now } : {}),
-        }),
-    );
+    game.battleSites = (snapshot.battleSites ?? [])
+      .filter((site) => !discardedActiveBattleIds.has(site.battleId))
+      .map(
+        (site) =>
+          new BattleSite({
+            ...site,
+            ...(typeof options.now === "function" ? { now: options.now } : {}),
+          }),
+      );
+    if (discardedBattles.length) {
+      game.eventLog.push({
+        type: "incompatible_battles_discarded",
+        battleIds: discardedBattles.map((battle) => battle.id),
+        at: game.now(),
+      });
+    }
+    reconcileClosedExceptionalSites(game);
     return game;
   }
 
@@ -3577,6 +5071,7 @@ export class Game {
 
   #heroResourceCapacity(hero, resourceName, requested) {
     if (!Number.isFinite(requested) || requested <= 0) return 0;
+    if (getItemDefinition(resourceName)?.bagSlots === 0) return requested;
     const usedSlots = this.inventoryService.getUsedHeroBagSlots(hero);
     if (usedSlots > hero.bagSlotCount) return 0;
     const bundleSize = getItemDefinition(resourceName)?.bundleSize ?? 1;
@@ -3608,7 +5103,7 @@ export class Game {
     if (group.type === "messenger") return 5;
     if (group.type === "prospecting") return 1.4;
     if (group.type === "convoy")
-      return Math.max(0.8, 2 - group.cargo.length * 0.1);
+      return Math.max(0.8, 2 - group.occupiedCargoSlots * 0.1);
     if (group.army.units.length === 0) return 1.2;
     return Math.max(
       0.5,
@@ -3617,6 +5112,32 @@ export class Game {
         (unit) => this.unitDefinitions.get(unit.typeId)?.stats?.speed ?? 1.2,
       ),
     );
+  }
+
+  getAutonomousControllerId(group) {
+    if (group.owner.kind !== "player" && group.alignment)
+      return { ally: "kingdom", neutral: "neutral", enemy: "enemy" }[
+        group.alignment
+      ];
+    if (group.owner.kind === "location") {
+      const origin = this.getLocation(group.owner.id);
+      return (
+        origin?.controllerId ??
+        origin?.ownerId ??
+        group.factionId ??
+        group.owner.id
+      );
+    }
+    const controllerId =
+      group.owner.kind === "player"
+        ? group.owner.id
+        : (group.factionId ?? group.owner.id);
+    if (
+      group.owner.kind !== "player" &&
+      !this.locationAccessPolicy.alliedControllerIds.has(controllerId)
+    )
+      this.locationAccessPolicy.enemyControllerIds.add(controllerId);
+    return controllerId;
   }
 
   #createBattleFromAutonomousEvent(event) {
@@ -3637,7 +5158,14 @@ export class Game {
     const autonomousTeamId = `autonomous-${group.id}`;
     if (event.type === "autonomous_group_location_attack_requested") {
       const location = this.getLocation(event.locationId);
-      if (location === null) return null;
+      if (
+        location === null ||
+        !this.locationAccessPolicy.canCapture(
+          this.getAutonomousControllerId(group),
+          location,
+        )
+      )
+        return null;
       const defenderHeroIds = location.heroIds.filter((heroId) => {
         const hero = this.getHero(heroId);
         return (
@@ -3645,6 +5173,31 @@ export class Game {
           this.locationAccessPolicy.isDefender(hero.playerId, location)
         );
       });
+      if (
+        defenderHeroIds.length === 0 &&
+        !location.garrison.units.some((unit) => unit.quantity > 0)
+      ) {
+        const playerId = this.getAutonomousControllerId(group);
+        const result = this.locationCaptureService.capture({
+          location,
+          playerId,
+          relation: this.locationAccessPolicy.getRelation(playerId, location),
+          canCapture: this.locationAccessPolicy.canCapture(playerId, location),
+          isQuestCompleted: (id) => this.isObjectiveCompleted(id),
+        });
+        if (result.success) {
+          this.eventLog.push({
+            type: "location_captured",
+            ...result,
+            groupId: group.id,
+            at: this.now(),
+          });
+          group.status = "idle";
+          group.mission = null;
+          group.interruption = null;
+          return null;
+        }
+      }
       return this.createBattle({
         teamParticipants: [
           { id: "heroes", heroIds: defenderHeroIds, locationId: location.id },
@@ -3683,8 +5236,14 @@ export class Game {
           snapshot.sourceId.slice("autonomous-group-".length),
         );
         if (group === null) return;
+        if (group.commander)
+          group.commander.setBattleState({
+            health: snapshot.health,
+            state: snapshot.health === 0 ? "ghost" : snapshot.state,
+          });
         const survived =
           team.id === battle.winnerTeamId &&
+          (!group.commander || snapshot.health > 0) &&
           group.army.units.some((unit) => unit.combatantCount > 0);
         group.status = survived ? "idle" : "destroyed";
         group.interruption = null;
@@ -3754,6 +5313,11 @@ export class Game {
             ),
           );
         }
+        this.explorationClueService.lose(
+          hero,
+          hero.carriedLoot.map((entry) => entry.itemId),
+          `battle-loss:${battle.id}`,
+        );
         hero.carriedLoot.forEach((entry, index) =>
           dropped.push({
             id: `carried-${hero.id}-${index}`,
@@ -3781,6 +5345,11 @@ export class Game {
 
   #storeCollectedLoot(hero, entries) {
     entries.forEach((entry) => {
+      const clue = this.explorationClueService.find(entry.itemId);
+      if (clue) {
+        this.explorationClueService.receive(hero, clue);
+        return;
+      }
       const definition = getItemDefinition(entry.itemId);
       if (
         definition &&
@@ -3843,7 +5412,12 @@ export class Game {
                 itemId: entry.itemId,
                 slot: result.slot,
               });
-            else experiencePool += 1;
+            else {
+              hero.carriedLoot = hero.carriedLoot.filter(
+                (item) => item.id !== packageId,
+              );
+              experiencePool += 1;
+            }
           }
         } else experiencePool += quantity;
       });

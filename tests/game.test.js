@@ -17,7 +17,11 @@ test("une partie crée ses joueurs et démarre après le choix des héros", () =
   assert.equal(game.players.length, 2);
   game.chooseHero("player-1", { name: "Aldric", classId: "warrior" });
   game.chooseHero("player-2", { name: "Nora", classId: "warrior" });
+  game.getHero("hero-1").addExperience(25);
   assert.equal(game.start(), true);
+  assert.equal(game.getHero("hero-1").experience, 0);
+  assert.deepEqual(game.getHero("hero-1").xpHistory, []);
+  assert.equal(game.getHero("hero-2").experience, 0);
   assert.equal(game.status, "started");
   currentTime += 10 * 60_000;
   assert.equal(game.getRemainingTimeMilliseconds(), 20 * 60_000);
@@ -47,9 +51,12 @@ test("une partie complète est restaurable pour devenir l’état officiel du se
   game.chooseHero("player-2", { name: "Nora", classId: "warrior" });
   game.start();
   game.getHero("hero-1").addResource("gold", 7);
+  game.getHero("hero-1").addExperience(25);
   const snapshot = game.toJSON();
   const restored = Game.fromJSON(snapshot, { now: () => 5_000 });
   assert.equal(restored.status, "started");
   assert.equal(restored.getHero("hero-1").resources.gold, 7);
+  assert.equal(restored.start(), false);
+  assert.equal(restored.getHero("hero-1").experience, 25);
   assert.deepEqual(restored.toJSON(), snapshot);
 });

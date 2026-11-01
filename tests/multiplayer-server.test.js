@@ -1,5 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {
+  installSnapshotReceiver,
+  decodeResponse,
+} from "./fixtures/snapshot-client.js";
 import { io as createClient } from "socket.io-client";
 import { createRpgGpsServer } from "../server/server.js";
 import { Game } from "../app/js/core/game.js";
@@ -21,7 +25,10 @@ test("un compte sélectionné devient indisponible pour les autres téléphones"
   const created = await request(first, "account:create", { name: "Léa" });
   await request(first, "account:select", { accountId: created.account.id });
   const listed = await request(second, "account:list", {});
-  assert.equal(listed.accounts.find(({ id }) => id === created.account.id).available, false);
+  assert.equal(
+    listed.accounts.find(({ id }) => id === created.account.id).available,
+    false,
+  );
   const refused = await request(second, "account:select", {
     accountId: created.account.id,
   });
@@ -43,7 +50,11 @@ test("deux clients reçoivent le même état de lobby en temps réel", async (co
   });
   await Promise.all([connected(host), connected(guest)]);
 
-  const created = await request(host, "lobby:create", { playerName: "Jo" });
+  const created = await request(host, "lobby:create", {
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   assert.equal(created.ok, true);
   const update = eventOnce(
     host,
@@ -69,7 +80,7 @@ test("deux clients reçoivent le même état de lobby en temps réel", async (co
   const configured = await request(host, "lobby:configure", {
     positionMode: "gps",
     maxPlayers: 3,
-    scenarioId: "repression",
+    scenarioId: "chaos",
     difficulty: "hard",
   });
   assert.equal(configured.ok, true);
@@ -116,7 +127,11 @@ test("la position d’un héros est diffusée aux autres joueurs", async (contex
     await new Promise((resolve) => server.close(resolve));
   });
   await Promise.all([connected(host), connected(guest)]);
-  const created = await request(host, "lobby:create", { playerName: "Jo" });
+  const created = await request(host, "lobby:create", {
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   const joined = await request(guest, "lobby:join", {
     code: created.lobby.code,
     playerName: "Léa",
@@ -163,7 +178,11 @@ test("l’état d’un héros authentifié est diffusé sans pouvoir usurper un 
     await new Promise((resolve) => server.close(resolve));
   });
   await Promise.all([connected(host), connected(guest)]);
-  const created = await request(host, "lobby:create", { playerName: "Jo" });
+  const created = await request(host, "lobby:create", {
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   const joined = await request(guest, "lobby:join", {
     code: created.lobby.code,
     playerName: "Léa",
@@ -190,9 +209,7 @@ test("l’état d’un héros authentifié est diffusé sans pouvoir usurper un 
     state: "active",
     commandPoints: 2,
     maxCommandPoints: 4,
-    units: [
-      { id: "unit-1", typeId: "archer", quantity: 6, combatantCount: 5 },
-    ],
+    units: [{ id: "unit-1", typeId: "archer", quantity: 6, combatantCount: 5 }],
   });
   assert.equal(response.ok, true);
   const state = (await received).positions.find(
@@ -216,7 +233,11 @@ test("les lieux communs sont versionnés et un état périmé est refusé", asyn
     await new Promise((resolve) => server.close(resolve));
   });
   await Promise.all([connected(host), connected(guest)]);
-  const created = await request(host, "lobby:create", { playerName: "Jo" });
+  const created = await request(host, "lobby:create", {
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   await request(guest, "lobby:join", {
     code: created.lobby.code,
     playerName: "Léa",
@@ -235,23 +256,26 @@ test("les lieux communs sont versionnés et un état périmé est refusé", asyn
   const accepted = await request(host, "game:world-state", {
     baseRevision: 0,
     state: {
-      locations: [{
-        id: "shared-camp",
-        name: "Camp commun",
-        type: "camp",
-        source: "test",
-        position: { latitude: 48.85, longitude: 2.35 },
-        resources: { stock: { wood: 8 } },
-        garrison: { units: [] },
-      }],
+      locations: [
+        {
+          id: "shared-camp",
+          name: "Camp commun",
+          type: "camp",
+          source: "test",
+          position: { latitude: 48.85, longitude: 2.35 },
+          resources: { stock: { wood: 8 } },
+          garrison: { units: [] },
+        },
+      ],
     },
   });
   assert.equal(accepted.ok, true);
-  assert.equal((await shared).state.locations[0].resources.stock.wood, 8);
+  const sharedSnapshot = await shared;
+  assert.equal(sharedSnapshot.state.locations[0].resources.stock.wood, 8);
 
   const stale = await request(guest, "game:world-state", {
     baseRevision: 0,
-    state: accepted.world.state,
+    state: sharedSnapshot.state,
   });
   assert.equal(stale.ok, false);
   assert.equal(stale.error.code, "world_revision_conflict");
@@ -269,7 +293,11 @@ test("le moteur serveur poursuit un combat après la déconnexion de l’organis
     await new Promise((resolve) => server.close(resolve));
   });
   await Promise.all([connected(host), connected(guest)]);
-  const created = await request(host, "lobby:create", { playerName: "Jo" });
+  const created = await request(host, "lobby:create", {
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
   const joined = await request(guest, "lobby:join", {
     code: created.lobby.code,
     playerName: "Léa",
@@ -305,7 +333,6 @@ test("le moteur serveur poursuit un combat après la déconnexion de l’organis
       { id: "heroes", heroIds: [hostHero.id, guestHero.id] },
       { id: "bandits", heroIds: [enemyHero.id] },
     ],
-    config: { countdownMs: 0 },
   });
   battle.start();
   const initial = eventOnce(
@@ -321,9 +348,22 @@ test("le moteur serveur poursuit un combat après la déconnexion de l’organis
   const advanced = eventOnce(
     guest,
     "game:state",
-    (snapshot) => snapshot.revision > 1 && snapshot.state.battles[0].elapsedMs > 0,
+    (snapshot) =>
+      snapshot.revision > 1 && snapshot.state.battles[0].duel.round > 0,
   );
   host.close();
+  const submitted = await request(guest, "battle:command", {
+    battleId: battle.id,
+    command: "submitDuelChoice",
+    args: [{ cards: [] }],
+  });
+  assert.equal(submitted.ok, true);
+  const locked = await request(guest, "battle:command", {
+    battleId: battle.id,
+    command: "lockDuelChoice",
+    args: [],
+  });
+  assert.equal(locked.ok, true);
   const official = await advanced;
   assert.equal(official.state.battles[0].status, "active");
   const forbidden = await request(guest, "game:command", {
@@ -334,7 +374,110 @@ test("le moteur serveur poursuit un combat après la déconnexion de l’organis
   assert.equal(forbidden.error.code, "command_forbidden");
 });
 
+test("le solo crée une session serveur privée et reçoit son moteur officiel", async (context) => {
+  const server = createRpgGpsServer();
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const socket = createClient(`http://127.0.0.1:${server.address().port}`, {
+    transports: ["websocket"],
+  });
+  context.after(async () => {
+    socket.close();
+    await new Promise((resolve) => server.close(resolve));
+  });
+  await connected(socket);
+  const created = await request(socket, "lobby:solo", {
+    playerName: "Alice",
+    heroClassId: "warrior",
+    configuration: { positionMode: "simulation" },
+  });
+  assert.equal(created.ok, true);
+  assert.equal(created.lobby.maxPlayers, 1);
+  const launch = createMultiplayerLaunch(created.lobby);
+  const game = new Game({
+    setup: launch.setup,
+    coordinateMode: "simulation",
+    heroClasses: [{ id: "warrior", name: "Guerrier", abilityIds: [] }],
+    locations: [],
+  });
+  game.chooseHero(created.session.playerId, {
+    name: "Alice",
+    classId: "warrior",
+  });
+  game.chooseHero("bandits", { name: "Brigand", classId: "warrior" });
+  game.start();
+  const result = await request(socket, "game:bootstrap", {
+    state: game.toJSON(),
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.game.state.status, "started");
+  assert.ok(
+    result.game.state.heroes.some(
+      (hero) => hero.playerId === created.session.playerId,
+    ),
+  );
+  const refused = await request(socket, "game:world-state", {
+    baseRevision: 0,
+    state: { locations: [] },
+  });
+  assert.equal(refused.ok, false);
+  assert.equal(refused.error.code, "server_authoritative");
+});
+
+test("seul l’organisateur détruit la partie et tous les joueurs perdent leur session", async (context) => {
+  const server = createRpgGpsServer();
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const address = `http://127.0.0.1:${server.address().port}`;
+  const host = createClient(address, { transports: ["websocket"] });
+  const guest = createClient(address, { transports: ["websocket"] });
+  context.after(async () => {
+    host.close();
+    guest.close();
+    await new Promise((resolve) => server.close(resolve));
+  });
+  await Promise.all([connected(host), connected(guest)]);
+  const created = await request(host, "lobby:create", {
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+  });
+  const joined = await request(guest, "lobby:join", {
+    code: created.lobby.code,
+    playerName: "Léa",
+  });
+  for (const socket of [host, guest]) {
+    await request(socket, "lobby:hero-class", { heroClassId: "warrior" });
+    await request(socket, "lobby:ready", { ready: true });
+  }
+  const started = await request(host, "lobby:start", {});
+  assert.equal(started.ok, true);
+  const refused = await request(guest, "game:destroy", {});
+  assert.equal(refused.error.code, "host_only");
+  const notices = [host, guest].map((socket) =>
+    eventOnce(socket, "game:ended", () => true),
+  );
+  const result = await request(host, "game:destroy", {});
+  assert.equal(result.ok, true);
+  assert.equal(result.destroyed, true);
+  for (const notice of await Promise.all(notices))
+    assert.match(notice.message, /sans sauvegarde/);
+  for (const [socket, session] of [
+    [host, created.session],
+    [guest, joined.session],
+  ]) {
+    const resumed = await request(socket, "lobby:resume", {
+      token: session.token,
+    });
+    assert.equal(resumed.ok, false);
+  }
+  const retry = await request(guest, "lobby:join", {
+    code: created.lobby.code,
+    playerName: "Léa",
+  });
+  assert.equal(retry.ok, false);
+});
+
 function connected(socket) {
+  installSnapshotReceiver(socket);
   if (socket.connected) return Promise.resolve();
   return new Promise((resolve, reject) => {
     socket.once("connect", resolve);
@@ -343,7 +486,11 @@ function connected(socket) {
 }
 
 function request(socket, event, payload) {
-  return new Promise((resolve) => socket.emit(event, payload, resolve));
+  return new Promise((resolve) =>
+    socket.emit(event, payload, (response) =>
+      resolve(decodeResponse(socket, response)),
+    ),
+  );
 }
 
 function eventOnce(socket, event, predicate) {

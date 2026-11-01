@@ -18,6 +18,7 @@ export class FogRenderer {
     gridCells = [],
     enabled = true,
     visionRadius = null,
+    revealedZones = [],
     playAreaPoints = [],
   }) {
     this.visionLayer?.remove();
@@ -45,10 +46,7 @@ export class FogRenderer {
         : rectanglePoints(boundsForCells(gridCells));
     const zoneBounds = boundsForPoints(areaPoints);
     this.visionLayer = L.polygon(
-      [
-        areaPoints.map(asLatLng),
-        visionRing(center, radius, simulation),
-      ],
+      [areaPoints.map(asLatLng), visionRing(center, radius, simulation)],
       {
         pane: MapLayers.EXPLORATION,
         className: "rpg-theoretical-vision",
@@ -74,6 +72,7 @@ export class FogRenderer {
       simulation,
       zoneBounds,
       playAreaPoints: areaPoints,
+      revealedZones,
     });
     const svg = document.createElementNS(SVG_NAMESPACE, "svg");
     svg.setAttribute("viewBox", `0 0 ${OVERLAY_SIZE} ${OVERLAY_SIZE}`);
@@ -114,7 +113,15 @@ export function boundsForPoints(points) {
   ];
 }
 
-export function fogMaskGeometry({ cells, center, radius, simulation = false, zoneBounds = boundsForCells(cells), playAreaPoints = rectanglePoints(zoneBounds) }) {
+export function fogMaskGeometry({
+  cells,
+  center,
+  radius,
+  simulation = false,
+  zoneBounds = boundsForCells(cells),
+  playAreaPoints = rectanglePoints(zoneBounds),
+  revealedZones = [],
+}) {
   const [southWest, northEast] = zoneBounds;
   const width = northEast.longitude - southWest.longitude;
   const height = northEast.latitude - southWest.latitude;
@@ -125,9 +132,20 @@ export function fogMaskGeometry({ cells, center, radius, simulation = false, zon
   const discoveredPath = cells
     .filter((cell) => cell.explored === true || cell.visits > 0)
     .map((cell) => {
-      const topLeft = project({ latitude: cell.bounds[1].latitude, longitude: cell.bounds[0].longitude });
-      const bottomRight = project({ latitude: cell.bounds[0].latitude, longitude: cell.bounds[1].longitude });
-      return rectanglePath(topLeft.x, topLeft.y, bottomRight.x - topLeft.x, bottomRight.y - topLeft.y);
+      const topLeft = project({
+        latitude: cell.bounds[1].latitude,
+        longitude: cell.bounds[0].longitude,
+      });
+      const bottomRight = project({
+        latitude: cell.bounds[0].latitude,
+        longitude: cell.bounds[1].longitude,
+      });
+      return rectanglePath(
+        topLeft.x,
+        topLeft.y,
+        bottomRight.x - topLeft.x,
+        bottomRight.y - topLeft.y,
+      );
     })
     .join(" ");
   const projectedCenter = project(center);
@@ -140,9 +158,25 @@ export function fogMaskGeometry({ cells, center, radius, simulation = false, zon
   const latitudeRadius = simulation ? radius : radius / 111_320;
   const longitudeRadius = simulation
     ? radius
-    : radius / (111_320 * Math.max(0.01, Math.cos((center.latitude * Math.PI) / 180)));
+    : radius /
+      (111_320 * Math.max(0.01, Math.cos((center.latitude * Math.PI) / 180)));
   return {
     discoveredPath,
+    extraVisions: revealedZones.map((zone) => {
+      const c = project(zone.center);
+      const dy = simulation ? zone.radius : zone.radius / 111_320;
+      const dx = simulation
+        ? zone.radius
+        : zone.radius /
+          (111_320 *
+            Math.max(0.01, Math.cos((zone.center.latitude * Math.PI) / 180)));
+      return {
+        cx: c.x,
+        cy: c.y,
+        rx: (dx / width) * OVERLAY_SIZE,
+        ry: (dy / height) * OVERLAY_SIZE,
+      };
+    }),
     playAreaPath,
     vision: {
       cx: projectedCenter.x,
@@ -153,7 +187,12 @@ export function fogMaskGeometry({ cells, center, radius, simulation = false, zon
   };
 }
 
-export function fogOverlayMarkup({ discoveredPath, playAreaPath, vision }) {
+export function fogOverlayMarkup({
+  discoveredPath,
+  playAreaPath,
+  vision,
+  extraVisions = [],
+}) {
   return `<defs>
     <pattern id="rpg-fog-texture" width="320" height="320" patternUnits="userSpaceOnUse" patternTransform="rotate(-4)">
       <image href="${FOG_CLOUD_ASSET}" x="-26" y="-26" width="372" height="372" preserveAspectRatio="xMidYMid slice"/>
@@ -161,6 +200,7 @@ export function fogOverlayMarkup({ discoveredPath, playAreaPath, vision }) {
     <mask id="rpg-fog-mask">
       <rect width="${OVERLAY_SIZE}" height="${OVERLAY_SIZE}" fill="white"/>
       ${discoveredPath ? `<path d="${discoveredPath}" fill="black"/>` : ""}
+      ${extraVisions.map((v) => `<ellipse cx="${number(v.cx)}" cy="${number(v.cy)}" rx="${number(v.rx)}" ry="${number(v.ry)}" fill="black"/>`).join("")}
       <ellipse cx="${number(vision.cx)}" cy="${number(vision.cy)}" rx="${number(vision.rx)}" ry="${number(vision.ry)}" fill="black"/>
     </mask>
     <clipPath id="rpg-play-area-clip"><path d="${playAreaPath}"/></clipPath>
@@ -172,10 +212,14 @@ export function fogOverlayMarkup({ discoveredPath, playAreaPath, vision }) {
 }
 
 export function isInsideVision(position, center, radius, simulation = false) {
-  const point = Array.isArray(position) ? position : [position.latitude, position.longitude];
-  if (simulation) return Math.hypot(point[0] - center[0], point[1] - center[1]) <= radius;
+  const point = Array.isArray(position)
+    ? position
+    : [position.latitude, position.longitude];
+  if (simulation)
+    return Math.hypot(point[0] - center[0], point[1] - center[1]) <= radius;
   const latitudeMeters = (point[0] - center[0]) * 111_320;
-  const longitudeMeters = (point[1] - center[1]) * 111_320 * Math.cos((center[0] * Math.PI) / 180);
+  const longitudeMeters =
+    (point[1] - center[1]) * 111_320 * Math.cos((center[0] * Math.PI) / 180);
   return Math.hypot(latitudeMeters, longitudeMeters) <= radius;
 }
 
@@ -235,10 +279,7 @@ function visionRing(center, radius, simulation) {
       center.longitude +
         (Math.cos(angle) * radius) /
           (111_320 *
-            Math.max(
-              0.01,
-              Math.cos((center.latitude * Math.PI) / 180),
-            )),
+            Math.max(0.01, Math.cos((center.latitude * Math.PI) / 180))),
     ];
   });
 }

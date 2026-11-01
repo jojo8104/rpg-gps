@@ -1,0 +1,384 @@
+.rpg-camera-world {
+  position: absolute;
+  inset: 0;
+  /* Composer les calques coplanaires avant de transformer le plan de carte.
+     Cela évite les conflits de profondeur entre les tuiles et le brouillard. */
+  transform-style: flat;
+}
+.rpg-camera-controls {
+  background: #f5ebd4;
+  color: #302d24;
+  border: 1px solid #776646;
+  border-radius: 8px;
+  padding: 8px;
+  box-shadow: 0 2px 8px #0005;
+  max-width: 240px;
+}
+.rpg-camera-controls summary {
+  cursor: pointer;
+  min-height: 30px;
+  font-weight: 700;
+}
+.rpg-camera-controls label {
+  display: block;
+  margin: 8px 0;
+}
+.rpg-camera-controls output {
+  float: right;
+}
+.rpg-camera-controls input {
+  display: block;
+  width: 100%;
+  min-height: 32px;
+}
+.rpg-camera-controls button {
+  min-height: 40px;
+  margin-right: 6px;
+}
+.rpg-camera-controls small {
+  display: block;
+  margin-top: 8px;
+  line-height: 1.4;
+}
+.map-camera-active {
+  touch-action: none;
+}
+.game-screen .rpg-camera-controls {
+  margin-bottom: calc(82px + env(safe-area-inset-bottom));
+}
+.rpg-map-billboards {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 700;
+  overflow: hidden;
+}
+.rpg-billboard {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 64px;
+  height: 76px;
+  margin: -64px 0 0 -32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #e8d7a9;
+  pointer-events: auto;
+  transform-origin: 32px 64px;
+  cursor: pointer;
+  overflow: visible;
+}
+.rpg-billboard[hidden] {
+  display: none;
+}
+#map button.rpg-billboard.is-caravan,
+#map button.rpg-billboard.is-group {
+  appearance: none;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  text-shadow: none;
+}
+#map .autonomous-group-marker.is-convoy,
+#map .autonomous-group-marker.has-sprite {
+  background: transparent;
+  box-shadow: none;
+}
+#map button.rpg-billboard.is-location {
+  appearance: none;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  text-shadow: none;
+  margin-top: -64px;
+  transform-origin: 32px 64px;
+}
+#map button.rpg-billboard.is-location:focus-visible {
+  outline: 2px dashed #f5ebd4;
+  outline-offset: 3px;
+}
+.rpg-place-illustration {
+  display: block;
+  width: 64px;
+  height: 76px;
+}
+.rpg-place-illustration img {
+  width: 100%;
+  height: 64px;
+  object-fit: contain;
+  object-position: center bottom;
+  transform: translate(6px, 4px);
+  filter: drop-shadow(0 2px 2px #000a);
+}
+.rpg-place-illustration[data-status="unknown"] {
+  opacity: 0.45;
+  filter: grayscale(1);
+}
+.rpg-place-illustration .rpg-location__label {
+  left: var(--place-label-x, 50%);
+  top: var(--place-label-y, 94px);
+}
+.rpg-place-illustration .rpg-location__badge:empty {
+  display: none;
+}
+.rpg-location-ground {
+  transform-origin: 32px 38px;
+}
+#map .rpg-location-ground .rpg-location__frame {
+  inset: auto;
+  left: -2px;
+  top: 8px;
+  width: 68px;
+  height: 60px;
+  display: grid;
+  opacity: 1;
+}
+.rpg-billboard.is-hero,
+.rpg-billboard.is-caravan,
+.rpg-billboard.is-group {
+  margin-top: -42px;
+  transform-origin: 32px 42px;
+}
+.rpg-hero-sprite {
+  position: relative;
+  z-index: 2;
+  display: block;
+  width: 80px;
+  height: 80px;
+  margin-left: -8px;
+  image-rendering: pixelated;
+}
+.rpg-army-banner {
+  position: absolute;
+  z-index: 1;
+  left: 3px;
+  top: 4px;
+  width: 3px;
+  height: 68px;
+  background: #84623e;
+  box-shadow:
+    -1px 0 #352c23,
+    1px 0 #c6a16a;
+  pointer-events: none;
+  --banner-color: #569fe0;
+}
+.rpg-army-banner.is-green {
+  --banner-color: #69c982;
+}
+.rpg-army-banner.is-red {
+  --banner-color: #ef655f;
+}
+.rpg-army-banner.is-gold {
+  --banner-color: #d6b83f;
+}
+.rpg-army-banner__cloth {
+  position: absolute;
+  right: 3px;
+  top: 3px;
+  width: 17px;
+  height: 12px;
+  background: var(--banner-color);
+  border-top: 2px solid #f4dda4;
+  box-shadow: inset 0 -3px #0003;
+  transform-origin: right top;
+  animation: army-banner-breeze 1600ms ease-in-out infinite;
+}
+.rpg-army-banner.is-small .rpg-army-banner__cloth {
+  clip-path: polygon(100% 0, 0 50%, 100% 100%);
+}
+.rpg-army-banner.is-medium .rpg-army-banner__cloth {
+  width: 15px;
+  height: 30px;
+}
+.rpg-army-banner.is-large .rpg-army-banner__cloth {
+  width: 17px;
+  height: 48px;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 85%, 0 100%);
+}
+@keyframes army-banner-breeze {
+  0%,
+  100% {
+    transform: skewY(-3deg) scaleX(1);
+  }
+  50% {
+    transform: skewY(4deg) scaleX(0.9);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rpg-army-banner__cloth {
+    animation: none;
+  }
+}
+.rpg-hero-pose {
+  position: absolute;
+  background-image: url("../assets/heroes/hero-jrpg-walk-v2.png");
+  background-repeat: no-repeat;
+  background-size: 240px 639.375px;
+  image-rendering: pixelated;
+  opacity: 0;
+}
+.rpg-hero-pose[data-step="0"] {
+  opacity: 1;
+}
+.is-walking .rpg-hero-pose[data-step="0"] {
+  animation: hero-idle-step 560ms steps(1, end) infinite;
+}
+.is-walking .rpg-hero-pose[data-step="1"] {
+  animation: hero-left-step 560ms steps(1, end) infinite;
+}
+.is-walking .rpg-hero-pose[data-step="2"] {
+  animation: hero-right-step 560ms steps(1, end) infinite;
+}
+@keyframes hero-idle-step {
+  0%,
+  50%,
+  100% {
+    opacity: 0;
+  }
+  25%,
+  75% {
+    opacity: 1;
+  }
+}
+@keyframes hero-left-step {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  25%,
+  50%,
+  75% {
+    opacity: 0;
+  }
+}
+@keyframes hero-right-step {
+  0%,
+  25%,
+  75%,
+  100% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.rpg-hero-foot-shadow {
+  position: absolute;
+  left: 17px;
+  top: 72px;
+  width: 30px;
+  height: 8px;
+  border-radius: 50%;
+  background: #05080666;
+  transform: scaleY(var(--hero-shadow-flatten, 1));
+}
+.rpg-location-ground .rpg-location__frame::before {
+  display: block;
+  background: currentColor;
+  filter: none;
+}
+.rpg-location-ground .rpg-location__frame::after {
+  inset: 2px;
+  background: #323b30b0;
+  box-shadow: none;
+}
+#map .rpg-location-ground {
+  transform: none;
+  filter: none;
+  transition: none;
+  color: #d6b35c;
+}
+#map .rpg-location-ground[data-owner="ally"] {
+  color: #68bcec;
+}
+#map .rpg-location-ground[data-owner="enemy"] {
+  color: #ed7373;
+}
+#map .rpg-location-ground .rpg-location__frame {
+  animation: none;
+  transform: none;
+}
+.rpg-location__ring {
+  position: absolute;
+  left: -6px;
+  top: 0;
+  width: 76px;
+  height: 76px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  box-sizing: border-box;
+  pointer-events: none;
+  animation: location-ring-pulse 1800ms ease-out infinite;
+}
+.landscape-tools .rpg-camera-controls {
+  margin: 0;
+  max-width: 100%;
+  float: none;
+}
+.landscape-tools .rpg-camera-controls button {
+  display: block;
+  width: 100%;
+}
+.landscape-tools:has(.rpg-camera-controls[open]) {
+  max-height: calc(100dvh - 90px);
+  overflow-y: auto;
+}
+@keyframes location-ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  100% {
+    transform: scale(1.3);
+    opacity: 0;
+  }
+}
+#map .rpg-place-illustration .rpg-location__label {
+  display: block;
+}
+.rpg-place-illustration .rpg-location__badge {
+  background: transparent;
+  color: #ee3939;
+  font-size: 22px;
+  text-shadow: 0 1px 2px #000;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rpg-location__ring {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+#map button.rpg-billboard .rpg-location__badge {
+  color: #ee3939 !important;
+}
+
+/* Vigie immobile : plus basse qu’un héros, toujours face à l’écran. */
+.rpg-billboard.is-watch {
+  margin-top: -40px;
+  height: 40px;
+  transform-origin: 32px 40px;
+  pointer-events: none;
+}
+.rpg-watch-lookout {
+  position: absolute;
+  top: 0;
+  display: block;
+  image-rendering: pixelated;
+}
+.watch-lookout-anchor {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+/* Les héros restent au-dessus des lieux, GA et décors, quelle que soit leur profondeur. */
+.rpg-map-heroes {
+  z-index: 760;
+}

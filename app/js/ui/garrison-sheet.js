@@ -1,3 +1,4 @@
+import { formatInteger } from "./number-format.js";
 import { renderUnitTypeIcon } from "./unit-icon.js";
 import { renderUnitHealthBar } from "./unit-health-bar.js";
 
@@ -75,14 +76,14 @@ export function renderGarrisonSheet({
   };
   cleanupBySheet.set(element, cleanupDrag);
   element.oncontextmenu = (event) => event.preventDefault();
-  const transfer = (source, unitId, target) => {
+  const transfer = async (source, unitId, target) => {
     if (
       (source === "army" && target !== "garrison") ||
       (source === "garrison" && target !== "army")
     )
       return false;
     clearSelection();
-    onTransfer({
+    await onTransfer({
       direction: source === "army" ? "deposit" : "withdraw",
       unitId,
     });
@@ -205,5 +206,5 @@ export function renderGarrisonUnitSlot({
     range: definition?.stats?.range ?? 1,
   });
   const health = renderUnitHealthBar(unit, { tag: "span" });
-  return `<div class="garrison-slot is-occupied" data-slot-index="${index}"><button type="button" class="garrison-unit${locked ? " is-locked" : ""}" data-unit-id="${unit.id}" data-source="${source}" ${locked ? "disabled" : ""}><span class="garrison-unit__icon">${icon}</span><span class="garrison-unit__body"><strong>${unit.name ?? definition?.name ?? unit.typeId}</strong><small>${unit.rank ?? "soldier"} · ${unit.quantity}/${maximum}</small>${health}${locked ? `<small>Appartient à ${unit.ownerPlayerId}</small>` : ""}</span></button></div>`;
+  return `<div class="garrison-slot is-occupied" data-slot-index="${index}"><button type="button" class="garrison-unit${locked ? " is-locked" : ""}" data-unit-id="${unit.id}" data-source="${source}" ${locked ? "disabled" : ""}><span class="garrison-unit__icon">${icon}</span><span class="garrison-unit__body"><strong>${unit.name ?? definition?.name ?? unit.typeId}</strong><small>${unit.rank ?? "soldier"} · ${formatInteger(unit.quantity)}/${formatInteger(maximum)}</small>${health}${locked ? `<small>Appartient à ${unit.ownerPlayerId}</small>` : ""}</span></button></div>`;
 }

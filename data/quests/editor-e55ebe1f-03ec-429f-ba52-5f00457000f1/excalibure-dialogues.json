@@ -1,0 +1,25 @@
+{
+  "dialogue-parler-1": {
+    "speakerId": "merlin",
+    "locationId": "broceliande",
+    "initialNodeId": "accueil",
+    "nodes": [
+      {
+        "id": "accueil",
+        "lines": [
+          {
+            "speaker": "Merlin",
+            "text": "Votre conversation commence ici."
+          }
+        ],
+        "choices": [
+          {
+            "id": "continuer",
+            "label": "Continuer",
+            "goal": "ok"
+          }
+        ]
+      }
+    ]
+  }
+}

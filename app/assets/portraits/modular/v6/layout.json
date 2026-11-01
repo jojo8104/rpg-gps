@@ -1,0 +1,9 @@
+{
+  "width": 512,
+  "height": 832,
+  "clothingBand": [440, 520],
+  "clothingWidth": { "male": 320, "female": 300 },
+  "clothingOriginX": 256,
+  "femaleEyes0Offset": [-2, 0],
+  "beardTarget": [194, 250, 124, 88]
+}

@@ -29,3 +29,27 @@ test("l'identité et les statistiques d'un héros se révèlent progressivement"
   assert.equal(identifiedHero.presences[0].label, "Rask");
   assert.equal(identifiedHero.presences[0].stats[0].value, 16);
 });
+
+
+test("la production masque les ressources inactives sans amélioration productrice", () => {
+  const site = new Location({ id: "production", name: "Production", type: "village", source: "scenario", interactionRadius: 20, detectionRadius: 80, position: { latitude: 48, longitude: 2 }, resources: { production: { gold: 2, wood: 0, food: 0, horse: 0 }, stock: { wood: 12 } }, infrastructure: { farm: 1 } });
+  const intel = buildLocationIntel({ location: site, snapshot, knowledgeLevel: 3 });
+  assert.deepEqual(intel.production.map((entry) => entry.id), ["gold", "food"]);
+  assert.ok(intel.stock.some((entry) => entry.id === "wood"));
+});
+
+test("la fiche conserve les menus des fortifications et leurs emplacements", () => {
+  const structures = [{ id: "walls", level: 2, canDismantle: true, upgradeActionId: "build-improvement:walls" }];
+  const defense = { structures, improvementSlots: { free: 1 } };
+  const intel = buildLocationIntel({ location, snapshot: { ...snapshot, defense }, knowledgeLevel: 3 });
+  assert.deepEqual(intel.defense.structures, structures);
+  assert.equal(intel.defense.improvementSlots.free, 1);
+  const hidden = buildLocationIntel({ location, snapshot: { ...snapshot, defense }, knowledgeLevel: 1 });
+  assert.deepEqual(hidden.defense.structures, []);
+});
+
+test("sans projection préalable, seuls les bâtiments défensifs sont dans la défense", () => {
+  const site = new Location({ id: "defense", name: "Défense", type: "village", source: "scenario", interactionRadius: 20, detectionRadius: 80, position: { latitude: 48, longitude: 2 }, infrastructure: { wall: 2, farm: 1, depot: 1 } });
+  const intel = buildLocationIntel({ location: site, snapshot, knowledgeLevel: 3 });
+  assert.deepEqual(intel.defense.structures.map((entry) => entry.id), ["wall"]);
+});

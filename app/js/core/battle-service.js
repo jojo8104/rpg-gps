@@ -1,15 +1,11 @@
+import { unitExpeditionMorale } from "./expedition-morale.js";
 import { BattleEngine } from "./battle-engine.js";
 import { HeroArmyModifier } from "./hero-army-modifier.js";
 
 /** Pont entre les entités persistantes du jeu et leurs instantanés tactiques. */
 export class BattleService {
-  constructor(unitDefinitions, aptitudeDefinitions = []) {
+  constructor(unitDefinitions) {
     this.unitDefinitions = unitDefinitions;
-    this.aptitudeDefinitions = aptitudeDefinitions.map((definition) =>
-      typeof definition.toJSON === "function"
-        ? definition.toJSON()
-        : structuredClone(definition),
-    );
   }
 
   createBattle({
@@ -25,13 +21,17 @@ export class BattleService {
     if (!Array.isArray(teamParticipants) || teamParticipants.length < 2)
       throw new RangeError("La bataille requiert au moins deux équipes.");
     const teams = teamParticipants.map((team) => {
-      const heroIds = team.heroIds ?? [];
+      const heroIds = [...(team.heroIds ?? [])];
       const location = team.locationId
         ? game.getLocation(team.locationId)
         : null;
       const autonomousGroup = team.autonomousGroupId
         ? game.getAutonomousGroup(team.autonomousGroupId)
         : null;
+      for (const id of location?.heroIds ?? []) {
+        const hero = game.getHero(id);
+        if (id === "capital-marshal" && hero?.state === "active" && game.locationAccessPolicy.isDefender(hero.playerId, location) && !heroIds.includes(id)) heroIds.push(id);
+      }
       if (team.autonomousGroupId && autonomousGroup === null)
         throw new RangeError("Le groupe autonome de bataille n'existe pas.");
       const modifiers = new Map(
@@ -48,19 +48,37 @@ export class BattleService {
       const heroes = heroIds.map((heroId) =>
         this.#createHeroSnapshot(game, heroId),
       );
-      if (heroes.length === 0 && location !== null)
+      if (heroes.length === 0 && location !== null && autonomousGroup === null)
         heroes.push(this.#createLocationCommanderSnapshot(location));
-      if (heroes.length === 0 && autonomousGroup !== null)
+      if (autonomousGroup !== null)
         heroes.push(this.#createAutonomousCommanderSnapshot(autonomousGroup));
       return {
         id: team.id,
+        aiStyle:
+          team.aiStyle !== undefined
+            ? team.aiStyle
+            : heroIds.includes("capital-marshal") ? "defensive"
+            : heroIds.length > 0
+              ? null
+              : autonomousGroup !== null
+                ? autonomousGroup.type === "rogue"
+                  ? "aggressive"
+                  : "opportunist"
+                : location !== null
+                  ? "defensive"
+                  : null,
         heroes,
         units: [
           ...heroIds.flatMap((heroId) =>
-            this.#createUnitSnapshots(game, heroId, modifiers.get(heroId)),
+            this.#createUnitSnapshots(
+              game,
+              heroId,
+              modifiers.get(heroId),
+              location,
+            ),
           ),
-          ...this.#createGarrisonUnitSnapshots(location),
-          ...this.#createAutonomousUnitSnapshots(autonomousGroup),
+          ...this.#createGarrisonUnitSnapshots(location, game.now()),
+          ...(autonomousGroup?.mission?.questId === "repression" && autonomousGroup.id === "repression-knight" && location ? [] : this.#createAutonomousUnitSnapshots(autonomousGroup, game.now())),
         ],
       };
     });
@@ -70,7 +88,6 @@ export class BattleService {
       loot,
       config,
       now,
-      aptitudeDefinitions: this.aptitudeDefinitions,
     });
   }
 
@@ -130,9 +147,10 @@ export class BattleService {
       state: hero.state,
       maxHealth: hero.maxHealth,
       health: hero.health,
-      attack: 10 + hero.level * 2,
-      defense: 5 + hero.level,
+      attack: 10 + hero.level * 2 + (hero.id === "capital-marshal" ? hero.finalStats.attack : 0),
+      defense: 5 + hero.level + (hero.id === "capital-marshal" ? hero.finalStats.defense : 0),
       speed: 2,
+      tacticalCommand: hero.finalStats.command,
       command: hero.maxCommandPoints,
       maxCommandPoints: hero.maxCommandPoints,
       commandPoints: hero.commandPoints,
@@ -170,6 +188,15 @@ export class BattleService {
   }
 
   #createAutonomousCommanderSnapshot(group) {
+    if (group.commander) {
+      const hero = group.commander;
+      const stats = hero.finalStats;
+      return { id: `battle-group-${group.id}`, sourceId: `autonomous-group-${group.id}`, playerId: group.owner.id,
+        name: hero.name, maxHealth: hero.maxHealth, health: hero.health, attack: 10 + hero.level * 2 + stats.attack,
+        defense: 5 + hero.level + stats.defense, speed: 2, command: hero.maxCommandPoints,
+        maxCommandPoints: hero.maxCommandPoints, commandPoints: hero.commandPoints,
+        specialPowerIds: [...hero.specialPowerIds], aptitudeRanks: { ...hero.aptitudeRanks } };
+    }
     const soldiers = group.army.units.reduce(
       (sum, unit) => sum + unit.combatantCount,
       0,
@@ -199,8 +226,9 @@ export class BattleService {
     };
   }
 
-  #createAutonomousUnitSnapshots(group) {
+  #createAutonomousUnitSnapshots(group, at = Date.now()) {
     if (group === null) return [];
+    const modifiers = group.commander ? HeroArmyModifier.calculate({ hero: group.commander, units: group.army.units, unitDefinitions: this.unitDefinitions }) : null;
     return group.army.units
       .filter((unit) => unit.combatantCount > 0)
       .map((unit) => {
@@ -217,6 +245,7 @@ export class BattleService {
           playerId: group.owner.id,
           name: unit.name ?? definition.name,
           typeId: unit.typeId,
+          battleSlot: unit.battleSlot,
           typeName: definition.name,
           tags: [...(definition.tags ?? [])],
           quantity: unit.quantity,
@@ -227,11 +256,11 @@ export class BattleService {
           damageMin: definition.stats.damageMin,
           damageMax: definition.stats.damageMax,
           attackIntervalMs: definition.stats.attackIntervalMs,
-          attack: definition.stats.attack,
-          defense: definition.stats.defense,
-          speed: definition.stats.speed,
+          attack: definition.stats.attack + (modifiers?.attackBonus ?? 0),
+          defense: definition.stats.defense + (modifiers?.defenseBonus ?? 0),
+          speed: definition.stats.speed * (modifiers?.speedMultiplier ?? 1),
           range: definition.stats.range,
-          morale: group.morale ?? definition.stats.morale ?? 5,
+          morale: Math.max(0, (group.morale ?? definition.stats.morale ?? 5) + (modifiers?.moraleBonus ?? 0) + unitExpeditionMorale(unit,at)),
           behavior: definition.behavior ?? "advance",
           retreat: { ...retreat },
           symbol: (definition.name ?? unit.typeId ?? "U")
@@ -241,7 +270,7 @@ export class BattleService {
       });
   }
 
-  #createGarrisonUnitSnapshots(location) {
+  #createGarrisonUnitSnapshots(location, at = Date.now()) {
     if (location === null) return [];
     return location.garrison.units
       .filter((unit) => unit.combatantCount > 0)
@@ -257,6 +286,7 @@ export class BattleService {
           playerId: unit.ownerPlayerId,
           name: unit.name ?? definition.name,
           typeId: unit.typeId,
+          battleSlot: unit.battleSlot,
           typeName: definition.name,
           tags: [...(definition.tags ?? [])],
           quantity: unit.quantity,
@@ -267,11 +297,11 @@ export class BattleService {
           damageMin: definition.stats.damageMin,
           damageMax: definition.stats.damageMax,
           attackIntervalMs: definition.stats.attackIntervalMs,
-          attack: definition.stats.attack,
-          defense: definition.stats.defense,
+          attack: definition.stats.attack + (location.locationAttackBonus ?? 0),
+          defense: definition.stats.defense + (location.defenseBonus ?? 0),
           speed: definition.stats.speed,
           range: definition.stats.range,
-          morale: definition.stats.morale,
+          morale: Math.max(0, (definition.stats.morale ?? 5) + unitExpeditionMorale(unit,at)),
           behavior: definition.behavior ?? "advance",
           retreat: { ...definition.retreat },
           symbol: (definition.name ?? unit.typeId ?? "U")
@@ -285,6 +315,7 @@ export class BattleService {
     game,
     heroId,
     modifiers = this.#createModifiers(game, heroId, "casual"),
+    defendingLocation = null,
   ) {
     const hero = game.getHero(heroId);
     return hero.army.units
@@ -303,6 +334,7 @@ export class BattleService {
           playerId: unit.ownerPlayerId,
           name: unit.name ?? definition.name,
           typeId: unit.typeId,
+          battleSlot: unit.battleSlot,
           typeName: definition.name,
           tags: [...(definition.tags ?? [])],
           quantity: unit.quantity,
@@ -313,10 +345,17 @@ export class BattleService {
           damageMin: definition.stats.damageMin,
           damageMax: definition.stats.damageMax,
           attackIntervalMs: definition.stats.attackIntervalMs,
-          attack: Math.max(0, definition.stats.attack + modifiers.attackBonus),
+          attack: Math.max(
+            0,
+            definition.stats.attack +
+              modifiers.attackBonus +
+              (defendingLocation?.locationAttackBonus ?? 0),
+          ),
           defense: Math.max(
             0,
-            definition.stats.defense + modifiers.defenseBonus,
+            definition.stats.defense +
+              modifiers.defenseBonus +
+              (defendingLocation?.defenseBonus ?? 0),
           ),
           speed: Math.max(
             0.1,
@@ -325,7 +364,7 @@ export class BattleService {
           range: definition.stats.range,
           morale: Math.max(
             0,
-            (definition.stats.morale ?? 5) + modifiers.moraleBonus,
+            (definition.stats.morale ?? 5) + modifiers.moraleBonus + unitExpeditionMorale(unit,game.now()),
           ),
           specialPowerIds: [
             ...new Set([

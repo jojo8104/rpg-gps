@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Étendards des armées</title>
+    <link rel="stylesheet" href="../app/css/map-camera.css" />
+    <style>
+      body {
+        background: #22352c;
+        color: #f5edcf;
+        margin: 24px;
+        font: 16px system-ui;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        max-width: 900px;
+      }
+      .card {
+        background: #526747;
+        padding: 20px;
+        text-align: center;
+        border-radius: 8px;
+      }
+      .character {
+        position: relative;
+        width: 80px;
+        height: 90px;
+        margin: auto;
+      }
+      .rpg-hero-sprite {
+        margin-left: 0;
+      }
+      .rpg-army-banner {
+        left: 11px;
+      }
+      .rpg-hero-foot-shadow {
+        left: 25px;
+      }
+      @media (max-width: 600px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Étendards · taille de l’armée connue</h1>
+    <p>
+      Bleu : ton héros. Vert : allié. Rouge : adversaire. Aucun étendard pour
+      une armée inconnue.
+    </p>
+    <main></main>
+    <script type="module">
+      import { armyBanner } from "../app/js/map/army-banner.js";
+      import { heroSprite } from "../app/js/map/UnitRenderer.js";
+      for (const [classId, color, name] of [
+        ["warrior", "blue", "Aventurier"],
+        ["mage", "green", "Mage alliée"],
+        ["ranger", "red", "Éclaireuse adverse"],
+      ]) {
+        const section = document.createElement("section");
+        section.innerHTML = `<h2>${name}</h2><div class="grid"></div>`;
+        for (const [count, label] of [
+          [0, "Sans armée"],
+          [5, "Petite · 1–9"],
+          [15, "Moyenne · 10–29"],
+          [40, "Grande · 30+"],
+        ]) {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `<div class="character">${armyBanner([{ combatantCount: count }], color)}${heroSprite(classId)}</div><span>${label}</span>`;
+          section.querySelector(".grid").append(card);
+        }
+        document.querySelector("main").append(section);
+      }
+    </script>
+  </body>
+</html>

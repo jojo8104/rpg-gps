@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="fr">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>Équipements — RPG GPS</title
+  ><style>
+    body {
+      margin: 0;
+      padding: 32px;
+      background: #17201e;
+      color: #f8ebcf;
+      font: 16px system-ui;
+    }
+    header {
+      max-width: 1000px;
+      margin: 0 auto 28px;
+    }
+    h1 {
+      font: 700 36px Georgia;
+      margin: 0 0 12px;
+    }
+    header p {
+      color: #c4c6b9;
+    }
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(185px, 1fr));
+      gap: 16px;
+      max-width: 1400px;
+      margin: auto;
+    }
+    article {
+      background: radial-gradient(ellipse at top, #34433a, #222b25);
+      border: 1px solid #697354;
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+    }
+    img {
+      width: 128px;
+      height: 128px;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 5px #0008);
+    }
+    h2 {
+      font: 700 18px Georgia;
+      min-height: 44px;
+      margin: 14px 0 6px;
+    }
+    p {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    small {
+      color: #cbb581;
+    }
+    @media (max-width: 500px) {
+      body {
+        padding: 16px;
+      }
+      main {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      article {
+        padding: 10px;
+      }
+      img {
+        width: 100%;
+        height: 108px;
+      }
+    }
+  </style>
+  <header>
+    <h1>L’arsenal des héros</h1>
+    <p>83 équipements illustrés · Guerrier, Éclaireur et Mage</p>
+    <p>
+      Les noms appartiennent à notre univers. Les fichiers sources servent
+      uniquement d’illustrations.
+    </p>
+  </header>
+  <main>
+    <article>
+      <img
+        src="../app/assets/equipment/tiara.png"
+        alt="Couronne du souverain"
+        loading="lazy"
+      />
+      <h2>Couronne du souverain</h2>
+      <p>+3 défense</p>
+      <small>Relique royale</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/holysymbol.png"
+        alt="Sceau du commandement royal"
+        loading="lazy"
+      />
+      <h2>Sceau du commandement royal</h2>
+      <p>+2 commandement</p>
+      <small>Relique royale</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/t12heavyarmor.png"
+        alt="Armure du dernier rempart"
+        loading="lazy"
+      />
+      <h2>Armure du dernier rempart</h2>
+      <p>+5 défense</p>
+      <small>Relique royale</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/longsword.png"
+        alt="Lame du serment brisé"
+        loading="lazy"
+      />
+      <h2>Lame du serment brisé</h2>
+      <p>+6 attaque</p>
+      <small>Relique royale</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/prideshield.png"
+        alt="Égide de la capitale"
+        loading="lazy"
+      />
+      <h2>Égide de la capitale</h2>
+      <p>+4 défense</p>
+      <small>Relique royale</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/berserkerboots.png"
+        alt="Solerets de marche royale"
+        loading="lazy"
+      />
+      <h2>Solerets de marche royale</h2>
+      <p>+2 mobilité</p>
+      <small>Relique royale</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/noblering.png"
+        alt="Anneau du maréchal"
+        loading="lazy"
+      />
+      <h2>Anneau du maréchal</h2>
+      <p>+3 moral</p>
+      <small>Relique royale</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/medal.png"
+        alt="Insigne du conquérant"
+        loading="lazy"
+      />
+      <h2>Insigne du conquérant</h2>
+      <p>+2 attaque, +1 commandement</p>
+      <small>Relique royale</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/iron-sword.png"
+        alt="Épée de fer"
+        loading="lazy"
+      />
+      <h2>Épée de fer</h2>
+      <p>+2 attaque</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/steel-sword.png"
+        alt="Épée d’acier"
+        loading="lazy"
+      />
+      <h2>Épée d’acier</h2>
+      <p>+4 attaque</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/round-shield.png"
+        alt="Bouclier rond"
+        loading="lazy"
+      />
+      <h2>Bouclier rond</h2>
+      <p>+2 défense</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/leatherarmor.png"
+        alt="Armure de cuir"
+        loading="lazy"
+      />
+      <h2>Armure de cuir</h2>
+      <p>+1 défense, +1 mobilité</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/scout-hood.png"
+        alt="Capuche d'éclaireur"
+        loading="lazy"
+      />
+      <h2>Capuche d'éclaireur</h2>
+      <p>+1 mobilité</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/leatherboots.png"
+        alt="Bottes de marche"
+        loading="lazy"
+      />
+      <h2>Bottes de marche</h2>
+      <p>+2 mobilité</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/goldamulet.png"
+        alt="Amulette de commandement"
+        loading="lazy"
+      />
+      <h2>Amulette de commandement</h2>
+      <p>+1 commandement, +1 moral</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/noblering.png"
+        alt="Anneau de chance"
+        loading="lazy"
+      />
+      <h2>Anneau de chance</h2>
+      <p>+1 moral</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/prismadagger.png"
+        alt="Dague du pisteur"
+        loading="lazy"
+      />
+      <h2>Dague du pisteur</h2>
+      <p>+2 attaque, +1 mobilité</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/hammer.png"
+        alt="Marteau du capitaine"
+        loading="lazy"
+      />
+      <h2>Marteau du capitaine</h2>
+      <p>+3 attaque, +1 commandement</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/herosword.png"
+        alt="Lame du porte-étendard"
+        loading="lazy"
+      />
+      <h2>Lame du porte-étendard</h2>
+      <p>+4 attaque, +1 moral</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/shortbow.png"
+        alt="Arc de chasse"
+        loading="lazy"
+      />
+      <h2>Arc de chasse</h2>
+      <p>+2 attaque</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/forestbow.png"
+        alt="Arc de reconnaissance"
+        loading="lazy"
+      />
+      <h2>Arc de reconnaissance</h2>
+      <p>+2 attaque, +1 mobilité</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/heavycrossbow.png"
+        alt="Arbalète de guerre"
+        loading="lazy"
+      />
+      <h2>Arbalète de guerre</h2>
+      <p>+4 attaque</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/lightcrossbow.png"
+        alt="Arbalète du guetteur"
+        loading="lazy"
+      />
+      <h2>Arbalète du guetteur</h2>
+      <p>+3 attaque, +1 défense</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/longbow.png"
+        alt="Arc du vent sylvestre"
+        loading="lazy"
+      />
+      <h2>Arc du vent sylvestre</h2>
+      <p>+4 attaque, +2 mobilité</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/kitchenknife.png"
+        alt="Couteau de voyage"
+        loading="lazy"
+      />
+      <h2>Couteau de voyage</h2>
+      <p>+1 attaque</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/dagger.png"
+        alt="Couteaux de lancer équilibrés"
+        loading="lazy"
+      />
+      <h2>Couteaux de lancer équilibrés</h2>
+      <p>+2 attaque</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/ironspear.png"
+        alt="Javelots du garde-frontière"
+        loading="lazy"
+      />
+      <h2>Javelots du garde-frontière</h2>
+      <p>+2 attaque, +1 défense</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/steelaxe.png"
+        alt="Hachettes du berserker"
+        loading="lazy"
+      />
+      <h2>Hachettes du berserker</h2>
+      <p>+4 attaque, -1 défense</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/kunai.png"
+        alt="Lames de brume"
+        loading="lazy"
+      />
+      <h2>Lames de brume</h2>
+      <p>+3 attaque, +1 mobilité</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/woodbranch.png"
+        alt="Bâton d’apprenti"
+        loading="lazy"
+      />
+      <h2>Bâton d’apprenti</h2>
+      <p>+1 attaque, +1 défense</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/wizardwand.png"
+        alt="Bâton de braise"
+        loading="lazy"
+      />
+      <h2>Bâton de braise</h2>
+      <p>+3 attaque</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/celestialrod.png"
+        alt="Bâton du gardien"
+        loading="lazy"
+      />
+      <h2>Bâton du gardien</h2>
+      <p>+2 défense, +5 santé maximale</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/transcendance.png"
+        alt="Bâton du rassemblement"
+        loading="lazy"
+      />
+      <h2>Bâton du rassemblement</h2>
+      <p>+2 commandement, +1 moral</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/t13staff.png"
+        alt="Bâton de l’archimage"
+        loading="lazy"
+      />
+      <h2>Bâton de l’archimage</h2>
+      <p>+3 attaque, +2 défense, +1 commandement</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/buckler.png"
+        alt="Rondache du voyageur"
+        loading="lazy"
+      />
+      <h2>Rondache du voyageur</h2>
+      <p>+1 défense, +1 mobilité</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/oakshield.png"
+        alt="Écu du sergent"
+        loading="lazy"
+      />
+      <h2>Écu du sergent</h2>
+      <p>+2 défense, +1 commandement</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/woodshield.png"
+        alt="Pavois renforcé"
+        loading="lazy"
+      />
+      <h2>Pavois renforcé</h2>
+      <p>+4 défense, -1 mobilité</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/stpatrickshield.png"
+        alt="Bouclier du serment"
+        loading="lazy"
+      />
+      <h2>Bouclier du serment</h2>
+      <p>+3 défense, +1 moral</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/artifactscroll.png"
+        alt="Grimoire d’initiation"
+        loading="lazy"
+      />
+      <h2>Grimoire d’initiation</h2>
+      <p>+1 attaque</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/t13catalyst.png"
+        alt="Cube de protection"
+        loading="lazy"
+      />
+      <h2>Cube de protection</h2>
+      <p>+2 défense</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/t12catalyst.png"
+        alt="Pierre de vitalité"
+        loading="lazy"
+      />
+      <h2>Pierre de vitalité</h2>
+      <p>+5 santé maximale, +1 moral</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/tomeofknowledge.png"
+        alt="Livre des voix unies"
+        loading="lazy"
+      />
+      <h2>Livre des voix unies</h2>
+      <p>+2 commandement</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/tombcurse1.png"
+        alt="Lanterne astrale"
+        loading="lazy"
+      />
+      <h2>Lanterne astrale</h2>
+      <p>+1 attaque, +1 défense, +1 mobilité</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/helmet.png"
+        alt="Casque de milicien"
+        loading="lazy"
+      />
+      <h2>Casque de milicien</h2>
+      <p>+1 défense</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/ironcap.png"
+        alt="Cervelière renforcée"
+        loading="lazy"
+      />
+      <h2>Cervelière renforcée</h2>
+      <p>+2 défense</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/vikinghelm.png"
+        alt="Heaume du vétéran"
+        loading="lazy"
+      />
+      <h2>Heaume du vétéran</h2>
+      <p>+2 défense, +1 moral</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/centurionhelmet.png"
+        alt="Casque du capitaine"
+        loading="lazy"
+      />
+      <h2>Casque du capitaine</h2>
+      <p>+1 défense, +2 commandement</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/chesshelm.png"
+        alt="Heaume du dernier rempart"
+        loading="lazy"
+      />
+      <h2>Heaume du dernier rempart</h2>
+      <p>+3 défense, +5 santé maximale, -1 mobilité</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/leathercap.png"
+        alt="Bonnet de voyage"
+        loading="lazy"
+      />
+      <h2>Bonnet de voyage</h2>
+      <p>+1 moral</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/wizardcone.png"
+        alt="Chapeau runique"
+        loading="lazy"
+      />
+      <h2>Chapeau runique</h2>
+      <p>+1 attaque, +1 défense</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/blackcowl.png"
+        alt="Capuche des sentiers secrets"
+        loading="lazy"
+      />
+      <h2>Capuche des sentiers secrets</h2>
+      <p>+2 mobilité</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/astralhat.png"
+        alt="Coiffe du sage"
+        loading="lazy"
+      />
+      <h2>Coiffe du sage</h2>
+      <p>+2 commandement, +1 moral</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/chainmail.png"
+        alt="Cotte de mailles"
+        loading="lazy"
+      />
+      <h2>Cotte de mailles</h2>
+      <p>+3 défense, -1 mobilité</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/ringmail.png"
+        alt="Brigandine de guerre"
+        loading="lazy"
+      />
+      <h2>Brigandine de guerre</h2>
+      <p>+2 défense, +5 santé maximale</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/breastplate.png"
+        alt="Cuirasse du capitaine"
+        loading="lazy"
+      />
+      <h2>Cuirasse du capitaine</h2>
+      <p>+3 défense, +1 commandement, -1 mobilité</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/scalemail.png"
+        alt="Harnois du vétéran"
+        loading="lazy"
+      />
+      <h2>Harnois du vétéran</h2>
+      <p>+4 défense, +1 moral, -1 mobilité</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/cuirass.png"
+        alt="Armure de la citadelle"
+        loading="lazy"
+      />
+      <h2>Armure de la citadelle</h2>
+      <p>+5 défense, +10 santé maximale, -2 mobilité</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/padded.png"
+        alt="Gambison de voyage"
+        loading="lazy"
+      />
+      <h2>Gambison de voyage</h2>
+      <p>+1 défense, +5 santé maximale</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/studded.png"
+        alt="Cuir clouté"
+        loading="lazy"
+      />
+      <h2>Cuir clouté</h2>
+      <p>+2 défense</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/exploreroutfit.png"
+        alt="Veste du pisteur"
+        loading="lazy"
+      />
+      <h2>Veste du pisteur</h2>
+      <p>+1 défense, +2 mobilité</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/windrunnerarmor.png"
+        alt="Armure de la feuille d’acier"
+        loading="lazy"
+      />
+      <h2>Armure de la feuille d’acier</h2>
+      <p>+3 défense, +1 mobilité</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/robe.png"
+        alt="Robe d’apprenti"
+        loading="lazy"
+      />
+      <h2>Robe d’apprenti</h2>
+      <p>+1 défense</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/wizardrobe.png"
+        alt="Robe du cercle protecteur"
+        loading="lazy"
+      />
+      <h2>Robe du cercle protecteur</h2>
+      <p>+2 défense, +5 santé maximale</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/disciplerobe.png"
+        alt="Robe des braises"
+        loading="lazy"
+      />
+      <h2>Robe des braises</h2>
+      <p>+2 attaque, +1 défense</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/vampirerobe.png"
+        alt="Robe du seigneur"
+        loading="lazy"
+      />
+      <h2>Robe du seigneur</h2>
+      <p>+2 commandement, +1 moral</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/t13robe.png"
+        alt="Robe du firmament"
+        loading="lazy"
+      />
+      <h2>Robe du firmament</h2>
+      <p>+2 attaque, +2 défense, +5 santé maximale</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/furcloak.png"
+        alt="Manteau de voyage"
+        loading="lazy"
+      />
+      <h2>Manteau de voyage</h2>
+      <p>+5 santé maximale</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/squirecloak.png"
+        alt="Cape du messager"
+        loading="lazy"
+      />
+      <h2>Cape du messager</h2>
+      <p>+1 mobilité, +1 moral</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/scalecloak.png"
+        alt="Manteau de commandement"
+        loading="lazy"
+      />
+      <h2>Manteau de commandement</h2>
+      <p>+2 commandement</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/elvencloak.png"
+        alt="Cape des sous-bois"
+        loading="lazy"
+      />
+      <h2>Cape des sous-bois</h2>
+      <p>+2 mobilité</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/siacloak.png"
+        alt="Manteau des constellations"
+        loading="lazy"
+      />
+      <h2>Manteau des constellations</h2>
+      <p>+1 attaque, +1 défense, +1 moral</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/heavyboots.png"
+        alt="Bottes ferrées"
+        loading="lazy"
+      />
+      <h2>Bottes ferrées</h2>
+      <p>+1 défense, +1 mobilité</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/forestshoes.png"
+        alt="Bottes du traqueur"
+        loading="lazy"
+      />
+      <h2>Bottes du traqueur</h2>
+      <p>+2 mobilité, +1 attaque</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/harpyshoes.png"
+        alt="Bottes du pèlerin"
+        loading="lazy"
+      />
+      <h2>Bottes du pèlerin</h2>
+      <p>+1 mobilité, +5 santé maximale</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/platinumshoes.png"
+        alt="Bottes du passage astral"
+        loading="lazy"
+      />
+      <h2>Bottes du passage astral</h2>
+      <p>+2 mobilité, +1 défense</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/silverband.png"
+        alt="Anneau de fer"
+        loading="lazy"
+      />
+      <h2>Anneau de fer</h2>
+      <p>+1 défense</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/gatormaidring.png"
+        alt="Anneau de vigueur"
+        loading="lazy"
+      />
+      <h2>Anneau de vigueur</h2>
+      <p>+5 santé maximale</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/mysteriousring.png"
+        alt="Anneau du duelliste"
+        loading="lazy"
+      />
+      <h2>Anneau du duelliste</h2>
+      <p>+2 attaque</p>
+      <small>Guerrier · Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/t12ring.png"
+        alt="Anneau du conclave"
+        loading="lazy"
+      />
+      <h2>Anneau du conclave</h2>
+      <p>+1 attaque, +1 commandement</p>
+      <small>Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/pendant.png"
+        alt="Pendentif de vitalité"
+        loading="lazy"
+      />
+      <h2>Pendentif de vitalité</h2>
+      <p>+5 santé maximale</p>
+      <small>Guerrier · Éclaireur · Mage</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/noblechain.png"
+        alt="Torque du conquérant"
+        loading="lazy"
+      />
+      <h2>Torque du conquérant</h2>
+      <p>+2 attaque, +1 commandement</p>
+      <small>Guerrier</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/vipamulet.png"
+        alt="Collier des chemins oubliés"
+        loading="lazy"
+      />
+      <h2>Collier des chemins oubliés</h2>
+      <p>+2 mobilité, +1 moral</p>
+      <small>Éclaireur</small>
+    </article>
+    <article>
+      <img
+        src="../app/assets/equipment/sunpendant.png"
+        alt="Médaillon de l’équilibre"
+        loading="lazy"
+      />
+      <h2>Médaillon de l’équilibre</h2>
+      <p>+1 attaque, +1 défense, +1 commandement</p>
+      <small>Mage</small>
+    </article>
+  </main>
+</html>

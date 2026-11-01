@@ -1,0 +1,21 @@
+[
+  {
+    "id": "excalibure",
+    "name": "Excalibure",
+    "category": "equipment",
+    "bundleSize": 1,
+    "icon": "◆",
+    "unique": true,
+    "equipmentSlot": "mainHand",
+    "modifiers": {
+      "attack": 5,
+      "defense": 5,
+      "morale": 5,
+      "command": 10,
+      "mobility": 0,
+      "health": 0
+    },
+    "description": "Epée légendaire du roi",
+    "usage": ""
+  }
+]

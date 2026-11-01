@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Éditeur de personnages — RPG GPS</title>
+    <link rel="stylesheet" href="css/portrait-editor.css" />
+  </head>
+  <body>
+    <header class="editor-header">
+      <div>
+        <a href="portrait-lab.html">← Atelier des portraits</a>
+        <h1>Éditeur de personnages</h1>
+        <p>
+          Choisissez les pièces, ajustez les raccords et vérifiez le résultat
+          dans le dialogue.
+        </p>
+      </div>
+      <span id="save-status" role="status">Prêt</span>
+    </header>
+    <nav class="mobile-switch" aria-label="Navigation de l’éditeur">
+      <a href="#editor-preview">Voir l’aperçu</a
+      ><a href="#editor-controls">Régler le personnage</a>
+    </nav>
+    <main class="editor-layout">
+      <section
+        id="editor-controls"
+        class="editor-controls"
+        aria-label="Réglages du personnage"
+      >
+        <fieldset>
+          <legend>Personnage et lieu</legend>
+          <button type="button" id="load-marshal">
+            Charger le maréchal Aldren
+          </button>
+          <div class="fields">
+            <label
+              >Bibliothèque<select id="gender">
+                <option value="female">Féminine</option>
+                <option value="male">Masculine</option>
+              </select></label
+            ><label>Décor<select id="background"></select></label
+            ><label>Vêtement<select id="clothing"></select></label
+            ><label>Visage<select id="face"></select></label
+            ><label>Coiffure<select id="hair"></select></label
+            ><label>Couleur des cheveux<select id="hair-color"></select></label
+            ><label>Couleur de la barbe<select id="beard-color"></select></label
+            ><label>Yeux<select id="eyes"></select></label
+            ><label>Nez<select id="nose"></select></label
+            ><label>Bouche<select id="mouth"></select></label
+            ><label>Expression<select id="expression"></select></label>
+            <div class="accessory-picker">
+              <span>Accessoires cumulables</span>
+              <div
+                id="accessory"
+                role="group"
+                aria-label="Accessoires cumulables"
+              ></div>
+            </div>
+            <label>Couvre-chef<select id="headwear"></select></label
+            ><label>Lunettes<select id="glasses"></select></label
+            ><label>Objet<select id="prop"></select></label
+            ><label>Foulard du visage<select id="mask"></select></label
+            ><label>Rides du front<select id="forehead"></select></label
+            ><label>Plis de la bouche<select id="mouthLines"></select></label
+            ><label>Pattes-d’oie<select id="eyeWrinkles"></select></label>
+          </div>
+          <button id="randomize" type="button">Autre assemblage</button>
+        </fieldset>
+        <fieldset>
+          <legend>Variations du PNJ</legend>
+          <div id="appearance-variations"></div>
+          <p id="proportions-summary" class="hint"></p>
+          <p class="hint">
+            La corpulence lie deux blocs : tête, cheveux et traits de 90 à 110 %
+            ; cou, torse et vêtements de 70 à 130 %. Les deux s’élargissent ou
+            s’amincissent ensemble. La barbe reste toujours à 100 % d’opacité. «
+            Autre assemblage » varie aussi ces valeurs.
+          </p>
+        </fieldset>
+        <fieldset>
+          <legend>Position et proportions des calques</legend>
+          <label>Élément à régler<select id="group"></select></label
+          ><label class="check"
+            ><input id="visible" type="checkbox" />Afficher cet élément</label
+          >
+          <div id="adjustments"></div>
+          <button id="reset-layer" type="button">
+            Réinitialiser cet élément
+          </button>
+          <p class="hint">
+            Les coordonnées suivent la toile de 512 × 832 pixels. « Tête et
+            traits » déplace ensemble le visage, les yeux, le nez et la bouche.
+          </p>
+        </fieldset>
+        <fieldset>
+          <legend>Cadrage du personnage</legend>
+          <div id="scene-adjustments"></div>
+          <label class="check"
+            ><input id="guides" type="checkbox" />Afficher les repères</label
+          ><label class="check"
+            ><input id="transparent" type="checkbox" />Masquer le décor</label
+          >
+        </fieldset>
+        <fieldset>
+          <legend>Dialogue</legend>
+          <label>Rôle ou nom<input id="speaker-name" maxlength="160" /></label
+          ><label>Nom du lieu<input id="place-name" maxlength="160" /></label
+          ><label
+            >Texte<textarea
+              id="dialogue-line"
+              rows="4"
+              maxlength="8000"
+            ></textarea></label
+          ><label class="check"
+            ><input id="choices" type="checkbox" />Afficher douze choix pour
+            tester le défilement</label
+          >
+        </fieldset>
+        <fieldset>
+          <legend>Conserver les réglages</legend>
+          <p class="hint">
+            Sauvegarde automatique dans ce navigateur. Les réglages restent dans
+            l’éditeur ; exportez le JSON pour les partager ou les intégrer
+            ensuite.
+          </p>
+          <div class="actions">
+            <button id="export" type="button">Exporter le JSON</button
+            ><label class="file-button"
+              >Importer un JSON<input
+                id="import"
+                type="file"
+                accept="application/json,.json" /></label
+            ><button id="reset-all" type="button">Tout réinitialiser</button>
+          </div>
+        </fieldset>
+      </section>
+      <section
+        id="editor-preview"
+        class="editor-preview"
+        aria-label="Aperçu du dialogue"
+      >
+        <div class="preview-toolbar">
+          <h2>Aperçu dans le jeu</h2>
+          <label
+            >Format<select id="format">
+              <option value="390x844">Téléphone · 390 × 844</option>
+              <option value="844x390">Téléphone paysage · 844 × 390</option>
+              <option value="768x1024">Tablette · 768 × 1024</option>
+              <option value="1280x800">Écran large · 1280 × 800</option>
+            </select></label
+          >
+        </div>
+        <p class="hint">
+          La scène reste fixe. En portrait, le texte et les choix occupent 40 %
+          de l’écran.
+        </p>
+        <div id="frame-holder">
+          <iframe
+            id="preview"
+            width="390"
+            height="844"
+            title="Aperçu interactif du personnage"
+          ></iframe>
+        </div>
+        <p id="preview-status" role="status">Chargement de l’aperçu…</p>
+      </section>
+    </main>
+    <script type="module" src="js/ui/portrait-editor.js"></script>
+  </body>
+</html>

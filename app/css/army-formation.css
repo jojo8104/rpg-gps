@@ -1,0 +1,37 @@
+#army-content { padding-bottom: 230px; }
+.army-deployment {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(680px, calc(100% - 2rem));
+  box-sizing: border-box;
+  bottom: calc(5rem + env(safe-area-inset-bottom));
+  z-index: 8;
+  margin-top: 1rem;
+  padding: .7rem;
+  border: 2px solid #62452b;
+  border-radius: 12px;
+  background: linear-gradient(#fff0cc, #dfbc85);
+  color: #342416;
+  box-shadow: 0 -4px 16px #0004;
+}
+.army-deployment p { margin: .25rem 0 .6rem; font-size: .75rem; }
+.army-deployment__slots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5rem; }
+.army-deployment__position { min-width: 0; }
+.army-deployment__slot {
+  width: 100%; min-height: 105px; padding: .35rem;
+  display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+}
+.army-deployment__slot > span:first-child { font-size: .75rem; }
+.army-deployment__slot .unit-type-icon { width: 42px; height: 42px; }
+.army-deployment__slot .unit-art-thumbnail { width: 42px; height: 42px; object-fit: contain; }
+.army-deployment__slot small { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .7rem; }
+.army-deployment__empty { font-size: 1.8rem; opacity: .6; }
+.army-deployment__slot.is-drop-target { outline: 3px solid #478c67; outline-offset: 2px; }
+.army-deployment__remove { width: 100%; margin-top: .25rem; min-height: 32px; padding: .2rem; font-size: .7rem; }
+.army-formation-pick { touch-action: none; user-select: none; cursor: grab; min-height: 36px; padding: .25rem .5rem; font-size: .75rem; }
+.army-formation-pick:active { cursor: grabbing; }
+.army-formation-pick[aria-pressed="true"] { outline: 2px solid #478c67; }
+.army-deployment__ghost { position: fixed; z-index: 3000; pointer-events: none; transform: translate(-50%, -70%); width: 85px; padding: .5rem; border: 2px solid #c8a25d; border-radius: 12px; background: #493525; color: #fff0cc; display: grid; justify-items: center; box-shadow: 0 5px 18px #0008; }
+.army-deployment__ghost .unit-type-icon, .army-deployment__ghost img { width: 48px; height: 48px; object-fit: contain; }
+.army-deployment__ghost small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

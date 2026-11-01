@@ -1,0 +1,10 @@
+{
+  "width": 512,
+  "height": 832,
+  "upperChest": [128, 308, 256, 170],
+  "bodyMatchesClothing": true,
+  "bodyMask": "enveloppe horizontale de chaque tenue, marge intérieure de 2 pixels",
+  "hairScale": 1.06,
+  "hairOrigin": [256, 220],
+  "headNeckAndClothing": "ancrages v4 conservés"
+}

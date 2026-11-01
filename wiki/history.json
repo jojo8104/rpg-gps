@@ -41,6 +41,356 @@
       "note": "Actualisation du guide et des documents de règles avant publication sur GitHub",
       "hash": "25c5f3e82c5765a57bc2ce9fe78b4cd1548181f6a164550f36e0306f5de5ac9a",
       "file": "archives/premiers-pas/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-09T21:39:44.915Z",
+      "note": "Préparation détaillée IRL, rôles organisateur et installation des QR codes",
+      "hash": "410befa768bba0bbc29bd107036c016167d28ec90df3b89c5db080a98e18c25b",
+      "file": "archives/premiers-pas/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-09T21:43:37.334Z",
+      "note": "Publication du wiki dans un dépôt GitHub dédié, avec conservation des archives",
+      "hash": "dec27020f99f6bd06e11e4d3e5bb6b202539b807dfb2c8831551eaef8707912e",
+      "file": "archives/premiers-pas/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-10T20:52:02.030Z",
+      "note": "Carte : commandes transparentes, quête serveur visible et languette de lieu sélectionné",
+      "hash": "a6cca41d2bfa6185b51e7935dc701d63f5b61bb07a2695c1bd088fe7cba42baa",
+      "file": "archives/premiers-pas/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-10T20:59:19.288Z",
+      "note": "Lisibilité et navigation cohérente des écrans de préparation",
+      "hash": "12dd14f0dfc498460e35ec6a0d7cbcc60eb10e030db4d44658281fe0a5aa4f49",
+      "file": "archives/premiers-pas/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-10T21:01:18.592Z",
+      "note": "Lisibilité et navigation cohérente des écrans de préparation",
+      "hash": "3302b02b25d171ffbe04c58f58930a958639f562288869e278ba6498f500cc7a",
+      "file": "archives/premiers-pas/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-10T21:07:28.279Z",
+      "note": "Carte : pouvoirs centrés et recentrage au-dessus de la languette de lieu",
+      "hash": "b4b5fb4c1684a5b13d8b33f84a27cebea344744da6cfec883e1ec272845422a0",
+      "file": "archives/premiers-pas/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-10T21:17:12.127Z",
+      "note": "Correction du DOM simulé des tests du menu et vérification du nettoyage de l’éditeur de terrain, sans changement des règles",
+      "hash": "f1fc726896237b158809da7810c04b3353f7fee1a1fab7c557d5aedc69441418",
+      "file": "archives/premiers-pas/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-10T22:27:20.420Z",
+      "note": "Préparation inspirée du test local, progression cliquable et dimensions du terrain",
+      "hash": "7a9b901ba4d07c62493322fa77a9f2b682d14b13f09b8e970db725c7d427a47c",
+      "file": "archives/premiers-pas/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-10T22:30:34.822Z",
+      "note": "Bouton de scan QR sur la carte au-dessus du centrage joueur",
+      "hash": "7de1a9ef945f91cda72d0c0a260eee5404fe705ef9662fd933ead607944f1a68",
+      "file": "archives/premiers-pas/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-10T22:30:54.680Z",
+      "note": "Bouton de menu : trois barres sans texte visible",
+      "hash": "19235e69e4a512161b74cc40258a7d02c853113c7f95e510cc2e4ab7846e35c0",
+      "file": "archives/premiers-pas/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-11T05:58:00.722Z",
+      "note": "Carte : zoom dégagé du menu en portrait et pouvoirs bas en paysage",
+      "hash": "94dfc9c2bc45361b4359d411b43ee34a129a83daed988bd368522d57ec55997d",
+      "file": "archives/premiers-pas/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-11T06:42:04.074Z",
+      "note": "Retrait des lieux exclusifs des quêtes désélectionnées et clarification des contraintes de placement ; formats de terrain prévus",
+      "hash": "5906f0542c2cac36ae31be427a80ce5299a6c9844846be46e6502b16598153dc",
+      "file": "archives/premiers-pas/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-11T08:28:05.870Z",
+      "note": "Conserver les lieux économiques réutilisés par les quêtes et préciser le principe d’association aux lieux du monde",
+      "hash": "77d4cf95be955c1b7717041b9b88c2150f57883159f0d188459b9d9c49c86f1f",
+      "file": "archives/premiers-pas/v19.html"
+    },
+    {
+      "version": 20,
+      "date": "2026-10-11T15:36:59.152Z",
+      "note": "Validation progressive de la préparation IRL, date et impression conditionnelles aux QR, repères de lieux sur la carte",
+      "hash": "7d4f8ef1ae2328aa560fc2dff1292e9206ec62f8117e88dbe3f0e93ad4ae5649",
+      "file": "archives/premiers-pas/v20.html"
+    },
+    {
+      "version": 21,
+      "date": "2026-10-11T16:43:35.801Z",
+      "note": "Monde initial de dix lieux et report des missions nécessitant des lieux supplémentaires",
+      "hash": "f060f65b149ffbccca60acc5f5d594a167f380e6455c26cf09e234a9fbec23da",
+      "file": "archives/premiers-pas/v21.html"
+    },
+    {
+      "version": 22,
+      "date": "2026-10-11T16:45:01.945Z",
+      "note": "Partie rapide : terrain, réglages compacts, joueurs ; scénario facultatif et reprise séparée",
+      "hash": "048a3f52ef21b2722cad1824d5a20cbbde0f7636d7a8543cefb16c5340f83805",
+      "file": "archives/premiers-pas/v22.html"
+    },
+    {
+      "version": 23,
+      "date": "2026-10-11T16:53:34.805Z",
+      "note": "Retrait de sept tests de quêtes historiques obsolètes, démarrage sans ancien camp et mesure correcte des diffusions réseau",
+      "hash": "1e8e0df344c6d10d4b0b70c807a337235a7fa31fd091983e97c5708783b302f2",
+      "file": "archives/premiers-pas/v23.html"
+    },
+    {
+      "version": 24,
+      "date": "2026-10-11T17:13:13.755Z",
+      "note": "Accès organisateur dans le menu et fermeture des configurations au retour au jeu",
+      "hash": "1c117240b1598076c36ae5965325fdd830c6ecfeb61a86f9cc9dd225b4fea020",
+      "file": "archives/premiers-pas/v24.html"
+    },
+    {
+      "version": 25,
+      "date": "2026-10-11T18:13:36.271Z",
+      "note": "Placements différés par les joueurs après marche et stock de cases validées par repérage",
+      "hash": "35e6beec2da1cd1beda46551f7949556aa40e17a493399e482764491dd75b0e6",
+      "file": "archives/premiers-pas/v25.html"
+    },
+    {
+      "version": 26,
+      "date": "2026-10-14T11:32:10.661Z",
+      "note": "Scénarios de l’éditeur disponibles dans la salle et lancement du monde officiel",
+      "hash": "79eee9d727fa14c0c2202444aec7ca5f30e8ac1b39d63ff79931c1baf9894aa0",
+      "file": "archives/premiers-pas/v26.html"
+    },
+    {
+      "version": 27,
+      "date": "2026-10-14T12:07:01.939Z",
+      "note": "Isolation des lieux de chaque scénario et placements officiels en simulation",
+      "hash": "d59952ee838a1a1d97166d7fb2de2d39df2ee2f26f5be3f4c8486ff5ab2715ff",
+      "file": "archives/premiers-pas/v27.html"
+    },
+    {
+      "version": 28,
+      "date": "2026-10-14T19:37:54.517Z",
+      "note": "Parcours guidés, options avancées repliables et fenêtre cartographique plein écran",
+      "hash": "af1a0328508632842b3cfb8e960af77edbd9646a8fc2b0eaa72b719f392cb92d",
+      "file": "archives/premiers-pas/v28.html"
+    },
+    {
+      "version": 29,
+      "date": "2026-10-14T19:47:50.927Z",
+      "note": "Déplacement des sommets du contour et des exclusions par glisser-déposer",
+      "hash": "e9b823d3b9a5879cce0b93d3300af0fd9382bfab29e1888bb14a9accd86c32d4",
+      "file": "archives/premiers-pas/v29.html"
+    },
+    {
+      "version": 30,
+      "date": "2026-10-16T21:54:02.278Z",
+      "note": "Choix du personnage par les mêmes fiches dans le lobby et la partie test",
+      "hash": "ffee312e219c72158f9145ba2b6f7bffd52ffc8e40ffd66b3dc183dd3086084f",
+      "file": "archives/premiers-pas/v30.html"
+    },
+    {
+      "version": 31,
+      "date": "2026-10-16T22:34:00.128Z",
+      "note": "Correction de la fixture du rendu en arrière-plan : actualiser les quêtes en préservant les panneaux de gestion",
+      "hash": "a8385244635bcb1f6cbc37a93c30269ff5102f8108334e042669444e4785a51b",
+      "file": "archives/premiers-pas/v31.html"
+    },
+    {
+      "version": 32,
+      "date": "2026-10-17T12:49:04.924Z",
+      "note": "Intégration des neuf armoiries noir et blanc aux fiches QR, sans modification des règles",
+      "hash": "f0a3ccda4d7ed614a84529dd0b5342786cbc0c915778de9445d1d9b98ce0644d",
+      "file": "archives/premiers-pas/v32.html"
+    },
+    {
+      "version": 33,
+      "date": "2026-10-18T21:55:52.702Z",
+      "note": "Respect des zones de sécurité du téléphone dans les premiers menus et bouton corbeille des joueurs",
+      "hash": "c66c4713b69da9cf4de58f11f81906cafadf265a74faff9cf2be436b15fe3e69",
+      "file": "archives/premiers-pas/v33.html"
+    },
+    {
+      "version": 34,
+      "date": "2026-10-19T10:28:07.883Z",
+      "note": "Correction de la validation initiale du scénario et des marges système sur téléphone",
+      "hash": "5603131347647c6115fb67a1d462ebc6034782068b34007abe6e2654cd8ebbde",
+      "file": "archives/premiers-pas/v34.html"
+    },
+    {
+      "version": 35,
+      "date": "2026-10-20T16:15:17.184Z",
+      "note": "Retour de test chaos : carte continue, progression de marche, sauvegardes, convois et supervision historique",
+      "hash": "c84eab76f9befaec92ff221b45a75e4062c002918ad8567e626d6bacfb585489",
+      "file": "archives/premiers-pas/v35.html"
+    },
+    {
+      "version": 36,
+      "date": "2026-10-20T21:44:14.751Z",
+      "note": "Récupération des extractions OSM expirées par secteurs persistants et délais coordonnés",
+      "hash": "cd5f0bb5dee31c096f777d462fcb1c1034e780b5bcd52f9bdb3f3265af3d2a05",
+      "file": "archives/premiers-pas/v36.html"
+    },
+    {
+      "version": 37,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "2befca95023e57c42e6ea343962783d7c72a7a5ca283c33ab5cc9fc24a4b21c6",
+      "file": "archives/premiers-pas/v37.html"
+    },
+    {
+      "version": 38,
+      "date": "2026-10-20T22:31:55.923Z",
+      "note": "Guide organisé en articles HTML illustrés et liens de référence expliqués",
+      "hash": "231e6ec6fc4430d9870b4ab04ff7113f88eb5b6003443119c5e79c0c4f74564b",
+      "file": "archives/premiers-pas/v38.html"
+    },
+    {
+      "version": 39,
+      "date": "2026-10-20T22:34:00.953Z",
+      "note": "Pages individuelles, résumés de lecture et articles de référence expliqués et illustrés",
+      "hash": "54df8608a150fa032f049036091fd88e77e5e57466fe4eb9e4a3d7ed9130f4d2",
+      "file": "archives/premiers-pas/v39.html"
+    },
+    {
+      "version": 40,
+      "date": "2026-10-20T22:42:37.520Z",
+      "note": "Diagnostic du changement de fond OSM, accès explicite à la carte classique et sélection de personnage commune",
+      "hash": "a021365eded00b8dd4ddd18893a869584105949ac32bcb41ae15a158056b1d72",
+      "file": "archives/premiers-pas/v40.html"
+    },
+    {
+      "version": 41,
+      "date": "2026-10-21T21:07:39.927Z",
+      "note": "Diagnostic de saturation OSM, test de cache après redémarrage du worker et inspection en lecture seule",
+      "hash": "a2164467d029feb19070c4b81ebebc37fbeee587db34182c9c59bbb93bccf689",
+      "file": "archives/premiers-pas/v41.html"
+    },
+    {
+      "version": 42,
+      "date": "2026-10-21T21:08:50.382Z",
+      "note": "Article de diagnostic OSM accessible depuis le guide et contrôle du cache persistant",
+      "hash": "bf336692fe6fe65acb5971ba29b11759dd43d252e091904e9d7d91af8a9f06d0",
+      "file": "archives/premiers-pas/v42.html"
+    },
+    {
+      "version": 43,
+      "date": "2026-10-21T22:41:44.404Z",
+      "note": "Rapprochement en lecture seule des zones sauvegardées et du cache OSM",
+      "hash": "71cbb0e67e9ea94f5ab24d07da1f9fef6928e6dc22e53601f3cb98bd57cf53d0",
+      "file": "archives/premiers-pas/v43.html"
+    },
+    {
+      "version": 44,
+      "date": "2026-10-22T04:53:14.724Z",
+      "note": "Bibliothèque privée de cartes dans le sélecteur de zone et nettoyage des paquets inutilisés",
+      "hash": "c52bdba80897069e8d97d714cf2d753b5ec6d281b0307b8f8904e99c3014a1f2",
+      "file": "archives/premiers-pas/v44.html"
+    },
+    {
+      "version": 45,
+      "date": "2026-10-22T04:55:35.371Z",
+      "note": "Outil de nettoyage ciblé du cache cartographique existant",
+      "hash": "8ce05dae057049a0d652b0bb8b8943ed43ec211d965eec0acf87d3f8e8aed61c",
+      "file": "archives/premiers-pas/v45.html"
+    },
+    {
+      "version": 46,
+      "date": "2026-10-23T23:50:06.561Z",
+      "note": "Limiter les extractions OSM, temporiser les échecs et réutiliser les contours équivalents",
+      "hash": "ae685abf1ddef63b9c309d5073c6283e439cad51db577ad039b9fde5d6cf16d1",
+      "file": "archives/premiers-pas/v46.html"
+    },
+    {
+      "version": 47,
+      "date": "2026-10-23T23:57:38.041Z",
+      "note": "Coupler les cartes sauvegardées à une banque géographique serveur réutilisable",
+      "hash": "c07bd350298fb915d6a1269b771d85b56e2f91c363b00f6c108ece4508801b78",
+      "file": "archives/premiers-pas/v47.html"
+    },
+    {
+      "version": 48,
+      "date": "2026-10-24T08:33:40.920Z",
+      "note": "Réutiliser les surfaces communes et télécharger uniquement les portions manquantes",
+      "hash": "b33ba726d7ed382062b850e1e318772d28f581cd2179b807a0c0a9541797e854",
+      "file": "archives/premiers-pas/v48.html"
+    },
+    {
+      "version": 49,
+      "date": "2026-10-24T08:34:29.024Z",
+      "note": "Préciser la conservation des portions inutilisées dans la banque",
+      "hash": "6d9f5edea575b6bccec0ef60b567a1648134a34742dbf5d997a43138fb05b6f9",
+      "file": "archives/premiers-pas/v49.html"
+    },
+    {
+      "version": 50,
+      "date": "2026-10-24T08:59:18.432Z",
+      "note": "Gérer la banque dans le Dashboard et extraire uniquement le contour de la playarea",
+      "hash": "047cfe4abb04bd9674c30b8d4f2603bc40cb664aaac60ed812d759863a4a9b04",
+      "file": "archives/premiers-pas/v50.html"
+    },
+    {
+      "version": 51,
+      "date": "2026-10-24T11:00:22.454Z",
+      "note": "Regrouper toutes les surfaces manquantes dans un seul appel Overpass",
+      "hash": "7ae5736b6bc402a81cde3d1fa3957848d1c4745fb2b86a291f2cb5fc4fdc6c90",
+      "file": "archives/premiers-pas/v51.html"
+    },
+    {
+      "version": 52,
+      "date": "2026-10-24T11:50:54.008Z",
+      "note": "Distinguer cache et échecs fournisseur et fiabiliser la conservation des cartes",
+      "hash": "b8151c0d6eceb015568adf301509ec0477ad506721336ad41ebb14727ec58482",
+      "file": "archives/premiers-pas/v52.html"
+    },
+    {
+      "version": 53,
+      "date": "2026-10-24T12:06:42.824Z",
+      "note": "Reconnexion explicite, chargement des parties depuis l accueil et Dashboard en onglets avec gestion des sauvegardes",
+      "hash": "9a8ff5417faf5f8675d09c1f58777050b8f760c9f6b543825e56f938e00b2243",
+      "file": "archives/premiers-pas/v53.html"
+    },
+    {
+      "version": 54,
+      "date": "2026-10-24T12:44:31.433Z",
+      "note": "Correction du chargement : accès direct aux joueurs sans retour aux étapes de création",
+      "hash": "e896aec893e0f60430021f6c63557fdfd44303011c82c9f00b0b4d9db7246aa0",
+      "file": "archives/premiers-pas/v54.html"
+    },
+    {
+      "version": 55,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "8949047849b62c212fb25d9928335e9f26bd726f0790120d360be9ad94914aaf",
+      "file": "archives/premiers-pas/v55.html"
+    },
+    {
+      "version": 56,
+      "date": "2026-10-25T16:12:24.781Z",
+      "note": "Guide des règles par thème complété : bâtiments, formations, courrier, surveillance et restrictions du marché",
+      "hash": "5a2fc0391a14ce6129cdbcaa225d5e991f23fe384b5d78c1c31da9d1c6440042",
+      "file": "archives/premiers-pas/v56.html"
     }
   ],
   "heros-armee": [
@@ -134,6 +484,90 @@
       "note": "Suppression des cavaliers d’essai et de la montée de niveau automatique au démarrage des héros joueurs",
       "hash": "f2e11108d87242ca301c06665ee68c1af2867195707afc87be8d9ebd5ea8abd0",
       "file": "archives/heros-armee/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-20T16:15:17.184Z",
+      "note": "Retour de test chaos : carte continue, progression de marche, sauvegardes, convois et supervision historique",
+      "hash": "c924ac5f203e406879f159c8f91a3c6001e679461e041503c59fe2803fc0ceef",
+      "file": "archives/heros-armee/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "7e0dd7f3c7f26a6e5fddff7bf8bdc0a8f21b8d7511d9b54f1f06a0167e4bbcce",
+      "file": "archives/heros-armee/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-20T22:34:00.953Z",
+      "note": "Pages individuelles, résumés de lecture et articles de référence expliqués et illustrés",
+      "hash": "f1201b9619684a101abcf02fc7d9c0ccb09bee41cee944c7948c78c88006569d",
+      "file": "archives/heros-armee/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-20T22:36:14.196Z",
+      "note": "Ajout des portraits et sprites des variantes Guerrière, Mage et Éclaireur",
+      "hash": "1b018c25810b132598461bacb900eaecc8f88f94d8c08bd9b84b732b7430c7ca",
+      "file": "archives/heros-armee/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-21T05:59:31.469Z",
+      "note": "Choix du genre dans les trois cartes de héros, portraits et sprites sauvegardés par le serveur",
+      "hash": "09d75601ca2b3831ab8ad16ca574ae6cffa5e3abe3b565e04ab0ee56fba9856b",
+      "file": "archives/heros-armee/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-24T14:18:54.455Z",
+      "note": "Portraits anime des héros, mage masculin sans chapeau, calques de PNJ et décors par lieu",
+      "hash": "25759e31531d888a23958429dc075c1d4c7c2b7366189e87a7fecf2e445eeac0",
+      "file": "archives/heros-armee/v19.html"
+    },
+    {
+      "version": 20,
+      "date": "2026-10-25T12:44:56.654Z",
+      "note": "Portraits v12 : casques abaissés, mineurs, soldats, barbares et maréchal Aldren composé",
+      "hash": "056d42b236e05df28e906aada9cf5a86061a8f4479185be1ead3c3d1f419e866",
+      "file": "archives/heros-armee/v20.html"
+    },
+    {
+      "version": 21,
+      "date": "2026-10-25T13:19:59.086Z",
+      "note": "Distance visible dans un bloc distinct du grade, hauteur adaptée en paysage",
+      "hash": "b366491a4dae3d35591d91bc8aa9e38258b65ea42ef48d51a69345b8f8b13414",
+      "file": "archives/heros-armee/v21.html"
+    },
+    {
+      "version": 22,
+      "date": "2026-10-25T15:16:17.277Z",
+      "note": "Commandement total avec équipement et fiches de quêtes compactes dépliables",
+      "hash": "b3756d3d3e09c6416ddc7b17ca86efb296d339d4b3f23f6743e479a73795f9d1",
+      "file": "archives/heros-armee/v22.html"
+    },
+    {
+      "version": 23,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "d7cc5f8038ef016ded82505d99221a7c932af60c440de343d718b099d049f768",
+      "file": "archives/heros-armee/v23.html"
+    },
+    {
+      "version": 24,
+      "date": "2026-10-25T16:12:24.781Z",
+      "note": "Guide des règles par thème complété : bâtiments, formations, courrier, surveillance et restrictions du marché",
+      "hash": "e5f313a88dd56f8e7a9c4df4f6c6019a9dedde737582e0d26e0dfb987f34f401",
+      "file": "archives/heros-armee/v24.html"
+    },
+    {
+      "version": 25,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "2d982af83859a684eab7ec21bdc3cfe0a9c875f8f47da464cedf0fd5abb58745",
+      "file": "archives/heros-armee/v25.html"
     }
   ],
   "lieux": [
@@ -227,6 +661,258 @@
       "note": "Précisions sur les positions préférées et la visibilité des lieux durables",
       "hash": "84f5da9c80cff0e3345b7ce27fe060209d14df8f8d6b23e1e8ebe5113bf2f673",
       "file": "archives/lieux/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-11T15:21:47.907Z",
+      "note": "Actualisation des fixtures historiques vers les villages économiques partagés, sans changement des règles",
+      "hash": "cfcab5a4252bdb97576d8da5f78a099fdecd2456946da0e9cfd8db8635c07616",
+      "file": "archives/lieux/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-11T16:42:30.299Z",
+      "note": "Monde initial limité à la capitale, quatre villages, quatre ressources et Rochegarde",
+      "hash": "72ec4690d6579279902a6f88cd28694387157e2d1854b8ff8917046ec4fcd1ab",
+      "file": "archives/lieux/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-11T16:53:34.805Z",
+      "note": "Retrait de sept tests de quêtes historiques obsolètes, démarrage sans ancien camp et mesure correcte des diffusions réseau",
+      "hash": "147087856968b619fb3714ad88b873077496c270a965075d0b1430e71452f804",
+      "file": "archives/lieux/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-11T18:13:36.271Z",
+      "note": "Placements différés par les joueurs après marche et stock de cases validées par repérage",
+      "hash": "7cfb9368124fac55362eab96db279a5ab52ca936634ab5e20ca3af2fbba1ba71",
+      "file": "archives/lieux/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-11T23:15:01.228Z",
+      "note": "Ajout de l’atelier web PC : schéma de quête, fiches par action, carte optionnelle et export validé par le serveur",
+      "hash": "ec459c5e57a814cfca83d4662fb8fb2916486685606c874d3175481836630961",
+      "file": "archives/lieux/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-17T16:48:33.129Z",
+      "note": "Interdire le commerce des PNJ et populations au marché",
+      "hash": "8a88cf22228eeff6183134fb6f401a97f86b74fc36359924ee70f9006c3cbd1e",
+      "file": "archives/lieux/v19.html"
+    },
+    {
+      "version": 20,
+      "date": "2026-10-18T04:20:40.205Z",
+      "note": "Préparation des sprites face et dos des ennemis et de la faune, sans changement de règles",
+      "hash": "ac435d005b0c64b77916a711803a345ddd141b9611c0f65b590109299dad3c3c",
+      "file": "archives/lieux/v20.html"
+    },
+    {
+      "version": 21,
+      "date": "2026-10-18T04:54:22.953Z",
+      "note": "Modèles de groupes autonomes gobelins, orcs et faune : références éditeur, alignements et sprites de carte",
+      "hash": "582092159412f88ed73a56a3d1704fffa85adbfe56334ed54eaca233cad9ee78",
+      "file": "archives/lieux/v21.html"
+    },
+    {
+      "version": 22,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "75b019a14f4afd15468e6103836665932c33457b308d6d50ac1b2fb52700fd73",
+      "file": "archives/lieux/v22.html"
+    },
+    {
+      "version": 23,
+      "date": "2026-10-20T22:34:00.953Z",
+      "note": "Pages individuelles, résumés de lecture et articles de référence expliqués et illustrés",
+      "hash": "0be04118074605ce87a3e85a0e78e7e6abc6d7386a05935c71e4eebb5d5aa300",
+      "file": "archives/lieux/v23.html"
+    },
+    {
+      "version": 24,
+      "date": "2026-10-21T05:40:27.964Z",
+      "note": "Défilement des longues conversations et de tous leurs choix, taverne comprise",
+      "hash": "d58a0f460178a5a189ae238896b21e5ef8315b5efd2db8f9665fe5bb4477465d",
+      "file": "archives/lieux/v24.html"
+    },
+    {
+      "version": 25,
+      "date": "2026-10-24T14:18:54.455Z",
+      "note": "Portraits anime des héros, mage masculin sans chapeau, calques de PNJ et décors par lieu",
+      "hash": "1a557db142457b74201448a0cece5372832521f617341a89e9821dd8955e20e6",
+      "file": "archives/lieux/v25.html"
+    },
+    {
+      "version": 26,
+      "date": "2026-10-24T15:09:03.313Z",
+      "note": "Séparation des bibliothèques masculine et féminine et coiffures indépendantes avec cheveux avant et arrière",
+      "hash": "5eff22cced63b9b144c01e1a70a25f5816594335250ca7c028d1b5b2cd716029",
+      "file": "archives/lieux/v26.html"
+    },
+    {
+      "version": 27,
+      "date": "2026-10-24T15:34:50.531Z",
+      "note": "Retrait temporaire des visages larges des portraits composés, fichiers conservés",
+      "hash": "b8ab8afd878e62c2317b39fcc1f93c352cd90f16f7457de90fe87ce42f0adf4a",
+      "file": "archives/lieux/v27.html"
+    },
+    {
+      "version": 28,
+      "date": "2026-10-24T16:22:11.801Z",
+      "note": "Cadrage des PNJ en buste avec décor visible, titre lisible et suppression du fragment de coiffure sous les yeux",
+      "hash": "1b756d21cfe4df4937484b8b1b167ce391414274aee207c593ab91fbe3c7522e",
+      "file": "archives/lieux/v28.html"
+    },
+    {
+      "version": 29,
+      "date": "2026-10-24T19:12:25.769Z",
+      "note": "Portraits v3 : proportions tête-buste, épaules complètes et bras sous les manches retroussées",
+      "hash": "9d7381c4825ac8e274cc297a1947bfe39c84a68a729ce8b3f736252dd9e55f4d",
+      "file": "archives/lieux/v29.html"
+    },
+    {
+      "version": 30,
+      "date": "2026-10-24T20:08:22.498Z",
+      "note": "Dialogues au cadrage fixe, panneau de 40 % en portrait et calques v4 avec tête et cou séparés",
+      "hash": "d4996eb4f342591e4824d55cf8686f1e283b1b3f34a4bbce1558c302a2137ebb",
+      "file": "archives/lieux/v30.html"
+    },
+    {
+      "version": 31,
+      "date": "2026-10-24T21:16:43.595Z",
+      "note": "Éditeur HTML de personnages, titres sans répétition et raccords des cols ouverts en v5",
+      "hash": "ee524c97e581b02e47078e5a03315fd206d1f60db4d2e4ce87f715823a08866f",
+      "file": "archives/lieux/v31.html"
+    },
+    {
+      "version": 32,
+      "date": "2026-10-24T22:18:08.194Z",
+      "note": "Portraits v6 : gabarit commun des tenues, yeux féminins décalés et barbe adaptée au visage",
+      "hash": "382ddec8f6470918258e9a5b8a8a5c2108d78fe6762de865b34de395bd18d1dc",
+      "file": "archives/lieux/v32.html"
+    },
+    {
+      "version": 33,
+      "date": "2026-10-25T00:39:40.185Z",
+      "note": "Portraits v7 : épaules élargies, cou-torse unifié et cols arrière séparés",
+      "hash": "f27c2fa9f45231fb1160b2e69db6a373a8d4915d951c5a012756318dc311b242",
+      "file": "archives/lieux/v33.html"
+    },
+    {
+      "version": 34,
+      "date": "2026-10-25T01:13:32.514Z",
+      "note": "Portraits v8 : cinq tenues masculines à 115 %, cou à 129 % et épaules plus carrées",
+      "hash": "a6af7a71b1702dedc273774f60713570c0f05b919d736e74f61a6708644f47be",
+      "file": "archives/lieux/v34.html"
+    },
+    {
+      "version": 35,
+      "date": "2026-10-25T01:30:23.111Z",
+      "note": "Portraits : ajustements de largeur et de position des quatre tenues féminines",
+      "hash": "ffe6faec4b048772fce010f775df43c21bcf4c8558b631f9ec516da92670abbf",
+      "file": "archives/lieux/v35.html"
+    },
+    {
+      "version": 36,
+      "date": "2026-10-25T01:40:39.904Z",
+      "note": "Portraits : vêtement féminin de chef de village remonté de 15 pixels",
+      "hash": "072aa210ef03346d0eab75131c7a3c89431f4326fab46ebcf679db3a6628abba",
+      "file": "archives/lieux/v36.html"
+    },
+    {
+      "version": 37,
+      "date": "2026-10-25T01:53:01.358Z",
+      "note": "Portraits : corpulence stable par PNJ et densité variable des barbes",
+      "hash": "551ee2eb1cc1c29abfe7a3f9de047a160c6f8159e998311b7fff693ebd4e01da",
+      "file": "archives/lieux/v37.html"
+    },
+    {
+      "version": 38,
+      "date": "2026-10-25T02:09:36.110Z",
+      "note": "Portraits : plage de corpulence étendue à 50–180 %",
+      "hash": "5a5a97c455fe47d02ad868741bc6f310ba991facf0050e9a7691058e84ede40f",
+      "file": "archives/lieux/v38.html"
+    },
+    {
+      "version": 39,
+      "date": "2026-10-25T02:26:17.992Z",
+      "note": "Portraits : tête de 90 à 110 % et corps de 50 à 130 %, liés par la corpulence",
+      "hash": "f2c1b4b29abeac81c7771c1b9c67c214a457718c98ac8d02ba343be521e641b6",
+      "file": "archives/lieux/v39.html"
+    },
+    {
+      "version": 40,
+      "date": "2026-10-25T02:35:42.310Z",
+      "note": "Portraits : largeur minimale du corps à 70 %",
+      "hash": "91d277de67bab9c61798abca6ddcc0766d82d63c98b8a853bbeb1ba3fed6d680",
+      "file": "archives/lieux/v40.html"
+    },
+    {
+      "version": 41,
+      "date": "2026-10-25T03:06:55.562Z",
+      "note": "Portraits v9 : nouveaux visages, traits, coiffures, brigands, couvre-chefs et accessoires compatibles",
+      "hash": "ffae59b4d91fada14b6ec835d8ae3db8b808e367a93c48ac00e2ad574c829111",
+      "file": "archives/lieux/v41.html"
+    },
+    {
+      "version": 42,
+      "date": "2026-10-25T03:34:51.179Z",
+      "note": "Portraits v10 : foulards, mentons carrés, joues rondes, vieillesse et expressions",
+      "hash": "e3b28b2b60963d4bb162ec7393945a1e52c3374fb6e05bc5f3aa57bd8b16ce32",
+      "file": "archives/lieux/v42.html"
+    },
+    {
+      "version": 43,
+      "date": "2026-10-25T08:26:51.073Z",
+      "note": "Portraits v11 : couleurs indépendantes des coiffures et barbes, couvre-chefs frontaux",
+      "hash": "e30595fa2b777d3de62d3bef645ef833e943156a0aab9a4e58d22dd5e319492c",
+      "file": "archives/lieux/v43.html"
+    },
+    {
+      "version": 44,
+      "date": "2026-10-25T12:29:27.408Z",
+      "note": "Correction des tests PNG v12 : transparence exacte, tolérance RGB minimale et diagnostic mémoire borné",
+      "hash": "feb68da2df3c676823849bf39a916408e6b98a9d757b91ec383d5bc49fd8179b",
+      "file": "archives/lieux/v44.html"
+    },
+    {
+      "version": 45,
+      "date": "2026-10-25T12:44:56.654Z",
+      "note": "Portraits v12 : casques abaissés, mineurs, soldats, barbares et maréchal Aldren composé",
+      "hash": "4b8da2bcd7e07315c5ffac2d8a2447f7563b5cc5416b596d6a7d012382c88761",
+      "file": "archives/lieux/v45.html"
+    },
+    {
+      "version": 46,
+      "date": "2026-10-25T13:19:59.086Z",
+      "note": "Distance visible dans un bloc distinct du grade, hauteur adaptée en paysage",
+      "hash": "8d56b1ab04bc6e01f28cb6e64cd892a765f500143556b8fb77551dae02651506",
+      "file": "archives/lieux/v46.html"
+    },
+    {
+      "version": 47,
+      "date": "2026-10-25T15:57:10.431Z",
+      "note": "Ajout des 21 icônes PNG manquantes des bâtiments, sans modification des règles",
+      "hash": "5d6100a815094e69aeb187624b039f770d503f2ea5c99165c9398e9b4d09c0b6",
+      "file": "archives/lieux/v47.html"
+    },
+    {
+      "version": 48,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "5eeebf93bb36759d1fa8623f137fbef1cf26341482fd7279d0147c3a6f9e7f3f",
+      "file": "archives/lieux/v48.html"
+    },
+    {
+      "version": 49,
+      "date": "2026-10-25T16:12:24.781Z",
+      "note": "Guide des règles par thème complété : bâtiments, formations, courrier, surveillance et restrictions du marché",
+      "hash": "676d5bf06959431d9fb8ab5afdc6710066c5d7d4851ee865d9725bd18d790d43",
+      "file": "archives/lieux/v49.html"
     }
   ],
   "quetes": [
@@ -320,6 +1006,118 @@
       "note": "Traces de pas pour les indices des prospecteurs sur la carte",
       "hash": "4c3fb2cce05017bf2146663a67d25062454c4ecb14146ede3e25041dbb3cd471",
       "file": "archives/quetes/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-11T08:23:53.329Z",
+      "note": "Le ravitaillement réutilise les quatre villages économiques autour de la capitale",
+      "hash": "4794e9ab2ff824b1b53d6b597e9a9ccb136bbb7cf67c6154d11ab2f4df0cab59",
+      "file": "archives/quetes/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-11T08:24:36.625Z",
+      "note": "Le ravitaillement réutilise les quatre villages économiques autour de la capitale",
+      "hash": "4086b8bdd9111a8c4ab7630d0a02094b11babe1cba5af79c3f1d107a182815d0",
+      "file": "archives/quetes/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-11T15:05:35.193Z",
+      "note": "Documentation du template de quête, des sept actions et des limites des embranchements",
+      "hash": "ef2034ee5dba556bacfe9f44e92b6206eebf540b90121b3c807c3b2129aa1e45",
+      "file": "archives/quetes/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-11T15:21:47.907Z",
+      "note": "Actualisation des fixtures historiques vers les villages économiques partagés, sans changement des règles",
+      "hash": "b3f29a9b708977c0a34dee1f3c99e8de38e1f234ff60090e9824687f10c4cbe2",
+      "file": "archives/quetes/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-11T16:43:35.801Z",
+      "note": "Monde initial de dix lieux et report des missions nécessitant des lieux supplémentaires",
+      "hash": "369223994269cba8e9bfa07e0b291cf2f85b66ae8c703f23f0650448c6a51e82",
+      "file": "archives/quetes/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-11T16:53:34.805Z",
+      "note": "Retrait de sept tests de quêtes historiques obsolètes, démarrage sans ancien camp et mesure correcte des diffusions réseau",
+      "hash": "6e7719a8d67863be6444fa917701021f111410c14b7f45bdcf5c5907bf06647f",
+      "file": "archives/quetes/v19.html"
+    },
+    {
+      "version": 20,
+      "date": "2026-10-11T17:07:37.388Z",
+      "note": "Moteur de quêtes : sorties nommées, liens conditionnels, jonctions et fins de branches",
+      "hash": "0f937bc82a766d7d6d5c8048074535a6e30931d6acb11008b97fe5c0c5400d34",
+      "file": "archives/quetes/v20.html"
+    },
+    {
+      "version": 21,
+      "date": "2026-10-16T21:53:14.371Z",
+      "note": "Journal actualisé à l’acceptation et consultation des missions sans enregistrement",
+      "hash": "4a5232e6256b63fec485c9a61da2e0f0fd57de67b73a986b435d8429a76963ad",
+      "file": "archives/quetes/v21.html"
+    },
+    {
+      "version": 22,
+      "date": "2026-10-17T04:44:48.217Z",
+      "note": "Lisibilité des quêtes : palette parchemin des menus et suppression des fonds verts",
+      "hash": "849611b6df7608b4e97a0c3abf67b6ed0bc2188c8a527d4e4db52c55f66a2c15",
+      "file": "archives/quetes/v22.html"
+    },
+    {
+      "version": 23,
+      "date": "2026-10-19T22:51:38.903Z",
+      "note": "Éditeur : coopération et événements stratégiques en conception",
+      "hash": "0868d95e0dd648689fba87d8980fed9d67d7a6cc3033bc8df7dd53c61b36a1d4",
+      "file": "archives/quetes/v23.html"
+    },
+    {
+      "version": 24,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "02a98601e2bd91fabf0d03c8fce8ad0b93bc891ab889cf45bc347c2be6758d6c",
+      "file": "archives/quetes/v24.html"
+    },
+    {
+      "version": 25,
+      "date": "2026-10-20T22:34:00.953Z",
+      "note": "Pages individuelles, résumés de lecture et articles de référence expliqués et illustrés",
+      "hash": "f928920e99ca1a02567bf635a479570554aecbdd636f36a8694bedd671b1c23e",
+      "file": "archives/quetes/v25.html"
+    },
+    {
+      "version": 26,
+      "date": "2026-10-25T12:44:56.654Z",
+      "note": "Portraits v12 : casques abaissés, mineurs, soldats, barbares et maréchal Aldren composé",
+      "hash": "7074c2e4516a65e1db4307fa1005304d5a77fa93a321ef12bb81896f7e9e0fec",
+      "file": "archives/quetes/v26.html"
+    },
+    {
+      "version": 27,
+      "date": "2026-10-25T15:16:17.277Z",
+      "note": "Commandement total avec équipement et fiches de quêtes compactes dépliables",
+      "hash": "e4b0b5c2aaeeff3d00bc35676fc128cccd40f00b580b82199c6322e91d6ec9c3",
+      "file": "archives/quetes/v27.html"
+    },
+    {
+      "version": 28,
+      "date": "2026-10-25T15:22:38.575Z",
+      "note": "Injection de l’hôte navigateur dans la vue des ressources pour tester les modèles de groupes sans window global",
+      "hash": "8ecb511e53d6a9ceb33b4b234597a596bb74ab9ac0b5e668e9d1a0ddd1bbbb36",
+      "file": "archives/quetes/v28.html"
+    },
+    {
+      "version": 29,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "da140d96a98ef1fbb2deb406c942a5f268f04bc6b0bb57fd5cfbb789d0191493",
+      "file": "archives/quetes/v29.html"
     }
   ],
   "combats": [
@@ -357,6 +1155,55 @@
       "note": "Combat compact : carte stable, notice, validation séparée et pertes visuelles officielles",
       "hash": "ec367603368cb8775a18de5090a5e583ce3482d8fc0f23ca194c16ba2c66cb99",
       "file": "archives/combats/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "48733d3e900ef42bfc2859cb677780a17dc12751b42954e48bebf81b57ad2534",
+      "file": "archives/combats/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-20T22:34:00.953Z",
+      "note": "Pages individuelles, résumés de lecture et articles de référence expliqués et illustrés",
+      "hash": "925adea8122b4effe3d51445e4f6f7e59537a5d5ecb444acfa5e3394cb4a0b8b",
+      "file": "archives/combats/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-25T02:51:25.335Z",
+      "note": "Terrains anime/JRPG v2 : textures simplifiées et illustration de l’atlas, sans changement de règles",
+      "hash": "1bf5352adb925194e3ef0868d792996ffd93bbc35756da6fd34e7bd4b284d731",
+      "file": "archives/combats/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-25T02:52:39.801Z",
+      "note": "Atlas JRPG et documentation du générateur actuel : biomes lisibles et rivière optionnelle",
+      "hash": "3236085d9f5234fc3e333e63948a6adf1cc1e70b278754fd933f9a43abe01a10",
+      "file": "archives/combats/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-25T02:54:57.628Z",
+      "note": "Tuile rocheuse JRPG : piton à sommet dégagé et falaise, règles inchangées",
+      "hash": "b080fce88734ded412452488d80da8ac598d3c17ead90a90727d47aa29ad2ad5",
+      "file": "archives/combats/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "acb3abbc631e1f0a53950be8917f47fbe94831b49e7a7ffe09f076be70c36ab9",
+      "file": "archives/combats/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "7cf52aca7f6beb3ec90577754e3f338205e00d50091f66c9b9fb5b7d41e16f3b",
+      "file": "archives/combats/v12.html"
     }
   ],
   "classes": [
@@ -366,6 +1213,27 @@
       "note": "Version initiale du wiki",
       "hash": "d58ad2efdef52fa6d9ce3ce303c865e2d17eaf9277c3df58043d6cd13bcb8333",
       "file": "archives/classes/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "5321c4b4ae44634e7530dbed10047c47bfbe05a1d3af72eae129eed9c486c092",
+      "file": "archives/classes/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-24T14:18:54.455Z",
+      "note": "Portraits anime des héros, mage masculin sans chapeau, calques de PNJ et décors par lieu",
+      "hash": "dee5fffcac4e6c04d8e52fc5d43e8f87db078ef4248b50f4b37c5eebd542a5da",
+      "file": "archives/classes/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "6a79e724644db541315cf5e361a1927149901612fd6aa84aaafbdac11201bfe7",
+      "file": "archives/classes/v4.html"
     }
   ],
   "unites": [
@@ -375,6 +1243,27 @@
       "note": "Version initiale du wiki",
       "hash": "87f132270b6305fe6a8bb8eed6fd7baeae3431732fa08623c6966de7c13bab4b",
       "file": "archives/unites/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "45d0c4efa44593740d9217772957d11ecb7c3be60f3ce33ace31b3e54ef21e0f",
+      "file": "archives/unites/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "531c8d6a31114b362c2ba37ebc947b42810cc1576244cc179f8673ff82b44afd",
+      "file": "archives/unites/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "2a1791a1ab4755c439178975cce18c673a43e02af81875c252f7361f60d328b2",
+      "file": "archives/unites/v4.html"
     }
   ],
   "dashboard-monitoring": [
@@ -384,6 +1273,2720 @@
       "note": "Dashboard : relevés du monde et graphiques militaires et économiques",
       "hash": "de0a020ba5f3558d6876758ac00d926b624465f95eceb410a1dfd944c32f09c8",
       "file": "archives/dashboard-monitoring/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-20T16:15:17.184Z",
+      "note": "Retour de test chaos : carte continue, progression de marche, sauvegardes, convois et supervision historique",
+      "hash": "f1a7567def6f943f8e1903bc36d4bb35914b40be28cf64df89fe553e7f706054",
+      "file": "archives/dashboard-monitoring/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-20T16:17:27.668Z",
+      "note": "Précisions sur la conservation complète de la supervision et accès aux sauvegardes",
+      "hash": "816073a8f8f51609b320057cc74e400892bd8f910d5b3f0d9d8e03253ec819ee",
+      "file": "archives/dashboard-monitoring/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-20T20:59:13.817Z",
+      "note": "Supervision sans joueur connecté, fiches détaillées, perspective de vision, exploration et frontières",
+      "hash": "33e2992166fcc4f874c889767145210ac60255f182bc6980305676e20f8763c9",
+      "file": "archives/dashboard-monitoring/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "b001ad868eec128a060b2a7e8e81ebbe843f2e76e4029d647fdfb560ec9698f3",
+      "file": "archives/dashboard-monitoring/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-20T22:34:00.953Z",
+      "note": "Pages individuelles, résumés de lecture et articles de référence expliqués et illustrés",
+      "hash": "9eb7116818a3e03008d74822ed09fedb86a595505ea174c2ae5e277f0dcafab8",
+      "file": "archives/dashboard-monitoring/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-20T22:46:29.561Z",
+      "note": "Dashboard : période réglable et stocks en colonnes",
+      "hash": "f9712167ca4fe209173dd4968322af8f38d79bd5392c0f6c61fb54175984894f",
+      "file": "archives/dashboard-monitoring/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-23T18:59:18.620Z",
+      "note": "Correction du cache du Dashboard et des API apres deploiement ou nouvelle session",
+      "hash": "f7e07a8352345c3715a5132d5f182938d270bcd504dc0cffc321c9de78094dfe",
+      "file": "archives/dashboard-monitoring/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-24T08:59:18.432Z",
+      "note": "Gérer la banque dans le Dashboard et extraire uniquement le contour de la playarea",
+      "hash": "1595991dc492d59548e4095180b355ab610a373cc46090621b808ea2a5231422",
+      "file": "archives/dashboard-monitoring/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-24T11:05:07.646Z",
+      "note": "Fond OpenStreetMap dans la banque et explication des suppressions protegees",
+      "hash": "58f95510f2a952ba4782d14d97839284f7c334936b7915a858de1f0ad89e1c0d",
+      "file": "archives/dashboard-monitoring/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-24T11:50:54.008Z",
+      "note": "Distinguer cache et échecs fournisseur et fiabiliser la conservation des cartes",
+      "hash": "0cf4ea8c6045d0143c977d2b32408f60b55e14effa79e576ca15e594f7c5ecad",
+      "file": "archives/dashboard-monitoring/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-24T12:06:42.824Z",
+      "note": "Reconnexion explicite, chargement des parties depuis l accueil et Dashboard en onglets avec gestion des sauvegardes",
+      "hash": "1ca982740807bd5fc68b16386cb010669919231bf31027eec0f8c296d513c660",
+      "file": "archives/dashboard-monitoring/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-24T12:44:31.433Z",
+      "note": "Correction du chargement : accès direct aux joueurs sans retour aux étapes de création",
+      "hash": "8412d43dc0f17133998ce7a9a00165824d22f0f07f971fddd7bba039816dcd97",
+      "file": "archives/dashboard-monitoring/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-25T12:33:18.579Z",
+      "note": "PNJ visibles dans les fiches de lieux du Dashboard, supervision en lecture seule",
+      "hash": "63d1cfe8735edc1b54fe2a41a0546098b27acbc2af26486bb445fde11073926b",
+      "file": "archives/dashboard-monitoring/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "6ec17b01f11e13671936aa2e255b5ffbae2203d3fb4d83550c0675cff9eb6c1e",
+      "file": "archives/dashboard-monitoring/v15.html"
+    }
+  ],
+  "concevoir-quetes": [
+    {
+      "version": 1,
+      "date": "2026-10-11T15:05:35.193Z",
+      "note": "Documentation du template de quête, des sept actions et des limites des embranchements",
+      "hash": "222f4ba83a254621b0420d71f28179ce74a3065a90d9f1aa3452969af340e18c",
+      "file": "archives/concevoir-quetes/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-11T17:07:37.388Z",
+      "note": "Moteur de quêtes : sorties nommées, liens conditionnels, jonctions et fins de branches",
+      "hash": "fc5df12301f27baedbe025ee278cffbc64a5ba8a7204b7ab700bb7fc940e791e",
+      "file": "archives/concevoir-quetes/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-11T23:15:01.228Z",
+      "note": "Ajout de l’atelier web PC : schéma de quête, fiches par action, carte optionnelle et export validé par le serveur",
+      "hash": "3f7c40c012855aa3f2d17a9df553f56ee59986993c4b8c0e2a6a7d1627899cb2",
+      "file": "archives/concevoir-quetes/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-12T22:38:16.862Z",
+      "note": "Atelier : Nouvelle quête visible, aides contextuelles et fiches PNJ, groupes autonomes et objets",
+      "hash": "fcb2d615812f120c80cce980b0f90c36df80857a1ff2516f791fcbc200584503",
+      "file": "archives/concevoir-quetes/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-12T22:38:56.604Z",
+      "note": "Atelier : Nouvelle quête visible, aides contextuelles et fiches PNJ, groupes autonomes et objets",
+      "hash": "2bf126a95fcdd1f6b569a909ac2ba95d3861c14f7e2972e13eb5f18425f93207",
+      "file": "archives/concevoir-quetes/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-12T22:45:16.111Z",
+      "note": "Atelier : composition de scénarios et enchaînements de quêtes",
+      "hash": "4dbfac8491df7bcf6762616cfa1cc7842d110ae77beba5757cae27a52e098a92",
+      "file": "archives/concevoir-quetes/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-12T22:46:44.518Z",
+      "note": "Atelier : composition de scénarios et enchaînements de quêtes",
+      "hash": "cbe0116870cffbbcbc4f411bfec662d563205afa6eac274b558488d62c63abfd",
+      "file": "archives/concevoir-quetes/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-13T04:58:28.793Z",
+      "note": "Créations de GA par les quêtes, dépendances de lieux et enregistrement serveur depuis l’éditeur",
+      "hash": "b099d2d3fafde01cc38d3e175eb7d76ece5f54d76077a029ffdbdbbe154b2a77",
+      "file": "archives/concevoir-quetes/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-13T05:07:22.812Z",
+      "note": "Documentation des créations de GA et du catalogue serveur versionné",
+      "hash": "44b0797cd746f7e3b30f329a85411bb9dbb37e1abeab5f78358ba08c02e85006",
+      "file": "archives/concevoir-quetes/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-14T09:08:01.170Z",
+      "note": "Bibliothèque d’images et apparences des lieux, PNJ, objets et GA",
+      "hash": "8c6b39c64e9e9953f51bf3be68233f22aedbebccde894319a486f11a85ed4f61",
+      "file": "archives/concevoir-quetes/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-14T09:58:53.420Z",
+      "note": "Saisie des champs structurés par clés et valeurs typées dans l’éditeur",
+      "hash": "96b2a77d679fdc22e8616dbf845d72a84b39365473e81cbecb64dc8d68f7f28f",
+      "file": "archives/concevoir-quetes/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-14T11:32:10.661Z",
+      "note": "Scénarios de l’éditeur disponibles dans la salle et lancement du monde officiel",
+      "hash": "1a97fe7142b16bd48e611f6480f5267e22c7983c8f53c332fc19419a6b7e3be1",
+      "file": "archives/concevoir-quetes/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-14T12:07:01.939Z",
+      "note": "Isolation des lieux de chaque scénario et placements officiels en simulation",
+      "hash": "85d061a95db2a87f950473579de463bc0593f0944bb14e723a89356090b42e7d",
+      "file": "archives/concevoir-quetes/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-14T12:46:27.066Z",
+      "note": "Terrain de scénario réutilisé et validé automatiquement dans la salle",
+      "hash": "57bf0c5894c36c335f1f084f2854455a0dd7ef68eac4ccf992d3b2dc499df0a3",
+      "file": "archives/concevoir-quetes/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-14T12:54:50.620Z",
+      "note": "Rôle des champs dans les aides contextuelles de l’éditeur",
+      "hash": "d87f7be2f332df1af773afeaaf111347ac688c1e2be88a54b4bafe29dbe45710",
+      "file": "archives/concevoir-quetes/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-14T13:03:10.856Z",
+      "note": "Boutons de génération aléatoire des fiches d’objets, de lieux et de PNJ",
+      "hash": "1196457b0ced361b5c2bb4d6164a96665bb6a20eeecd7ee058ce6e4737ae679b",
+      "file": "archives/concevoir-quetes/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-14T15:42:43.968Z",
+      "note": "Carte Leaflet et fond OpenStreetMap dans l’éditeur de terrain",
+      "hash": "28c0b75fd18ea9115ec138d71a0b2ce4f5c7b2d3e20de480b9baf609773379f5",
+      "file": "archives/concevoir-quetes/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-16T21:53:14.371Z",
+      "note": "Journal actualisé à l’acceptation et consultation des missions sans enregistrement",
+      "hash": "088e6aeb0b235011243b8f84a11285032db7b17f356a9b3652acfea41a369175",
+      "file": "archives/concevoir-quetes/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-17T04:44:48.217Z",
+      "note": "Lisibilité des quêtes : palette parchemin des menus et suppression des fonds verts",
+      "hash": "66387cbed9bf9d00ef9b5cc3f892f7c00e7b2c2a31ce0a30477ddb7997107a8e",
+      "file": "archives/concevoir-quetes/v19.html"
+    },
+    {
+      "version": 20,
+      "date": "2026-10-19T22:51:38.903Z",
+      "note": "Éditeur : coopération et événements stratégiques en conception",
+      "hash": "222a735b7eeaa24ea119bb5c5965ad64a377877f1d6183cafce6ddfb5a3dcd65",
+      "file": "archives/concevoir-quetes/v20.html"
+    },
+    {
+      "version": 21,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "824e7f379fb33e29f492db5aada57b3170566ad5b326dec2d46c61d7f4a8e4f4",
+      "file": "archives/concevoir-quetes/v21.html"
+    },
+    {
+      "version": 22,
+      "date": "2026-10-20T22:34:00.953Z",
+      "note": "Pages individuelles, résumés de lecture et articles de référence expliqués et illustrés",
+      "hash": "b5c94efbe4da4d7faf6b33e7904c0c09c5b6d85b8ab045583730d93b8d0d5122",
+      "file": "archives/concevoir-quetes/v22.html"
+    },
+    {
+      "version": 23,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "b86dd81f289ec945a4894d5769f9f30f47ae53122a70a2415e09dbe2e0bf189f",
+      "file": "archives/concevoir-quetes/v23.html"
+    }
+  ],
+  "commandes-powershell": [
+    {
+      "version": 1,
+      "date": "2026-10-11T15:30:20.224Z",
+      "note": "Ajout du guide PowerShell : déploiement, tunnel SSH et supervision serveur",
+      "hash": "e19e68c09f84a40307022c66c8ffbd7f47479b6c4eea2917b293d447932bfef5",
+      "file": "archives/commandes-powershell/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "5b3800b2a2204bde8ae40bb03d1aa054ea6adb9903bca26460f7681c93c6a939",
+      "file": "archives/commandes-powershell/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-20T22:34:00.953Z",
+      "note": "Pages individuelles, résumés de lecture et articles de référence expliqués et illustrés",
+      "hash": "983dfda8fe353947e5b1f38311122a226e1f142a1e93e0eeb1e1c45515cfa33e",
+      "file": "archives/commandes-powershell/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "97c8f453573aae8b3d3989e9b911137470cf0c4317e65c88e2553eeb3b4328b7",
+      "file": "archives/commandes-powershell/v4.html"
+    }
+  ],
+  "atelier-quetes": [
+    {
+      "version": 1,
+      "date": "2026-10-11T23:15:01.228Z",
+      "note": "Ajout de l’atelier web PC : schéma de quête, fiches par action, carte optionnelle et export validé par le serveur",
+      "hash": "972dbf42bde2cea61f2716a29d408ee566bb928192d01871d239cf1c6514a747",
+      "file": "archives/atelier-quetes/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-12T22:38:16.862Z",
+      "note": "Atelier : Nouvelle quête visible, aides contextuelles et fiches PNJ, groupes autonomes et objets",
+      "hash": "e7b83b5748776658a7e4cfb255dd45888112a28b74861ff242d8bee94f8eaeac",
+      "file": "archives/atelier-quetes/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-12T22:38:56.604Z",
+      "note": "Atelier : Nouvelle quête visible, aides contextuelles et fiches PNJ, groupes autonomes et objets",
+      "hash": "5824be2168faa756f65632fa2e946c8bc9ceec40f140c702691a946ad0decaa5",
+      "file": "archives/atelier-quetes/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-12T22:45:16.111Z",
+      "note": "Atelier : composition de scénarios et enchaînements de quêtes",
+      "hash": "97472e4421defe4eb1eacd6002ab889106b171dd2793043894d3c7d7a83fcc6d",
+      "file": "archives/atelier-quetes/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-12T22:46:44.518Z",
+      "note": "Atelier : composition de scénarios et enchaînements de quêtes",
+      "hash": "d00cda6457149cf5118aacc60db55a8e5773ddf9d03d4b2d6c9dda71245a8525",
+      "file": "archives/atelier-quetes/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-13T04:58:28.793Z",
+      "note": "Créations de GA par les quêtes, dépendances de lieux et enregistrement serveur depuis l’éditeur",
+      "hash": "0b77ada9cf5b3325851195786890b022b9b1b5aa9a1517da53f2863ad2287936",
+      "file": "archives/atelier-quetes/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-13T05:07:22.812Z",
+      "note": "Documentation des créations de GA et du catalogue serveur versionné",
+      "hash": "7b0d61ec7259f34236e1980fb8e269153ad106db3fbc2aee26b1a1c0d46315ab",
+      "file": "archives/atelier-quetes/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-14T09:08:01.170Z",
+      "note": "Bibliothèque d’images et apparences des lieux, PNJ, objets et GA",
+      "hash": "ab180c0153d37ce693fa4ffbef527d10cd9efabf12f7cf2c735e1786fdfce27d",
+      "file": "archives/atelier-quetes/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-14T09:58:53.420Z",
+      "note": "Saisie des champs structurés par clés et valeurs typées dans l’éditeur",
+      "hash": "27cef1d3958fe091304966cd264b10ba72fbe9edf489fbb992f7507ef61ea111",
+      "file": "archives/atelier-quetes/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-14T11:32:10.661Z",
+      "note": "Scénarios de l’éditeur disponibles dans la salle et lancement du monde officiel",
+      "hash": "34fad8c84e08dab0a1c99194dbcbf2a3653ada9674345dd02665af52166ff999",
+      "file": "archives/atelier-quetes/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-14T12:07:01.939Z",
+      "note": "Isolation des lieux de chaque scénario et placements officiels en simulation",
+      "hash": "f813ca002c48c0f3b072799d921433fc475c0bbe233fb42055c918eb62b8eb43",
+      "file": "archives/atelier-quetes/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-14T12:46:27.066Z",
+      "note": "Terrain de scénario réutilisé et validé automatiquement dans la salle",
+      "hash": "d5d1cf03dde76941b36f4038d3d1f2dd828bb05524e0779f63f03aaa56b1c16a",
+      "file": "archives/atelier-quetes/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-14T12:54:50.620Z",
+      "note": "Rôle des champs dans les aides contextuelles de l’éditeur",
+      "hash": "5cbee6f6dd72dd1d70a48e2cec3baf26a3d4cd510d40fa134f47a440a5543a91",
+      "file": "archives/atelier-quetes/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-14T13:03:10.856Z",
+      "note": "Boutons de génération aléatoire des fiches d’objets, de lieux et de PNJ",
+      "hash": "acd3efe4818d467d52494eba86056911abc8e00ed90ce2abc0f107d0c5ebd93f",
+      "file": "archives/atelier-quetes/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-14T15:42:43.968Z",
+      "note": "Carte Leaflet et fond OpenStreetMap dans l’éditeur de terrain",
+      "hash": "879e605c1cb346f989fe023c1654e5124b73a38b4930e76f932934fd409eb8b7",
+      "file": "archives/atelier-quetes/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-19T22:51:38.903Z",
+      "note": "Éditeur : coopération et événements stratégiques en conception",
+      "hash": "7b696e35ef959d992b60a04ad6173ab6939161f094245a6cb1990b1e8a676cdd",
+      "file": "archives/atelier-quetes/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "cdffd8fb68b21d2dbf2df0dc56ec4cf2a069f580681bb87bbb023579c6ccff58",
+      "file": "archives/atelier-quetes/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-20T22:34:00.953Z",
+      "note": "Pages individuelles, résumés de lecture et articles de référence expliqués et illustrés",
+      "hash": "622560a264e52c57fb474d119f1fc25aff1e17dec792041c3797ea58c42bf827",
+      "file": "archives/atelier-quetes/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "2575edda4fdfd3377d0598ccd6bec83e0f34377dadd0e33e82d1e462bacaab74",
+      "file": "archives/atelier-quetes/v19.html"
+    },
+    {
+      "version": 20,
+      "date": "2026-10-25T18:33:30.351Z",
+      "note": "Schémas de scénario, proposition de quête, menus de références, panneau réglable et action Modifier",
+      "hash": "78378a6fc05d2c0944136b7a88d5a9c610ba91bb7c8a65e4638428b2e32f949b",
+      "file": "archives/atelier-quetes/v20.html"
+    },
+    {
+      "version": 21,
+      "date": "2026-10-25T18:41:05.226Z",
+      "note": "Illustrations des contrôles de Modifier et schéma du scénario",
+      "hash": "6acc80ebc484d4707b7c8fa2cf20433fb3e20083b37072d58a5d5dbf7251c9e5",
+      "file": "archives/atelier-quetes/v21.html"
+    }
+  ],
+  "article-startup-menu": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "986f9d001644c5f742450780979a07912805001cf32a78d0dcdae100bf09a888",
+      "file": "archives/article-startup-menu/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-20T22:42:37.520Z",
+      "note": "Diagnostic du changement de fond OSM, accès explicite à la carte classique et sélection de personnage commune",
+      "hash": "0769964f3b2c1900a162e692dea3707ba528a48d7e71be3077a5bdac2eaab8d0",
+      "file": "archives/article-startup-menu/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-24T12:06:42.824Z",
+      "note": "Reconnexion explicite, chargement des parties depuis l accueil et Dashboard en onglets avec gestion des sauvegardes",
+      "hash": "a6ede9e634409421c5cdf0c1fdd733762440e0caf551a865dbec16e77fa0671c",
+      "file": "archives/article-startup-menu/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-24T12:44:31.433Z",
+      "note": "Correction du chargement : accès direct aux joueurs sans retour aux étapes de création",
+      "hash": "b37af9b1166386f67434b6de1fc70f6806db34e2c12ca447e493d92b10b66a4c",
+      "file": "archives/article-startup-menu/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "4acd6aeba9e76bb7f650577399ad3b879f7d5a8cca01c6fd6a073a0639983c3b",
+      "file": "archives/article-startup-menu/v5.html"
+    }
+  ],
+  "article-party-preparation": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "58351df9920454c5e321fe2e7777630ae33f082774de4c854e42558b1f2e7065",
+      "file": "archives/article-party-preparation/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-22T04:53:14.724Z",
+      "note": "Bibliothèque privée de cartes dans le sélecteur de zone et nettoyage des paquets inutilisés",
+      "hash": "1f56ba239b5dc5c898822445e8339e8df3830e534b30a898a195921062303e09",
+      "file": "archives/article-party-preparation/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "251e8a9bf9c50d803209e013e54c5b0e47feafc2a9dbcda420169f222d33684a",
+      "file": "archives/article-party-preparation/v3.html"
+    }
+  ],
+  "article-hero-items": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "fdbc5bdc2ea04a676cd5353565b5a9d3f60d5d5bcde83c2ee06b7d61f64a7f85",
+      "file": "archives/article-hero-items/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "0cfd4a7d8bfbe8d2e7d610c65a2c5b697ef0a74dae992032439d845e62a60013",
+      "file": "archives/article-hero-items/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "f83d16213805694089190da3b8ea34276493cf52687e89c59fa206e673aa8e07",
+      "file": "archives/article-hero-items/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-28T04:14:20.328Z",
+      "note": "Clarification des regles disponibles de prospection, rumeurs et specialistes",
+      "hash": "c1e877b9a8b3ec187f2004cf9e9b6e78f00e74790f9343d01f553a39f2edd556",
+      "file": "archives/article-hero-items/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "93cf2929aaf3466b38c7b23456dcff7b22a2356f26b3d2943148cc1032ff2781",
+      "file": "archives/article-hero-items/v5.html"
+    }
+  ],
+  "article-hero-progression-display": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "8dd23ca9918cf8dc486974bcd14fcd7abdbcb0490c76f06398fd04cd7819aa1c",
+      "file": "archives/article-hero-progression-display/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T12:44:56.654Z",
+      "note": "Portraits v12 : casques abaissés, mineurs, soldats, barbares et maréchal Aldren composé",
+      "hash": "749a87c073c951bc90cb2b3e64dd9e8f1ce3d6ef80727e017db059b48326b556",
+      "file": "archives/article-hero-progression-display/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T13:19:59.086Z",
+      "note": "Distance visible dans un bloc distinct du grade, hauteur adaptée en paysage",
+      "hash": "0a16519ba5b7b2cef035212280975cfbeccf9268ef1e9f84f973a5284cef9db3",
+      "file": "archives/article-hero-progression-display/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T15:16:17.277Z",
+      "note": "Commandement total avec équipement et fiches de quêtes compactes dépliables",
+      "hash": "ad8cad837cc15baf97a11206479354a6787c326309cf5cb454b13d0603e1ae2f",
+      "file": "archives/article-hero-progression-display/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "d2b3fb111a3cf46889394358924ee36fa3052fb22fc5429c3857e510ad72729d",
+      "file": "archives/article-hero-progression-display/v5.html"
+    }
+  ],
+  "article-mage-astral-travel": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "8d6ff51a055900211486a192c62d846f19616cf71a2fb03d20f8dfa93b9939a7",
+      "file": "archives/article-mage-astral-travel/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "01e1510a8754c91eb66c8b435e0bc06ccd39b4221c77bfa0bdbaa90ae3663685",
+      "file": "archives/article-mage-astral-travel/v2.html"
+    }
+  ],
+  "article-hero-map-sprites": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "384d7e90100b5a723cbc1d31a5f5b3d7fcde1a51e633228a1d51dc22d5345751",
+      "file": "archives/article-hero-map-sprites/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-21T05:59:31.469Z",
+      "note": "Choix du genre dans les trois cartes de héros, portraits et sprites sauvegardés par le serveur",
+      "hash": "ae4493dead9eed36b2bbefb3c4d262a410b1a5247692c121fe81002c6e85f394",
+      "file": "archives/article-hero-map-sprites/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-24T14:18:54.455Z",
+      "note": "Portraits anime des héros, mage masculin sans chapeau, calques de PNJ et décors par lieu",
+      "hash": "1913b711d0dc550313cb178ac6328d9b73ec4c0c53e1390ebf2820229907cc21",
+      "file": "archives/article-hero-map-sprites/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "02ce339378698b530d44a3d02c0d9cb6ea292e32c10f98bc5f7864ec235cc828",
+      "file": "archives/article-hero-map-sprites/v4.html"
+    }
+  ],
+  "article-army-map-banners": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "9f33321124070693efb02ea32301b593fefa4212965c3db8512df8d8ebd0ab5a",
+      "file": "archives/article-army-map-banners/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "a076509a20ceb2097ff9bd0653c28f73c7d9c2e104cf0dcae292df7cf4a2e26b",
+      "file": "archives/article-army-map-banners/v2.html"
+    }
+  ],
+  "article-watch-lookout-sprite": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "26873778cd12519724df5fdc4d30a6faba6cf21d8e66208aa9e8ad81ece1d0bf",
+      "file": "archives/article-watch-lookout-sprite/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "33043b510b07f9d812d76313d319be23417acb3cf26f79f377f1466e8e331366",
+      "file": "archives/article-watch-lookout-sprite/v2.html"
+    }
+  ],
+  "article-hero-sprite-art": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "b7bf90cffa41b2be6fe14b7a1eac1015226d1467f809a3ed020c40fb5b0a89b0",
+      "file": "archives/article-hero-sprite-art/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "4591bcdcd1fe5003f5bbf21a01a2413422933a043eec243b9f5c338f245a9d83",
+      "file": "archives/article-hero-sprite-art/v2.html"
+    }
+  ],
+  "article-location-improvements": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "c7fee3fd092b2ce515f3bb48fdd07e5c56e63889032c103dbc6c1ad160ab196f",
+      "file": "archives/article-location-improvements/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-21T05:40:27.964Z",
+      "note": "Défilement des longues conversations et de tous leurs choix, taverne comprise",
+      "hash": "123833917d226365fdbadebb8a7c1f59f383021e1e6598fcebada1fb5985b4e5",
+      "file": "archives/article-location-improvements/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T15:57:10.431Z",
+      "note": "Ajout des 21 icônes PNG manquantes des bâtiments, sans modification des règles",
+      "hash": "8ef4f80d0fba6667002440bc9bced58a94059c0833a3ad655ce1a932eefb1e8f",
+      "file": "archives/article-location-improvements/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "23267abcce71aff04c63d660be034643b708188d79082c52d7c6990945a3a49f",
+      "file": "archives/article-location-improvements/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-25T16:12:24.781Z",
+      "note": "Guide des règles par thème complété : bâtiments, formations, courrier, surveillance et restrictions du marché",
+      "hash": "1505d06c704b5ffc44578bbab10f0e340b92b267e19e75b1e927d10ce10ffa70",
+      "file": "archives/article-location-improvements/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-11-01T02:50:03.670Z",
+      "note": "Fondation des camps sur place ou par expedition et evolutions selon le terrain",
+      "hash": "409f06bc806f703d6dee36610e53b080c8bc280b38e017527384733f2f133c32",
+      "file": "archives/article-location-improvements/v6.html"
+    }
+  ],
+  "article-location-taxes": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "d59763a41f09a8b4fb8e8dce1c0d4b492717bf5f7f1fdc51252d23b594adeabf",
+      "file": "archives/article-location-taxes/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "d43404590bdd6ed7b0f6a7958dc1a6353fe0f69edc021d511ccf9bf20ad55d9e",
+      "file": "archives/article-location-taxes/v2.html"
+    }
+  ],
+  "article-territories": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "20aa660351c2c54e6b79fa136a244ce16a6593f60c2c515c80506295eebafb71",
+      "file": "archives/article-territories/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "f5726592bf1ef7438f097a57088e1c51bdfaa33d71bd1073c795de0da818a07f",
+      "file": "archives/article-territories/v2.html"
+    }
+  ],
+  "article-capital-ai": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "f90800d31f366328e39a45c39b1e76fc9270473a48eab72f0fa6cab18a70c891",
+      "file": "archives/article-capital-ai/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "cc6517e2aa8b69f905445351c85c9274f58b580153a15affc03b47d948a22df4",
+      "file": "archives/article-capital-ai/v2.html"
+    }
+  ],
+  "article-caravan-map-sprites": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "9fd586d97aecedb9599f9ebd97af2b0cc5298fc2fa21285730b86bd38bbce458",
+      "file": "archives/article-caravan-map-sprites/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "92c4a17b166522286db141f83638c11dd889143c47f39deb817725d22a27809c",
+      "file": "archives/article-caravan-map-sprites/v2.html"
+    }
+  ],
+  "article-autonomous-group-map-sprites": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "2dc6497d2451ad1a7faa721f01c97eff669f21e79ae952d6a45727ea1fe70203",
+      "file": "archives/article-autonomous-group-map-sprites/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "52a641c514062bade35d2286e1592a6ae11b1ece7310e73805c03810da7acf07",
+      "file": "archives/article-autonomous-group-map-sprites/v2.html"
+    }
+  ],
+  "article-scenario-map-definition": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "9d1763fd294810ecf8dd6b9f7e4824c005aaae9fad3b6d0311500b7a3dbf2406",
+      "file": "archives/article-scenario-map-definition/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "f5520b102f2aefda23c2e49c39262c252615a6af40c48d806d636c703820ef8b",
+      "file": "archives/article-scenario-map-definition/v2.html"
+    }
+  ],
+  "article-enemy-map-sprites": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "dbc1570cffdfb537a67d755d46f1edb5e3fb7db6697aa203e4f514f5a3d85eac",
+      "file": "archives/article-enemy-map-sprites/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "2036111c717c3e19f1720fe10fbb036cf910aee24ada046172281233aabc2566",
+      "file": "archives/article-enemy-map-sprites/v2.html"
+    }
+  ],
+  "article-quest-definition": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "cbbb5095534d91b5d7e291d96c5b70b9a852e3056e9974138302b9fe8ba877c8",
+      "file": "archives/article-quest-definition/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T15:16:17.277Z",
+      "note": "Commandement total avec équipement et fiches de quêtes compactes dépliables",
+      "hash": "c19fa12c498607593bd2f0e4f658fb914f4e71fc3a8fbc72e67a8e73f219fac6",
+      "file": "archives/article-quest-definition/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "652d8b4e7aa1e89604d05e07250dd8cb978e664c617547261c48c1d50a97bde3",
+      "file": "archives/article-quest-definition/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T18:33:30.351Z",
+      "note": "Schémas de scénario, proposition de quête, menus de références, panneau réglable et action Modifier",
+      "hash": "72ac75ec38daf452d45be355dfbe15a9a0050783bbc39bbf9259b0b28b7e1d8f",
+      "file": "archives/article-quest-definition/v4.html"
+    }
+  ],
+  "article-missing-prospectors": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "7d857f6e3c65ca319ac5d82b95b17119e25c4094058df86e1109bc96070079d6",
+      "file": "archives/article-missing-prospectors/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "572faae04b7b480f32c353f4585968cc3e319d470e9b8f39f2082cfe77a85d92",
+      "file": "archives/article-missing-prospectors/v2.html"
+    }
+  ],
+  "article-quest-authoring-guide": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "f0eb602c10f29cda437fee045cbce92b7618187f89f4ad285996eeec235f803c",
+      "file": "archives/article-quest-authoring-guide/v1.html"
+    }
+  ],
+  "article-quest-editor": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "9d62d31618c8c983eb9c543dfe40d764f29a23056991461596c6a2d2e996e1c3",
+      "file": "archives/article-quest-editor/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T12:44:56.654Z",
+      "note": "Portraits v12 : casques abaissés, mineurs, soldats, barbares et maréchal Aldren composé",
+      "hash": "90c7db079d217ab16b04b14ba600605514b090fe23e2c27b1843e6a816adaa91",
+      "file": "archives/article-quest-editor/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T15:22:38.575Z",
+      "note": "Injection de l’hôte navigateur dans la vue des ressources pour tester les modèles de groupes sans window global",
+      "hash": "9a3f6b6f7662c534acda05e2c7904e546c546b2fb3122b6370a367c9af0315e7",
+      "file": "archives/article-quest-editor/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T18:33:30.351Z",
+      "note": "Schémas de scénario, proposition de quête, menus de références, panneau réglable et action Modifier",
+      "hash": "13f178a8d277f6caac1d33eb4dad0962baf7272279449780acf87e74a1d483e6",
+      "file": "archives/article-quest-editor/v4.html"
+    }
+  ],
+  "article-battle-tactics": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "8eb39d98b7378f16afb127da03733f59f6a0917c5adb5058f92a8637c8d6cc9d",
+      "file": "archives/article-battle-tactics/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "57e87cae828c6788689c2efce127c382616142c62fe50e9df6a11f94530d6d04",
+      "file": "archives/article-battle-tactics/v2.html"
+    }
+  ],
+  "article-tactical-bonuses": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "8076a1801f3517e3fa936be1a12f17679518f71ac2f28ec77a2c1322fc2e62e5",
+      "file": "archives/article-tactical-bonuses/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "f57a3ce56d22f711e57fd1b0e275d231f5a6257884ed2281545680eb23b8279c",
+      "file": "archives/article-tactical-bonuses/v2.html"
+    }
+  ],
+  "article-tactical-terrain-effects": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "e726fa793edfef39fc1709fa93694e7f4de367bc56c621d6c380125bf381e55e",
+      "file": "archives/article-tactical-terrain-effects/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T02:51:25.335Z",
+      "note": "Terrains anime/JRPG v2 : textures simplifiées et illustration de l’atlas, sans changement de règles",
+      "hash": "98be8d238821a7ea0241acb409881ada6aa93424dfd7c8dc001df5f77f470665",
+      "file": "archives/article-tactical-terrain-effects/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T02:54:57.628Z",
+      "note": "Tuile rocheuse JRPG : piton à sommet dégagé et falaise, règles inchangées",
+      "hash": "8cdb6d9e044ed2d9b1fa7b4a7860c7f645ecce5adb0c471c97ffc6b4bbb25ecc",
+      "file": "archives/article-tactical-terrain-effects/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "95d36edbf49af342ad5d0e133245d676e612417d859ce90a344e4ab9692d115d",
+      "file": "archives/article-tactical-terrain-effects/v4.html"
+    }
+  ],
+  "article-battle-duel-rules": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "13d3e41a75d6a7ab3c42404e04709a7e391bda62fcfd6674169459f54a6cdb9a",
+      "file": "archives/article-battle-duel-rules/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "ef4ba5d79562a02c5bf7c19705e4e9ab292e58627c2fe65b265db5324ad1ed88",
+      "file": "archives/article-battle-duel-rules/v2.html"
+    }
+  ],
+  "article-ranged-combat": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "dc4e4d3ba47e381c7c2737b9cdb33bbabbb40ce83c4d90455e68711c5948e87d",
+      "file": "archives/article-ranged-combat/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "977e8cf3cc74a73423ab7be1fcea1d486c270891ecd19439893b1046cced66a5",
+      "file": "archives/article-ranged-combat/v2.html"
+    }
+  ],
+  "article-dashboard-monitoring": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "39503b1064cac8acac550a8a9ab239e1bbd75e4db5a662b104c2222e164fb11d",
+      "file": "archives/article-dashboard-monitoring/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-20T22:46:29.561Z",
+      "note": "Dashboard : période réglable et stocks en colonnes",
+      "hash": "7a1fecb7565403dc035e63fb83da4693ed99db6c48724aaf69e24d91dafa4688",
+      "file": "archives/article-dashboard-monitoring/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-20T22:47:14.165Z",
+      "note": "Dashboard : période réglable et stocks en colonnes",
+      "hash": "d7d585a1bd088c5d2ec159461b1bfdcaeb80c0d50468dbe8c702088b9a3fa839",
+      "file": "archives/article-dashboard-monitoring/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-23T18:59:18.620Z",
+      "note": "Correction du cache du Dashboard et des API apres deploiement ou nouvelle session",
+      "hash": "2a6bceafaacdebbcae96112a54b5d3e8d3ede74c0e9863ca636aa70dafa07f33",
+      "file": "archives/article-dashboard-monitoring/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-24T08:59:18.432Z",
+      "note": "Gérer la banque dans le Dashboard et extraire uniquement le contour de la playarea",
+      "hash": "842b2ce193f7c19d1843d5b98ed2e21e9c1685388cf92d24c650031efaa90004",
+      "file": "archives/article-dashboard-monitoring/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-24T11:50:54.008Z",
+      "note": "Distinguer cache et échecs fournisseur et fiabiliser la conservation des cartes",
+      "hash": "733b33dc8e841f7d50c9b0a7d9d40afd66a4d915fc4a2129434ef38f81f9bec8",
+      "file": "archives/article-dashboard-monitoring/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-24T12:06:42.824Z",
+      "note": "Reconnexion explicite, chargement des parties depuis l accueil et Dashboard en onglets avec gestion des sauvegardes",
+      "hash": "7db768ecf44e690d95ba2cb04af4e94da31da5251442cd6253db7fbb09f37100",
+      "file": "archives/article-dashboard-monitoring/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-24T12:44:31.433Z",
+      "note": "Correction du chargement : accès direct aux joueurs sans retour aux étapes de création",
+      "hash": "c499087a9622c987744c965b64445b5359c76772dc16fd3d4f72283377b453f5",
+      "file": "archives/article-dashboard-monitoring/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-25T12:33:18.579Z",
+      "note": "PNJ visibles dans les fiches de lieux du Dashboard, supervision en lecture seule",
+      "hash": "abeec584ec98e8621d4c39692c7d54ddc96ebe8bb1370d28392a29959048fb94",
+      "file": "archives/article-dashboard-monitoring/v9.html"
+    }
+  ],
+  "article-powershell-server-guide": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "899e18c7f2b808392f562323b56404fe3b343d17e4795a04ff188de531f384a6",
+      "file": "archives/article-powershell-server-guide/v1.html"
+    }
+  ],
+  "article-wiki-maintenance": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "3f59732e12360cc6614e328a0f5b9d2138757464e4e12eb549a6c6254090b6d2",
+      "file": "archives/article-wiki-maintenance/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-20T22:25:35.734Z",
+      "note": "Documentation HTML par sujet, explications éditoriales et médias conservés avec les archives",
+      "hash": "9c1f74eb1d6baf8d996862a5031bfadfc722478afb6d4193d3445d1c4f61da62",
+      "file": "archives/article-wiki-maintenance/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "2d4d754adf1ab64530dd633e087887d89bb7a63f909acc31f54af6c3bc90f159",
+      "file": "archives/article-wiki-maintenance/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "9d77e7dfeb27959e81be6bd1148159bc14e7002696be315e39c21867c0c85b83",
+      "file": "archives/article-wiki-maintenance/v4.html"
+    }
+  ],
+  "article-quest-creations": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:23:10.702Z",
+      "note": "Un article par page, documents de règles expliqués en HTML et illustrations des assets du jeu",
+      "hash": "186b5bf2b79dedac7106facbc37c5db1cd16beda3e5a60a9be27a8cf09da5ab5",
+      "file": "archives/article-quest-creations/v1.html"
+    }
+  ],
+  "article-hero-gender-variants": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:36:14.196Z",
+      "note": "Ajout des portraits et sprites des variantes Guerrière, Mage et Éclaireur",
+      "hash": "4ded2c0db747042038824c9ea84a0e8f77e86a82501ac8d2b23b3dabbc7ea894",
+      "file": "archives/article-hero-gender-variants/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-21T05:59:31.469Z",
+      "note": "Choix du genre dans les trois cartes de héros, portraits et sprites sauvegardés par le serveur",
+      "hash": "c2772cffb87991e72aa1eab9427c4caa665ab7f18493f833d32c327fac266e5b",
+      "file": "archives/article-hero-gender-variants/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-24T14:18:54.455Z",
+      "note": "Portraits anime des héros, mage masculin sans chapeau, calques de PNJ et décors par lieu",
+      "hash": "30cf541cb0a96390bf36d5bad525b3a96503eef2a171f6f0fee12b1a6e1dcd41",
+      "file": "archives/article-hero-gender-variants/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "0e5a6b25a4a81869cb11644dff3268a956770417a92a7846105cf86561b97629",
+      "file": "archives/article-hero-gender-variants/v4.html"
+    }
+  ],
+  "article-idees-et-todo": [
+    {
+      "version": 1,
+      "date": "2026-10-20T22:42:37.520Z",
+      "note": "Diagnostic du changement de fond OSM, accès explicite à la carte classique et sélection de personnage commune",
+      "hash": "fd711bb03361e95b038de0dc7c528e717ec00890c2769bd78876a5fe528a492e",
+      "file": "archives/article-idees-et-todo/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "940e7dae0faf638847be49cc2b008821e8ee34c4f3c90b1dff3799c090902497",
+      "file": "archives/article-idees-et-todo/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T21:52:39.965Z",
+      "note": "Specification des ressources cachees par cellule et des campements specialises",
+      "hash": "11cc143197d2b13472a1827f7e9f173ee50a1147c7e2f4b8ad1313bee7c68145",
+      "file": "archives/article-idees-et-todo/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T22:26:17.331Z",
+      "note": "Decouvertes dans le lieu principal et parchemins a effet exclusif",
+      "hash": "3f23974eb2c94d30d414a5fd5cc25c2e2e86831d0158d2098281447798ad603c",
+      "file": "archives/article-idees-et-todo/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-25T22:32:12.740Z",
+      "note": "Disparition des tresors pour tous et preparation des expeditions selon les competences",
+      "hash": "32915eff3b6327585ed9ddf94715553ddbc7065837fc991ddaa9b1ed9dc01c7c",
+      "file": "archives/article-idees-et-todo/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-25T22:55:58.536Z",
+      "note": "Scores expedition et puissance, recompenses et preparation des lieux exceptionnels",
+      "hash": "0b1ef27c9e837b2584c4a0987cbe9c244f4bc0888adca7519470ade486ed0f85",
+      "file": "archives/article-idees-et-todo/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-26T07:46:41.170Z",
+      "note": "Compatibilite des evolutions des camps et cloture partagee des decouvertes exceptionnelles",
+      "hash": "74d2f67c27071a280a98673a189102c879d5f06b2f3d21d6a433dd17ebd4b24c",
+      "file": "archives/article-idees-et-todo/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-26T08:13:07.080Z",
+      "note": "Cartes de localisation generees en fragments, designations des lieux et rumeurs a 5 or",
+      "hash": "5fb88d992229211467044732bc3801d9a9ffeee72efa8f7e5de9c505600dbe88",
+      "file": "archives/article-idees-et-todo/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-26T08:29:22.938Z",
+      "note": "Recherche active par jauge et dialogues, verification de compatibilite des indices",
+      "hash": "21e35c01c35ab763116ce445b865f075c1876000cc094de79cd7cb8542ae3ff2",
+      "file": "archives/article-idees-et-todo/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-26T13:21:31.130Z",
+      "note": "Dialogue a bonus expedition, indices reutilisables et recharge immediate de recherche",
+      "hash": "1a6740fa9ca06c8722b883dd20dbf2d3ebdb69d40f4c2b6875aac2ee0413b8d5",
+      "file": "archives/article-idees-et-todo/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-26T13:48:53.898Z",
+      "note": "Degats et variations de moral apres chaque tentative de donjon",
+      "hash": "081f8919c208938dfd538f71634c10c9edf7d2be12377f7ae847fde9a2197c2a",
+      "file": "archives/article-idees-et-todo/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-26T22:30:48.889Z",
+      "note": "Validation des repartitions, disparition a 25 pour cent, archives et proposition de scores",
+      "hash": "a8a0b4c80743e47c2255600c7cbce71170699410929e74b185282b9cb1915c85",
+      "file": "archives/article-idees-et-todo/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-26T22:42:16.046Z",
+      "note": "Validation du bareme expedition et de la formule de reussite des donjons",
+      "hash": "ddfcb524d14deed7313f6dca2a0b44c4d47667ec7df3372787ad2ef110b9dcff",
+      "file": "archives/article-idees-et-todo/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-26T22:53:16.868Z",
+      "note": "Socle persistant versionne de l exploration, reprise et confidentialite serveur",
+      "hash": "055209cda6284c2f3d9fc7cb27e5534173251ceec9ea71166557bcf789b06c84",
+      "file": "archives/article-idees-et-todo/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-28T01:01:48.006Z",
+      "note": "Generation serveur du terrain au lancement, influence des lieux et sites exceptionnels rattaches",
+      "hash": "733122cefbf6620966c606cfec567234563f37ec43d06ce43e32a21793dfcc75",
+      "file": "archives/article-idees-et-todo/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-28T01:47:26.710Z",
+      "note": "Vue exploration par joueur, indices autorises et protection des secrets dans les envois reseau",
+      "hash": "9e28c87d6b850810206e8bee4a71c6f6f72a06c4be4682e39af8e34c085f5d16",
+      "file": "archives/article-idees-et-todo/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-28T03:24:10.094Z",
+      "note": "Suppression des faux indices et annonce mondiale cinq minutes apres une disparition",
+      "hash": "2168ecffd63ec4c1f066df197fc44af03f36fcc53b66196d3769a54448b99722",
+      "file": "archives/article-idees-et-todo/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "2b2c92b999df04db0375fa3fd7824dc7c0df4adf76ac078ca5c8c46edfa11e4d",
+      "file": "archives/article-idees-et-todo/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "a2172dd395c1bf76baf6bf11deafed1f60481eb6bb15a0c4589425b62e2ed49c",
+      "file": "archives/article-idees-et-todo/v19.html"
+    },
+    {
+      "version": 20,
+      "date": "2026-10-30T05:03:43.924Z",
+      "note": "Recherche exterieure : jauge validee, consommation serveur et discretion pendant 60 secondes",
+      "hash": "71e1ecb8715b7a169275e86a3aa406f65047914fb116d0b595b1d6408b30af4b",
+      "file": "archives/article-idees-et-todo/v20.html"
+    }
+  ],
+  "article-play-area-map": [
+    {
+      "version": 1,
+      "date": "2026-10-21T21:08:50.382Z",
+      "note": "Article de diagnostic OSM accessible depuis le guide et contrôle du cache persistant",
+      "hash": "cb6ce9d6cf2e11d761d39cac79cb3294ea6a0a66d67f0618b5cab7af9bb51de3",
+      "file": "archives/article-play-area-map/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-21T22:41:44.404Z",
+      "note": "Rapprochement en lecture seule des zones sauvegardées et du cache OSM",
+      "hash": "d079ae58d918de915aa14dbafc06474814eb0f75e70e86597b19c267780315ee",
+      "file": "archives/article-play-area-map/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-22T04:53:14.724Z",
+      "note": "Bibliothèque privée de cartes dans le sélecteur de zone et nettoyage des paquets inutilisés",
+      "hash": "03324dd02d46e515e7244b8a3380ef64067f8d269c048fa2587d30083c6a284f",
+      "file": "archives/article-play-area-map/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-22T04:55:35.371Z",
+      "note": "Outil de nettoyage ciblé du cache cartographique existant",
+      "hash": "c51e86557405ab5c4ea23d406d986d5c61e7b2bf173919498075ae65ff452e17",
+      "file": "archives/article-play-area-map/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-23T23:50:06.561Z",
+      "note": "Limiter les extractions OSM, temporiser les échecs et réutiliser les contours équivalents",
+      "hash": "d15b825148f6ef5a6adeb0f708e6303918da130817de1250e0cb518faa1c18ab",
+      "file": "archives/article-play-area-map/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-23T23:57:38.041Z",
+      "note": "Coupler les cartes sauvegardées à une banque géographique serveur réutilisable",
+      "hash": "e91c76864d7ce0689d519d49ae88a0d02612475b1c7d3dd820e460b7de43d00a",
+      "file": "archives/article-play-area-map/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-24T08:33:40.920Z",
+      "note": "Réutiliser les surfaces communes et télécharger uniquement les portions manquantes",
+      "hash": "f830286009576bbcff36befb3ffa92b3587bcec22f5c0feb915b2ba66af6bdbf",
+      "file": "archives/article-play-area-map/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-24T08:34:29.024Z",
+      "note": "Préciser la conservation des portions inutilisées dans la banque",
+      "hash": "b360a179bb0cb1c9dedfaed43d1b0935a1b5ffa0397dd15466862cef691e4e0b",
+      "file": "archives/article-play-area-map/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-24T08:59:18.432Z",
+      "note": "Gérer la banque dans le Dashboard et extraire uniquement le contour de la playarea",
+      "hash": "37f8b116437fa0789eb5f6bc1e478dba0056c520f5336531cb4a0581061218a2",
+      "file": "archives/article-play-area-map/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-24T11:00:22.454Z",
+      "note": "Regrouper toutes les surfaces manquantes dans un seul appel Overpass",
+      "hash": "6c4fdabe813b9c3bbece8c5c30a553bd6739d50593ddd0e27aa1df7bfb9984fd",
+      "file": "archives/article-play-area-map/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-24T11:05:07.646Z",
+      "note": "Fond OpenStreetMap dans la banque et explication des suppressions protegees",
+      "hash": "1bffb68b9fcbd0b85427ab061bacaa3da1fa076f7fb5badb617fbb256ca80ca1",
+      "file": "archives/article-play-area-map/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-24T11:50:54.008Z",
+      "note": "Distinguer cache et échecs fournisseur et fiabiliser la conservation des cartes",
+      "hash": "135e8790eb6f679ae5bffe9ad2883cdb71c08867ebaabf368da94fc1f93456a0",
+      "file": "archives/article-play-area-map/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-24T12:44:31.433Z",
+      "note": "Correction du chargement : accès direct aux joueurs sans retour aux étapes de création",
+      "hash": "894d76286f677d48e53c4cd6d10a792b454b48174463c1eaf7d2a21c9bc56e95",
+      "file": "archives/article-play-area-map/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "617dff439edd38e0c8b0aaf59fe7c4a06f525a0c7f8d0d3d30e384a046622853",
+      "file": "archives/article-play-area-map/v14.html"
+    }
+  ],
+  "article-modular-portraits": [
+    {
+      "version": 1,
+      "date": "2026-10-24T14:18:54.455Z",
+      "note": "Portraits anime des héros, mage masculin sans chapeau, calques de PNJ et décors par lieu",
+      "hash": "022cf10d07bbfbfdc9794f9abdc3c5053e8917cfeaebc41c938b8f2dc0fc51ed",
+      "file": "archives/article-modular-portraits/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-24T15:09:03.313Z",
+      "note": "Séparation des bibliothèques masculine et féminine et coiffures indépendantes avec cheveux avant et arrière",
+      "hash": "74c5798bf37b378972506de538232f70d3a1a6e12f94cc45753b2d721df105ab",
+      "file": "archives/article-modular-portraits/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-24T15:34:50.531Z",
+      "note": "Retrait temporaire des visages larges des portraits composés, fichiers conservés",
+      "hash": "e6c411f372adca12b31bf5795ccf845e0ac25c83de7e4de62c5202dd55e15ee7",
+      "file": "archives/article-modular-portraits/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-24T16:22:11.801Z",
+      "note": "Cadrage des PNJ en buste avec décor visible, titre lisible et suppression du fragment de coiffure sous les yeux",
+      "hash": "01f85379b8fb27965d89ce556b4d3fed1ae69dba05cb9f9c8558e5ec271faf73",
+      "file": "archives/article-modular-portraits/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-24T19:12:25.769Z",
+      "note": "Portraits v3 : proportions tête-buste, épaules complètes et bras sous les manches retroussées",
+      "hash": "9e0eea6eeb7b780cf167da5fabd311924160230e26e662847f91dcf33e60a737",
+      "file": "archives/article-modular-portraits/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-24T20:08:22.498Z",
+      "note": "Dialogues au cadrage fixe, panneau de 40 % en portrait et calques v4 avec tête et cou séparés",
+      "hash": "e86d747e3ba02caba0d4b70adc8ba210bbf8b70a9ebc30cc35082a7cf4b093d2",
+      "file": "archives/article-modular-portraits/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-24T21:16:43.595Z",
+      "note": "Éditeur HTML de personnages, titres sans répétition et raccords des cols ouverts en v5",
+      "hash": "47e2da62e2e9ddbbec7b7c54cb43d23e147f1b5c2a6b77c081c46e34720dc230",
+      "file": "archives/article-modular-portraits/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-24T22:18:08.194Z",
+      "note": "Portraits v6 : gabarit commun des tenues, yeux féminins décalés et barbe adaptée au visage",
+      "hash": "6dffd825ee295c229caac4515b028db105923849a10f461a5e091108d65580ee",
+      "file": "archives/article-modular-portraits/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-25T00:39:40.185Z",
+      "note": "Portraits v7 : épaules élargies, cou-torse unifié et cols arrière séparés",
+      "hash": "aa59c98a601dafcfff619e2af1a4884648b54854b22450cbacee5c9780f9f975",
+      "file": "archives/article-modular-portraits/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-25T01:13:32.514Z",
+      "note": "Portraits v8 : cinq tenues masculines à 115 %, cou à 129 % et épaules plus carrées",
+      "hash": "98fcea9b2f82c10d8c38f337cbc79a8a60da35d11ba31e4a5800c2cdb16d26d1",
+      "file": "archives/article-modular-portraits/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-25T01:30:23.111Z",
+      "note": "Portraits : ajustements de largeur et de position des quatre tenues féminines",
+      "hash": "3678d7f0833f651c108f36fcaf72fe5b14477484f7d08c219447a08ab6bdfef0",
+      "file": "archives/article-modular-portraits/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-25T01:40:39.904Z",
+      "note": "Portraits : vêtement féminin de chef de village remonté de 15 pixels",
+      "hash": "78a73af1d8f18c6143de78a268ad1fb4685a633ea148ef1723165bf3c8e52081",
+      "file": "archives/article-modular-portraits/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-25T01:53:01.358Z",
+      "note": "Portraits : corpulence stable par PNJ et densité variable des barbes",
+      "hash": "19f13242ba2984bbda62f3a2806ad374d21e7eb8412fdf4d2dff6f1507f5846c",
+      "file": "archives/article-modular-portraits/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-25T02:09:36.110Z",
+      "note": "Portraits : plage de corpulence étendue à 50–180 %",
+      "hash": "1d728cfad371654aef3e057a977c9f1464c834f7a78e8b34214bd2bbfab5e16f",
+      "file": "archives/article-modular-portraits/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-25T02:26:17.992Z",
+      "note": "Portraits : tête de 90 à 110 % et corps de 50 à 130 %, liés par la corpulence",
+      "hash": "c72959849f9a02d5ef0ecf7c0e0cd43c7227fdc62a04b16dd209dab7b00226ce",
+      "file": "archives/article-modular-portraits/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-25T02:35:42.310Z",
+      "note": "Portraits : largeur minimale du corps à 70 %",
+      "hash": "003d858b9136c9fdc9a5c1748dea15d85920dba6b5c18293e77d1fefde571bff",
+      "file": "archives/article-modular-portraits/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-25T03:06:55.562Z",
+      "note": "Portraits v9 : nouveaux visages, traits, coiffures, brigands, couvre-chefs et accessoires compatibles",
+      "hash": "7e20a1760343667acaa371df1218745f4a1c1f112135939a28137ffc086a8356",
+      "file": "archives/article-modular-portraits/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-25T03:34:51.179Z",
+      "note": "Portraits v10 : foulards, mentons carrés, joues rondes, vieillesse et expressions",
+      "hash": "a7909d85376a318860267960ae5b8bac9e32e2260fd4c2cbb0e8f0751971401b",
+      "file": "archives/article-modular-portraits/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-25T08:26:51.073Z",
+      "note": "Portraits v11 : couleurs indépendantes des coiffures et barbes, couvre-chefs frontaux",
+      "hash": "187bf101d9559602d29ee90ce8fe23e53b691fad6ea171aa5999a530f9717bf0",
+      "file": "archives/article-modular-portraits/v19.html"
+    },
+    {
+      "version": 20,
+      "date": "2026-10-25T12:29:27.408Z",
+      "note": "Correction des tests PNG v12 : transparence exacte, tolérance RGB minimale et diagnostic mémoire borné",
+      "hash": "54c1c1ffd7e92930dccdc76e94e477a61ee81c16f85202d2e49eac12d3d2aee6",
+      "file": "archives/article-modular-portraits/v20.html"
+    },
+    {
+      "version": 21,
+      "date": "2026-10-25T12:44:56.654Z",
+      "note": "Portraits v12 : casques abaissés, mineurs, soldats, barbares et maréchal Aldren composé",
+      "hash": "b1fcc6440caa3c340f4b92bcb7bac79578613a682ab346460b3778980d0503d8",
+      "file": "archives/article-modular-portraits/v21.html"
+    },
+    {
+      "version": 22,
+      "date": "2026-10-25T13:19:59.086Z",
+      "note": "Distance visible dans un bloc distinct du grade, hauteur adaptée en paysage",
+      "hash": "48b4cf9749c8db28c36a86c50b800f64f27987f08678ea02b904c283a634d756",
+      "file": "archives/article-modular-portraits/v22.html"
+    },
+    {
+      "version": 23,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "b4a520a5dd40a014315f7dda35bcbed5f9642fa5d23a66ce85cff85d477522b5",
+      "file": "archives/article-modular-portraits/v23.html"
+    },
+    {
+      "version": 24,
+      "date": "2026-10-25T20:36:49.125Z",
+      "note": "Portraits : accessoires cumulables, barbes à 100 % et déplacements élargis",
+      "hash": "d941864e47e01260fc66bb6f2cbaa158440ae31d0bdcf0a52b8b67dabc7049d5",
+      "file": "archives/article-modular-portraits/v24.html"
+    }
+  ],
+  "article-battlefield-generation": [
+    {
+      "version": 1,
+      "date": "2026-10-25T02:52:39.801Z",
+      "note": "Atlas JRPG et documentation du générateur actuel : biomes lisibles et rivière optionnelle",
+      "hash": "ff276d4002836a3071bca8a1c4d7eaf6cace3ece0cb9310f43e27e85e4f58724",
+      "file": "archives/article-battlefield-generation/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T02:54:57.628Z",
+      "note": "Tuile rocheuse JRPG : piton à sommet dégagé et falaise, règles inchangées",
+      "hash": "14e7001893703db521ddb348cfd3dfaca13b3b11f11e537431e8536cff23e599",
+      "file": "archives/article-battlefield-generation/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "57fed25bb8382c152b51c754ba12dca30b82acb3ba433b9f21920c90b636b981",
+      "file": "archives/article-battlefield-generation/v3.html"
+    }
+  ],
+  "exploration": [
+    {
+      "version": 1,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "3155a82f42724c36bef7302e478dd8df3296d4a2aa583a830be7661ad114a9d2",
+      "file": "archives/exploration/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-28T03:10:51.582Z",
+      "note": "Cartes de localisation verifiees et cycle de vie des items indices : sources, pertes, ventes et archives",
+      "hash": "9370de485cdf09b3fbf7fc532c3eda163042e41db2a38654d8c46b4afa2e58b2",
+      "file": "archives/exploration/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-28T03:24:10.094Z",
+      "note": "Suppression des faux indices et annonce mondiale cinq minutes apres une disparition",
+      "hash": "9b059b908c3869ad2e73f0b72060a8bf987ea203754d441378097b2f8777b0be",
+      "file": "archives/exploration/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "8ecf34dbcd1e8400f180291d852fc65ec832b5146c2bda3ff4d5c8e017e54c90",
+      "file": "archives/exploration/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-28T05:48:53.032Z",
+      "note": "Chances de decouverte augmentees : metiers 50 pour cent et generalistes 20 pour cent",
+      "hash": "5bca23a58022a9ffc9ce27e623b55abd9eaf3f7299b22530b3be482f6834c13d",
+      "file": "archives/exploration/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "e3a5f4c4c6d3dfa1c6bea7ff050cea68fcc203657260de9b0b802b16bcc69292",
+      "file": "archives/exploration/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-29T17:05:45.014Z",
+      "note": "Alignement du guide joueur : ecoute payante et documents sans encombrement",
+      "hash": "eab683b823f110b58db1a9966379e60c7e04a607600cb87f960265c5947d6fb5",
+      "file": "archives/exploration/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-30T05:03:43.924Z",
+      "note": "Recherche exterieure : jauge validee, consommation serveur et discretion pendant 60 secondes",
+      "hash": "c0d755f3dbf8356765c22712391384a070b7a32bd4a1ca7c1ed1b98ff80b1d30",
+      "file": "archives/exploration/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-31T23:11:04.814Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "4f0ab8a1a00ad57a53d77225ccf88228d9f615c8bce19c1a6d88413a3351de20",
+      "file": "archives/exploration/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-31T23:11:56.314Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "7a3c1a6ad5ea39a2655652e7f210afcba4bbcea9a04e30d8bdb3b2482759c332",
+      "file": "archives/exploration/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-31T23:21:39.715Z",
+      "note": "Preparation et depart des expeditions exceptionnelles avec score serveur commun",
+      "hash": "6e108c91ad6c4b6ab7fe822ae437178816fa478650a9d52b2c4d35e83c8390cc",
+      "file": "archives/exploration/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-31T23:36:52.573Z",
+      "note": "Resolution des sites exceptionnels : butin, puissance, degats, moral et retour",
+      "hash": "132c3a72919ba19d252ffc6da28062735334f5074e13d6867055b63387035402",
+      "file": "archives/exploration/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-11-01T01:59:06.955Z",
+      "note": "Cloture partagee des sites : missions concurrentes, indices et archives",
+      "hash": "0c32dba63f3fa7b11ebd7513f46cb47f8aaa83786f4a86abcfd205706d8f6730",
+      "file": "archives/exploration/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-11-01T02:03:15.869Z",
+      "note": "Annonce immediate pour tous apres victoire sur un site exceptionnel",
+      "hash": "3ffbf3bd4c46dc1a1e47e814f4175520f216ce06abc5a9f3c6165311e37a9a55",
+      "file": "archives/exploration/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-11-01T02:50:03.670Z",
+      "note": "Fondation des camps sur place ou par expedition et evolutions selon le terrain",
+      "hash": "d7f6430f8138ba9062ca1e9df3ffd14d101e092a0a7b72d64fbb3ec232300eb0",
+      "file": "archives/exploration/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-11-01T06:39:25.721Z",
+      "note": "Carte des découvertes, fiches de préparation et validation du parcours",
+      "hash": "5214572245000ec3ec8e436f50122db8f9ddd954f316495eaf61bb94cc2c6258",
+      "file": "archives/exploration/v16.html"
+    }
+  ],
+  "pouvoirs": [
+    {
+      "version": 1,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "b638d7944355ecde5713c98ad591aaa401767f785ee27aa646304b6450828757",
+      "file": "archives/pouvoirs/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "b7b53bffc0b07e863cd11fb88dc600bf9dec830172b07693cae5ef41c65478c6",
+      "file": "archives/pouvoirs/v2.html"
+    }
+  ],
+  "armee": [
+    {
+      "version": 1,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "87ef53c606fafd450d17f3019ced0cf78ec7c103155e9d86c41bd6b2ebd6d136",
+      "file": "archives/armee/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "ee5cc09a70122dce57de472258e872ffdca844647c69a3b350b22fbc83ec4671",
+      "file": "archives/armee/v2.html"
+    }
+  ],
+  "equipement": [
+    {
+      "version": 1,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "538a0d3595d2c62e2beb377ba7442e4b8dece9afb458d9c90c24d303e6275577",
+      "file": "archives/equipement/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "1cf7a01ac30ef831067cfcde60e1909d8817cc350ca6957e14eaeef5541f5c62",
+      "file": "archives/equipement/v2.html"
+    }
+  ],
+  "economie": [
+    {
+      "version": 1,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "02b8e39bcfae88a312d1bcd85401c14a5f6291fca4965b10fb2f98e0f8ac5682",
+      "file": "archives/economie/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:12:24.781Z",
+      "note": "Guide des règles par thème complété : bâtiments, formations, courrier, surveillance et restrictions du marché",
+      "hash": "c5e0a63504df8e03d220cb77c8b02f471ccb02db9ca7077c71dd56cab5a82216",
+      "file": "archives/economie/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "e028d80025dfc04df8a1fcd554b73411068c158f3ac8352e6260c8503cbe02e1",
+      "file": "archives/economie/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-28T04:14:20.328Z",
+      "note": "Clarification des regles disponibles de prospection, rumeurs et specialistes",
+      "hash": "8bc58c30e9b345ddb92732f28c829e3d8b02124b5aa18b7f401aa8e65f64e759",
+      "file": "archives/economie/v4.html"
+    }
+  ],
+  "cooperation": [
+    {
+      "version": 1,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "5dd5b75463236527ecc7a35042fb0cb7dc3f3e081ca32591cdaec89d3c1327b0",
+      "file": "archives/cooperation/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:12:24.781Z",
+      "note": "Guide des règles par thème complété : bâtiments, formations, courrier, surveillance et restrictions du marché",
+      "hash": "53fa81009a90f0fb8eb842fe692e736d7b62ab29cae152ad8d0c5e3b6ab3b33c",
+      "file": "archives/cooperation/v2.html"
+    }
+  ],
+  "sante": [
+    {
+      "version": 1,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "6d9670aaf0fa7589d35501e5dfb632b1786fa2c20db87a4264d8e4943e13dae1",
+      "file": "archives/sante/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T16:38:50.886Z",
+      "note": "Tableaux de statistiques illustrés, introductions courtes, explications de lecture et exemples illustrés",
+      "hash": "3b81b7509e46a1477575287abcc618d5e5d3f51c8d3d58ed314fc477a77bdb25",
+      "file": "archives/sante/v2.html"
+    }
+  ],
+  "butin": [
+    {
+      "version": 1,
+      "date": "2026-10-25T16:08:31.690Z",
+      "note": "Refonte du guide joueur par thèmes : règles, conditions, exemples et séparation des outils et notes de développement",
+      "hash": "c7b405b8a51bf009f2de33ab17250cc1340e6d36744eb754ff73899662bd3754",
+      "file": "archives/butin/v1.html"
+    }
+  ],
+  "portrait-tools": [
+    {
+      "version": 1,
+      "date": "2026-10-25T20:36:49.125Z",
+      "note": "Portraits : accessoires cumulables, barbes à 100 % et déplacements élargis",
+      "hash": "0fc906d95bf84ec845be4e153e211862a62419778729804a6868d211e050a683",
+      "file": "archives/portrait-tools/v1.html"
+    }
+  ],
+  "ressources-cachees": [
+    {
+      "version": 1,
+      "date": "2026-10-25T21:52:39.965Z",
+      "note": "Specification des ressources cachees par cellule et des campements specialises",
+      "hash": "ae54a613261a31032581152b3476baf4b0fa9ca6b3c6f897038a220b8e52552c",
+      "file": "archives/ressources-cachees/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T21:58:30.581Z",
+      "note": "Ajout des cinq marqueurs de ressources naturelles decouvertes",
+      "hash": "7eb19b684d48818d9613d235243cdc4f96f8dde9c1f340d7f3391eb3a034a14f",
+      "file": "archives/ressources-cachees/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T22:26:17.331Z",
+      "note": "Decouvertes dans le lieu principal et parchemins a effet exclusif",
+      "hash": "afe5c004a538951787da3dc8c3d5caf97ae965e424ada88d8459f061fdda48a9",
+      "file": "archives/ressources-cachees/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T22:32:12.740Z",
+      "note": "Disparition des tresors pour tous et preparation des expeditions selon les competences",
+      "hash": "4a654a34a75b7b46e194364e6cf92142027ed08dca1262e3ba46242b83d37bea",
+      "file": "archives/ressources-cachees/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-25T22:55:58.536Z",
+      "note": "Scores expedition et puissance, recompenses et preparation des lieux exceptionnels",
+      "hash": "51e60cf680405f761758510b3795954db2e1ce360a29a132e861d6c81d017430",
+      "file": "archives/ressources-cachees/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-26T07:46:41.170Z",
+      "note": "Compatibilite des evolutions des camps et cloture partagee des decouvertes exceptionnelles",
+      "hash": "cb6b01e77b7e8ad61947fadaef5e064aa4281bb50cff0084c5843f87e379e3d9",
+      "file": "archives/ressources-cachees/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-26T08:13:07.080Z",
+      "note": "Cartes de localisation generees en fragments, designations des lieux et rumeurs a 5 or",
+      "hash": "b0beb36fb25b743c0ab3bcb4278248ba5930fda7eb716692515017b094e34ec1",
+      "file": "archives/ressources-cachees/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-26T08:29:22.938Z",
+      "note": "Recherche active par jauge et dialogues, verification de compatibilite des indices",
+      "hash": "1e48aa7b8e145f71945fa08f0c0be84a385f75c5b24433f33696dd5f242ade3c",
+      "file": "archives/ressources-cachees/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-26T13:21:31.130Z",
+      "note": "Dialogue a bonus expedition, indices reutilisables et recharge immediate de recherche",
+      "hash": "e243d823a125348d3de9ec7ca6e30d06c8e883bbb6e1d0561201e4ea30e0ede7",
+      "file": "archives/ressources-cachees/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-26T13:48:53.898Z",
+      "note": "Degats et variations de moral apres chaque tentative de donjon",
+      "hash": "8e0ad3360a208380967ad26de5135d3a3fae54b0f038e86bc255d2d1d3732a48",
+      "file": "archives/ressources-cachees/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-26T22:30:48.889Z",
+      "note": "Validation des repartitions, disparition a 25 pour cent, archives et proposition de scores",
+      "hash": "9adfd75f40bf46ae7041d9482a71e04c6a65677cb017c2f0cb7ef9f9b8191745",
+      "file": "archives/ressources-cachees/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-26T22:42:16.046Z",
+      "note": "Validation du bareme expedition et de la formule de reussite des donjons",
+      "hash": "efaf44d7a34275067da940ab2e8732a8a5e7c0304335fb99125bea6d80edc119",
+      "file": "archives/ressources-cachees/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-28T03:24:10.094Z",
+      "note": "Suppression des faux indices et annonce mondiale cinq minutes apres une disparition",
+      "hash": "cc31cb71051cc354d50ac6474f65cc17873349a968f2f4c10dab3ff5710faf8d",
+      "file": "archives/ressources-cachees/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-28T07:18:36.764Z",
+      "note": "Distinction entre bruit des tavernes et fiabilite des objets indices",
+      "hash": "21ded1358e80354c5a7b0fb11e64ee62f4c568da45377facd8eafe76c69f070c",
+      "file": "archives/ressources-cachees/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "020d437ace6ca7ec983218e946fe97bb0f659a54cfc845949551e0ad53229752",
+      "file": "archives/ressources-cachees/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-29T17:05:45.014Z",
+      "note": "Alignement du guide joueur : ecoute payante et documents sans encombrement",
+      "hash": "ca4dd165d57e075f53b989095276ba4dbf53c2c3fce31c593b4eac408a23d5b6",
+      "file": "archives/ressources-cachees/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-30T05:03:43.924Z",
+      "note": "Recherche exterieure : jauge validee, consommation serveur et discretion pendant 60 secondes",
+      "hash": "98e83aaa1c56482fba77505183b82409dc909fad31ecb14dc4d910d23a5a1e5a",
+      "file": "archives/ressources-cachees/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-31T23:11:04.814Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "53f74d579ed1cf79cda27d52ca7dfc7dfc6c2f8278522a9092bcd0c4f1e3fccb",
+      "file": "archives/ressources-cachees/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-31T23:11:56.314Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "bfff1714cc66b9b52421b5bd525f5f8dcb0cd433eb60f367cfc550e6e2c6d63c",
+      "file": "archives/ressources-cachees/v19.html"
+    }
+  ],
+  "article-hidden-resource-cells": [
+    {
+      "version": 1,
+      "date": "2026-10-25T21:52:39.965Z",
+      "note": "Specification des ressources cachees par cellule et des campements specialises",
+      "hash": "e3c9876253b6f7d05c8d37169b460ace7bf050ad3752a26dafe66be472191a30",
+      "file": "archives/article-hidden-resource-cells/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-25T21:58:30.581Z",
+      "note": "Ajout des cinq marqueurs de ressources naturelles decouvertes",
+      "hash": "5893816ab43e6ac051bacb608369c06ea5722bfa20d7f930cbc241c311edcb49",
+      "file": "archives/article-hidden-resource-cells/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-25T22:26:17.331Z",
+      "note": "Decouvertes dans le lieu principal et parchemins a effet exclusif",
+      "hash": "a3b74c41aaf9a484df1d8fcf91bdf8e2e3643b34ccd89dcc0c6e5957d7a32991",
+      "file": "archives/article-hidden-resource-cells/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-25T22:32:12.740Z",
+      "note": "Disparition des tresors pour tous et preparation des expeditions selon les competences",
+      "hash": "479be5ebf62d60dae8b8989fa6217b6ac17841c455ba791b77571b88c8aa918a",
+      "file": "archives/article-hidden-resource-cells/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-25T22:55:58.536Z",
+      "note": "Scores expedition et puissance, recompenses et preparation des lieux exceptionnels",
+      "hash": "823ab349fa63f2edd71dcda0ca0798e601c426e3cb499902b25b9e7da41e1dc2",
+      "file": "archives/article-hidden-resource-cells/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-26T07:46:41.170Z",
+      "note": "Compatibilite des evolutions des camps et cloture partagee des decouvertes exceptionnelles",
+      "hash": "9ce9a0a4d9c46a8afa7aa6fc1887985181ca76b4ed3d704591e99ded45904559",
+      "file": "archives/article-hidden-resource-cells/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-26T08:13:07.080Z",
+      "note": "Cartes de localisation generees en fragments, designations des lieux et rumeurs a 5 or",
+      "hash": "9d358ca97246f01be4ba850ba098c309a48f7f5b00a1ccc3633281269fdc0bc3",
+      "file": "archives/article-hidden-resource-cells/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-26T08:29:22.938Z",
+      "note": "Recherche active par jauge et dialogues, verification de compatibilite des indices",
+      "hash": "71fe9883374d6844f8807051d4325d1382064d512dfcb9b2cc2a9ea986bff782",
+      "file": "archives/article-hidden-resource-cells/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-26T13:21:31.130Z",
+      "note": "Dialogue a bonus expedition, indices reutilisables et recharge immediate de recherche",
+      "hash": "15f137a6714e01038b37dfb1d4650a9456614a82281b88a9464a84f5555044e5",
+      "file": "archives/article-hidden-resource-cells/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-26T13:21:51.606Z",
+      "note": "Dialogue a bonus expedition, indices reutilisables et recharge immediate de recherche",
+      "hash": "3e861ca0c5248fdbc4fd143f40615e898503a100cb99087e516c6ae8e7ac9fac",
+      "file": "archives/article-hidden-resource-cells/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-26T13:48:53.898Z",
+      "note": "Degats et variations de moral apres chaque tentative de donjon",
+      "hash": "a6517b2ed5359ab10316de78bc7b283e8596b2930a018ae7ff3a497ba5b8644e",
+      "file": "archives/article-hidden-resource-cells/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-10-26T22:30:48.889Z",
+      "note": "Validation des repartitions, disparition a 25 pour cent, archives et proposition de scores",
+      "hash": "ff48683bd5c0664c3f507f9e9583bdf71268dcd9cd656bf7d50e4328289c2449",
+      "file": "archives/article-hidden-resource-cells/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-10-26T22:42:16.046Z",
+      "note": "Validation du bareme expedition et de la formule de reussite des donjons",
+      "hash": "5f409ba8812208f211a19953aa8f5352011e44808c349d2991d350790c711413",
+      "file": "archives/article-hidden-resource-cells/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-10-26T22:53:16.868Z",
+      "note": "Socle persistant versionne de l exploration, reprise et confidentialite serveur",
+      "hash": "56c273278521e1c852ab0f2bac0c16aa99aacf1c81e037b8ea7bee6b2dc30e23",
+      "file": "archives/article-hidden-resource-cells/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-10-28T01:01:48.006Z",
+      "note": "Generation serveur du terrain au lancement, influence des lieux et sites exceptionnels rattaches",
+      "hash": "9b25e2bbd209e4109888f1fcafa8b73803254c244c34c94224c54a773945c8d9",
+      "file": "archives/article-hidden-resource-cells/v15.html"
+    },
+    {
+      "version": 16,
+      "date": "2026-10-28T01:47:26.710Z",
+      "note": "Vue exploration par joueur, indices autorises et protection des secrets dans les envois reseau",
+      "hash": "e56dcbdd7bab0ce5d3b4aab158043ca30e382ba2b13cabeec16cecb6b34a1b3d",
+      "file": "archives/article-hidden-resource-cells/v16.html"
+    },
+    {
+      "version": 17,
+      "date": "2026-10-28T03:10:51.582Z",
+      "note": "Cartes de localisation verifiees et cycle de vie des items indices : sources, pertes, ventes et archives",
+      "hash": "c30eaa8affb45cd8334b44ddf1e11e8e004eac216ff64c3bfcd75e04241f6a90",
+      "file": "archives/article-hidden-resource-cells/v17.html"
+    },
+    {
+      "version": 18,
+      "date": "2026-10-28T03:24:10.094Z",
+      "note": "Suppression des faux indices et annonce mondiale cinq minutes apres une disparition",
+      "hash": "ec19a2db63308e66c648bd14965acdb90952e5d716edade8fc6f7fdba98a059a",
+      "file": "archives/article-hidden-resource-cells/v18.html"
+    },
+    {
+      "version": 19,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "89846b47e830fc2f062925399236acc9667d7e1e4a2c1813fabb9641f5aa1217",
+      "file": "archives/article-hidden-resource-cells/v19.html"
+    },
+    {
+      "version": 20,
+      "date": "2026-10-28T04:14:20.328Z",
+      "note": "Clarification des regles disponibles de prospection, rumeurs et specialistes",
+      "hash": "b22de4d7cadcfab0d3c01d8b6e9602d262bfae36f25c5626a8999d16b7c151b1",
+      "file": "archives/article-hidden-resource-cells/v20.html"
+    },
+    {
+      "version": 21,
+      "date": "2026-10-28T05:48:53.032Z",
+      "note": "Chances de decouverte augmentees : metiers 50 pour cent et generalistes 20 pour cent",
+      "hash": "af04285942b161805c625e14fd1a42e70d69e68cf5d81d0120fbbbe6ebede79d",
+      "file": "archives/article-hidden-resource-cells/v21.html"
+    },
+    {
+      "version": 22,
+      "date": "2026-10-28T07:18:36.764Z",
+      "note": "Distinction entre bruit des tavernes et fiabilite des objets indices",
+      "hash": "8646934b5011b21163399efed0c37cfd1366a7bf46fafef4aa8355a03bcbc74c",
+      "file": "archives/article-hidden-resource-cells/v22.html"
+    },
+    {
+      "version": 23,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "b465fc7f6c5eb0a7703814290085e61d5c5fa535d6aaad6efac9f18e4584c664",
+      "file": "archives/article-hidden-resource-cells/v23.html"
+    },
+    {
+      "version": 24,
+      "date": "2026-10-30T05:03:43.924Z",
+      "note": "Recherche exterieure : jauge validee, consommation serveur et discretion pendant 60 secondes",
+      "hash": "7d5e842a6e750bba9b75bce0be4522657565ead4e2f006ee57edba1fff8b2da1",
+      "file": "archives/article-hidden-resource-cells/v24.html"
+    },
+    {
+      "version": 25,
+      "date": "2026-10-31T23:11:04.814Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "dcff5445b477b4b9d59f8f0ee950746b79c12441d300ebdc3513ec60441023a5",
+      "file": "archives/article-hidden-resource-cells/v25.html"
+    },
+    {
+      "version": 26,
+      "date": "2026-10-31T23:21:39.715Z",
+      "note": "Preparation et depart des expeditions exceptionnelles avec score serveur commun",
+      "hash": "6fb9d008b02cccca660bafa550c01361f5f1ac5074ca065674b55432de3c670b",
+      "file": "archives/article-hidden-resource-cells/v26.html"
+    },
+    {
+      "version": 27,
+      "date": "2026-10-31T23:36:52.573Z",
+      "note": "Resolution des sites exceptionnels : butin, puissance, degats, moral et retour",
+      "hash": "b7fe84d406c9de502547a45280354400be4ae058ff580030c8f4c96df9f4ca6f",
+      "file": "archives/article-hidden-resource-cells/v27.html"
+    },
+    {
+      "version": 28,
+      "date": "2026-11-01T01:59:06.955Z",
+      "note": "Cloture partagee des sites : missions concurrentes, indices et archives",
+      "hash": "27773165fe54b3f2a767be9bb0af50458e1d2dca2ef046a9a94d96678f94e40c",
+      "file": "archives/article-hidden-resource-cells/v28.html"
+    },
+    {
+      "version": 29,
+      "date": "2026-11-01T02:50:03.670Z",
+      "note": "Fondation des camps sur place ou par expedition et evolutions selon le terrain",
+      "hash": "ed29cf9387eb3cb1d9029f84913f184781df8220ccc5eea6aad81b00cbbc8d0e",
+      "file": "archives/article-hidden-resource-cells/v29.html"
+    },
+    {
+      "version": 30,
+      "date": "2026-11-01T06:39:25.721Z",
+      "note": "Carte des découvertes, fiches de préparation et validation du parcours",
+      "hash": "c75b5a073f852d9d6430f75244f93ba3801ffe9adc1392159c8d60f6700b29ee",
+      "file": "archives/article-hidden-resource-cells/v30.html"
+    }
+  ],
+  "exploration-persistence": [
+    {
+      "version": 1,
+      "date": "2026-10-26T22:53:16.868Z",
+      "note": "Socle persistant versionne de l exploration, reprise et confidentialite serveur",
+      "hash": "f8f5f9642a20e203a80ec4c8b2d39e1fa0ebf2508769faf9ed309509cb4fbd5c",
+      "file": "archives/exploration-persistence/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-28T01:01:48.006Z",
+      "note": "Generation serveur du terrain au lancement, influence des lieux et sites exceptionnels rattaches",
+      "hash": "be4b6499b81e0b25312355b0f0f7b2eaa8b28f6f6d46648ce8713e11864d4fd8",
+      "file": "archives/exploration-persistence/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-28T01:47:26.710Z",
+      "note": "Vue exploration par joueur, indices autorises et protection des secrets dans les envois reseau",
+      "hash": "5783c03f859cd55254d183fde38955f53eb34635e0e0407b1dec6de7453697a2",
+      "file": "archives/exploration-persistence/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-28T03:10:51.582Z",
+      "note": "Cartes de localisation verifiees et cycle de vie des items indices : sources, pertes, ventes et archives",
+      "hash": "d245a6271a8d33c4dd8631c2e3150de34c8c6f7962bc86631486f0c618d2024b",
+      "file": "archives/exploration-persistence/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-28T03:24:10.094Z",
+      "note": "Suppression des faux indices et annonce mondiale cinq minutes apres une disparition",
+      "hash": "7d64b3c00858a4d501444502586b23363f0fe265e0a60a83345d0f5768053515",
+      "file": "archives/exploration-persistence/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "e000a5dae58fac17837153e7021aac97ffd9eac02c10b4bed95afaea0354ad75",
+      "file": "archives/exploration-persistence/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-31T23:11:56.314Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "468432e9ad6be4b5c8a9f95e247d007e4dc9a60f402e909a5239d78c8022185e",
+      "file": "archives/exploration-persistence/v7.html"
+    }
+  ],
+  "article-exploration-persistence": [
+    {
+      "version": 1,
+      "date": "2026-10-26T22:53:16.868Z",
+      "note": "Socle persistant versionne de l exploration, reprise et confidentialite serveur",
+      "hash": "d1bf54e07ae3a78423ef5f675f60e1a4c72925952d8ccec71366f2ef4beef40f",
+      "file": "archives/article-exploration-persistence/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-28T01:01:48.006Z",
+      "note": "Generation serveur du terrain au lancement, influence des lieux et sites exceptionnels rattaches",
+      "hash": "2bbf7cd728ce946fccf10445d55a9450007292d49052bb38785c84315101d1f6",
+      "file": "archives/article-exploration-persistence/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-28T01:47:26.710Z",
+      "note": "Vue exploration par joueur, indices autorises et protection des secrets dans les envois reseau",
+      "hash": "74f2a5853f71f0ca91adf0c40c54c13400d3ce9f58cb36990b7d7d13436e832a",
+      "file": "archives/article-exploration-persistence/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-28T03:10:51.582Z",
+      "note": "Cartes de localisation verifiees et cycle de vie des items indices : sources, pertes, ventes et archives",
+      "hash": "c7d13f9f975e3e2f6fdbaafb6b483bd843741301579dd9c4a72f05f75020f711",
+      "file": "archives/article-exploration-persistence/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-28T03:24:10.094Z",
+      "note": "Suppression des faux indices et annonce mondiale cinq minutes apres une disparition",
+      "hash": "6cb827a167710e17a94b1a1d43157bde83afb2fa53f1191c4779fb929f66a432",
+      "file": "archives/article-exploration-persistence/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "da9bdc072494306c5e77b6cd795da5e2553374f02f8c3a4593e2a89ff996fe20",
+      "file": "archives/article-exploration-persistence/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "58947f06bb4d61422c657bbf60ac13f68481fa07892ef79916b0a4bdd51a9b89",
+      "file": "archives/article-exploration-persistence/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-30T05:03:43.924Z",
+      "note": "Recherche exterieure : jauge validee, consommation serveur et discretion pendant 60 secondes",
+      "hash": "35b19d464f59a97e7c9b0d55dbf58c513b1f4bf47b6af2d5af7012ae1c06d2fc",
+      "file": "archives/article-exploration-persistence/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-31T23:11:04.814Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "6811a07b3d3fdf9afaab9679d77de7cf7f4be61e4b3e9f92646d078e5ecd815f",
+      "file": "archives/article-exploration-persistence/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-31T23:21:39.715Z",
+      "note": "Preparation et depart des expeditions exceptionnelles avec score serveur commun",
+      "hash": "6b3c2f62260fbc24cd787c51d85b7378c53e56c25fec3942763f1cdc5babed97",
+      "file": "archives/article-exploration-persistence/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-31T23:36:52.573Z",
+      "note": "Resolution des sites exceptionnels : butin, puissance, degats, moral et retour",
+      "hash": "ecdf41654e73ff946f14f8bd38c5d97f4f9457d06b6cd310d7e92a1f64ba68fa",
+      "file": "archives/article-exploration-persistence/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-11-01T01:59:06.955Z",
+      "note": "Cloture partagee des sites : missions concurrentes, indices et archives",
+      "hash": "dfb000d317e7f51ee1f346a9cfad60b0576ae823f1be397a957b2fbc5d8cfa93",
+      "file": "archives/article-exploration-persistence/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-11-01T02:50:03.670Z",
+      "note": "Fondation des camps sur place ou par expedition et evolutions selon le terrain",
+      "hash": "5eec5851ef2c19c97f3ca6cdbad8b7ffb47d5dc7dabd35765b4d524c3ddb4ed5",
+      "file": "archives/article-exploration-persistence/v13.html"
+    }
+  ],
+  "article-exploration-generation": [
+    {
+      "version": 1,
+      "date": "2026-10-28T01:01:48.006Z",
+      "note": "Generation serveur du terrain au lancement, influence des lieux et sites exceptionnels rattaches",
+      "hash": "b7d3af24825c9a785de9df0384716b35e8243698b86ef6f3b1549e8b9fee57a4",
+      "file": "archives/article-exploration-generation/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-28T01:47:26.710Z",
+      "note": "Vue exploration par joueur, indices autorises et protection des secrets dans les envois reseau",
+      "hash": "78236986928804cb23f56d6519a741b1e6c01d503bdb52bff1f0a76a0ba7677e",
+      "file": "archives/article-exploration-generation/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-28T03:10:51.582Z",
+      "note": "Cartes de localisation verifiees et cycle de vie des items indices : sources, pertes, ventes et archives",
+      "hash": "cd1fa1ca8dde3335d7062b8c7cbcba22da3d0a8d828ef4f96215191e6fc5987e",
+      "file": "archives/article-exploration-generation/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "4d5f640fa7a74adcbd5a7fe5aa886f564656223a34ddf37754bb96accb90dff4",
+      "file": "archives/article-exploration-generation/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-28T04:14:20.328Z",
+      "note": "Clarification des regles disponibles de prospection, rumeurs et specialistes",
+      "hash": "25f797e8b19b3f82b11a8a358a63d816be19eeb2e77c80dafa89b4539ffd29b5",
+      "file": "archives/article-exploration-generation/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-31T23:11:04.814Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "e7b6dd6d77611ce9ba37f03137e1627f5bf67dda1b57d92528c100bf130bc4e0",
+      "file": "archives/article-exploration-generation/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-31T23:36:52.573Z",
+      "note": "Resolution des sites exceptionnels : butin, puissance, degats, moral et retour",
+      "hash": "3c2fb309cf24aaa0bf61291d9fe05066cb7cbcd70443d3c08ca35ee47630423f",
+      "file": "archives/article-exploration-generation/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-11-01T02:50:03.670Z",
+      "note": "Fondation des camps sur place ou par expedition et evolutions selon le terrain",
+      "hash": "3979d1335393704480592f21bbebd41092b1142f380245b8dcab556826df6674",
+      "file": "archives/article-exploration-generation/v8.html"
+    }
+  ],
+  "article-exploration-privacy": [
+    {
+      "version": 1,
+      "date": "2026-10-28T01:47:26.710Z",
+      "note": "Vue exploration par joueur, indices autorises et protection des secrets dans les envois reseau",
+      "hash": "c9617d33e63822c928fb95dc7a9a464cc767df159202de112657c857e1a8a48c",
+      "file": "archives/article-exploration-privacy/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-28T03:10:51.582Z",
+      "note": "Cartes de localisation verifiees et cycle de vie des items indices : sources, pertes, ventes et archives",
+      "hash": "a974a4783676edf31523ed46e25612c1a0c670abb551d8389df46056037c3533",
+      "file": "archives/article-exploration-privacy/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-28T03:24:10.094Z",
+      "note": "Suppression des faux indices et annonce mondiale cinq minutes apres une disparition",
+      "hash": "512d1c49867c1e28bb17b3532381e7d858d5acb0344a6f33980f3acabd9266f3",
+      "file": "archives/article-exploration-privacy/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "78239a0881355f3d66d8a826c3872c2188fc1b74b57fc64401d8d7fd9046aa00",
+      "file": "archives/article-exploration-privacy/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "73b06577004cc8f336972865db1a8fe395b68880fdc46f896cdd2629f74fd311",
+      "file": "archives/article-exploration-privacy/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-30T05:03:43.924Z",
+      "note": "Recherche exterieure : jauge validee, consommation serveur et discretion pendant 60 secondes",
+      "hash": "eadaae4a291c18ff89887975819bb233a9a5275714f8375bf44cfbde42070a91",
+      "file": "archives/article-exploration-privacy/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-31T23:11:04.814Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "d94f94d5c419fe1751d3b441d54e1f357a71274b9546548ca3f6f372fb640a80",
+      "file": "archives/article-exploration-privacy/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-31T23:11:56.314Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "44a8fa87c03750811200cdcc851765da199a62b7053cefbd5902467c61fa03c9",
+      "file": "archives/article-exploration-privacy/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-10-31T23:21:39.715Z",
+      "note": "Preparation et depart des expeditions exceptionnelles avec score serveur commun",
+      "hash": "34991c590f8e7f815f90c417a4d7f1cc353716d13ff3778aa25843ec055d7d53",
+      "file": "archives/article-exploration-privacy/v9.html"
+    },
+    {
+      "version": 10,
+      "date": "2026-10-31T23:36:52.573Z",
+      "note": "Resolution des sites exceptionnels : butin, puissance, degats, moral et retour",
+      "hash": "b160e7b16941c5c521254501a49214e5208bc98f1e53b910902848cff7f77e5f",
+      "file": "archives/article-exploration-privacy/v10.html"
+    },
+    {
+      "version": 11,
+      "date": "2026-10-31T23:42:02.889Z",
+      "note": "Resolution des sites exceptionnels et verification de la confidentialite",
+      "hash": "0986997c43e17390a2262305d5dca1b270d29b0d9e8cefbcbbfcc7a0370711cc",
+      "file": "archives/article-exploration-privacy/v11.html"
+    },
+    {
+      "version": 12,
+      "date": "2026-11-01T01:59:06.955Z",
+      "note": "Cloture partagee des sites : missions concurrentes, indices et archives",
+      "hash": "5c30272d5c362a90281eb6935487803abba16266e1c9768ae80335206d558fcf",
+      "file": "archives/article-exploration-privacy/v12.html"
+    },
+    {
+      "version": 13,
+      "date": "2026-11-01T02:50:03.670Z",
+      "note": "Fondation des camps sur place ou par expedition et evolutions selon le terrain",
+      "hash": "b90f23fa51226a909c02dac01c384a99cc96058c1618de212839dc4d0f88d52c",
+      "file": "archives/article-exploration-privacy/v13.html"
+    },
+    {
+      "version": 14,
+      "date": "2026-11-01T02:53:51.974Z",
+      "note": "Camps : fondation, terrain et confidentialite du gisement",
+      "hash": "2cbff6c517f1f6a350f9c311ea73c2a1143be29b007c9d9de2d465f56a2403ee",
+      "file": "archives/article-exploration-privacy/v14.html"
+    },
+    {
+      "version": 15,
+      "date": "2026-11-01T06:39:25.721Z",
+      "note": "Carte des découvertes, fiches de préparation et validation du parcours",
+      "hash": "e0e2e813faf27ab1efe3c7f4bb11d312f3dbb728f46be8b05392fff85f5fcdc8",
+      "file": "archives/article-exploration-privacy/v15.html"
+    }
+  ],
+  "article-exploration-clues": [
+    {
+      "version": 1,
+      "date": "2026-10-28T03:10:51.582Z",
+      "note": "Cartes de localisation verifiees et cycle de vie des items indices : sources, pertes, ventes et archives",
+      "hash": "0128c08f717eed78923f3cba721145f171c4967ee3604edf53c4a7f1182c051c",
+      "file": "archives/article-exploration-clues/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-28T03:24:10.094Z",
+      "note": "Suppression des faux indices et annonce mondiale cinq minutes apres une disparition",
+      "hash": "2c0dd702bc1585b156d3e4be158ce9dd03ffa52e0acd410dee84c29219e593b1",
+      "file": "archives/article-exploration-clues/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "25d9af1e071cf01fe2635b0a4c43a3a327dbe11bef06159cd21db94992c3fda3",
+      "file": "archives/article-exploration-clues/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-28T07:18:36.764Z",
+      "note": "Distinction entre bruit des tavernes et fiabilite des objets indices",
+      "hash": "4a3423db0f70e360ac98f28180c03d36fc26305ef43d201e65b8d090f0b7303e",
+      "file": "archives/article-exploration-clues/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "7d9f39b13f83c536df0d4355ca6ef4082350cbb9b6de3646b0f4a45777ecdae6",
+      "file": "archives/article-exploration-clues/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-30T05:03:43.924Z",
+      "note": "Recherche exterieure : jauge validee, consommation serveur et discretion pendant 60 secondes",
+      "hash": "1427ff9b426c6adbbe409b733098121910347bb7b75f99cf45a7db664b8c93ec",
+      "file": "archives/article-exploration-clues/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-10-31T23:11:04.814Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "ae31f9d13e11e1e78435e2188079374e7680312e438d84a63056c2b1c8751352",
+      "file": "archives/article-exploration-clues/v7.html"
+    },
+    {
+      "version": 8,
+      "date": "2026-10-31T23:11:56.314Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "a10bf9f0b943f63ba34f5f96aaf42473516073ceb82b876862afbb930af65bc5",
+      "file": "archives/article-exploration-clues/v8.html"
+    },
+    {
+      "version": 9,
+      "date": "2026-11-01T01:59:06.955Z",
+      "note": "Cloture partagee des sites : missions concurrentes, indices et archives",
+      "hash": "c4c3e26a114361a23814095f830c2dfa1cc060b9c77d56044aa49104ca87a440",
+      "file": "archives/article-exploration-clues/v9.html"
+    }
+  ],
+  "article-exploration-rumors-and-discovery": [
+    {
+      "version": 1,
+      "date": "2026-10-28T04:10:07.138Z",
+      "note": "Raccordement des PNJ, rumeurs fiables et decouvertes sans exploitation automatique",
+      "hash": "9a84ce8cc8ac2fcc2ad3c647811a382989ce76c8d73102928d0aa25bdf79eec1",
+      "file": "archives/article-exploration-rumors-and-discovery/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-28T05:48:53.032Z",
+      "note": "Chances de decouverte augmentees : metiers 50 pour cent et generalistes 20 pour cent",
+      "hash": "f6783840f2d08a24abdd078a73e72fc7ce6513869a3fd328d5f67f7e13cd58c0",
+      "file": "archives/article-exploration-rumors-and-discovery/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-28T07:18:36.764Z",
+      "note": "Distinction entre bruit des tavernes et fiabilite des objets indices",
+      "hash": "5396fe854ee1ee98ade17da72759d8daa3b2f2f72e7ec93fcd1f4e4352edd707",
+      "file": "archives/article-exploration-rumors-and-discovery/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "4c7c38ab4d1cbe12f6ee5b4e7eac61b75ad30f1a7b9caafa82187b65b8a6a257",
+      "file": "archives/article-exploration-rumors-and-discovery/v4.html"
+    },
+    {
+      "version": 5,
+      "date": "2026-10-30T05:03:43.924Z",
+      "note": "Recherche exterieure : jauge validee, consommation serveur et discretion pendant 60 secondes",
+      "hash": "028f8d5d8ebec355035bf1a4f49a85fb14922a33a2241d92e5e1fd870009e9be",
+      "file": "archives/article-exploration-rumors-and-discovery/v5.html"
+    },
+    {
+      "version": 6,
+      "date": "2026-10-31T23:11:04.814Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "68018c12c901ff14b327f441946ba43488c96163210e1fd4192bf4c7c6995343",
+      "file": "archives/article-exploration-rumors-and-discovery/v6.html"
+    },
+    {
+      "version": 7,
+      "date": "2026-11-01T02:50:03.670Z",
+      "note": "Fondation des camps sur place ou par expedition et evolutions selon le terrain",
+      "hash": "b5a5b612f05dc53bf6c8d26b65c0823fc614296bdbe275fcab02a4ccf5a23fbb",
+      "file": "archives/article-exploration-rumors-and-discovery/v7.html"
+    }
+  ],
+  "article-tavern-rumors-and-documents": [
+    {
+      "version": 1,
+      "date": "2026-10-29T17:03:46.421Z",
+      "note": "Rumeurs payantes, messages de recherche et documents hors capacite des bagages",
+      "hash": "91c19e8168c10b647def3ff26253f6e84c17825acd651050cab008bf50eb6f32",
+      "file": "archives/article-tavern-rumors-and-documents/v1.html"
+    }
+  ],
+  "article-exploration-search": [
+    {
+      "version": 1,
+      "date": "2026-10-30T05:03:43.924Z",
+      "note": "Recherche exterieure : jauge validee, consommation serveur et discretion pendant 60 secondes",
+      "hash": "0e8d3e57b71c63d4a9583eeef128339cac2f48695bc3c351ee7c661c0a49b4f1",
+      "file": "archives/article-exploration-search/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-31T23:11:04.814Z",
+      "note": "Sites exceptionnels uniquement hors de l influence des lieux normaux",
+      "hash": "76323e97ad7f34278d997f28df4d6bca4bc27f4f6dcf16de430b1c849e174d95",
+      "file": "archives/article-exploration-search/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-10-31T23:21:39.715Z",
+      "note": "Preparation et depart des expeditions exceptionnelles avec score serveur commun",
+      "hash": "28b7fcb18e6f4c7b109c63b9762b460a75108b17f8cc0b4a11a1bdd905feaab8",
+      "file": "archives/article-exploration-search/v3.html"
+    },
+    {
+      "version": 4,
+      "date": "2026-10-31T23:36:52.573Z",
+      "note": "Resolution des sites exceptionnels : butin, puissance, degats, moral et retour",
+      "hash": "9319148c4f88afc70113f0de76825a6c085b9b5dfa6a1271a8d20bdec809517a",
+      "file": "archives/article-exploration-search/v4.html"
+    }
+  ],
+  "article-exceptional-expeditions": [
+    {
+      "version": 1,
+      "date": "2026-10-31T23:21:39.715Z",
+      "note": "Preparation et depart des expeditions exceptionnelles avec score serveur commun",
+      "hash": "342220a1377043a963532964f7fae9fee344bc354343fe70a27e2627b814c388",
+      "file": "archives/article-exceptional-expeditions/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-10-31T23:36:52.573Z",
+      "note": "Resolution des sites exceptionnels : butin, puissance, degats, moral et retour",
+      "hash": "d87ceaca43d826c9d6b7f10c50bebd4effa12e4f27f1169640b56ae965faef52",
+      "file": "archives/article-exceptional-expeditions/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-11-01T01:59:06.955Z",
+      "note": "Cloture partagee des sites : missions concurrentes, indices et archives",
+      "hash": "0194af5b8562c5df76b2e50e5eff2c714bdd5b295cfc3a9e6ff59d3684c49487",
+      "file": "archives/article-exceptional-expeditions/v3.html"
+    }
+  ],
+  "article-exceptional-site-resolution": [
+    {
+      "version": 1,
+      "date": "2026-10-31T23:36:52.573Z",
+      "note": "Resolution des sites exceptionnels : butin, puissance, degats, moral et retour",
+      "hash": "a183bcb6162b861c6e25e5bb0761f4c2a79f50f42c797f040804cf751fe59009",
+      "file": "archives/article-exceptional-site-resolution/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-11-01T01:59:06.955Z",
+      "note": "Cloture partagee des sites : missions concurrentes, indices et archives",
+      "hash": "46c5dfd13ce2d142681e8f8046cd75c761f1cf845e0c7b0279a6508a81bfec56",
+      "file": "archives/article-exceptional-site-resolution/v2.html"
+    },
+    {
+      "version": 3,
+      "date": "2026-11-01T02:03:15.869Z",
+      "note": "Annonce immediate pour tous apres victoire sur un site exceptionnel",
+      "hash": "cc02a12a961542ad4c25ae140fb7ce78d0318856db0546e4780b981342ed7afa",
+      "file": "archives/article-exceptional-site-resolution/v3.html"
+    }
+  ],
+  "article-exceptional-site-closure": [
+    {
+      "version": 1,
+      "date": "2026-11-01T01:59:06.955Z",
+      "note": "Cloture partagee des sites : missions concurrentes, indices et archives",
+      "hash": "7362ed5ec62230660e3737eafe68e17d8deb3679f4fc7267ee5ec99ff9c65bc7",
+      "file": "archives/article-exceptional-site-closure/v1.html"
+    },
+    {
+      "version": 2,
+      "date": "2026-11-01T02:03:15.869Z",
+      "note": "Annonce immediate pour tous apres victoire sur un site exceptionnel",
+      "hash": "a8d1d99e9ec7b642e5894419dd627fe656dcfad84949e8d043d97bfc24f8769b",
+      "file": "archives/article-exceptional-site-closure/v2.html"
+    }
+  ],
+  "article-camp-foundation-and-terrain": [
+    {
+      "version": 1,
+      "date": "2026-11-01T02:50:03.670Z",
+      "note": "Fondation des camps sur place ou par expedition et evolutions selon le terrain",
+      "hash": "b29f222a9785d4c467687cf172d7df45bf2bcd850fdcb999a77cd3ec966ba7c3",
+      "file": "archives/article-camp-foundation-and-terrain/v1.html"
+    }
+  ],
+  "article-exploration-map-and-sheets": [
+    {
+      "version": 1,
+      "date": "2026-11-01T06:39:25.721Z",
+      "note": "Carte des découvertes, fiches de préparation et validation du parcours",
+      "hash": "19e8878c4a55f64127038cdc01643b0a8ded482898c8d14311f4791a7764742d",
+      "file": "archives/article-exploration-map-and-sheets/v1.html"
     }
   ]
 }

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "id": "excalibure",
+  "title": "Excalibure",
+  "description": "à la recherhce d'excalibure",
+  "actions": [
+    {
+      "id": "parler_a_Merlin",
+      "action": "Parler",
+      "label": "Dialoguer et choisir un chemin",
+      "lieu": "broceliande",
+      "interaction": "Parler au vieille hermite de la forêt",
+      "requires": [],
+      "rewards": [],
+      "dialogue": {
+        "id": "dialogue-parler-1",
+        "qui": "merlin",
+        "goal": "conversation-terminee"
+      },
+      "outputs": [
+        "ok"
+      ]
+    },
+    {
+      "id": "atteindre-1",
+      "action": "Atteindre",
+      "label": "Rejoindre un lieu",
+      "lieu": "carrière",
+      "requires": [],
+      "rewards": [
+        {
+          "type": "item",
+          "itemId": "excalibure",
+          "amount": 1
+        }
+      ],
+      "interaction": "retirer l'épée"
+    }
+  ],
+  "links": [
+    {
+      "id": "lien-1",
+      "from": "parler_a_Merlin",
+      "output": "ok",
+      "to": "atteindre-1",
+      "conditions": []
+    }
+  ],
+  "prerequisites": [],
+  "events": [],
+  "publicationCondition": null,
+  "accessConditions": [],
+  "participationModes": [
+    "solo"
+  ],
+  "locationSlotId": "broceliande",
+  "giverNpcId": "merlin",
+  "interactionLabel": "Parler à l'hermite",
+  "dialogueId": null,
+  "natures": [],
+  "type": "simple",
+  "conditions": [],
+  "locationSlots": [],
+  "offer": null,
+  "steps": [],
+  "initialStepId": null,
+  "childQuestIds": [],
+  "completionPolicy": "all",
+  "scenes": [],
+  "presentation": {},
+  "outcomes": {
+    "success": [],
+    "failure": [],
+    "abandoned": []
+  },
+  "transitions": []
+}

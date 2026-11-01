@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="earth" x2=".7" y2="1">
+      <stop stop-color="#e8c681"/><stop offset="1" stop-color="#95643c"/>
+    </linearGradient>
+    <g id="sole" fill="url(#earth)" stroke="#493122" stroke-width="1.4">
+      <path d="M-5-4c-2-3-3-7-2-11 1-4 4-6 7-5 4 1 6 5 6 9 0 4-2 7-4 9Z"/>
+      <path d="m-4 0 7 1c1 3 0 6-3 6s-5-3-4-7Z"/>
+      <path d="m-5-13 9 2m-9 2 8 2" fill="none" stroke="#674529" stroke-width="1"/>
+    </g>
+  </defs>
+  <g opacity=".75"><use href="#sole" transform="translate(18 55) rotate(-20) scale(.76)"/></g>
+  <use href="#sole" transform="translate(39 43) rotate(14) scale(-.86 .86)"/>
+  <use href="#sole" transform="translate(24 27) rotate(-16) scale(.92)"/>
+  <use href="#sole" transform="translate(45 16) rotate(12) scale(-.7 .7)" opacity=".65"/>
+</svg>

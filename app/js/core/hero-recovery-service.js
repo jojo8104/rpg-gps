@@ -8,7 +8,9 @@ export class HeroRecoveryService {
     reviveHealthRatio = HERO_REVIVE_HEALTH_RATIO,
   } = {}) {
     if (!Number.isFinite(naturalHealPerCycle) || naturalHealPerCycle < 0)
-      throw new RangeError("Le soin naturel par cycle ne peut pas être négatif.");
+      throw new RangeError(
+        "Le soin naturel par cycle ne peut pas être négatif.",
+      );
     if (
       !Number.isFinite(reviveHealthRatio) ||
       reviveHealthRatio <= 0 ||
@@ -46,7 +48,11 @@ export class HeroRecoveryService {
     const healingLevel =
       healingLocation === null
         ? 0
-        : Math.max(1, healingLocation.infrastructure?.healing_tent ?? 0);
+        : Math.max(
+            1,
+            (healingLocation.infrastructure?.healing_tent ?? 0) +
+              (healingLocation.infrastructure?.chapel ?? 0),
+          );
     const locationHealing = healingLevel * cycles;
     const healing = naturalHealing + locationHealing;
     const restoredHealth = healing > 0 ? hero.recoverHealth(healing) : 0;
@@ -59,10 +65,14 @@ export class HeroRecoveryService {
     };
   }
 
-  reviveAtBase(hero) {
+  reviveAtBase(hero, location = null) {
     if (hero.state !== "ghost" || hero.health !== 0)
       return { success: false, reason: "hero_not_ghost", heroId: hero.id };
-    const health = hero.revive(this.reviveHealthRatio);
+    const health = hero.revive(
+      (location?.infrastructure?.chapel ?? 0) >= 2
+        ? 0.75
+        : this.reviveHealthRatio,
+    );
     return {
       success: true,
       heroId: hero.id,

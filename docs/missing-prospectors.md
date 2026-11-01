@@ -1,5 +1,11 @@
 # Les prospecteurs perdus
 
+Depuis le passage au monde initial de dix lieux, cette mission reste au
+catalogue mais n’est plus disponible au démarrage : son camp, ses indices et
+sa mine supplémentaire ne sont pas créés. Leur ajout à l’acceptation ou aux
+étapes de quête reste à raccorder. Le parcours ci-dessous décrit la mission
+lorsque ses lieux sont présents, notamment dans les tests isolés.
+
 Deuxième mission disponible dans le nouveau moteur à actions, après le pilote
 Le ravitaillement. Elle réutilise les lieux du monde Chaos et ne réactive pas
 l’ancien moteur de phases. Le titre ancien « Les prospecteurs disparus » désigne

@@ -32,7 +32,7 @@
     "stats": { "attack": 4, "defense": 2, "damageMin": 2, "damageMax": 4, "healthPerSoldier": 9, "combatHealthThreshold": 4, "speed": 5, "range": 3, "attackIntervalMs": 1000, "morale": 6 },
     "retreat": { "attack": 5, "defense": 3, "speed": 7, "range": 4 },
     "abilities": ["ranged_attack", "skirmisher"],
-    "costs": { "gold": 55, "wood": 10, "stone": 0, "iron": 10 },
+    "costs": { "gold": 55, "wood": 10, "stone": 0, "iron": 10, "horse": 5 },
     "tags": ["human", "cavalry", "ranged", "harassment"]
   },
   {
@@ -80,7 +80,7 @@
     "stats": { "attack": 5, "defense": 4, "damageMin": 2, "damageMax": 4, "healthPerSoldier": 12, "combatHealthThreshold": 5, "speed": 6, "range": 1, "attackIntervalMs": 1100, "morale": 7 },
     "retreat": { "attack": 3, "defense": 2, "speed": 8, "range": 1 },
     "abilities": ["skirmisher"],
-    "costs": { "gold": 70, "wood": 5, "stone": 0, "iron": 15 },
+    "costs": { "gold": 70, "wood": 5, "stone": 0, "iron": 15, "horse": 5 },
     "tags": ["human", "cavalry", "light_cavalry", "spear", "skirmisher"]
   },
   {
@@ -92,7 +92,7 @@
     "stats": { "attack": 8, "defense": 8, "damageMin": 3, "damageMax": 6, "healthPerSoldier": 18, "combatHealthThreshold": 7, "speed": 4.5, "range": 1, "attackIntervalMs": 1600, "morale": 9 },
     "retreat": { "attack": 3, "defense": 6, "speed": 5.5, "range": 1 },
     "abilities": [],
-    "costs": { "gold": 120, "wood": 10, "stone": 0, "iron": 50 },
+    "costs": { "gold": 120, "wood": 10, "stone": 0, "iron": 50, "horse": 5 },
     "tags": ["human", "cavalry", "heavy_armor", "shield", "lance"]
   },
   {

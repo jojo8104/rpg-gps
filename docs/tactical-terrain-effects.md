@@ -44,3 +44,11 @@ Le mur de lances ne protège qu’après son numéro d’ordre ; ses effets expi
 ## Destination contestée
 
 À priorité égale, deux déplacements adverses valides vers la même case libre provoquent un échange simultané sur le terrain de destination. Les effets du terrain, les spécialités et le ralentissement de déplacement s’appliquent aux deux combattants. Un seul survivant opérationnel occupe la case, y compris si son unité est un archer puisqu’il avait un ordre de déplacement. Deux survivants restent à leurs positions de départ ; deux unités neutralisées laissent la case vide. Le bonus n’est capturé qu’après l’occupation effective. Une charge bloquée avant la destination ne la conteste pas. Les échanges de positions adverses restent traités comme des engagements distincts.
+
+## Lisibilité des terrains — 25 octobre 2026
+
+Les terrains utilisent un atlas anime/JRPG en cel-shading : plaine vert clair, forêt vert profond, collines aux reliefs arrondis, rochers gris bleuté et eau turquoise. Les aplats et grandes formes remplacent les textures réalistes détaillées pour distinguer les cases sous les unités. Les ponts, tours, barricades et villages restent issus de leur atlas séparé. Les raccords entre cases, les positions officielles, les portées, les dégâts et tous les effets de terrain restent inchangés.
+
+### Variante piton rocheux
+
+La tuile de rochers est désormais illustrée par un piton massif : sommet clair et dégagé, falaises verticales gris bleuté et pied légèrement herbeux. Cette forme remplace les blocs dispersés de l’atlas v2 afin de distinguer immédiatement le relief rocheux des collines arrondies. La case conserve son identifiant `rock`, ses règles, son élévation officielle et ses effets ; le dessin ne crée ni obstacle supplémentaire ni nouvelle règle de hauteur. L’atlas courant est `map/tileset-v3/terrain.png` ; les versions antérieures sont conservées.

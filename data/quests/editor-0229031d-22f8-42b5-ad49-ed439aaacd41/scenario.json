@@ -1,0 +1,96 @@
+{
+  "id": "Kindom1",
+  "name": "La chute du Royaume",
+  "intro": "Une aventure composée de plusieurs quêtes.",
+  "mapDefinition": null,
+  "dialogues": {},
+  "initialPhaseId": "editor-idle",
+  "playerStart": {
+    "resources": {},
+    "unitStacks": []
+  },
+  "locationSlots": [
+    {
+      "id": "capital",
+      "type": "capital",
+      "defaultPlacement": {
+        "strategy": "fixed",
+        "position": {
+          "latitude": 48.8584635,
+          "longitude": 2.3478548
+        }
+      },
+      "appearance": {
+        "on": "immediate"
+      },
+      "world": {
+        "role": "starting-point",
+        "visibility": "known",
+        "lifetime": "persistent"
+      }
+    },
+    {
+      "id": "broceliande",
+      "type": "lumber-camp",
+      "defaultPlacement": {
+        "strategy": "fixed",
+        "position": {
+          "latitude": 48.8590424,
+          "longitude": 2.3596351
+        }
+      },
+      "appearance": {
+        "on": "immediate"
+      },
+      "world": {
+        "role": "world",
+        "visibility": "known",
+        "lifetime": "persistent"
+      }
+    },
+    {
+      "id": "carrière",
+      "type": "quarry",
+      "defaultPlacement": {
+        "strategy": "fixed",
+        "position": {
+          "latitude": 48.8569953,
+          "longitude": 2.3539273
+        }
+      },
+      "appearance": {
+        "on": "immediate"
+      },
+      "world": {
+        "role": "world",
+        "visibility": "known",
+        "lifetime": "persistent"
+      }
+    }
+  ],
+  "factions": [],
+  "trails": [],
+  "worldState": {},
+  "phases": [
+    {
+      "id": "editor-idle",
+      "title": "Quêtes à actions",
+      "description": "Progression assurée par le moteur de quêtes à actions.",
+      "type": "main",
+      "objectives": [],
+      "eventIds": [],
+      "transitions": [],
+      "choices": [],
+      "listeners": [],
+      "failure": {
+        "policy": "stop",
+        "nextPhase": null,
+        "scope": "quest",
+        "eventId": null
+      }
+    }
+  ],
+  "events": [],
+  "victoryConditions": [],
+  "defeatConditions": []
+}

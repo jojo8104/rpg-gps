@@ -19,14 +19,38 @@ export class HeroClassFeatureService {
   signatureMultiplier(hero) {
     return (
       (this.featuresFor(hero).concealmentMultiplier ?? 1) *
-      (hero?.classFeatureState?.gpsConcealmentMultiplier ?? 1)
+      (hero?.classFeatureState?.gpsConcealmentMultiplier ?? 1) *
+      ((hero?.classFeatureState?.exteriorSearch?.discretionPenaltyUntil ?? 0) >
+      this.now()
+        ? 2
+        : 1)
     );
   }
   detectionRadius(hero, baseRadius) {
     return baseRadius * (this.featuresFor(hero).detectionMultiplier ?? 1);
   }
   visionRadius(hero, fallback = 45) {
-    return this.featuresFor(hero).visionRadius ?? fallback;
+    const features = this.featuresFor(hero);
+    const initialRadius = features.visionRadius ?? fallback;
+    const maximumRadius = features.maximumVisionRadius ?? initialRadius;
+    const maximumLevel = features.maximumVisionLevel ?? 20;
+    const level = Math.max(1, Math.min(maximumLevel, hero?.level ?? 1));
+    if (maximumLevel <= 1 || maximumRadius <= initialRadius)
+      return initialRadius;
+    return Math.min(
+      maximumRadius,
+      initialRadius +
+        ((maximumRadius - initialRadius) * (level - 1)) / (maximumLevel - 1),
+    );
+  }
+  watchBeaconRadius(hero) {
+    const features = this.featuresFor(hero);
+    const rank = hero?.aptitudeRanks?.ranger_watch_beacon ?? "novice";
+    return (
+      features.watchBeaconRadiusByRank?.[rank] ??
+      features.watchBeaconRadius ??
+      30
+    );
   }
   informationLevel(hero, knownLevel) {
     return Math.min(
@@ -45,7 +69,9 @@ export class HeroClassFeatureService {
     const travel = hero?.classFeatureState?.astralTravel;
     if (!travel || travel.locationId !== locationId || at >= travel.expiresAt)
       return baseRadius;
-    return baseRadius + (travel.reachBonus ?? this.astralReachBonus(hero));
+    return travel.targetKind === "location"
+      ? travel.reachBonus
+      : baseRadius + (travel.reachBonus ?? this.astralReachBonus(hero));
   }
 
   divinationRadius(hero) {
@@ -76,6 +102,41 @@ export class HeroClassFeatureService {
   activeDivination(hero, at = this.now()) {
     const vision = hero?.classFeatureState?.divinationVision;
     return vision && at < vision.expiresAt ? structuredClone(vision) : null;
+  }
+
+  activeAstralTravel(hero, at = this.now()) {
+    const travel = hero?.classFeatureState?.astralTravel;
+    return travel && at < travel.expiresAt ? structuredClone(travel) : null;
+  }
+
+  beginAstralTravel(hero, at = this.now()) {
+    const reachBonus = this.astralReachBonus(hero);
+    if (hero?.classId !== "mage" || reachBonus <= 0)
+      return { success: false, reason: "ability_unavailable" };
+    const cooldownRemainingMs = this.cooldownRemaining(
+      hero,
+      "astralTravel",
+      at,
+    );
+    if (cooldownRemainingMs > 0)
+      return {
+        success: false,
+        reason: "ability_on_cooldown",
+        cooldownRemainingMs,
+      };
+    const durationMs = this.featuresFor(hero).astralDurationMs ?? 10000;
+    const cooldownMs = this.featuresFor(hero).astralCooldownMs ?? 600000;
+    hero.classFeatureState.astralTravel = {
+      reachBonus,
+      activatedAt: at,
+      expiresAt: at + durationMs,
+    };
+    this.#startCooldown(hero, "astralTravel", cooldownMs, at);
+    return { success: true, durationMs, expiresAt: at + durationMs };
+  }
+
+  consumeAstralTravel(hero) {
+    if (hero?.classFeatureState) delete hero.classFeatureState.astralTravel;
   }
 
   activateAstralTravel(

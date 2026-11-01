@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { Hero } from "../app/js/core/hero.js";
 import { EquipmentService } from "../app/js/core/equipment-service.js";
 
-const hero = () => new Hero({ id: "h", playerId: "p", name: "Ada", carriedLoot: [{ id: "sword-1", itemId: "iron_sword", quantity: 1 }, { id: "ring-1", itemId: "lucky_ring", quantity: 1 }] });
+const hero = () => new Hero({ id: "h", playerId: "p", name: "Ada", carriedLoot: [{ id: "sword-1", itemId: "iron_sword", quantity: 1 }, { id: "steel-sword-1", itemId: "steel_sword", quantity: 1 }, { id: "ring-1", itemId: "lucky_ring", quantity: 1 }] });
 
 test("équiper retire l'objet des bagages et applique ses bonus", () => {
   const subject = hero(); const result = new EquipmentService().equip(subject, "sword-1");
@@ -19,4 +19,10 @@ test("retirer un équipement exige un slot libre et le remet dans les bagages", 
   const subject = hero(); const service = new EquipmentService(); service.equip(subject, "sword-1");
   assert.equal(service.unequip(subject, "mainHand", { freeSlots: 0 }).success, false);
   assert.equal(service.unequip(subject, "mainHand", { freeSlots: 1, id: "returned" }).success, true); assert.equal(subject.carriedLoot.at(-1).id, "returned"); assert.equal(subject.equipmentModifiers.attack, 0);
+});
+
+test("une épée plus puissante peut remplacer une arme du même type", () => {
+  const subject = hero(); const service = new EquipmentService(); service.equip(subject, "sword-1");
+  const result = service.equip(subject, "steel-sword-1", "mainHand");
+  assert.equal(result.success, true); assert.equal(result.previousItemId, "iron_sword"); assert.equal(subject.equipment.mainHand, "steel_sword"); assert.equal(subject.equipmentModifiers.attack, 4); assert.equal(subject.carriedLoot.some((entry) => entry.itemId === "iron_sword"), true);
 });

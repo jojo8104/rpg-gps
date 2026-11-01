@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "id": "royal-fort-supply",
+  "title": "Le ravitaillement",
+  "description": "Collectez puis livrez vingt rations au fortin royal de Rochegarde.",
+  "locationSlotId": "capital",
+  "giverNpcId": "marshal-aldren",
+  "interactionLabel": "Recevoir l’ordre de ravitaillement",
+  "dialogueId": "supply-order",
+  "participationModes": ["solo", "equipe"],
+  "accessConditions": [
+    { "type": "locationPlaced", "locationId": "capital" },
+    { "type": "locationPlaced", "locationId": "supply-fort" },
+    { "type": "locationPlaced", "locationId": "capital-resource-gold-village" },
+    { "type": "locationPlaced", "locationId": "capital-resource-iron-village" },
+    { "type": "locationPlaced", "locationId": "capital-resource-wood-village" },
+    { "type": "locationPlaced", "locationId": "capital-resource-stone-village" }
+  ],
+  "prerequisites": [
+    {
+      "id": "rations-north",
+      "type": "ressource",
+      "resource": "food",
+      "quantity": 5,
+      "locationId": "capital-resource-gold-village",
+      "when": "accepted"
+    },
+    {
+      "id": "rations-east",
+      "type": "ressource",
+      "resource": "food",
+      "quantity": 5,
+      "locationId": "capital-resource-iron-village",
+      "when": "accepted"
+    },
+    {
+      "id": "rations-south",
+      "type": "ressource",
+      "resource": "food",
+      "quantity": 5,
+      "locationId": "capital-resource-wood-village",
+      "when": "accepted"
+    },
+    {
+      "id": "rations-west",
+      "type": "ressource",
+      "resource": "food",
+      "quantity": 5,
+      "locationId": "capital-resource-stone-village",
+      "when": "accepted"
+    }
+  ],
+  "actions": [
+    {
+      "id": "receive-order",
+      "action": "Parler",
+      "lieu": "capital",
+      "interaction": "Recevoir l’ordre de ravitaillement",
+      "dialogue": {
+        "id": "supply-order",
+        "qui": "marshal-aldren",
+        "goal": "order-received"
+      }
+    },
+    {
+      "id": "reach-north",
+      "action": "Atteindre",
+      "lieu": "capital-resource-gold-village",
+      "requires": ["receive-order"]
+    },
+    {
+      "id": "take-north",
+      "action": "Prendre",
+      "interaction": "Réquisitionner 5 rations",
+      "origine": "capital-resource-gold-village",
+      "quoi": "food",
+      "combien": 5,
+      "requires": ["reach-north"]
+    },
+    {
+      "id": "reach-east",
+      "action": "Atteindre",
+      "lieu": "capital-resource-iron-village",
+      "requires": ["receive-order"]
+    },
+    {
+      "id": "take-east",
+      "action": "Prendre",
+      "interaction": "Réquisitionner 5 rations",
+      "origine": "capital-resource-iron-village",
+      "quoi": "food",
+      "combien": 5,
+      "requires": ["reach-east"]
+    },
+    {
+      "id": "reach-south",
+      "action": "Atteindre",
+      "lieu": "capital-resource-wood-village",
+      "requires": ["receive-order"]
+    },
+    {
+      "id": "take-south",
+      "action": "Prendre",
+      "interaction": "Réquisitionner 5 rations",
+      "origine": "capital-resource-wood-village",
+      "quoi": "food",
+      "combien": 5,
+      "requires": ["reach-south"]
+    },
+    {
+      "id": "reach-west",
+      "action": "Atteindre",
+      "lieu": "capital-resource-stone-village",
+      "requires": ["receive-order"]
+    },
+    {
+      "id": "take-west",
+      "action": "Prendre",
+      "interaction": "Réquisitionner 5 rations",
+      "origine": "capital-resource-stone-village",
+      "quoi": "food",
+      "combien": 5,
+      "requires": ["reach-west"]
+    },
+    {
+      "id": "reach-fort",
+      "action": "Atteindre",
+      "lieu": "supply-fort",
+      "requires": ["take-north", "take-east", "take-south", "take-west"],
+      "rewards": [
+        {
+          "type": "xp",
+          "amount": 20
+        }
+      ]
+    },
+    {
+      "id": "deliver-food",
+      "action": "Donner",
+      "interaction": "Remettre les 20 rations",
+      "destinataire": "supply-fort",
+      "quoi": "food",
+      "combien": 20,
+      "requires": ["reach-fort"]
+    }
+  ],
+  "events": [
+    {
+      "id": "reveal-destinations",
+      "on": "QuestAccepted",
+      "effects": [
+        {
+          "type": "revealLocation",
+          "locationId": "capital-resource-gold-village",
+          "recipient": "participants"
+        },
+        {
+          "type": "revealLocation",
+          "locationId": "capital-resource-iron-village",
+          "recipient": "participants"
+        },
+        {
+          "type": "revealLocation",
+          "locationId": "capital-resource-wood-village",
+          "recipient": "participants"
+        },
+        {
+          "type": "revealLocation",
+          "locationId": "capital-resource-stone-village",
+          "recipient": "participants"
+        },
+        {
+          "type": "revealLocation",
+          "locationId": "supply-fort",
+          "recipient": "participants"
+        }
+      ]
+    }
+  ],
+  "outcomes": {
+    "success": [
+      {
+        "type": "xp",
+        "amount": 75
+      },
+      {
+        "type": "narration",
+        "text": "Les vingt rations rejoignent les réserves de Rochegarde. Le ravitaillement est terminé."
+      }
+    ],
+    "failure": [],
+    "abandoned": []
+  },
+  "transitions": []
+}

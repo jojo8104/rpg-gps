@@ -1,20 +1,40 @@
+import { heroPoseStyle } from "./hero-sprite-atlas.js";
 import { MapLayers } from "./MapLayers.js";
+import { armyBanner } from "./army-banner.js";
+import { hasHeroMoved } from "./hero-motion.js";
 
 export class UnitRenderer {
-  constructor({ map, mode, onMove }) {
+  constructor({ map, mode, onMove, billboards }) {
     this.map = map;
     this.mode = mode;
     this.onMove = onMove;
+    this.billboards = billboards;
+    this.heading = 0;
     this.marker = null;
     this.accuracy = null;
     this.animation = null;
+    this.walking = false;
+    map.on("unload", () => {
+      cancelAnimationFrame(this.animation);
+      clearTimeout(this.idleTimer);
+    });
   }
-  render(position, accuracy, heading) {
+  render(
+    position,
+    accuracy,
+    heading,
+    classId = this.classId ?? "warrior",
+    armyUnits = this.armyUnits,
+    gender = this.gender,
+  ) {
+    this.classId = classId;
+    this.gender = gender;
+    this.armyUnits = armyUnits;
     const target = asLatLng(position);
     if (!this.marker) {
       const icon = L.divIcon({
         className: "rpg-marker-host rpg-hero-marker-host",
-        html: heroSprite(),
+        html: "",
         iconSize: [56, 56],
         iconAnchor: [28, 28],
       });
@@ -24,6 +44,7 @@ export class UnitRenderer {
         zIndexOffset: 1000,
         icon,
       }).addTo(this.map);
+      this.lastTarget = target;
       if (this.mode !== "gps")
         this.marker.on("dragend", () =>
           this.onMove(toPosition(this.marker.getLatLng())),
@@ -32,28 +53,41 @@ export class UnitRenderer {
     this.setHeading(heading);
     if (this.mode === "gps" && Number.isFinite(accuracy)) {
       if (!this.accuracy)
-        this.accuracy = L.circle(target, {
+        this.accuracy = L.circle(this.marker.getLatLng(), {
           pane: MapLayers.EXPLORATION,
           radius: accuracy,
           className: "rpg-gps-accuracy",
           interactive: false,
         }).addTo(this.map);
-      else this.accuracy.setLatLng(target).setRadius(accuracy);
+      else this.accuracy.setLatLng(this.marker.getLatLng()).setRadius(accuracy);
     }
   }
   setHeading(heading) {
-    const hero = this.marker?.getElement()?.querySelector(".rpg-hero");
-    if (!hero || !Number.isFinite(heading)) return;
-    const direction = headingDirection(heading);
-    hero.dataset.direction = direction.id;
-    hero.style.setProperty("--hero-direction-angle", `${direction.angle}deg`);
-    hero.setAttribute("aria-label", `Héros orienté ${direction.label}`);
+    if (Number.isFinite(heading)) this.heading = heading;
+    if (!this.marker) return;
+    const direction = headingDirection(this.heading);
+    this.billboards.set("hero", {
+      marker: this.marker,
+      kind: "hero",
+      heading: this.heading,
+      walking: this.walking,
+      classId: this.classId,
+      gender: this.gender,
+      html: armyBanner(this.armyUnits) + heroSprite(this.classId, this.gender),
+      label: `Héros orienté ${direction.label}`,
+    });
   }
   #interpolateTo(target) {
-    if (this.mode !== "gps" || !this.marker) {
-      this.marker.setLatLng(target);
+    if (
+      this.lastTarget?.[0] === target[0] &&
+      this.lastTarget?.[1] === target[1]
+    )
       return;
+    if (hasHeroMoved(this.lastTarget, target, this.mode)) {
+      clearTimeout(this.idleTimer);
+      this.walking = true;
     }
+    this.lastTarget = target;
     cancelAnimationFrame(this.animation);
     const start = this.marker.getLatLng();
     const began = performance.now();
@@ -65,7 +99,15 @@ export class UnitRenderer {
         start.lat + (target[0] - start.lat) * eased,
         start.lng + (target[1] - start.lng) * eased,
       ]);
+      this.accuracy?.setLatLng(this.marker.getLatLng());
+      this.billboards.render();
       if (t < 1) this.animation = requestAnimationFrame(tick);
+      else if (this.walking) {
+        this.idleTimer = setTimeout(() => {
+          this.walking = false;
+          this.setHeading(this.heading);
+        }, 400);
+      }
     };
     this.animation = requestAnimationFrame(tick);
   }
@@ -93,6 +135,17 @@ export function headingDirection(heading) {
   return DIRECTIONS[Math.round(normalized / 45) % DIRECTIONS.length];
 }
 
-function heroSprite() {
-  return '<div class="rpg-hero" data-direction="n" role="img" aria-label="Héros orienté nord"><span class="hero-direction"><svg viewBox="0 0 56 56" aria-hidden="true"><ellipse class="rpg-hero__shadow" cx="28" cy="32" rx="17" ry="13"/><g class="rpg-hero__sprite"><path class="rpg-hero__cloak" d="M18 39 21 22 28 16 35 22 38 39 28 47Z"/><circle class="rpg-hero__head" cx="28" cy="17" r="7"/><path class="rpg-hero__face" d="m24 13 4-7 4 7-4 3Z"/><path class="rpg-hero__shoulders" d="M16 29 22 22h12l6 7-5 5-7-4-7 4Z"/><path class="rpg-hero__weapon" d="m36 25 9-13 2 2-8 14 4 3-2 2-7-6Z"/><circle class="rpg-hero__hand" cx="37" cy="27" r="2"/></g></svg></span></div>';
+export function heroSprite(classId = "warrior", gender = null) {
+  const poses = [0, 1, 2]
+    .map((step) => {
+      const style = Object.entries(heroPoseStyle(4, step, classId, gender))
+        .map(
+          ([key, value]) =>
+            `${key.replace(/[A-Z]/g, (letter) => "-" + letter.toLowerCase())}:${value}`,
+        )
+        .join(";");
+      return `<span class="rpg-hero-pose" data-step="${step}" style='${style}'></span>`;
+    })
+    .join("");
+  return `<span class="rpg-hero-foot-shadow" aria-hidden="true"></span><span class="rpg-hero-sprite" aria-hidden="true">${poses}</span>`;
 }

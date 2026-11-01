@@ -1,0 +1,5 @@
+{
+  "date": "2026-10-25",
+  "mode": "built-in imagegen",
+  "prompt": "Edit target: attached male outfit atlas, 4 columns by 2 rows. Preserve EXACT eight outfits, colors, material rendering, anime linework, headless cutout format and grid order. Only modify outfits indexes 0 warrior (top left), 1 purple mage, 2 green ranger, 5 burgundy mayor (bottom second), 7 orange waistcoat innkeeper (bottom right). On these five make shoulders visibly more square: raise outer shoulder seams and use a straighter almost horizontal shoulder line from collar to upper arm, adult male anatomy, reduce drooping slope. Preserve neck openings, hands, complete arms, collars, overall height and lower silhouettes. Do not widen these assets globally; exact width scaling will be handled by game renderer. Other three outfits unchanged. All cutouts fully separated with clear transparent gutters, no touching neighbor, no text, no heads, no necks, no background. Genuine transparent background."
+}

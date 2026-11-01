@@ -43,25 +43,9 @@ Les unités conservent leur `ownerPlayerId` dans une armée ou une garnison. Le
 recrutement applique les coûts des définitions d'unités, exige un héros présent
 dans un lieu recruteur, et respecte la capacité de son armée.
 
-Le combat temps réel sépare `BattleState`, état sérialisable, de `BattleEngine`,
-simulation déterministe pilotée par ticks. Trois lignes abstraites accueillent au
-maximum trois héros par équipe. Les unités acquièrent leurs cibles, avancent,
-attaquent et retraitent automatiquement selon leur comportement propre. Après une
-percée sur une ligne vide, elles restent sur cette ligne et infligent directement
-au héros ennemi actif le plus proche des dégâts multipliés (×1,5 par défaut). La
-bataille se termine dès qu'une équipe ne possède plus aucun héros actif.
-
-Pendant une bataille active, l'écran Battle est verrouillé. Il ne peut être quitté
-que par la fin du combat, une reddition explicite ou une fuite GPS confirmée hors
-de la zone réelle de bataille.
-
-La résolution crée éventuellement un `LootSite` persistant au centre GPS du
-combat. Les objets transportables sont attribués aux héros victorieux encore
-actifs, proportionnellement à leur contribution, mais ne rejoignent leur inventaire
-qu'après une collecte physique dans la zone et dans la limite de leur capacité.
-Les objets non transportables restent sur le champ de bataille. Les héros éliminés
-de l'équipe victorieuse sont exclus du partage ; les objets de quête et liés au
-compte ne peuvent pas rejoindre le butin.
+Le combat par cartes sépare les instantanés persistants (`BattleState`) de
+`BattleEngine`, qui orchestre les choix simultanés et leurs échéances. Les règles
+se trouvent dans `app/js/core/battle-duel/` et la vue dans `battle-duel-view.js`.
 
 Les batailles produisent aussi un `BattleSite` temporaire : il est toujours visible
 pour ses participants et devient visible aux autres joueurs lorsqu'ils passent à
@@ -74,17 +58,9 @@ les entrées et sorties de zones sans répétition. `InteractionEngine` en dédu
 interaction de lieu, de quête, d'exploration ou un `Encounter`. Le GPS et la carte
 ne contiennent aucune règle de scénario.
 
-Les renforts rejoignent une bataille active uniquement depuis sa zone réelle ;
-leur héros prend automatiquement la première des trois lignes encore libres.
-
-Une fuite nécessite plusieurs actualisations GPS hors de la zone de bataille :
-la première sortie est potentielle, puis la fuite est validée selon une règle
-configurable (`fleeConfirmations`).
-
-Après une fuite validée, une poursuite simulée applique des pertes selon vitesse,
-portée et moral ; le héros fuyant reçoit un cooldown configurable avant tout nouvel
-engagement. Les unités engagées restent sur le terrain, perdent le commandement et
-ne subissent la poursuite que si elles fuient explicitement.
+Les renforts rejoignent une bataille depuis sa zone réelle entre deux décisions,
+avant tout choix ou verrouillage. La fuite se choisit dans le duel ; le déplacement
+GPS seul ne termine pas le combat.
 
 La résolution persistante d'une bataille produit un rapport de survivants, pertes,
 prisonniers, déserteurs et butin. Les groupes non joueurs utilisent le modèle
@@ -124,3 +100,93 @@ Exécuter `npm test` depuis la racine du projet.
 
 Les conventions de rangement sont documentées dans `app/css/README.md` et
 `app/js/README.md`.
+
+## Interactions entre joueurs sur la carte
+
+Un clic sur un héros allié permet de demander une conversation ou un échange à portée d’engagement (8 m par défaut). Le destinataire accepte ou refuse dans son bottomsheet.
+
+- **Parler** ouvre les boutons de partage de la quête courante et d’échange réciproque des renseignements de carte. La conversation se fait de vive voix. La quête partagée est un briefing ; sa progression reste commune à la partie.
+- **Échanger** affiche les deux offres synchronisées. Un clic ou un glissé ajoute un élément ; les ressources ont une quantité modifiable. Les bagages et les unités sont transférés entiers, avec leurs caractéristiques. Les équipements portés transférés arrivent dans les bagages du destinataire.
+- Les deux joueurs valident la même version de l’offre. Une modification d’offre ou de possessions annule les validations. Le serveur vérifie les stocks, les places de bagages et le commandement avant d’appliquer les deux transferts ensemble.
+- Une demande expire après deux minutes, une session après dix minutes. Distance excessive, combat, indisponibilité ou déconnexion annulent l’interaction.
+- Les attaques respectent `allowPvP` (actif en compétition et en duel). Les renforts proches sont filtrés par alliance. Le serveur filtre les positions et les renseignements ennemis par destinataire, également dans les réponses et lors d’une reconnexion.
+
+Les règles sont dans `player-social-service.js`, l’interface dans `player-social-view.js` et la projection réseau dans `server/realtime/player-projection.js`. Les tests `player-social`, `player-social-server` et `player-projection` couvrent les accords, les transferts et la confidentialité réseau.
+
+### Quêtes annexes des villages et tavernes
+
+Chaque héros dispose d’une offre par chef de village et d’une offre indépendante par taverne construite. Sur place, utiliser **Parler** ou **Visiter la taverne (missions)**, consulter l’objectif et la récompense, puis accepter ou choisir **Plus tard**.
+
+Le catalogue comprend les vivres, les messages, le bois, la pierre, le fer, la bière, les chevaux et des lots combinés (bois + pierre, vivres + bière, fer + chevaux). Il propose aussi l’installation d’un PNJ spécialiste recruté et transporté par le héros, ou le dépôt d’une unité de miliciens, archers ou lanciers en garnison. Les personnages du scénario principal ne sont pas demandés.
+
+Les nouvelles livraisons utilisent les prix d’achat du marché : pour une valeur engagée V, la récompense vaut `ceil(1,2 × V) + 2` or et `ceil(10 + 3 × V)` XP. Exemple : 10 bois + 5 pierres donnent **11 or et 31 XP**. Les PNJ et unités rapportent uniquement `ceil(25 + 4 × coût de recrutement)` XP : un maître fermier donne **185 XP**, une unité de miliciens **105 XP**. Ces demandes sont définies dans `side-quest-catalog.js`. Les missions historiques restent au catalogue : 2 vivres pour **5 or et 15 XP**, ou un message pour **3 or et 30 XP**.
+
+Les lots et les PNJ sont transférés dans le stock du lieu en une seule fois : ressources manquantes ou stockage insuffisant empêchent tout prélèvement. Les travailleurs installés appliquent leurs bonus de production. Pour une garnison, le joueur choisit explicitement une unité au grade Soldat, avec 6 soldats en pleine santé ; le dépôt respecte les places et permissions habituelles. Une unité ayant déjà rapporté une récompense de garnison ne peut pas en rapporter une autre, même après retrait ou sauvegarde.
+
+Les récompenses ne sont attribuées qu’à la réussite ; l’abandon ne donne rien. Les offres consultées et missions acceptées gardent leurs montants sauvegardés (20 XP pour les anciennes missions sans montant d’expérience). Un message est remis chez son destinataire. Les demandes de garnison ne sont proposées que dans les lieux où le héros a le droit de déposer une unité et où une place est libre.
+
+Une offre consultée reste valable **5 minutes**. Une mission acceptée n’expire pas. Après réussite ou abandon auprès du donneur de quête, son offre suivante devient disponible **5 minutes** plus tard. Les délais utilisent l’horloge du jeu et leurs horodatages sont conservés lors d’une sauvegarde : recharger ne les réinitialise pas. Les missions acceptées, les résultats et les délais apparaissent dans le journal, avec un bouton pour afficher le lieu sur la carte.
+
+Le service `app/js/core/side-quest-service.js` contient les règles et la constante `SIDE_QUEST_RENEWAL_MS`. L’état est sérialisé dans `Hero.sideQuests`, indépendamment du scénario principal. Les tests `tests/side-quest.test.js` couvrent renouvellement, sauvegarde, accès, livraison, messages et récompenses uniques.
+
+### IA des combats
+
+`battle-duel/commands.js` choisit une carte et une technique pour les camps
+non contrôlés par un joueur. Les décisions sont déterministes et sans DOM.
+
+### Embuscades
+
+Une embuscade réussie augmente l’attaque des troupes de son camp et réduit la
+défense des troupes adverses pendant le premier duel. Les statistiques de base
+restent inchangées et les bonus expirent au duel suivant. Une embuscade annulée
+n’applique aucun bonus. L’état est conservé en sauvegarde et transmis par le serveur.
+
+## Tableau de bord de supervision
+
+Ouvrir `/dashboard/` sur le même serveur que le jeu. Une clé administrateur protège
+les API : elle est affichée au démarrage dans le journal du service (`journalctl
+-u rpg-gps -n 30 --no-pager`). Pour une clé stable, définir la variable
+`RPG_GPS_DASHBOARD_TOKEN` dans l’environnement du service. Sans cette variable,
+une nouvelle clé aléatoire est créée à chaque démarrage. La clé est saisie dans
+le formulaire et conservée uniquement dans la session de l’onglet.
+
+Depuis le PC serveur : `http://127.0.0.1:3000/dashboard/`. Depuis un autre PC,
+un tunnel SSH permet un accès privé :
+
+```bash
+ssh -N -L 3001:127.0.0.1:3000 rpg-gps-server
+```
+
+Puis ouvrir `http://127.0.0.1:3001/dashboard/`. Pour un accès distant sans tunnel,
+utiliser le domaine HTTPS du jeu.
+
+Chaque partie possède un onglet. La carte présente les joueurs, lieux, héros PNJ,
+groupes autonomes et la zone GPS ; les parties fictives utilisent un repère simple.
+Le bouton « Effacer » à côté de chaque onglet demande confirmation, puis supprime
+la partie et son historique, invalide ses sessions et sort les joueurs connectés.
+La suppression est enregistrée avant confirmation du serveur. Les comptes joueurs
+et les sauvegardes manuelles indépendantes sont conservés.
+En GPS, le cadrage initial et « Recentrer » utilisent exclusivement la PlayArea
+lorsqu'elle est disponible. Les lieux hors zone sont masqués sur la carte par
+défaut, restent signalés dans les détails et peuvent être affichés avec
+« Lieux hors zone ». La supervision ne déplace aucun lieu du jeu.
+Les détails montrent les ressources, inventaires, équipement, garnisons, combats,
+quêtes, scénario, monde et les 100 derniers événements. Les compteurs montrent
+mémoire du processus, mémoire JavaScript, CPU et nombre de parties actives.
+
+L’actualisation se fait toutes les quatre secondes, uniquement tant que l’onglet
+est visible. Le tableau ne rejoint aucune partie, ne reprend aucune simulation
+et n’exécute aucune règle du moteur dans le navigateur. Les résumés de toutes les
+parties sont légers ; seuls les détails de la partie sélectionnée sont sérialisés.
+
+La heatmap représente la densité des mesures de position validées par le serveur
+(mêmes cellules et origine que le jeu : 15 mètres en GPS et grille fictive
+équivalente), sur les 2 000 dernières mesures par
+partie. Cet historique borné est sauvegardé avec la partie et commence avec cette
+version : aucune position ancienne n’est inventée. Les trajets affichent les
+250 dernières mesures par joueur. Il s’agit d’une heatmap de suivi ; les signaux
+de recherche calculés uniquement par l’ancienne interface du joueur ne sont pas
+reproduits comme données officielles. Aucun brouillard de guerre n’est appliqué
+à cette vue administrateur.
+
+Les graphiques historiques du Dashboard suivent les héros, équipes et lieux avec un relevé du monde toutes les 4 secondes et 2 000 relevés consultables sur disque. Voir [le guide de supervision](docs/dashboard-monitoring.md) pour les pondérations de puissance et les limites du stockage.

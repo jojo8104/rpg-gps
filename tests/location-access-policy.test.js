@@ -3,7 +3,7 @@ import test from "node:test";
 import { Location } from "../app/js/core/location.js";
 import { LocationAccessPolicy, LOCATION_RELATIONS } from "../app/js/core/location-access-policy.js";
 
-const policy = new LocationAccessPolicy({ participants: [
+const policy = new LocationAccessPolicy({ rules: { allowPvP: true }, participants: [
   { playerId: "p1", teamId: "blue" }, { playerId: "p2", teamId: "blue" }, { playerId: "p3", teamId: "red" },
 ] });
 const location = (ownerId, features = {}) => new Location({ id: `place-${ownerId ?? "neutral"}`, name: "Lieu", type: "village", source: "scenario", position: { latitude: 0, longitude: 0 }, ownerId, features });

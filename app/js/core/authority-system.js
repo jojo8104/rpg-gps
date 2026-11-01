@@ -1,4 +1,5 @@
 import { UNIT_RANKS, requireRank } from "./rank-system.js";
+import { getItemDefinition } from "./item-catalog.js";
 
 export const BASE_HERO_AUTHORITY = 3;
 
@@ -8,7 +9,14 @@ export function maximumAuthority(hero, classDefinition) {
     throw new RangeError(
       "Le bonus d'autorite de classe doit etre un entier positif ou nul.",
     );
-  return BASE_HERO_AUTHORITY + bonus + hero.level - 1;
+  const equipmentBonus = [
+    ...new Set(Object.values(hero.equipment ?? {})),
+  ].reduce(
+    (total, itemId) =>
+      total + (getItemDefinition(itemId)?.modifiers?.authority ?? 0),
+    0,
+  );
+  return BASE_HERO_AUTHORITY + bonus + hero.level - 1 + equipmentBonus;
 }
 
 export function unitAuthorityCost(unit, unitDefinitions, rankId = unit.rank) {

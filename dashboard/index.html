@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RPG GPS · Supervision</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="dashboard.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <small>RPG GPS / ADMINISTRATION</small>
+        <h1>Supervision du monde</h1>
+      </div>
+      <div id="connection" role="status">Connexion requise</div>
+    </header>
+    <form id="login">
+      <label
+        >Clé administrateur
+        <input id="token" type="password" required autocomplete="off" /></label
+      ><button>Se connecter</button
+      ><span>Clé disponible dans le journal du serveur.</span>
+    </form>
+    <section id="metrics" class="metrics"></section>
+    <details id="map-manager" class="map-manager" hidden></details>
+    <nav id="tabs" aria-label="Parties"></nav>
+    <main>
+      <section class="map-panel">
+        <div class="toolbar">
+          <strong id="party-title">Aucune partie sélectionnée</strong
+          ><button id="center">Recentrer</button
+          ><label><input id="heat" type="checkbox" checked /> Heatmap</label
+          ><label><input id="trails" type="checkbox" checked /> Trajets</label
+          ><label><input id="outside" type="checkbox" /> Lieux hors zone</label
+          ><button id="refresh">Actualiser</button
+          ><button id="logout">Déconnexion</button>
+        </div>
+        <div class="perspective-toolbar">
+          <label
+            >Perspective
+            <select id="perspective">
+              <option value="">Vue administrateur</option>
+            </select></label
+          >
+          <label
+            ><input type="checkbox" id="vision" checked /> Champ de
+            vision</label
+          >
+          <label><input type="checkbox" id="fog" /> Brouillard de guerre</label>
+          <label
+            ><input type="checkbox" id="borders" checked /> Frontières
+            actuelles</label
+          >
+          <p id="perspective-note" role="status"></p>
+        </div>
+        <div class="history-toolbar">
+          <label for="timeline">Chronologie</label
+          ><input
+            id="timeline"
+            type="range"
+            min="0"
+            max="100"
+            value="100"
+            step="1"
+          /><output id="history-time">Direct</output>
+        </div>
+        <div id="map"></div>
+        <p class="legend">
+          ● Joueurs · ◆ Lieux · ▲ Groupes · Orange : densité des mesures reçues,
+          cumulée depuis le début de l’enregistrement. Trajets pointillés :
+          groupes autonomes. Aucun calcul du jeu n’est exécuté par ce tableau.
+        </p>
+      </section>
+      <aside>
+        <h2>Suivi de la partie</h2>
+        <p id="summary">Sélectionnez une partie.</p>
+        <label for="entity-search" class="search-label"
+          >Rechercher un élément</label
+        >
+        <input
+          id="entity-search"
+          type="search"
+          placeholder="Joueur, lieu, GA, objet…"
+          autocomplete="off"
+        />
+        <div id="details"></div>
+      </aside>
+    </main>
+    <section
+      id="history-charts"
+      aria-label="Graphiques historiques du monde"
+    ></section>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="dashboard.js"></script>
+  </body>
+</html>

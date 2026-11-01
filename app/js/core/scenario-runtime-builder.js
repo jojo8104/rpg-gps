@@ -1,13 +1,23 @@
 import { distanceMeters, validatePosition } from "./geo.js";
 import { distanceForPace } from "./quest-pace-profile.js";
 import { SetupPlacementService } from "./setup-placement-service.js";
+import { validateScenarioMapLocations } from "./scenario-map-definition.js";
+import { LocationSpacingPolicy } from "./location-spacing-policy.js";
 
-const STRATEGIES = new Set(["fixed", "distance", "area-relative"]);
+const STRATEGIES = new Set([
+  "fixed",
+  "random",
+  "distance",
+  "area-relative",
+  "player-walk",
+  "validated-cell",
+]);
 
 /** Matérialise les emplacements abstraits du scénario à partir du setup de partie. */
 export class ScenarioRuntimeBuilder {
-  build({ scenario, setup, bindings, locations }) {
+  build({ scenario, setup, bindings, locations, coordinateMode = "gps" }) {
     if (scenario === null) return null;
+    validateScenarioMapLocations(scenario, bindings, locations);
     const placementOverrides = setup.locationSetup.placements ?? {};
     const bindingBySlot = new Map(
       bindings.map((binding) => [binding.locationSlotId, binding]),
@@ -16,6 +26,19 @@ export class ScenarioRuntimeBuilder {
       locations.map((location) => [location.id, location]),
     );
     const placements = {};
+    const spacing = new LocationSpacingPolicy({ setup, coordinateMode });
+    // Réserver les points manuels avant tout placement automatique.
+    const occupied = Object.entries(placementOverrides).flatMap(
+      ([slotId, config]) => {
+        if (config.strategy !== "fixed" || !config.position) return [];
+        const id = bindingBySlot.get(slotId)?.locationId ?? slotId;
+        const location = locationById.get(id);
+        return location ? [{ ...location, position: config.position }] : [];
+      },
+    );
+    const placementService = new SetupPlacementService({
+      distanceFn: (a, b) => spacing.distance(a, b),
+    });
 
     for (const slot of scenario.locationSlots) {
       const binding =
@@ -35,24 +58,80 @@ export class ScenarioRuntimeBuilder {
         throw new RangeError(
           `Stratégie de placement inconnue pour ${slot.id}.`,
         );
+      if (
+        slot.world?.role === "starting-point" &&
+        ["distance", "player-walk", "validated-cell"].includes(config.strategy)
+      )
+        throw new RangeError(
+          "Le point de départ doit être placé dès la création de la carte.",
+        );
       if (binding === null || location === null)
         throw new RangeError(
           `Le lieu de scénario ${slot.id} doit être associé avant le démarrage.`,
         );
 
+      if (["player-walk", "validated-cell"].includes(config.strategy)) {
+        const walkingDistanceMeters = config.walkingDistanceMeters ?? 300;
+        if (
+          config.strategy === "player-walk" &&
+          (!Number.isFinite(walkingDistanceMeters) ||
+            walkingDistanceMeters < 10 ||
+            walkingDistanceMeters > 10000)
+        )
+          throw new RangeError("Distance de marche invalide.");
+        placements[slot.id] = {
+          strategy: config.strategy,
+          status: "player-pending",
+          locationId: location.id,
+          position: null,
+          walkingDistanceMeters,
+        };
+        continue;
+      }
+      if (config.strategy === "random") {
+        const [position] = placementService.generate({
+          playArea: setup.playArea,
+          count: 1,
+          randomize: true,
+          acceptPosition: (candidate) =>
+            spacing.check(location, candidate, occupied).success,
+        });
+        placements[slot.id] = {
+          strategy: "random",
+          status: "placed",
+          locationId: location.id,
+          position,
+        };
+        occupied.push({ ...location, position });
+        continue;
+      }
       if (config.strategy === "fixed") {
-        const position = config.position ?? location.position;
+        let position = config.position ?? location.position;
         validatePosition(position);
         if (!setup.playArea.contains(position))
           throw new RangeError(
             `Le placement fixe ${slot.id} doit être situé dans la PlayArea.`,
           );
+        if (
+          config.position &&
+          !spacing.check(location, position, occupied).success
+        )
+          throw new RangeError(
+            `Le placement fixe ${slot.id} ne respecte pas l’écart entre lieux.`,
+          );
+        position = placementService.resolveInside({
+          playArea: setup.playArea,
+          preferred: position,
+          acceptPosition: (candidate) =>
+            spacing.check(location, candidate, occupied).success,
+        });
         placements[slot.id] = {
           strategy: "fixed",
           status: "placed",
           locationId: location.id,
           position: { ...position },
         };
+        occupied.push({ ...location, position });
         continue;
       }
 
@@ -89,11 +168,13 @@ export class ScenarioRuntimeBuilder {
           minimumDistance,
           Math.min(maximumDistance, equivalentRadius * areaRatio),
         );
-        const position = new SetupPlacementService().findPosition({
+        const position = placementService.findPosition({
           playArea: setup.playArea,
           origin: originPlacement.position,
           preferredDistance,
           preferredDirectionDegrees: config.directionDegrees ?? 0,
+          acceptPosition: (candidate) =>
+            spacing.check(location, candidate, occupied).success,
         });
         placements[slot.id] = {
           strategy: "area-relative",
@@ -104,6 +185,7 @@ export class ScenarioRuntimeBuilder {
           preferredDistanceMeters: preferredDistance,
           areaRadiusRatio: areaRatio,
         };
+        occupied.push({ ...location, position });
         continue;
       }
 
@@ -153,6 +235,13 @@ export class ScenarioRuntimeBuilder {
       };
     }
 
+    for (const slot of scenario.locationSlots) {
+      if (slot.world) placements[slot.id].world = structuredClone(slot.world);
+      if (slot.appearance) {
+        placements[slot.id].appearance = structuredClone(slot.appearance);
+        placements[slot.id].appearedForPlayerIds = [];
+      }
+    }
     return { scenarioId: scenario.id, placements };
   }
 
@@ -176,7 +265,7 @@ export class ScenarioRuntimeBuilder {
     return started;
   }
 
-  update(runtime, { position, accuracy = null }) {
+  update(runtime, { position, accuracy = null, distanceFn = distanceMeters }) {
     if (runtime === null) return [];
     validatePosition(position);
     const updates = [];
@@ -189,13 +278,13 @@ export class ScenarioRuntimeBuilder {
           accuracy <= placement.maximumAccuracyMeters);
       if (accurate) {
         if (placement.lastPosition !== null)
-          placement.distanceMeters += distanceMeters(
+          placement.distanceMeters += distanceFn(
             placement.lastPosition,
             position,
           );
         placement.lastPosition = { ...position };
       } else placement.lastPosition = null;
-      placement.distanceFromOriginMeters = distanceMeters(
+      placement.distanceFromOriginMeters = distanceFn(
         placement.origin,
         position,
       );

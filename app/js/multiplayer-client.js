@@ -1,3 +1,5 @@
+import { SnapshotReceiver } from "./core/snapshot-delta.js";
+
 const STORAGE_KEY = "rpg-gps-multiplayer-session";
 
 export class MultiplayerClient {
@@ -23,24 +25,31 @@ export class MultiplayerClient {
     this.lastHeroStateSentAt = 0;
     this.worldRevision = 0;
     this.gameRevision = 0;
+    this.snapshotReceiver = new SnapshotReceiver();
+    this.resyncPending = false;
+    this.sessionActive = false;
+    this.resumePending = null;
+    this.sessionBound = false;
+    this.socket.on("disconnect", () => {
+      this.sessionBound = false;
+      this.snapshotReceiver.clear();
+    });
+    this.socket.on("connect", () => {
+      if (this.sessionActive && this.#storedToken())
+        this.resume().catch(() => {});
+    });
     this.socket.on("lobby:state", (lobby) => this.#publish(lobby));
-    this.socket.on("game:positions", (snapshot) =>
-      this.positionListeners.forEach((listener) => listener(snapshot)),
-    );
-    this.socket.on("game:world-state", (snapshot) => {
-      if (Number.isInteger(snapshot?.revision))
-        this.worldRevision = Math.max(this.worldRevision, snapshot.revision);
-      this.worldStateListeners.forEach((listener) => listener(snapshot));
-    });
-    this.socket.on("game:state", (snapshot) => {
-      if (Number.isInteger(snapshot?.revision))
-        this.gameRevision = Math.max(this.gameRevision, snapshot.revision);
-      this.gameStateListeners.forEach((listener) => listener(snapshot));
-    });
-    this.socket.on("game:saved", (notice) => {
+    for (const event of ["game:positions", "game:world-state", "game:state"])
+      this.socket.on(event, (packet) => this.#receiveSnapshot(event, packet));
+    const endSession = (notice) => {
+      this.sessionActive = false;
+      this.sessionBound = false;
+      this.snapshotReceiver.clear();
       this.storage?.removeItem(STORAGE_KEY);
       this.savedListeners.forEach((listener) => listener(notice));
-    });
+    };
+    this.socket.on("game:saved", endSession);
+    this.socket.on("game:ended", endSession);
     this.socket.on("account:state", (accounts) =>
       this.accountListeners.forEach((listener) => listener(accounts)),
     );
@@ -80,6 +89,12 @@ export class MultiplayerClient {
     return this.#request("account:create", { name });
   }
 
+  async deleteAccount(accountId) {
+    const result = await this.#request("account:delete", { accountId });
+    if (this.selectedAccount?.id === accountId) this.selectedAccount = null;
+    return result;
+  }
+
   async listAccounts() {
     return this.#request("account:list", {});
   }
@@ -94,19 +109,39 @@ export class MultiplayerClient {
     return this.#sessionRequest("lobby:create", { playerName });
   }
 
+  async createSolo(configuration) {
+    return this.#sessionRequest("lobby:solo", configuration);
+  }
+
   async join(code, playerName) {
     return this.#sessionRequest("lobby:join", { code, playerName });
   }
 
-  async resume() {
+  resume() {
+    if (this.resumePending) return this.resumePending;
+    this.resumePending = this.#resumeSession().finally(() => {
+      this.resumePending = null;
+    });
+    return this.resumePending;
+  }
+
+  async #resumeSession() {
     const token = this.#storedToken();
     if (!token) return null;
     try {
       return await this.#sessionRequest("lobby:resume", { token });
     } catch (error) {
-      this.storage?.removeItem(STORAGE_KEY);
+      this.sessionBound = false;
+      if (error.code === "session_expired") {
+        this.storage?.removeItem(STORAGE_KEY);
+        this.sessionActive = false;
+      }
       throw error;
     }
+  }
+
+  hasStoredSession() {
+    return Boolean(this.#storedToken());
   }
 
   async setReady(ready) {
@@ -117,12 +152,25 @@ export class MultiplayerClient {
     return this.#request("lobby:configure", configuration);
   }
 
-  async selectHeroClass(heroClassId) {
-    return this.#request("lobby:hero-class", { heroClassId });
+  async selectHeroClass(heroClassId, heroGender) {
+    return this.#request("lobby:hero-class", { heroClassId, heroGender });
   }
 
   async setPlayArea(playArea) {
     return this.#request("lobby:play-area", playArea);
+  }
+
+  configurePreparation(change) {
+    return this.#request("lobby:preparation", change);
+  }
+  installQrLocation(qrId, position) {
+    return this.#request("lobby:qr-install", { qrId, position });
+  }
+  printPreparation() {
+    return this.#request("lobby:qr-print", {});
+  }
+  scanQrLocation(qrId) {
+    return this.#request("game:qr-scan", { qrId });
   }
 
   async sendPosition(position) {
@@ -188,8 +236,26 @@ export class MultiplayerClient {
     return this.#request("lobby:start", {});
   }
 
+  async listMaps() {
+    return this.#request("map:list", {});
+  }
+  async saveMap(name, playArea) {
+    return this.#request("map:save", { name, playArea });
+  }
+  async deleteMap(id) {
+    return this.#request("map:delete", { id });
+  }
+
   async listSaves() {
     return this.#request("save:list", {});
+  }
+
+  listSavedGames() {
+    return this.#rawRequest("save:catalog", {});
+  }
+
+  openSavedGame(saveId) {
+    return this.#sessionRequest("save:open", { saveId });
   }
 
   async loadSave(saveId) {
@@ -200,21 +266,60 @@ export class MultiplayerClient {
     return this.#request("game:save-and-end", { name });
   }
 
+  async destroyGame() {
+    return this.#request("game:destroy", {});
+  }
+
   async leave() {
     const result = await this.#request("lobby:leave", {});
     this.storage?.removeItem(STORAGE_KEY);
+    this.sessionActive = false;
+    this.snapshotReceiver.clear();
     return result;
   }
 
+  #receiveSnapshot(event, packet) {
+    let snapshot;
+    try {
+      snapshot = this.snapshotReceiver.receive(event, packet);
+    } catch {
+      if (!this.resyncPending) {
+        this.resyncPending = true;
+        this.requestGameState()
+          .catch(() => {})
+          .finally(() => {
+            this.resyncPending = false;
+          });
+      }
+      return null;
+    }
+    if (event === "game:state") {
+      this.gameRevision = snapshot?.revision ?? 0;
+      this.gameStateListeners.forEach((listener) => listener(snapshot));
+    } else if (event === "game:world-state") {
+      this.worldRevision = snapshot?.revision ?? 0;
+      this.worldStateListeners.forEach((listener) => listener(snapshot));
+    } else this.positionListeners.forEach((listener) => listener(snapshot));
+    return snapshot;
+  }
+
   async #sessionRequest(event, payload) {
-    const result = await this.#request(event, payload);
+    const result = await this.#rawRequest(event, payload);
+    this.sessionActive = true;
+    this.sessionBound = true;
     if (result.session?.token)
       this.storage?.setItem(STORAGE_KEY, result.session.token);
     if (result.lobby) this.#publish(result.lobby);
     return result;
   }
 
-  #request(event, payload) {
+  async #request(event, payload) {
+    if (this.resumePending) await this.resumePending;
+    else if (this.sessionActive && !this.sessionBound) await this.resume();
+    return this.#rawRequest(event, payload);
+  }
+
+  #rawRequest(event, payload) {
     return new Promise((resolve, reject) => {
       this.socket
         .timeout(8_000)
@@ -223,8 +328,13 @@ export class MultiplayerClient {
             return reject(new Error("Le serveur ne répond pas."));
           if (!response?.ok)
             return reject(
-              new Error(response?.error?.message ?? "Demande refusée."),
+              Object.assign(
+                new Error(response?.error?.message ?? "Demande refusée."),
+                { code: response?.error?.code },
+              ),
             );
+          if (response.game?.sync)
+            response.game = this.#receiveSnapshot("game:state", response.game);
           resolve(response);
         });
     });
@@ -241,5 +351,4 @@ export class MultiplayerClient {
       return null;
     }
   }
-
 }

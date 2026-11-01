@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fr">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tileset de mini-carte</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #202d27;
+      color: #e9e2ca;
+      font: 16px system-ui;
+    }
+    main {
+      max-width: 1100px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 24px;
+    }
+    p {
+      line-height: 1.6;
+    }
+    canvas {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+    }
+    .atlas {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .atlas figure {
+      margin: 0;
+      flex: 1;
+      min-width: 240px;
+    }
+    img {
+      width: 100%;
+      display: block;
+    }
+    .transparent {
+      background: repeating-conic-gradient(#46554b 0% 25%, #354339 0% 50%)
+        0/20px 20px;
+    }
+    figcaption {
+      padding: 12px 0;
+    }
+    label {
+      display: block;
+      margin: 16px 0;
+    }
+  </style>
+  <main>
+    <h1>Mini-carte · terrains JRPG et constructions</h1>
+    <p>
+      Herbe, forêt, colline, relief rocheux et eau. Raccords continus entre
+      voisins, diagonales et berges. Ponts et constructions sur une couche
+      transparente distincte.
+    </p>
+    <label
+      ><input id="objects" type="checkbox" checked /> Afficher les
+      constructions</label
+    >
+    <canvas id="map" aria-label="Exemple de raccords entre biomes"></canvas>
+    <p id="status" role="status">Chargement des atlas…</p>
+    <div class="atlas">
+      <figure>
+        <img
+          src="../app/assets/map/tileset-v3/terrain.png"
+          alt="Atlas des terrains"
+        />
+        <figcaption>
+          Herbe · forêt · colline / roche · eau · variante d'herbe
+        </figcaption>
+      </figure>
+      <figure>
+        <img
+          class="transparent"
+          src="../app/assets/map/tileset-v1/structures.png"
+          alt="Atlas transparent des constructions"
+        />
+        <figcaption>Pont · tour / barricade · village</figcaption>
+      </figure>
+    </div>
+  </main>
+  <script type="module">
+    import {
+      loadMinimapTileset,
+      renderMinimapTileset,
+    } from "../app/js/map/minimap-tileset.js";
+    const codes = { g: "grass", f: "forest", h: "hill", r: "rock", w: "water" };
+    const grid = [
+      "ggffffgggghhrrrr",
+      "gffffffgghhhrrrr",
+      "ggfffffgghhhhrrr",
+      "gggffgggghhhhrrg",
+      "ggggggwwwwghhhgg",
+      "wwwwwwwwwwwwgggg",
+      "ggggggwwwwwwwggg",
+      "ggfffggwwwwwwggg",
+      "ggffffggwwwggggg",
+      "gfffffgggwgggghh",
+      "ggffgggggwggghhh",
+      "gggggggggwgggghh",
+    ].map((row) => [...row].map((code) => codes[code]));
+    const objects = [
+      { kind: "bridge", col: 9, row: 9 },
+      { kind: "bridge", col: 3, row: 5, rotation: 90 },
+      { kind: "tower", col: 12, row: 3 },
+      { kind: "barricade", col: 5, row: 3 },
+      { kind: "village", col: 3, row: 9 },
+      { kind: "tower", col: 1, row: 2 },
+    ];
+    try {
+      const atlas = await loadMinimapTileset();
+      const draw = () =>
+        renderMinimapTileset(
+          document.querySelector("#map"),
+          atlas,
+          grid,
+          document.querySelector("#objects").checked ? objects : [],
+        );
+      document.querySelector("#objects").addEventListener("change", draw);
+      draw();
+      document.querySelector("#status").textContent =
+        "Exemple graphique uniquement, sans règles de jeu.";
+    } catch (error) {
+      document.querySelector("#status").textContent = error.message;
+    }
+  </script>
+</html>

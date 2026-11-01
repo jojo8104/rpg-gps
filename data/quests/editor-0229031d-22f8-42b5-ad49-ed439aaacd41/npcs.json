@@ -1,0 +1,10 @@
+[
+  {
+    "id": "merlin",
+    "name": "Merlin",
+    "role": "Interlocuteur",
+    "locationId": "broceliande",
+    "dialogueId": "dialogue-parler-1",
+    "description": "indique le lieu où se trouve excalibure"
+  }
+]

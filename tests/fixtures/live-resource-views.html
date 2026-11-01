@@ -1,0 +1,82 @@
+<!doctype html><meta charset="utf-8"><title>Tests des mises à jour ciblées</title>
+<div id="market"></div><div id="world" style="height:200px;overflow:auto"></div>
+<script type="module">
+import { renderLocationDetail, updateLocationDetail } from "../../app/js/ui/world-view.js";
+import { renderMarketView, updateMarketView } from "../../app/js/ui/market-view.js";
+import { MarketService } from "../../app/js/core/market-service.js";
+import { Hero } from "../../app/js/core/hero.js";
+import { Location } from "../../app/js/core/location.js";
+const assert = (value, message) => { if (!value) throw Error(message); };
+try {
+  const market = document.querySelector("#market");
+  const hero = new Hero({ id: "h", playerId: "p", name: "H", classId: "warrior", resources: { gold: 20, iron: 5 } });
+  const location = new Location({ id: "market", name: "Marché", type: "village", source: "test", position: { latitude: 0, longitude: 0 }, population: 20, features: { trade: true }, resources: { stock: { gold: 30, wood: 20 } } });
+  const service = new MarketService();
+  let resolveTrade;
+  renderMarketView({ element: market, hero, location, service, onClose() {}, onTrade: () => new Promise(resolve => { resolveTrade = resolve; }) });
+  const root = market.firstChild;
+  const wood = market.querySelector('[data-market-resource="wood"]');
+  const buy = wood.querySelector('[data-trade-direction="buy"]');
+  buy.focus();
+  location.resources.stock.wood = 10;
+  updateMarketView({ element: market, hero, location, service });
+  assert(market.firstChild === root && market.querySelector('[data-market-resource="wood"]') === wood, "Le marché ou sa ligne a été reconstruit");
+  assert(document.activeElement === buy, "Focus perdu pendant la mise à jour du marché");
+  assert(!market.querySelector("small"), "Des informations small restent visibles");
+  assert(market.querySelectorAll(".market-row").length === 2, "Catalogue non filtré");
+  buy.click();
+  updateMarketView({ element: market, hero, location, service });
+  assert(buy.disabled, "Transaction en cours réactivée par un snapshot");
+  resolveTrade();
+  await new Promise(resolve => setTimeout(resolve, 0));
+  assert(!buy.disabled, "Transaction terminée encore bloquée");
+  location.resources.stock.wood = 0;
+  hero.resources.wood = 5;
+  updateMarketView({ element: market, hero, location, service });
+  assert(buy.disabled && !wood.querySelector('[data-trade-direction="sell"]').disabled, "Sens du commerce incorrect");
+  hero.resources.wood = 0;
+  updateMarketView({ element: market, hero, location, service });
+  assert(!market.contains(wood), "Ressource épuisée encore proposée");
+  updateMarketView({ element: market, hero, location, service, canTrade: false });
+  assert([...market.querySelectorAll('[data-trade-direction]')].every(button => button.disabled), "Marché accessible hors portée");
+
+  const world = document.querySelector("#world");
+  const calls = [];
+  const view = { id: "v", name: "Village", type: "village", nature: "village", relation: "owned", owner: { name: "Vous", color: "blue" }, nearby: true, interactionRadius: 20, distance: 0, level: 1, knowledgeLevel: 3, population: 8, populationCapacity: 20, description: "Village", production: [{ id: "wood", amount: 2, capacity: 100 }], stock: [{ id: "wood", amount: 10, capacity: 100 }], presences: [], canDismantle: true,
+  improvements: [{ id: "farm", name: "Ferme", level: 1, canDismantle: true, upgradeActionId: "build-improvement:farm" }], improvementSlots: { free: 1 }, defense: { structures: [], slots: 0, units: [] }, campDevelopment: { experience: 10, experienceRequired: 80, slots: { used: 1, maximum: 2 }, levelUp: { blockers: [] } },
+  actions: [{ id: "build-improvement:farm", label: "Ferme", details: { costs: { wood: 15 }, availableResources: { wood: 10 }, missingResources: [{ id: "wood", missing: 5 }] } }, { id: "production-stock:wood", details: { resourceName: "wood", productionAmount: 2, productionSlotCapacity: 4 } }] };
+  const noop = () => {};
+  renderLocationDetail({ element: world, location: view, index: 0, total: 1, onBack: noop, onPrevious: noop, onNext: noop, onShowMap: noop, onAction: action => calls.push(action) });
+  world.querySelector('[data-open-action-menu="reserves"]').click();
+  const menu = world.querySelector('[data-action-menu="reserves"]');
+  const slot = menu.querySelector('[data-inventory-action]');
+  slot.focus();
+  world.scrollTop = 50;
+  const scroll = world.scrollTop;
+  view.actions[1].details.productionAmount = 3;
+  view.stock[0].amount = 20;
+  view.actions.push({ id: "level-up-camp", label: "Élever au Camp 3" });
+  view.campDevelopment.experience = 11;
+  view.actions[0].details.missingResources = [];
+  view.actions[0].details.availableResources.wood = 20;
+  updateLocationDetail({ element: world, location: view });
+  updateLocationDetail({ element: world, location: view });
+  assert(world.querySelector('[data-action-menu="reserves"]') === menu && !menu.hidden, "Menu des réserves fermé ou remplacé");
+  assert(menu.querySelector('[data-inventory-action]') === slot && document.activeElement === slot, "Slot ou focus remplacé");
+  assert(world.scrollTop === scroll, "Défilement modifié");
+  assert(slot.textContent.includes("3/"), "Quantité non actualisée");
+  slot.click();
+  assert(calls.length === 1 && calls[0].endsWith(":3"), "Transfert périmé ou écouteurs dupliqués");
+  menu.querySelector('[data-close-action-menu]').click();
+  const tile = world.querySelector('[data-improvement-info]');
+  tile.click();
+  const popover = tile.nextElementSibling;
+  updateLocationDetail({ element: world, location: view });
+  assert(!popover.hidden && tile.nextElementSibling === popover, "Menu du bâtiment fermé");
+  assert(!popover.querySelector('[data-action="build-improvement:farm"]').disabled, "Amélioration abordable encore désactivée");
+  assert(world.querySelector('.location-resources').textContent.includes('20/100'), "Stock non actualisé");
+  assert(world.querySelector('[data-action="level-up-camp"]'), "Évolution débloquée absente après la mise à jour");
+  assert(world.querySelector('.location-xp-bar strong').textContent === '11/80', "XP non actualisée");
+  window.testResult = { success: true, message: "Marché, stocks, menus, focus, défilement et transferts vérifiés" };
+} catch (error) { window.testResult = { success: false, message: error.stack }; }
+</script>

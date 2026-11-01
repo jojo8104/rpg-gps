@@ -1,0 +1,59 @@
+.rpg-map-preparation,
+.rpg-map-download {
+  width: min(280px, 65vw);
+  padding: 8px;
+  color: #f4ead3;
+  background: #26382a;
+  border: 1px solid #b59b60;
+  border-radius: 8px;
+  box-shadow: 0 3px 10px #0005;
+  font:
+    13px/1.4 system-ui,
+    sans-serif;
+}
+.rpg-map-preparation form {
+  display: flex;
+  align-items: end;
+  gap: 6px;
+}
+.rpg-map-preparation {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+.rpg-map-preparation label {
+  flex: 1;
+  min-width: 0;
+}
+.rpg-map-preparation input {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+.rpg-map-preparation button,
+.rpg-map-download button {
+  min-height: 36px;
+  cursor: pointer;
+}
+.rpg-map-preparation p {
+  margin: 4px 0 0;
+}
+.rpg-map-search-results {
+  max-height: 180px;
+  overflow-y: auto;
+}
+.rpg-map-search-results button {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  text-align: left;
+  white-space: normal;
+}
+.rpg-map-download button {
+  display: block;
+  margin-top: 6px;
+}
+.rpg-map-preparation:focus-within {
+  outline: 2px solid #e2c77e;
+}

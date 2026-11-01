@@ -35,10 +35,33 @@
   inset: max(3.7rem, calc(env(safe-area-inset-top) + 3rem)) auto auto
     max(0.65rem, env(safe-area-inset-left));
   align-items: stretch;
-  width: min(180px, calc(100vw - 1.3rem));
+  width: min(260px, calc(100vw - 1.3rem));
+  max-height: calc(100dvh - 5rem - env(safe-area-inset-bottom));
+  overflow-y: auto;
 }
 .landscape-tools.is-open {
   display: flex;
+}
+.game-menu-submenu {
+  border: 1px solid #c7a96544;
+  border-radius: 8px;
+}
+.game-menu-submenu > summary {
+  padding: 0.7rem;
+  cursor: pointer;
+  color: #f4ead1;
+}
+.game-menu-submenu > summary:focus-visible {
+  outline: 2px solid #ffe083;
+}
+.game-menu-submenu__content {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.5rem;
+}
+.landscape-tools .game-menu-danger {
+  background: #572b28;
+  border-color: #cf8074;
 }
 .map-power-nav {
   display: flex;
@@ -133,15 +156,29 @@
   border-radius: 50%;
   background: #a8adb3;
 }
-.dev-trace-filter i.is-blue { background: #62a8ff; }
-.dev-trace-filter i.is-green { background: #69c982; }
-.dev-trace-filter i.is-red { background: #ef655f; }
+.dev-trace-filter i.is-blue {
+  background: #62a8ff;
+}
+.dev-trace-filter i.is-green {
+  background: #69c982;
+}
+.dev-trace-filter i.is-red {
+  background: #ef655f;
+}
 .landscape-tools button {
   width: 100%;
   grid-template-columns: 1.4rem 1fr;
 }
 .landscape-tools button small {
   font-size: 0.7rem;
+}
+.game-menu-submenu button,
+#save-and-end-game,
+#destroy-game {
+  grid-template-columns: 1fr;
+  min-height: 44px;
+  padding: 0.65rem;
+  text-align: left;
 }
 .landscape-tools__close {
   display: block !important;
@@ -192,6 +229,82 @@
   color: #fff4bd;
   box-shadow: 0 0 0 2px #d9c38477;
 }
+.watch-message-indicator {
+  position: absolute;
+  z-index: 2001;
+  top: max(0.65rem, env(safe-area-inset-top));
+  left: max(0.65rem, env(safe-area-inset-left));
+  width: 48px;
+  height: 48px;
+  padding: 5px;
+  border: 1px solid #d3af62;
+  border-radius: 50%;
+  background: #172019e8;
+  box-shadow: 0 5px 16px #0008;
+}
+.watch-message-indicator[hidden] {
+  display: none;
+}
+.watch-message-indicator img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.watch-message-indicator span {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 4px;
+  border-radius: 10px;
+  background: #a62622;
+  color: white;
+  font:
+    800 0.68rem/19px system-ui,
+    sans-serif;
+  text-align: center;
+}
+.watch-message-dialog {
+  width: min(92vw, 430px);
+  max-height: min(80dvh, 620px);
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  background: transparent;
+  color: #f5edda;
+}
+.watch-message-dialog::backdrop {
+  background: #07100caa;
+  backdrop-filter: blur(3px);
+}
+.watch-message-dialog__panel {
+  display: grid;
+  gap: 0.7rem;
+  max-height: min(80dvh, 620px);
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid #d3af62;
+  border-radius: 14px;
+  background: #172019f5;
+  box-shadow: 0 12px 36px #000b;
+}
+.watch-message-dialog__panel h2,
+.watch-message-dialog__panel p {
+  margin: 0;
+}
+.watch-message-dialog__panel article {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  border: 1px solid #d3af6255;
+  border-radius: 10px;
+  background: #283329;
+}
+.watch-message-dialog__panel article button {
+  width: 100%;
+}
 .map-power-nav .conceal-control.is-active {
   background: #7657a2;
   color: #fff4bd;
@@ -207,15 +320,17 @@
   display: none;
 }
 .game-screen:has(#map-view:not(.is-active)) .map-power-nav .conceal-control,
-.game-screen:has(#bottom-sheet:not([hidden])) .map-power-nav .conceal-control,
+.game-screen:has(#bottom-sheet:not([hidden]):not(.location-tab))
+  .map-power-nav
+  .conceal-control,
 .game-screen:has(#map-view:not(.is-active))
   .map-power-nav
   .watch-beacon-control,
-.game-screen:has(#bottom-sheet:not([hidden]))
+.game-screen:has(#bottom-sheet:not([hidden]):not(.location-tab))
   .map-power-nav
   .watch-beacon-control,
 .game-screen:has(#map-view:not(.is-active)) .map-power-nav .mage-power-control,
-.game-screen:has(#bottom-sheet:not([hidden]))
+.game-screen:has(#bottom-sheet:not([hidden]):not(.location-tab))
   .map-power-nav
   .mage-power-control {
   display: none;
@@ -226,9 +341,14 @@
 
 @media (orientation: landscape) {
   .map-power-nav {
-    top: 50%;
+    top: max(0.65rem, env(safe-area-inset-top));
+    right: auto;
+    left: 4.6rem;
     bottom: auto;
-    transform: translateY(-50%);
+    transform: none;
+    flex-direction: row;
+    max-width: calc(58vw - 5.2rem);
+    overflow-x: auto;
   }
   .bottom-nav {
     inset: auto auto max(0.5rem, env(safe-area-inset-bottom)) 50%;
@@ -280,15 +400,15 @@
 
 @media (orientation: portrait) {
   .map-power-nav {
-    top: auto;
+    top: max(0.65rem, env(safe-area-inset-top));
     right: max(0.65rem, env(safe-area-inset-right));
-    bottom: calc(74px + env(safe-area-inset-bottom));
+    bottom: auto;
     left: 4.6rem;
     transform: none;
     flex-direction: row;
     justify-content: center;
     padding: 0.3rem;
-    z-index: 1;
+    z-index: 1050;
   }
   .map-power-nav > strong {
     position: absolute;
@@ -304,7 +424,7 @@
     min-height: 48px;
   }
   .quest-hud {
-    top: max(0.65rem, env(safe-area-inset-top));
+    top: calc(max(0.65rem, env(safe-area-inset-top)) + 4rem);
     left: 5.6rem;
     right: max(0.65rem, env(safe-area-inset-right));
   }
@@ -405,34 +525,6 @@
   }
 }
 @media (orientation: portrait) {
-  #battle-view.is-active .battle-orientation-prompt {
-    position: fixed;
-    z-index: 1400;
-    inset: 0;
-    display: grid;
-    place-content: center;
-    justify-items: center;
-    gap: 0.7rem;
-    padding: 2rem;
-    text-align: center;
-    background: #09110c;
-    color: #eef8ee;
-  }
-  #battle-view.is-active .battle-orientation-prompt span {
-    font-size: 4rem;
-    animation: turn-phone 1.5s ease-in-out infinite;
-  }
-  #battle-view.is-active .battle-orientation-prompt strong {
-    font-size: 1.25rem;
-  }
-  #battle-view.is-active .battle-orientation-prompt p {
-    max-width: 20rem;
-    margin: 0;
-    color: #b9cab9;
-  }
-  #battle-view.is-active #battle-content {
-    visibility: hidden;
-  }
   .map-control {
     bottom: calc(128px + env(safe-area-inset-bottom));
   }
@@ -443,5 +535,101 @@
 @keyframes turn-phone {
   50% {
     transform: rotate(90deg);
+  }
+}
+
+/* Commandes légères : le panneau ne couvre plus la carte. */
+.map-power-nav {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.map-power-nav > strong {
+  display: none;
+}
+.map-power-nav button,
+.map-power-nav .conceal-control,
+.map-power-nav .watch-beacon-control,
+.map-power-nav .mage-power-control {
+  box-sizing: border-box;
+  flex: 0 0 48px;
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  overflow: visible;
+  pointer-events: auto;
+}
+@media (orientation: portrait) {
+  .quest-hud {
+    top: max(0.65rem, env(safe-area-inset-top));
+  }
+  .map-power-nav {
+    padding: 0;
+  }
+  .bottom-sheet.location-tab {
+    bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+.game-screen:has(#map-view.is-active) .bottom-sheet:not(.location-tab) {
+  bottom: calc(76px + env(safe-area-inset-bottom));
+  max-height: calc(
+    100dvh - 160px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  );
+  overflow-y: auto;
+}
+
+.quest-hud:not(.is-expanded) {
+  max-height: 3.6rem;
+  overflow-y: auto;
+}
+.quest-hud.is-expanded {
+  max-height: calc(
+    100dvh - 160px - env(safe-area-inset-top) - env(safe-area-inset-bottom)
+  );
+  overflow-y: auto;
+}
+#map-view .map-control {
+  top: auto;
+  bottom: calc(var(--map-commands-bottom) + 2px);
+  transform: none;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+}
+
+/* Rangée centrée au-dessus de la navigation ou de la languette visible. */
+.game-screen {
+  --map-commands-bottom: calc(76px + env(safe-area-inset-bottom));
+}
+.game-screen:has(.bottom-sheet.location-tab:not([hidden])) {
+  --map-commands-bottom: calc(148px + env(safe-area-inset-bottom));
+}
+.map-power-nav {
+  top: auto;
+  bottom: var(--map-commands-bottom);
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  flex-direction: row;
+  justify-content: center;
+  max-width: calc(100vw - 8rem);
+}
+@media (orientation: landscape) {
+  .game-screen:has(.bottom-sheet.location-tab:not([hidden])) {
+    --map-commands-bottom: calc(76px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (orientation: portrait) {
+  /* Les boutons Leaflet commencent sous le bouton du menu. */
+  #map .leaflet-top.leaflet-left .leaflet-control-zoom {
+    margin-top: calc(max(0.65rem, env(safe-area-inset-top)) + 3rem);
   }
 }

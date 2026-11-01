@@ -45,6 +45,7 @@ test("un lobby démarré devient une configuration Game commune", () => {
     ["p1", "p2", "bandits"],
   );
   assert.equal(launch.positionMode, "gps");
+  assert.equal(launch.resumesSavedGame, false);
   assert.equal(launch.adventureId, "repression");
   assert.equal(launch.setup.rules.enableContentment, true);
   assert.equal(launch.setup.rules.travelPaceMode, "sport");
@@ -60,6 +61,12 @@ test("un lobby démarré devient une configuration Game commune", () => {
   });
 });
 
+test("une sauvegarde chargée est signalée au démarrage du client", () => {
+  const lobby = startedLobby();
+  lobby.resume = { saveId: "save-1", slots: [] };
+  assert.equal(createMultiplayerLaunch(lobby).resumesSavedGame, true);
+});
+
 test("la graine produit les mêmes identifiants sur tous les téléphones", () => {
   const first = createSeededIdGenerator("ABCDE-1000");
   const second = createSeededIdGenerator("ABCDE-1000");
@@ -73,4 +80,22 @@ test("un lobby non démarré est refusé", () => {
   const lobby = startedLobby();
   lobby.status = "waiting";
   assert.throws(() => createMultiplayerLaunch(lobby), /pas prête/i);
+});
+
+for (const gameType of ["cooperation", "competition", "duel"]) {
+  test(`le type ${gameType} définit les équipes et l’aventure`, () => {
+    const lobby = startedLobby();
+    lobby.launch.configuration.gameType = gameType;
+    const launch = createMultiplayerLaunch(lobby);
+    const [first, second] = launch.setup.participants;
+    assert.equal(first.teamId === second.teamId, gameType === "cooperation");
+    assert.equal(launch.adventureId, gameType === "duel" ? "villages" : "repression");
+  });
+}
+
+test("un duel refuse trois joueurs au lancement", () => {
+  const lobby = startedLobby();
+  lobby.launch.configuration.gameType = "duel";
+  lobby.launch.players.push({ id: "p3", name: "Tom", heroClassId: "warrior" });
+  assert.throws(() => createMultiplayerLaunch(lobby), /deux joueurs/);
 });

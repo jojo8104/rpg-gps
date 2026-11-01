@@ -1,0 +1,28 @@
+{
+  "date": "2026-10-25",
+  "tool": "image_gen.imagegen (built-in)",
+  "reference": "app/assets/markers/map/quarry.png",
+  "transparentBackground": true,
+  "assets": [
+    {
+      "file": "resource-stone.png",
+      "prompt": "Use case: stylized-concept. Asset type: RPG GPS map marker resource-stone. Create one isolated a small natural outcrop of pale gray rocks and broken stone, no cut blocks. Match the provided reference's detailed isometric hand-painted medieval strategy game art, warm highlights, clean dark edges and readable chunky silhouette. This is an undeveloped natural resource site, NOT an operating mine or settlement. No people, buildings, tools, carts, crane, pin frame, lettering or text. Centered single compact icon, 3/4 isometric view, entire subject within generous transparent margins. Real transparent background. Readable at 64 pixels. Reference is style only."
+    },
+    {
+      "file": "resource-wood.png",
+      "prompt": "Use case: stylized-concept. Asset type: RPG GPS map marker resource-wood. Create one isolated a compact cluster of three leafy forest trees with exposed roots. Match the provided reference's detailed isometric hand-painted medieval strategy game art, warm highlights, clean dark edges and readable chunky silhouette. This is an undeveloped natural resource site, NOT an operating mine or settlement. No people, buildings, tools, carts, crane, pin frame, lettering or text. Centered single compact icon, 3/4 isometric view, entire subject within generous transparent margins. Real transparent background. Readable at 64 pixels. Reference is style only."
+    },
+    {
+      "file": "resource-iron.png",
+      "prompt": "Use case: stylized-concept. Asset type: RPG GPS map marker resource-iron. Create one isolated a dark charcoal rocky outcrop with visible rusty reddish iron ore veins. Match the provided reference's detailed isometric hand-painted medieval strategy game art, warm highlights, clean dark edges and readable chunky silhouette. This is an undeveloped natural resource site, NOT an operating mine or settlement. No people, buildings, tools, carts, crane, pin frame, lettering or text. Centered single compact icon, 3/4 isometric view, entire subject within generous transparent margins. Real transparent background. Readable at 64 pixels. Reference is style only."
+    },
+    {
+      "file": "resource-gold.png",
+      "prompt": "Use case: stylized-concept. Asset type: RPG GPS map marker resource-gold. Create one isolated a rocky outcrop with clear rich yellow metallic gold veins and a few small gold nuggets. Match the provided reference's detailed isometric hand-painted medieval strategy game art, warm highlights, clean dark edges and readable chunky silhouette. This is an undeveloped natural resource site, NOT an operating mine or settlement. No people, buildings, tools, carts, crane, pin frame, lettering or text. Centered single compact icon, 3/4 isometric view, entire subject within generous transparent margins. Real transparent background. Readable at 64 pixels. Reference is style only."
+    },
+    {
+      "file": "resource-fertile-land.png",
+      "prompt": "Use case: stylized-concept. Asset type: RPG GPS map marker resource-fertile-land. Create one isolated a small patch of rich dark brown fertile soil with fresh green shoots and a few wheat stalks, no fence. Match the provided reference's detailed isometric hand-painted medieval strategy game art, warm highlights, clean dark edges and readable chunky silhouette. This is an undeveloped natural resource site, NOT an operating mine or settlement. No people, buildings, tools, carts, crane, pin frame, lettering or text. Centered single compact icon, 3/4 isometric view, entire subject within generous transparent margins. Real transparent background. Readable at 64 pixels. Reference is style only."
+    }
+  ]
+}

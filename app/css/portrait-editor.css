@@ -1,0 +1,266 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  color: #f2ead7;
+  background: #111a18;
+  accent-color: #d6ba77;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+a {
+  color: #dfc588;
+}
+h1 {
+  font-size: 1.65rem;
+  margin: 0.5rem 0;
+}
+h2 {
+  font-size: 1.15rem;
+  margin: 0;
+}
+p {
+  line-height: 1.5;
+}
+.editor-header {
+  padding: 24px 28px;
+  border-bottom: 1px solid #516055;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+.editor-header p {
+  margin: 0.4rem 0;
+  color: #c3cabb;
+}
+#save-status {
+  font-size: 0.8rem;
+  color: #e4ca8c;
+  max-width: 300px;
+}
+.editor-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 410px) minmax(0, 1fr);
+  gap: 28px;
+  padding: 24px 28px;
+  max-width: 1600px;
+  margin: auto;
+}
+.editor-controls {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+.mobile-switch {
+  display: none;
+}
+#editor-controls,
+#editor-preview {
+  scroll-margin-top: 60px;
+}
+fieldset {
+  margin: 0;
+  border: 1px solid #4a594e;
+  border-radius: 12px;
+  padding: 16px;
+  background: #1b2621;
+}
+legend {
+  padding: 0 8px;
+  color: #e6cb8d;
+  font-weight: 700;
+}
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.86rem;
+  margin-bottom: 12px;
+}
+input,
+select,
+textarea,
+button,
+.file-button {
+  font: inherit;
+  border: 1px solid #687565;
+  border-radius: 7px;
+  padding: 9px;
+  background: #0e1713;
+  color: #f8f0df;
+  min-width: 0;
+}
+input[type="range"] {
+  padding: 0;
+  width: 100%;
+}
+input[type="checkbox"] {
+  margin: 0;
+  min-height: 18px;
+  width: 18px;
+}
+select,
+button {
+  min-height: 40px;
+}
+textarea {
+  resize: vertical;
+}
+button,
+.file-button {
+  cursor: pointer;
+  background: #36564a;
+}
+button:hover,
+.file-button:hover {
+  background: #456a5c;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #e5c47f;
+  outline-offset: 3px;
+}
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.hint {
+  font-size: 0.8rem;
+  color: #bfc8bb;
+  margin: 0.6rem 0;
+  line-height: 1.5;
+}
+.slider-row {
+  display: grid;
+  grid-template-columns: 1fr 70px;
+  column-gap: 12px;
+  align-items: center;
+}
+.slider-row > span {
+  grid-column: 1/-1;
+}
+.slider-row input[type="number"] {
+  width: 70px;
+  padding: 5px;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.file-button {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+}
+.file-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.editor-preview {
+  position: sticky;
+  top: 20px;
+  align-self: start;
+  min-width: 0;
+}
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+.preview-toolbar label {
+  margin: 0;
+  min-width: 200px;
+}
+#frame-holder {
+  position: relative;
+  overflow: hidden;
+  margin: 18px auto 0;
+  max-width: 1280px;
+  border-radius: 12px;
+  background: #060c09;
+  box-shadow: 0 12px 35px #0007;
+}
+iframe {
+  display: block;
+  border: 0;
+  transform-origin: 0 0;
+  background: #080b0c;
+}
+#preview-status {
+  font-size: 0.8rem;
+  color: #c9d3c4;
+}
+@media (max-width: 850px) {
+  .mobile-switch {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    justify-content: center;
+    gap: 24px;
+    background: #111a18;
+    padding: 12px;
+    border-bottom: 1px solid #516055;
+    font-size: 0.85rem;
+  }
+  .editor-layout {
+    grid-template-columns: 1fr;
+    padding: 16px;
+    gap: 22px;
+  }
+  .editor-preview {
+    position: static;
+    grid-row: 1;
+  }
+  .editor-header {
+    padding: 16px;
+    align-items: start;
+  }
+  .editor-header p {
+    font-size: 0.85rem;
+  }
+  .preview-toolbar {
+    flex-wrap: wrap;
+  }
+  .preview-toolbar label {
+    min-width: 0;
+  }
+  #frame-holder {
+    max-width: 540px;
+  }
+  .editor-header {
+    flex-wrap: wrap;
+  }
+}
+
+#accessory {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+#accessory label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+#accessory input {
+  width: auto;
+}
+.accessory-picker {
+  grid-column: 1 / -1;
+}

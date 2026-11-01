@@ -165,3 +165,366 @@ footer {
     scroll-behavior: auto;
   }
 }
+/* Pages d’articles et index, tout en conservant les styles des archives historiques. */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+.brand {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #ecd194;
+  text-decoration: none;
+}
+.brand span {
+  color: #b7c1ca;
+  font-size: 0.85rem;
+  font-weight: 400;
+  margin-left: 0.7rem;
+}
+.layout {
+  grid-template-columns: 240px minmax(0, 1fr);
+}
+.layout nav {
+  max-height: calc(100vh - 2rem);
+  overflow: auto;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  padding-right: 0.75rem;
+}
+.layout nav a {
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.35rem;
+  text-decoration: none;
+}
+.layout nav a:hover,
+.layout nav a[aria-current] {
+  background: #263c40;
+  color: #ecd194;
+}
+.breadcrumb {
+  color: #aab7bf;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+}
+.wiki-article {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.wiki-article h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  overflow-wrap: anywhere;
+}
+.wiki-article h2 {
+  margin-top: 2rem;
+}
+.wiki-article h3 {
+  margin-top: 1.5rem;
+}
+.wiki-article p,
+.reference-body li {
+  overflow-wrap: anywhere;
+}
+.lead {
+  font-size: 1.14rem;
+  color: #c9d8dd;
+}
+.explanation {
+  background: #1a2932;
+  border-left: 3px solid #a7c995;
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
+}
+.explanation h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+.explanation p:last-child {
+  margin-bottom: 0;
+}
+.illustrations {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 1rem;
+}
+.illustration {
+  margin: 1rem 0;
+  max-width: 480px;
+}
+.illustration img {
+  display: block;
+  max-width: 100%;
+  max-height: 340px;
+  width: auto;
+  height: auto;
+  margin: auto;
+  object-fit: contain;
+  background: radial-gradient(ellipse, #30404a, transparent 72%);
+  border-radius: 0.5rem;
+}
+.illustration figcaption {
+  color: #acbac3;
+  font-size: 0.8rem;
+  margin: 0.65rem 0;
+  line-height: 1.5;
+}
+.illustration.guide-art {
+  float: right;
+  width: 36%;
+  max-width: 280px;
+  margin: 0 0 1.5rem 1.5rem;
+}
+.illustrations .illustration {
+  flex: 1 1 210px;
+}
+.portrait img {
+  width: 160px;
+  height: 160px;
+}
+.unit-thumbnail {
+  margin: 0 auto 0.5rem;
+  width: 80px;
+}
+.unit-thumbnail img {
+  max-height: 90px;
+}
+.unit-thumbnail figcaption {
+  display: none;
+}
+.catalog-card,
+.index-card {
+  padding: 1.25rem;
+  border: 1px solid #36434b;
+  border-radius: 0.75rem;
+  background: #1a2730;
+  min-width: 0;
+}
+.catalog-card h2 {
+  font-size: 1.4rem;
+}
+.index-cards {
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+}
+.index-card h3 {
+  margin: 0.4rem 0;
+  line-height: 1.3;
+}
+.index-card p:last-child {
+  color: #b9c6cd;
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+.index-card .eyebrow {
+  font-size: 0.7rem;
+}
+.article-toc {
+  clear: both;
+  border: 1px solid #36434b;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin: 1.5rem 0;
+}
+.article-toc summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.source-note {
+  color: #aab7bf;
+  font-size: 0.9rem;
+}
+.reference-body pre {
+  overflow-x: auto;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #36434b;
+  background: #0b1218;
+  line-height: 1.5;
+}
+.reference-body code {
+  color: #ecd194;
+  font-size: 0.9em;
+}
+.reference-body p code,
+.reference-body li code,
+.reference-body td code {
+  overflow-wrap: anywhere;
+}
+.reference-body blockquote {
+  border-left: 3px solid #526771;
+  margin: 1rem 0;
+  padding: 0.1rem 1rem;
+  color: #bac7ce;
+}
+.reference-body table {
+  min-width: 420px;
+}
+.reference-body td {
+  vertical-align: top;
+}
+.article-history {
+  clear: both;
+}
+.related-links li {
+  margin: 0.5rem 0;
+}
+.archive-content img {
+  max-width: 100%;
+}
+.archive-content .reference-body pre {
+  overflow: auto;
+}
+@media (max-width: 760px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .layout nav {
+    max-height: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0 0 1rem;
+    font-size: 0.8rem;
+  }
+  .layout nav a {
+    border: 1px solid #36434b;
+  }
+  .site-header {
+    align-items: start;
+  }
+  .site-header > a:last-child {
+    font-size: 0.8rem;
+  }
+  .illustration.guide-art {
+    float: none;
+    width: 100%;
+    margin: 1rem auto;
+  }
+  .index-cards {
+    grid-template-columns: 1fr;
+  }
+  .wiki-article {
+    min-width: 0;
+  }
+}
+/* Navigation du guide de règles et index thématique. */
+.theme-contents {
+  padding-left: 1.15rem;
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+}
+.theme-contents li {
+  margin: 0.4rem 0;
+}
+.rule-topic {
+  clear: both;
+  margin-bottom: 2rem;
+  scroll-margin-top: 1.5rem;
+}
+.rule-topic h2 {
+  border-bottom: 1px solid #36434b;
+  padding-bottom: 0.5rem;
+}
+.secondary-nav {
+  margin-top: 1rem;
+  border-top: 1px solid #36434b;
+  padding-top: 0.75rem;
+}
+.secondary-nav summary {
+  cursor: pointer;
+  color: #b4c4cb;
+  padding: 0.5rem;
+}
+.secondary-nav a {
+  display: block;
+}
+.reference-group {
+  border: 1px solid #36434b;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+.reference-group > summary {
+  cursor: pointer;
+  color: #b9dca6;
+  font-weight: 600;
+}
+.reference-group[open] > .cards {
+  margin-top: 1rem;
+}
+@media (max-width: 760px) {
+  .secondary-nav {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+}
+.stat-table table {
+  min-width: 520px;
+}
+.stat-table th,
+.stat-table td {
+  vertical-align: middle;
+}
+.stat-table thead th:not(:first-child),
+.stat-table td {
+  text-align: center;
+}
+.stat-table tbody th {
+  min-width: 125px;
+}
+.illustration.stat-thumbnail {
+  max-width: 135px;
+  margin: 0.25rem auto 0.65rem;
+}
+.stat-thumbnail img {
+  width: 72px;
+  height: 80px;
+  object-fit: contain;
+}
+.stat-thumbnail figcaption {
+  font-size: 0.65rem;
+  line-height: 1.35;
+}
+.table-explanation {
+  margin-top: 1rem;
+}
+.rule-example {
+  clear: both;
+  padding: 1.25rem;
+  border: 1px solid #617d60;
+  background: #18292c;
+  border-radius: 0.75rem;
+  margin: 1.75rem 0;
+  display: flow-root;
+}
+.rule-example h2 {
+  margin-top: 0;
+  font-size: 1.3rem;
+}
+.illustration.example-art {
+  float: left;
+  width: 120px;
+  margin: 0.25rem 1.25rem 0.5rem 0;
+}
+.example-art img {
+  width: 110px;
+  max-height: 140px;
+  object-fit: contain;
+}
+@media (max-width: 520px) {
+  .illustration.example-art {
+    float: none;
+    margin: 0.5rem auto 1rem;
+  }
+  .stat-table th,
+  .stat-table td {
+    padding: 0.5rem;
+  }
+}

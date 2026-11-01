@@ -83,7 +83,7 @@ test("quêtes, monde narratif et groupes autonomes sont reconstruits ensemble", 
   assert.equal(game.autonomousGroups[0].id, "column-1");
 });
 
-test("un combat actif conserve son temps, ses formations et ses ordres", () => {
+test("un combat actif conserve ses choix de cartes et son échéance", () => {
   const battle = new BattleEngine({
     id: "battle-shared",
     teams: [
@@ -105,17 +105,16 @@ test("un combat actif conserve son temps, ses formations et ses ordres", () => {
     ],
   });
   battle.start();
-  battle.tick(500);
+  battle.advanceDuel({ humanTeamIds: battle.teams.map(team => team.id) });
   const serialized = battle.toJSON();
-  serialized.teams[0].units[0].lane = 2;
-  serialized.teams[0].units[0].targetId = "enemy-1";
+  battle.submitDuelChoice("heroes", { cards: ["unit-1"] });
+  serialized.duel = structuredClone(battle.duel);
   const game = { locations: [location()], scenario: null, battles: [] };
   applyMultiplayerWorldState(game, {
     ...createMultiplayerWorldState(game.locations),
     battles: [serialized],
   });
   assert.equal(game.battles[0].status, "active");
-  assert.equal(game.battles[0].state.elapsedMs, 500);
-  assert.equal(game.battles[0].teams[0].units[0].lane, 2);
-  assert.equal(game.battles[0].teams[0].units[0].targetId, "enemy-1");
+  assert.deepEqual(game.battles[0].duel.pendingChoices, battle.duel.pendingChoices);
+  assert.equal(game.battles[0].decisionDeadlineAt, battle.decisionDeadlineAt);
 });

@@ -1,0 +1,41 @@
+{
+  "tool": "image_gen.imagegen",
+  "mode": "built-in",
+  "date": "2026-10-24",
+  "reference": "../../hero-lineup-anime-v2.png",
+  "prompts": [
+    {
+      "output": "male-hair-atlas-v2.png",
+      "prompt": "Production portrait HAIR ONLY atlas for the adult MEN in the supplied anime RPG reference, not finished characters. Exactly FOUR isolated male hairstyles in a 2 by 2 grid on actual transparent background, generous margins around each part. Style clean simple Japanese anime outlines, flat cel shading matching the male warrior and male mage. All straight FRONT VIEW, same adult male cranial volume. Top left short tousled chestnut adventurer hair; top right short swept reddish auburn mage hair; bottom left cropped dark brown practical wavy hair; bottom right short swept gray mature hair. CRITICAL EACH PART IS PURE HAIR ONLY: absolutely NO SKIN, NO EARS, NO FACE, NO EYES, NO EYEBROWS, NO NOSE, NO NECK, NO BODY, NO CLOTHES. The whole open face and ear regions must be transparent so any skin tone can fit underneath. Outer hair silhouette and bangs only. The shapes must look like wigs with an open empty face, not heads or portraits. No hats, labels, background, checkerboard, shadows outside hair or tiny scattered pixels. Each of four hair parts fully inside its cell, suitable for alpha bounding-box extraction and independent overlay on a bald MALE face.",
+      "transparent_background": true
+    },
+    {
+      "output": "female-hair-atlas-v2.png",
+      "prompt": "Production modular FEMALE HAIRSTYLE layer atlas for women from the approved Japanese anime RPG reference. Actual transparent background. EXACT regular 4 columns by 2 rows, with large transparent gutters and every isolated component fully inside its cell. Four distinct matching hairstyle pairs across columns: column1 chestnut braid; column2 copper shoulder length wavy bob; column3 dark brown high ponytail; column4 silver gray long low bun with side locks. TOP ROW: FRONT HAIR ONLY for each hairstyle, frontal crown and bangs framing an EMPTY TRANSPARENT FACE, upper side locks only, no skin or ears. BOTTOM ROW: matching BACK HAIR ONLY, the hair mass BEHIND the head and neck, including braid or ponytail or bob ends as appropriate. Back hair may be a solid hair silhouette because a separate bald head will cover its center. Same frontal female head volume and center axis across all four columns. These are strictly separate hair components, NOT heads, NOT finished characters. ABSOLUTELY NO SKIN, NO EARS, NO EYES, NO FACE OUTLINE, NO EYEBROWS, NO NECK, NO SHOULDERS, NO CLOTHES, NO ACCESSORIES OR HATS. All face openings in top row truly transparent alpha. Clean simple anime fantasy outlines and cel shading matching approved female heroes. No text or labels or drawn checkerboard. Do not connect top and bottom parts, keep clear transparent gutters for mechanical slicing.",
+      "transparent_background": true
+    },
+    {
+      "output": "female-clothing-atlas-v2.png",
+      "prompt": "Production modular WOMEN'S CLOTHING atlas for female anime fantasy RPG portraits, matching the women in the approved reference. Exactly 4 columns by 2 rows equal sized cells with clear transparent gutters. Eight isolated FRONT FACING chest-up garment busts, fitted to the SAME adult female shoulder width, neck width and torso proportions throughout. These are NOT male garments scaled smaller: draw female tailoring and rounded shoulder shapes appropriate for these female heroes and townspeople, practical modest clothes, no sexualization. Top row left to right: 1 teal warrior cape gray armor brown straps; 2 deep purple gold practical mage coat with hood DOWN no hat; 3 olive ranger cloak beige tunic leather harness; 4 cream linen work shirt brown leather apron. Bottom row left to right: 1 tan tunic brown village leader vest modest brass clasp; 2 burgundy mayor jacket cream shirt restrained gold trim; 3 charcoal blacksmith shirt sturdy leather apron; 4 cream innkeeper blouse muted rust waistcoat leather lacing. CRITICAL absolutely NO HEADS NO HAIR NO SKIN NO NECKS NO HANDS. Every neckline must be an OPEN TRANSPARENT U SHAPED HOLE from top down to front collar edge, no filled oval or internal rear collar blocking neck layer. Each complete shoulder silhouette fully within own cell. Simple clean Japanese anime outlines and light flat cel shading, consistent palette. Actual transparent background, no labels, text, floor shadows or drawn checkerboard.",
+      "transparent_background": true
+    },
+    {
+      "output": "male-hair-atlas-v2.png",
+      "stage": "distinct-cuts-correction",
+      "prompt": "Edit this pure-hair 2x2 atlas to make FOUR TRULY DIFFERENT MEN'S HAIRCUTS, not the same spiky cut in different colors. Keep pure hair only, no skin ears face eyebrows body or clothes; all face openings transparent. Top left: preserve existing short chestnut tousled spiky adventurer cut. Top right: replace with neatly combed auburn SIDE PART, smooth low volume crown, SHORT CLOSE SIDES, no spikes and NO long side locks. Bottom left: replace with dark brown short WAVY CROP, rounded compact crown, short blunt side-swept fringe, no long pointed strands. Bottom right: replace with gray SWEPT BACK short mature cut, exposed empty forehead, hair swept away from face, smooth short sides, NO bangs hanging over face. All straight frontal view at identical adult male head scale, generous transparent margins and pure clean alpha. Exactly same 2x2 grid and anime cel shaded style. Transparent background, no added marks or labels. Hair components only.",
+      "transparent_background": true
+    },
+    {
+      "output": "female-hair-front-atlas-v2.png",
+      "prompt": "Create ONE production FRONT HAIR ONLY atlas for female modular anime portraits. Exactly 2 by 2 grid with four isolated compact female HAIR CAPS, actual transparent background. These front caps will cover the same bald oval female head; long hair lengths are a different rear layer so DO NOT draw long strands, braids or ponytail hanging down on these front caps. Keep all four compact front caps at exactly the same cranial scale, full symmetrical scalp coverage and identical forehead opening height. Top left chestnut hair with soft side-swept bangs for a braided style. Top right copper red softly wavy bob crown with short parted bangs. Bottom left dark brown hair tied high with a small visible ponytail root and short swept bangs. Bottom right silver gray neatly combed full crown with short side-parted bangs for a low bun hairstyle. VERY IMPORTANT gray crown must fully cover entire skull including left side; no shaved or bald areas, no exposed scalp. Bangs must leave eyes clear; no strand below the eyebrows or hanging over eye or nose. Pure hair pixels ONLY, no skin no ears no eyebrows no eyes no face no head outline no neck no clothes. The central face opening must be transparent. No part extends below where ears would begin. No labels, no drawn checkerboard, no shadows around parts, generous transparent gutters. Simple pleasant Japanese anime clean linework and flat cel shading matching reference.",
+      "transparent_background": true,
+      "status": "discarded: ears present; using hair-only crowns extracted from female-hair-atlas-v2.png"
+    },
+    {
+      "output": "female-hair-front-atlas-v2.png",
+      "stage": "alpha-extraction-fix",
+      "prompt": "Precise ALPHA EXTRACTION FIX. In this four-hair 2x2 atlas, erase EVERY visible pale peach / pink skin fragment and ear from all four items. These are forbidden leftover pixels, not part of the hair layer. Top left has pale ears at lower left and right. Top right has large cream ear crescents below left and right hair. Bottom left has an ear fragment at lower right and left. Bottom right has cream pink ears below left and right. Make ALL of these skin areas fully transparent alpha. Preserve ALL brown copper gray hair pixels and preserve the exact hair shapes, positions, scale, grid, shading and outlines. Do not redraw or replace hairstyles. The final image must contain ONLY colored hair, absolutely zero skin or ears. Face openings also fully transparent. Background fully transparent. Same 2x2 atlas, no text. Treat this as removing unwanted ear stickers from a modular hair asset.",
+      "transparent_background": true
+    }
+  ]
+}

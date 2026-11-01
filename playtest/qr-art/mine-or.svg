@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 120" role="img" aria-labelledby="title">
+  <title id="title">Mine d’or : galerie étayée, pioche et pépites étincelantes</title>
+  <rect width="240" height="120" fill="white"/>
+  <g stroke="black" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path fill="white" d="M20 105l9-36 22-18 13-24 30-12 28 12 21 2 21 25 17 18 12 33z"/>
+    <path fill="none" d="M40 68l18-4 8-17M78 30l17-6 16 10M137 43l13 18 12 3"/>
+    <path fill="black" d="M65 105V58h66v47z"/>
+    <path fill="white" d="M59 105V53h12v52zM125 105V53h12v52zM55 48h86v12H55z"/>
+    <path fill="none" stroke="white" d="M80 104l9-32M116 104l-9-32M86 87h24M83 97h30"/>
+    <path fill="white" d="M151 105l-5-12 11-12 17 3 6 14-10 7zM176 105l-4-13 12-10 14 5 5 18zM164 83l-4-11 11-9 12 5 1 14-10 6z"/>
+    <path fill="none" d="M147 93l15 3 8 9M162 96l-5-15M173 92l14 5 11-10M171 64l3 13 10 5M187 97l-3 8M201 60v13M195 67h12M183 47v9M179 52h8"/>
+    <path fill="white" d="M196 43l-6-5 24-28 6 5z"/>
+    <path fill="black" d="M192 16q17-9 34 8l-14-5-20 9 8-10z"/>
+    <path fill="none" d="M16 106h208"/>
+  </g>
+</svg>

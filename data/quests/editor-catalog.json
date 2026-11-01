@@ -1,0 +1,12 @@
+[
+  {
+    "id": "Kindom1",
+    "packageDirectory": "editor-0229031d-22f8-42b5-ad49-ed439aaacd41",
+    "questIds": [
+      "excalibure"
+    ],
+    "initialQuestIds": [
+      "excalibure"
+    ]
+  }
+]

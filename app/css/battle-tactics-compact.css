@@ -1,0 +1,175 @@
+/* Stable board: opening techniques or reserves never shrinks its cells. */
+.tactics-layout {
+  height: auto;
+  min-height: 100%;
+  gap: 6px;
+  padding: 8px;
+}
+.tactics-layout .tactics-map {
+  flex: none;
+  height: clamp(300px, 60svh, 540px);
+  min-height: 0;
+  max-height: none;
+}
+.tactics-header .tactics-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.tactics-header-actions button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 6px 10px;
+}
+.tactics-header-actions [data-tactics-info] {
+  border-radius: 50%;
+  font-weight: bold;
+}
+.tactics-selection {
+  min-height: 18px;
+  padding: 0;
+  margin: 0;
+  font-size: 11px;
+}
+.tactics-selection:empty {
+  display: none;
+}
+.tactics-layout .tactics-fan-handle {
+  min-height: 44px;
+  margin-top: 12px;
+}
+.tactics-flee-compact {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  width: 40px;
+  min-height: 40px;
+  z-index: 2;
+}
+.tactics-priority-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+.tactics-priority-controls button {
+  min-height: 36px;
+  min-width: 40px;
+}
+.tactics-specials {
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 0;
+}
+.tactics-specials button {
+  min-height: 40px;
+}
+.tactics-layout .tactics-cell .tactics-plinth {
+  left: 32%;
+  right: 32%;
+  min-height: 11px;
+  bottom: 3px;
+  border-radius: 4px;
+  box-shadow: none;
+}
+.tactics-cell .tactics-plinth b {
+  font-size: 9px;
+  padding: 0;
+}
+.tactics-cell .tactics-health {
+  height: 3px;
+}
+.tactics-layout .tactics-cell .tactics-sprite {
+  width: 54px;
+  height: 64px;
+  max-height: calc(100% - 19px);
+  padding: 0;
+  margin-bottom: 15px;
+}
+.tactics-cell .tactics-unit-name {
+  display: none;
+}
+.tactics-cell .tactics-priority {
+  top: 3px;
+  right: 3px;
+  bottom: auto;
+  left: auto;
+  border-radius: 50%;
+  min-width: 17px;
+  padding: 2px;
+  font-size: 10px;
+}
+.tactics-loss {
+  position: absolute;
+  pointer-events: none;
+  z-index: 25;
+  font-weight: 900;
+  font-size: 15px;
+  white-space: nowrap;
+  text-shadow:
+    0 2px 2px #000,
+    1px 0 #000,
+    -1px 0 #000;
+  transform: translate(-50%, -50%);
+  animation: tactics-loss-rise 0.65s ease-out both;
+}
+.tactics-loss--pv {
+  color: #fff5db;
+}
+.tactics-loss--wounded {
+  color: #ffbd50;
+}
+.tactics-loss--dead {
+  color: #ff6666;
+}
+@keyframes tactics-loss-rise {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.8);
+  }
+  20% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -40px) scale(1.1);
+  }
+}
+.tactics-help {
+  position: fixed;
+  max-width: 420px;
+  width: calc(100% - 40px);
+  max-height: 75svh;
+  overflow: auto;
+  padding: 18px;
+  border: 2px solid #c9a765;
+  border-radius: 14px;
+  background: #142a29;
+  color: #f5efdc;
+}
+.tactics-help::backdrop {
+  background: #0009;
+}
+.tactics-help header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+.tactics-help h2 {
+  color: #f5efdc !important;
+  margin: 0;
+  font-size: 18px;
+}
+.tactics-help button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.tactics-help p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tactics-loss {
+    animation: none;
+  }
+}

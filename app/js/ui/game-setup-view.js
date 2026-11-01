@@ -1,4 +1,10 @@
+import {
+  mountHeroGenderControl,
+  selectedHeroGender,
+} from "./hero-gender-control.js";
+import { heroClassSelection } from "./hero-class-cards.js";
 import { GameSetup } from "../core/game-setup.js";
+import { heroClassName } from "./hero-appearance.js";
 
 const PROVISIONAL_PLAY_AREA = {
   id: "initial-area",
@@ -40,13 +46,19 @@ export function createQuickGameSetup({
   });
 }
 
-export function createAutomaticHeroChoice(classId = "warrior") {
+export function createAutomaticHeroChoice(classId = "warrior", gender) {
   const names = { warrior: "Aldric", ranger: "Sylve", mage: "Mériane" };
+  const variants = {
+    "warrior-female": "Aldria",
+    "mage-male": "Mérian",
+    "ranger-male": "Sylvain",
+  };
   const appearances = { warrior: "knight", ranger: "ranger", mage: "mage" };
   const firstAptitudes = { mage: "offensive_magic" };
   return {
-    name: names[classId] ?? "Aldric",
+    name: variants[`${classId}-${gender}`] ?? names[classId] ?? "Aldric",
     classId,
+    ...(gender ? { gender } : {}),
     appearanceId: appearances[classId] ?? "knight",
     ...(firstAptitudes[classId]
       ? { firstAptitudeId: firstAptitudes[classId] }
@@ -54,18 +66,65 @@ export function createAutomaticHeroChoice(classId = "warrior") {
   };
 }
 
+export function nextSetupAction(pageIndex, positionMode) {
+  if (positionMode !== "simulation") return { pageIndex: pageIndex + 1 };
+  if (pageIndex === 3) return { start: true };
+  return { pageIndex: pageIndex + 1 };
+}
+
+export function previousSetupPage(pageIndex, positionMode) {
+  return pageIndex - 1;
+}
+
 export class GameSetupView {
-  constructor(root) {
+  constructor(root, { onSimulationStart } = {}) {
     this.root = root;
     this.pageIndex = 0;
+    this.onSimulationStart = onSimulationStart;
   }
 
   initialize() {
+    const stepNames = [
+      "Accueil",
+      "Terrain",
+      "Rythme",
+      "Héros",
+      "Monde",
+      "Placement",
+      "Récapitulatif",
+    ];
+    this.root
+      .querySelector(".setup-progress")
+      .classList.add("setup-progress--interactive");
+    this.root
+      .querySelectorAll(".setup-progress span")
+      .forEach((step, index) => {
+        step.setAttribute("role", "button");
+        step.tabIndex = 0;
+        step.title = stepNames[index];
+        step.dataset.stepName = stepNames[index];
+        step.setAttribute("aria-label", stepNames[index]);
+        step.addEventListener("click", () => this.showPage(index));
+        step.addEventListener("keydown", (event) => {
+          if (["Enter", " "].includes(event.key)) {
+            event.preventDefault();
+            this.showPage(index);
+          }
+        });
+      });
     this.root.querySelectorAll("[data-setup-next]").forEach((button) => {
-      button.addEventListener("click", () => this.showPage(this.pageIndex + 1));
+      button.addEventListener("click", () => {
+        const action = nextSetupAction(this.pageIndex, this.readPositionMode());
+        if (action.start) this.onSimulationStart?.();
+        else this.showPage(action.pageIndex);
+      });
     });
     this.root.querySelectorAll("[data-setup-back]").forEach((button) => {
-      button.addEventListener("click", () => this.showPage(this.pageIndex - 1));
+      button.addEventListener("click", () =>
+        this.showPage(
+          previousSetupPage(this.pageIndex, this.readPositionMode()),
+        ),
+      );
     });
     this.root.querySelectorAll("input[type='radio']").forEach((input) => {
       input.addEventListener("change", () => this.updateSummary());
@@ -76,54 +135,16 @@ export class GameSetupView {
   setHeroClasses(heroClasses) {
     const root = this.root.querySelector("#hero-class-options");
     if (!root) return;
-    const portraits = {
-      warrior: "assets/portraits/hero-wanderer.png",
-      ranger: "assets/portraits/hero-ranger.png",
-      mage: "assets/portraits/hero-mage.png",
-    };
-    const statLabels = {
-      attack: "Attaque",
-      defense: "Défense",
-      morale: "Moral",
-      mobility: "Mobilité",
-      command: "Commandement",
-      health: "Santé",
-    };
-    const maximums = {
-      attack: 5,
-      defense: 5,
-      morale: 5,
-      mobility: 5,
-      command: 5,
-      health: 25,
-    };
-    root.innerHTML = heroClasses
-      .map(
-        (heroClass, index) => `
-          <label class="hero-class-card">
-            <input type="radio" name="hero-class" value="${heroClass.id}" ${index === 0 ? "checked" : ""}>
-            <span class="hero-class-card__portrait" aria-hidden="true"><img src="${portraits[heroClass.id] ?? portraits.warrior}" alt=""></span>
-            <span class="hero-class-card__body">
-              <strong>${heroClass.name}</strong>
-              <span class="hero-class-card__advantage">${heroClass.advantage}</span>
-              <span class="hero-class-card__stats">${Object.entries(
-                heroClass.baseStats,
-              )
-                .map(
-                  ([id, value]) =>
-                    `<span><small>${statLabels[id] ?? id}</small><i><b style="width:${Math.round((value / maximums[id]) * 100)}%"></b></i><em>${value}</em></span>`,
-                )
-                .join("")}</span>
-            </span>
-          </label>`,
-      )
-      .join("");
+    root.innerHTML = heroClassSelection(heroClasses);
+    mountHeroGenderControl(root, () => this.updateSummary());
     root
       .querySelectorAll("input")
       .forEach((input) =>
         input.addEventListener("change", () => this.updateSummary()),
       );
     this.updateSummary();
+    const heroContinue = this.root.querySelector("#hero-continue");
+    if (heroContinue) heroContinue.disabled = heroClasses.length === 0;
   }
 
   showPage(index) {
@@ -137,10 +158,21 @@ export class GameSetupView {
     this.root
       .querySelectorAll(".setup-progress span")
       .forEach((step, stepIndex) => {
+        step.hidden = stepIndex < 1 || stepIndex > 3;
+        if (!step.hidden) step.textContent = String(stepIndex);
         step.classList.toggle("is-active", stepIndex === this.pageIndex);
         step.classList.toggle("is-complete", stepIndex < this.pageIndex);
+        if (stepIndex === this.pageIndex)
+          step.setAttribute("aria-current", "step");
+        else step.removeAttribute("aria-current");
       });
     this.updateSummary();
+    const heroContinue = this.root.querySelector("#hero-continue");
+    if (heroContinue)
+      heroContinue.textContent =
+        this.pageIndex === 3 && this.readPositionMode() === "simulation"
+          ? "Commencer la partie"
+          : "Continuer";
     this.root.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -161,6 +193,7 @@ export class GameSetupView {
   readHeroChoice() {
     return createAutomaticHeroChoice(
       this.selectedValue("hero-class", "warrior"),
+      selectedHeroGender(this.root.querySelector("#hero-class-options")),
     );
   }
 
@@ -171,6 +204,9 @@ export class GameSetupView {
     const pace = this.selectedValue("travel-pace", "calm");
     const { density, placement } = this.readWorldPreferences();
     const heroClass = this.selectedValue("hero-class", "warrior");
+    const gender = selectedHeroGender(
+      this.root.querySelector("#hero-class-options"),
+    );
     const labels = {
       gps: ["Terrain", "Dehors avec le GPS"],
       simulation: ["Terrain", "Simulation à la maison"],
@@ -182,8 +218,8 @@ export class GameSetupView {
       auto: ["Placement", "Automatique"],
       mixed: ["Placement", "Guidé"],
       manual: ["Placement", "Libre"],
-      warrior: ["Héros", "Guerrier"],
-      ranger: ["Héros", "Éclaireur"],
+      warrior: ["Héros", heroClassName("warrior", gender)],
+      ranger: ["Héros", heroClassName("ranger", gender)],
       mage: ["Héros", "Mage"],
     };
     summary.innerHTML = [mode, pace, heroClass, density, placement]
@@ -195,11 +231,10 @@ export class GameSetupView {
   }
 
   readSetup() {
-    const playtest = this.root.dataset.edition === "playtest";
     return createQuickGameSetup({
-      name: playtest ? "RPG GPS — Survie" : "Essai terrain",
-      scenarioId: playtest ? "verdant-frontier" : "chaos",
-      solo: playtest,
+      name: "Test local — À la maison",
+      scenarioId: "chaos",
+      solo: false,
       travelPaceMode:
         this.root.querySelector('input[name="travel-pace"]:checked')?.value ??
         "calm",
@@ -208,7 +243,7 @@ export class GameSetupView {
   }
 
   readPositionMode() {
-    return this.selectedValue("test-mode", "simulation");
+    return "simulation";
   }
   showError(error) {
     this.root.querySelector("#setup-status").textContent = error.message;

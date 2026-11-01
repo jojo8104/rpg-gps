@@ -1,14 +1,19 @@
 /** Définition immuable d'un scénario, indépendante de la partie et de la géographie réelle. */
 import { Trail } from "./trail.js";
+import { normalizeScenarioMapDefinition } from "./scenario-map-definition.js";
+import { normalizeLocationAppearance } from "./scenario-location-appearance.js";
+import { normalizeLocationWorld } from "./scenario-location-world-policy.js";
 
 export class Scenario {
   constructor({
     id,
     name,
     intro,
+    dialogues = {},
     initialPhaseId,
     playerStart = {},
     locationSlots = [],
+    mapDefinition = null,
     factions = [],
     trails = [],
     worldState = {},
@@ -20,6 +25,8 @@ export class Scenario {
     this.id = Scenario.#requireText(id, "L'identifiant du scénario");
     this.name = Scenario.#requireText(name, "Le nom du scénario");
     this.intro = Scenario.#requireText(intro, "Le contexte initial");
+    Scenario.#requireObject(dialogues, "Les dialogues du scénario");
+    this.dialogues = structuredClone(dialogues);
     this.playerStart = Scenario.#createPlayerStart(playerStart);
     this.locationSlots = Scenario.#createRecords(locationSlots, "Les lieux", [
       "id",
@@ -29,6 +36,10 @@ export class Scenario {
       "id",
       "name",
     ]);
+    this.mapDefinition = normalizeScenarioMapDefinition(
+      mapDefinition,
+      this.locationSlots,
+    );
     Scenario.#requireObject(worldState, "L'état mondial initial");
     this.worldState = structuredClone(worldState);
     if (!Array.isArray(trails))
@@ -94,6 +105,8 @@ export class Scenario {
       id: this.id,
       name: this.name,
       intro: this.intro,
+      mapDefinition: structuredClone(this.mapDefinition),
+      dialogues: structuredClone(this.dialogues),
       initialPhaseId: this.initialPhaseId,
       playerStart: {
         resources: { ...this.playerStart.resources },
@@ -315,7 +328,10 @@ export class Scenario {
         : Scenario.#requireText(failure.nextPhase, "La phase après échec");
     if (policy === "branch" && nextPhase === null)
       throw new RangeError("Un embranchement d'échec exige une phase cible.");
-    const scope = Scenario.#requireText(failure.scope ?? "quest", "La portée de l'échec");
+    const scope = Scenario.#requireText(
+      failure.scope ?? "quest",
+      "La portée de l'échec",
+    );
     if (!["quest", "phase"].includes(scope))
       throw new RangeError("La portée de l'échec est invalide.");
     return {
@@ -380,6 +396,10 @@ export class Scenario {
           "La stratégie de placement",
         );
       }
+      if (record.appearance !== undefined)
+        normalized.appearance = normalizeLocationAppearance(record.appearance);
+      if (record.world !== undefined)
+        normalized.world = normalizeLocationWorld(record.world);
       return normalized;
     });
   }

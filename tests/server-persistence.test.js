@@ -24,7 +24,12 @@ test("une partie et ses sessions survivent à un redémarrage", async (context) 
     now: () => 1_000,
     onStateChanged: (state) => store.schedule(state),
   });
-  const host = lobbies.createLobby({ playerName: "Jo", connectionId: "host" });
+  const host = lobbies.createLobby({
+    maxPlayers: 4,
+    positionMode: "simulation",
+    playerName: "Jo",
+    connectionId: "host",
+  });
   const guest = lobbies.joinLobby({
     code: host.lobby.code,
     playerName: "Léa",
@@ -57,8 +62,16 @@ test("une partie et ses sessions survivent à un redémarrage", async (context) 
     connectionId: "new-socket",
   });
   assert.equal(resumed.lobby.status, "started");
-  assert.equal(resumed.lobby.players.find(({ id }) => id === guest.session.playerId).connected, true);
-  assert.equal(resumed.lobby.players.find(({ id }) => id === host.session.playerId).connected, false);
+  assert.equal(
+    resumed.lobby.players.find(({ id }) => id === guest.session.playerId)
+      .connected,
+    true,
+  );
+  assert.equal(
+    resumed.lobby.players.find(({ id }) => id === host.session.playerId)
+      .connected,
+    false,
+  );
   assert.equal(restored.gameSnapshot(started.code).state.status, "started");
   assert.equal(restored.gameSnapshot(started.code).state.heroes.length, 3);
 });
@@ -71,9 +84,14 @@ test("la dernière modification est écrite atomiquement", async (context) => {
   await store.flush();
   store.schedule({ lobbies: [], sessions: [], marker: "finale" });
   await store.flush();
-  const saved = JSON.parse(await readFile(path.join(directory, "server-state.json"), "utf8"));
+  const saved = JSON.parse(
+    await readFile(path.join(directory, "server-state.json"), "utf8"),
+  );
   assert.equal(saved.marker, "finale");
-  assert.deepEqual((await readdir(directory)).filter((name) => name.endsWith(".tmp")), []);
+  assert.deepEqual(
+    (await readdir(directory)).filter((name) => name.endsWith(".tmp")),
+    [],
+  );
 });
 
 test("une sauvegarde corrompue est isolée sans bloquer le serveur", async (context) => {
@@ -88,5 +106,8 @@ test("une sauvegarde corrompue est isolée sans bloquer le serveur", async (cont
   } finally {
     console.error = originalError;
   }
-  assert.equal((await readdir(directory)).some((name) => name.includes(".corrupt-")), true);
+  assert.equal(
+    (await readdir(directory)).some((name) => name.includes(".corrupt-")),
+    true,
+  );
 });

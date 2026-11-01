@@ -1,0 +1,156 @@
+{
+  "prospectors-receive-order": {
+    "speakerId": "marshal-aldren",
+    "locationId": "capital",
+    "initialNodeId": "briefing",
+    "nodes": [
+      {
+        "id": "briefing",
+        "lines": [
+          {
+            "speaker": "Maréchal Aldren",
+            "text": "Six prospecteurs et un jeune géologue ont disparu près de Valgrise."
+          },
+          {
+            "speaker": "Maréchal Aldren",
+            "text": "Interrogez Armand au camp royal et retrouvez leur piste."
+          }
+        ],
+        "choices": [
+          {
+            "id": "continue",
+            "label": "Continuer",
+            "goal": "receive-order"
+          }
+        ]
+      }
+    ]
+  },
+  "prospectors-question-chief": {
+    "speakerId": "armand-valgrise",
+    "locationId": "royal-camp",
+    "initialNodeId": "briefing",
+    "nodes": [
+      {
+        "id": "briefing",
+        "lines": [
+          {
+            "speaker": "Armand de Valgrise",
+            "text": "Ils exploraient les anciennes collines minières."
+          },
+          {
+            "speaker": "Armand de Valgrise",
+            "text": "Des empreintes ont été retrouvées sur leur chemin. Suivez-les."
+          }
+        ],
+        "choices": [
+          {
+            "id": "continue",
+            "label": "Continuer",
+            "goal": "question-chief"
+          }
+        ]
+      }
+    ]
+  },
+  "prospectors-inspect-first-trace": {
+    "speakerId": "hero",
+    "locationId": "prospectors-trace-1",
+    "initialNodeId": "briefing",
+    "nodes": [
+      {
+        "id": "briefing",
+        "lines": [
+          {
+            "speaker": "Votre héros",
+            "text": "Des empreintes et des outils abandonnés indiquent la direction prise par les prospecteurs."
+          }
+        ],
+        "choices": [
+          {
+            "id": "continue",
+            "label": "Continuer",
+            "goal": "inspect-first-trace"
+          }
+        ]
+      }
+    ]
+  },
+  "prospectors-inspect-second-trace": {
+    "speakerId": "hero",
+    "locationId": "prospectors-trace-2",
+    "initialNodeId": "briefing",
+    "nodes": [
+      {
+        "id": "briefing",
+        "lines": [
+          {
+            "speaker": "Votre héros",
+            "text": "Des traces de lutte et des flèches brisées conduisent à leur dernier champ de bataille."
+          }
+        ],
+        "choices": [
+          {
+            "id": "continue",
+            "label": "Continuer",
+            "goal": "inspect-second-trace"
+          }
+        ]
+      }
+    ]
+  },
+  "prospectors-find-geologist": {
+    "speakerId": "royal-geologist",
+    "locationId": "gold-mine",
+    "initialNodeId": "briefing",
+    "nodes": [
+      {
+        "id": "briefing",
+        "lines": [
+          {
+            "speaker": "Le géologue",
+            "text": "Vous avez vaincu nos geôliers ! Les six prospecteurs sont morts lors de l’embuscade."
+          },
+          {
+            "speaker": "Le géologue",
+            "text": "Conduisez-moi auprès d’Armand, puis à la capitale pour témoigner."
+          }
+        ],
+        "choices": [
+          {
+            "id": "continue",
+            "label": "Continuer",
+            "goal": "find-geologist"
+          }
+        ]
+      }
+    ]
+  },
+  "prospectors-report-to-chief": {
+    "speakerId": "armand-valgrise",
+    "locationId": "royal-camp",
+    "initialNodeId": "briefing",
+    "nodes": [
+      {
+        "id": "briefing",
+        "lines": [
+          {
+            "speaker": "Armand de Valgrise",
+            "text": "Le géologue confirme votre découverte. Nous informerons les familles."
+          },
+          {
+            "speaker": "Armand de Valgrise",
+            "text": "Portez son témoignage et le rapport au maréchal, à la capitale."
+          }
+        ],
+        "choices": [
+          {
+            "id": "continue",
+            "label": "Continuer",
+            "goal": "report-to-chief"
+          }
+        ]
+      }
+    ]
+  }
+}

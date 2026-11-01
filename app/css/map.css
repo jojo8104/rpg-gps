@@ -1,6 +1,4 @@
 @import url("./world-art.css");
-@import url("./battle-sprites.css");
-@import url("./battlefield-art.css");
 @import url("./unit-art.css");
 
 #map {
@@ -250,6 +248,40 @@
   font-weight: 800;
   font-size: 1.05rem;
 }
+.watch-alert-marker-host {
+  border: 0;
+  background: none;
+}
+.watch-alert-marker {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 2px solid #f0ca6b;
+  border-radius: 50%;
+  background: #172019ed;
+  box-shadow:
+    0 3px 12px #000b,
+    0 0 0 0 #e4bb58aa;
+  animation: watch-alert-pulse 1.2s ease-out infinite;
+}
+.watch-alert-marker img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+@keyframes watch-alert-pulse {
+  70% {
+    box-shadow:
+      0 3px 12px #000b,
+      0 0 0 14px #e4bb5800;
+  }
+  100% {
+    box-shadow:
+      0 3px 12px #000b,
+      0 0 0 0 #e4bb5800;
+  }
+}
 .rpg-ally-marker__name {
   position: absolute;
   top: 43px;
@@ -265,6 +297,65 @@
 .rpg-ally-marker-host.is-offline {
   opacity: 0.48;
   filter: grayscale(0.8);
+}
+.rpg-remote-hero-host .rpg-hero {
+  filter: drop-shadow(0 3px 7px #000b) drop-shadow(0 0 8px #4caf50aa);
+}
+.rpg-remote-hero-host.is-red .rpg-hero {
+  filter: drop-shadow(0 3px 7px #000b) drop-shadow(0 0 8px #e84b4baa);
+}
+.rpg-remote-hero-host.is-green .rpg-hero__cloak {
+  fill: #318447;
+  stroke: #123d21;
+}
+.rpg-remote-hero-host.is-red .rpg-hero__cloak {
+  fill: #b43b3b;
+  stroke: #551616;
+}
+.rpg-remote-hero-name {
+  position: absolute;
+  top: 54px;
+  left: 50%;
+  translate: -50% 0;
+  width: max-content;
+  max-width: 110px;
+  overflow: hidden;
+  color: #fff;
+  font: 800 11px/1.2 system-ui;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 4px #000;
+  white-space: nowrap;
+}
+.rpg-player-popup .leaflet-popup-content-wrapper,
+.rpg-player-popup .leaflet-popup-tip {
+  background: #202820;
+  color: #f4ecd8;
+}
+.rpg-player-popup .leaflet-popup-content {
+  margin: 12px;
+}
+.player-map-popup {
+  min-width: 190px;
+}
+.player-map-popup > span {
+  color: #7ed893;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.player-map-popup.is-red > span {
+  color: #ff8585;
+}
+.player-map-popup h3 {
+  margin: 4px 0;
+  color: #fff4d0;
+}
+.player-map-popup p {
+  margin: 4px 0 10px;
+}
+.player-map-popup button {
+  width: 100%;
 }
 .rpg-terrain {
   stroke-width: 1.5;
@@ -297,7 +388,6 @@
 .rpg-fog-overlay {
   pointer-events: none;
   filter: drop-shadow(0 5px 10px rgb(91 105 113 / 22%));
-  animation: fog-cloud-breathe 8s ease-in-out infinite alternate;
 }
 .rpg-fog-outside {
   fill: #111617;
@@ -365,25 +455,81 @@
     transform: scale(1.35);
   }
 }
-@keyframes fog-cloud-breathe {
-  0% {
-    filter: drop-shadow(0 5px 10px rgb(91 105 113 / 20%));
-  }
-  50% {
-    opacity: 0.88;
-  }
-  100% {
-    filter: drop-shadow(0 8px 14px rgb(91 105 113 / 28%));
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   .rpg-danger-effect,
-  .rpg-location .rpg-location__frame,
-  .rpg-fog-overlay {
+  .rpg-location .rpg-location__frame {
     animation: none;
   }
   .rpg-location,
   .hero-direction {
     transition: none;
   }
+}
+.rpg-territory-border {
+  filter: drop-shadow(0 0 3px currentColor);
+}
+.rpg-territory-surveillance {
+  animation: territory-surveillance 2s linear infinite;
+}
+@keyframes territory-surveillance {
+  to {
+    stroke-dashoffset: -32;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rpg-territory-surveillance {
+    animation: none;
+  }
+}
+
+.astral-hero-marker {
+  opacity: 0.7;
+  filter: drop-shadow(0 0 8px #ff29ed) hue-rotate(85deg);
+  cursor: grab;
+}
+.astral-hero-marker .rpg-hero-foot-shadow {
+  display: none;
+}
+.astral-hero-marker:active {
+  cursor: grabbing;
+}
+
+.astral-ghost-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 800;
+  width: 88px;
+  height: 108px;
+  margin: -116px 0 0 -44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px dashed #ff8bf5;
+  border-radius: 20px;
+  background: #852cbb22;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.astral-ghost-handle .rpg-hero-sprite {
+  margin-left: 0;
+  pointer-events: none;
+}
+.astral-drag-hint {
+  font: 600 12px/20px sans-serif;
+  color: white;
+  background: #451454;
+  border-radius: 8px;
+  padding: 0 8px;
+  pointer-events: none;
+}
+.astral-ghost-handle.is-dragging {
+  cursor: grabbing;
+  border-style: solid;
+  opacity: 0.9;
+}
+.astral-hero-marker.leaflet-marker-icon {
+  pointer-events: none;
 }

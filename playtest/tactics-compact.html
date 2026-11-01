@@ -1,0 +1,7 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vérification visuelle du combat</title><link rel="stylesheet" href="/app/css/style.css"><link rel="stylesheet" href="/app/css/battle-duel.css"><link rel="stylesheet" href="/app/css/battle-tactics.css"><link rel="stylesheet" href="/app/css/battle-tactics-compact.css"><style>body{margin:0;background:#08110d}#preview{max-width:580px;margin:auto}</style><div id="preview"></div><script type="module">
+import {renderTacticalBattleView} from '/app/js/ui/tactical-battle-view.js';
+const battle=await (await fetch('./tactics-compact-state.json')).json();
+let selected=null,fanOpen=false,specialOpen=false;
+function show(){renderTacticalBattleView({element:document.querySelector('#preview'),battle,teamId:'a',orders:[],selected,fanOpen,specialOpen,message:'',onFan(){fanOpen=!fanOpen;show()},onSelect(id){selected=id;fanOpen=false;show()},onCell(p,actor){if(actor?.ownerId==='a'){specialOpen=selected===actor.id&&!specialOpen;selected=actor.id;show()}},onSpecial(){},onCancel(){},onPriority(){},onLock(){},onFlee(){},onBase(){}})}
+show();
+</script></html>

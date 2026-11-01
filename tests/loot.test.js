@@ -8,7 +8,13 @@ import { LootDistributionService } from "../app/js/core/loot-distribution-servic
 const hero = (id, playerId) => ({ id, sourceId: id, playerId, attack: 10, defense: 2, speed: 2 });
 function finishedBattle({ loot, winners = [hero("h1", "p1")], losers = [hero("h2", "p2")] }) {
   const battle = new BattleEngine({ id: "battle", loot, teams: [{ id: "w", heroes: winners, units: [] }, { id: "l", heroes: losers, units: [] }] });
-  losers.forEach((entry) => { battle.getEntity(entry.id).state = "ghost"; }); battle.start(); battle.tick(1); return battle;
+  battle.start();
+  battle.duel.players[0].hero.attack = 1000;
+  battle.duel.encounter.twist = { id: "NO_TECHNIQUE" };
+  battle.submitDuelChoice("w", { cards: ["HERO"] });
+  battle.submitDuelChoice("l", { cards: ["HERO"] });
+  battle.lockDuelChoice("w"); battle.lockDuelChoice("l");
+  return battle;
 }
 
 test("le butin est partagé par contribution entre les héros victorieux survivants", () => {
@@ -49,6 +55,23 @@ test("les ressources du résultat rejoignent les groupes slotables du héros", (
   const game = new Game({ setup, heroClasses: [{ id: "fighter", name: "Combattant", abilityIds: [], startingUnits: [] }], idGenerator: (prefix) => `${prefix}-${id++}` });
   const winner = game.chooseHero("p1", { name: "A", classId: "fighter" }); game.start();
   game.battleLoot.push(new BattleLoot({ id: "loot", battleId: "battle", entries: [{ id: "gold", itemId: "gold", quantity: 120, portable: true, valuePerUnit: 1, allocations: { p1: 120 } }], shares: [{ playerId: "p1", heroId: winner.id, contribution: 1, ratio: 1 }] }));
+  game.battleReports.push({ battleId: "battle", battleLoot: game.battleLoot[0].toJSON() });
   const result = game.collectBattleLoot({ battleId: "battle", playerId: "p1", heroId: winner.id, selection: { gold: 120 } });
   assert.equal(result.success, true); assert.equal(winner.resources.gold, 120); assert.equal(game.inventoryService.getUsedHeroBagSlots(winner), 2);
+  assert.equal(game.battleReports[0].battleLoot.entries[0].allocations.p1, 0);
+  game.collectBattleLoot({ battleId: "battle", playerId: "p1", heroId: winner.id, selection: { gold: 0 } });
+  assert.equal(winner.resources.gold, 120);
+});
+
+test("la collecte partielle complète une pile pleine en slots et conserve le surplus après restauration", () => {
+  const reward = new BattleLoot({ id: "partial", battleId: "battle", entries: [{ id: "gold", itemId: "gold", quantity: 120, portable: true, allocations: { p1: 120 } }], shares: [{ playerId: "p1", heroId: "h1" }] });
+  const result = reward.collect({ playerId: "p1", bag: { freeSlots: 0, quantitiesByItem: { gold: 80 }, slotsByItem: { gold: 1 } }, selection: { gold: 120 }, allowPartial: true });
+  assert.equal(result.collected[0].quantity, 20);
+  const restored = new BattleLoot(reward.toJSON());
+  assert.equal(restored.entries[0].allocations.p1, 100);
+  const full = restored.collect({ playerId: "p1", bag: { freeSlots: 0 }, selection: { gold: 100 }, allowPartial: true });
+  assert.equal(full.reason, "insufficient_slots");
+  assert.equal(restored.entries[0].quantity, 100);
+  assert.equal(restored.collect({ playerId: "p1", bag: { freeSlots: 1 }, selection: { gold: 100 }, allowPartial: true }).success, true);
+  assert.equal(restored.status, "COLLECTED");
 });

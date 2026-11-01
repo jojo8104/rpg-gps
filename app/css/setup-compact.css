@@ -1,0 +1,289 @@
+/* Compact preparation pages; scrolling remains available on small screens. */
+.lobby-screen {
+  color: var(--parchment-ink);
+  background: linear-gradient(#fff0cc, #e3c38e);
+  border: 2px solid #8c6647;
+  border-radius: 12px;
+  box-shadow: 0 8px 28px #0006;
+  box-sizing: border-box;
+}
+.lobby-screen *,
+.setup-screen * {
+  box-sizing: border-box;
+}
+.lobby-screen h1,
+.lobby-screen h2,
+.lobby-screen h3,
+.lobby-screen strong {
+  color: var(--parchment-ink);
+}
+#lobby-room-code {
+  color: #79531d;
+  text-shadow: none;
+}
+.lobby-screen .lobby-form {
+  min-width: 0;
+  background: #fff4d9;
+  color: var(--parchment-ink);
+  border-color: #9a7347;
+}
+.lobby-screen label,
+.lobby-screen select,
+.lobby-screen input,
+.setup-screen label,
+.setup-screen select {
+  min-width: 0;
+  max-width: 100%;
+}
+.lobby-screen select,
+.lobby-screen input:not([type="checkbox"]) {
+  width: 100%;
+}
+.lobby-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  gap: 0.65rem;
+  padding: 0.65rem 0;
+  margin-top: 0.65rem;
+  background: #e3c38e;
+  border-top: 1px solid #9a7347;
+}
+.lobby-footer > button {
+  flex: 1;
+  min-width: 0;
+  margin: 0 !important;
+}
+.account-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: center;
+}
+#account-list .account-row > button:first-child {
+  height: 64px;
+  min-width: 0;
+  padding: 0.65rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+#account-list .account-remove {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font-size: 1.65rem;
+}
+#account-list .is-selected:disabled {
+  color: #fff0c9 !important;
+  background: #315b35 !important;
+  opacity: 1;
+  outline: 2px solid #79531d;
+}
+.lobby-screen .lobby-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #9a7347;
+}
+.lobby-tabs button {
+  min-width: 0;
+  min-height: 48px;
+  font-size: 0.85rem;
+}
+.lobby-screen .lobby-tabs button[aria-pressed="true"] {
+  outline-color: #79531d;
+}
+#lobby-configuration {
+  margin-block: 0.65rem;
+}
+#lobby-save-configuration {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+}
+@media (max-width: 420px) {
+  .lobby-screen #account-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lobby-footer > button {
+    font-size: 0.85rem;
+    padding-inline: 0.5rem;
+  }
+}
+.lobby-screen [hidden],
+.setup-screen [hidden] {
+  display: none !important;
+}
+.lobby-screen,
+.setup-screen {
+  width: min(100% - 1rem, 760px);
+  max-height: 100dvh;
+  overflow-y: auto;
+  padding: max(0.75rem, env(safe-area-inset-top)) 0.85rem
+    max(0.75rem, env(safe-area-inset-bottom));
+}
+.lobby-screen h1,
+.lobby-screen h2,
+.setup-page h2 {
+  margin: 0.3rem 0 0.65rem;
+}
+.lobby-screen h3,
+.lobby-screen p {
+  margin-block: 0.5rem;
+}
+.lobby-screen .lobby-form {
+  padding: 0.75rem;
+  gap: 0.6rem;
+}
+.lobby-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+.lobby-tabs button {
+  flex: 1;
+  padding: 0.65rem 0.4rem;
+}
+.lobby-tabs button[aria-pressed="true"] {
+  outline: 2px solid #ffe083;
+  outline-offset: 1px;
+}
+#account-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+#account-continue,
+#mode-back,
+#lobby-back {
+  margin-top: 0.75rem;
+}
+.lobby-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.lobby-terrain-map {
+  height: clamp(300px, 62dvh, 640px);
+  min-height: 0;
+}
+.setup-choice-grid,
+.hero-class-options,
+.setup-summary {
+  margin-block: 0.75rem;
+  gap: 0.5rem;
+}
+.setup-choice {
+  min-height: 0;
+  padding: 0.65rem 0.65rem 0.65rem 2.7rem;
+}
+.setup-navigation {
+  margin-top: 0.75rem;
+}
+.setup-summary div {
+  padding: 0.65rem;
+}
+.hero-class-card {
+  padding: 0.6rem;
+  gap: 0.5rem !important;
+}
+.hero-class-card__body {
+  gap: 0.25rem;
+}
+.hero-class-card__body > strong {
+  font-size: 1.05rem;
+}
+.hero-class-card__advantage {
+  font-size: 0.85rem;
+}
+.hero-class-card:not(:has(input:checked)) .hero-class-card__stats {
+  display: none;
+}
+.landscape-tools .game-session-code {
+  margin: 0.25rem 0;
+  padding: 0.5rem;
+  border: 1px solid #9a7347;
+  border-radius: 8px;
+  color: #ffe9b8;
+  font-size: 0.8rem;
+}
+.landscape-tools .game-session-code strong {
+  display: block;
+  color: #ffe083;
+  font-size: 1.15rem;
+  letter-spacing: 0.12em;
+  user-select: all;
+}
+@media (min-width: 560px) {
+  #lobby-configuration {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  #lobby-configuration > h3,
+  #lobby-configuration > p,
+  #lobby-configuration > button {
+    grid-column: 1 / -1;
+  }
+  .lobby-mode-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-height: 500px) and (min-width: 560px) {
+  .setup-choice-grid,
+  .hero-class-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .setup-page > p:not(.eyebrow) {
+    margin-block: 0.35rem;
+  }
+  .hero-class-card {
+    grid-template-columns: 1fr;
+  }
+  .hero-class-card__portrait {
+    display: none;
+  }
+}
+
+/* Partie rapide : réglages courts et sans texte d’explication. */
+.is-quick-setup #lobby-configuration {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 0.5rem;
+  gap: 0.4rem 0.6rem;
+  margin: 0.35rem 0;
+}
+.is-quick-setup #lobby-configuration > :is(h3, p) {
+  display: none;
+}
+.is-quick-setup #lobby-configuration .lobby-setting-choices {
+  grid-column: auto;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.25rem;
+}
+.is-quick-setup .lobby-setting-choices legend {
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+}
+.is-quick-setup #lobby-configuration .setup-choice {
+  padding: 0.45rem 0.35rem 0.45rem 1.9rem;
+  font-size: 0.8rem;
+  min-height: 36px;
+}
+.is-quick-setup #lobby-configuration label {
+  margin: 0;
+  gap: 0.2rem;
+  font-size: 0.85rem;
+}
+.is-quick-setup #lobby-configuration select {
+  padding: 0.4rem;
+  min-height: 38px;
+}
+.is-quick-setup [data-room-tab="preparation"]::before {
+  background: #806a4b55;
+}
+
+.is-quick-setup #lobby-configuration .lobby-setting-choices {
+  align-content: start;
+  align-items: start;
+}

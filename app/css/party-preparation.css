@@ -1,0 +1,561 @@
+.lobby-screen.is-terrain-editor {
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: max(0.4rem, env(safe-area-inset-top)) 0.5rem
+    max(0.4rem, env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+.is-terrain-editor #lobby-room {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.is-terrain-editor #lobby-room > h2,
+.is-terrain-editor #lobby-role-title,
+.is-terrain-editor #lobby-configuration-summary {
+  margin-block: 0.15rem;
+  font-size: 0.85rem;
+}
+.is-terrain-editor #lobby-room-back {
+  align-self: flex-start;
+  width: 100%;
+  min-height: 32px;
+  padding: 0.3rem 0.7rem;
+}
+.is-terrain-editor .lobby-tabs {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  flex-shrink: 0;
+  margin: 0.3rem 0;
+}
+.is-terrain-editor .lobby-tabs button {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 36px;
+  font-size: 0.8rem;
+  padding: 0.45rem;
+}
+.is-terrain-editor [data-room-page="terrain"] {
+  flex: 1;
+  min-height: 0;
+}
+.is-terrain-editor .lobby-terrain {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0.5rem;
+}
+.is-terrain-editor .lobby-terrain h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.is-terrain-editor #lobby-terrain-status {
+  margin: 0.15rem 0;
+  font-size: 0.8rem;
+}
+.is-terrain-editor .lobby-terrain-map {
+  flex: 1;
+  height: auto;
+  min-height: 120px;
+}
+.is-terrain-editor #lobby-terrain-open {
+  display: none;
+}
+.is-terrain-editor .lobby-terrain-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+.is-terrain-editor .lobby-terrain-actions button {
+  width: auto;
+  min-height: 36px;
+  flex: 1 1 85px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.75rem;
+}
+.is-terrain-editor #lobby-terrain-save {
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.6rem;
+  order: 10;
+}
+.is-terrain-editor .rpg-map-preparation {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.3rem;
+}
+.is-terrain-editor .rpg-map-preparation label {
+  font-size: 0.75rem;
+}
+.is-terrain-editor .rpg-map-preparation button {
+  width: auto;
+  padding: 0.4rem;
+}
+.lobby-screen.is-terrain-editor {
+  display: flex;
+  flex-direction: column;
+}
+.is-terrain-editor #lobby-room-footer {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.3rem 0;
+}
+.is-terrain-editor #lobby-status:empty {
+  display: none;
+}
+.is-terrain-editor .lobby-tabs button {
+  width: 100%;
+}
+.lobby-screen .rpg-map-preparation {
+  background: #fff4d9;
+  color: var(--parchment-ink);
+  border-color: #9a7347;
+  box-shadow: none;
+}
+.preparation-quest {
+  background: #fff4d9;
+  color: var(--parchment-ink);
+  min-width: 0;
+}
+.preparation-location > *,
+.preparation-quest > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.preparation-location select {
+  width: 100%;
+  max-width: 100%;
+}
+.preparation-quest-title input {
+  flex: 0 0 1.2rem;
+}
+.lobby-screen:has(
+    [data-room-page="preparation"]:not([hidden]) .preparation-navigation
+  )
+  #lobby-room-footer {
+  display: none;
+}
+@media (max-width: 560px) {
+  #party-preparation .preparation-steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.setup-progress.setup-progress--interactive,
+.lobby-screen .lobby-tabs.setup-progress {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  margin: 0.5rem 0 0.8rem;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+}
+.setup-progress--interactive > button,
+.setup-progress--interactive > span {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  width: 0;
+  height: 56px;
+  min-height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--parchment-ink);
+  font-size: 0;
+  text-shadow: none;
+  cursor: pointer;
+  overflow: visible;
+}
+.lobby-screen .setup-progress--interactive > button {
+  flex: 1 1 0;
+  height: 56px;
+  min-height: 56px;
+  width: 0;
+  font-size: 0;
+  padding: 0;
+}
+.setup-progress--interactive > :is(button, span)::before {
+  content: "";
+  position: absolute;
+  inset: 5px 0 auto;
+  height: 5px;
+  border-radius: 99px;
+  background: #806a4b55;
+}
+.setup-progress--interactive > :is(.is-active, .is-complete)::before {
+  background: #9a6b2b;
+}
+.setup-progress--interactive > :is(button, span)::after {
+  content: attr(data-step-name);
+  position: absolute;
+  inset: 16px 0 auto;
+  color: var(--parchment-ink);
+  font:
+    700 0.75rem/1.15 Georgia,
+    serif;
+  text-align: center;
+  opacity: 0;
+  overflow-wrap: anywhere;
+}
+.setup-progress--interactive > :is(:hover, :focus-visible, .is-active)::after {
+  opacity: 1;
+}
+.setup-progress--interactive > :focus-visible {
+  outline: 2px solid #79531d;
+  outline-offset: 3px;
+}
+.setup-progress.setup-progress--interactive
+  > span:is(.is-active, .is-complete) {
+  background: transparent;
+}
+.lobby-screen .setup-progress--interactive > button[aria-pressed="true"] {
+  outline: none;
+}
+.lobby-screen .lobby-setting-choices {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0.4rem 0;
+  grid-column: 1 / -1;
+}
+.lobby-setting-choices legend {
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.lobby-screen .lobby-setting-choices .setup-choice {
+  padding: 0.7rem 0.55rem 0.7rem 2.15rem;
+  font-size: 0.9rem;
+  line-height: 1.25;
+  min-width: 0;
+}
+.lobby-screen .lobby-setting-choices .setup-choice strong {
+  overflow-wrap: anywhere;
+}
+.lobby-screen .lobby-setting-choices .setup-choice input {
+  left: 0.55rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.lobby-screen .setup-choice input[type="radio"] {
+  width: 1.25rem;
+  min-height: 1.25rem;
+}
+.lobby-screen .setup-choice:has(input:disabled) {
+  cursor: default;
+  opacity: 0.7;
+}
+.lobby-terrain-position-controls .rpg-map-preparation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+  align-items: end;
+}
+.lobby-terrain-position-controls .rpg-map-preparation > button {
+  align-self: end;
+  min-height: 40px;
+}
+.lobby-terrain-position-controls
+  .rpg-map-preparation
+  > :is(p, .rpg-map-search-results) {
+  grid-column: 1 / -1;
+}
+.lobby-terrain-position-controls .rpg-map-preparation > p:empty,
+.lobby-terrain-position-controls .rpg-map-search-results:empty {
+  display: none;
+}
+@media (max-width: 560px) {
+  .lobby-terrain-position-controls .rpg-map-preparation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .lobby-terrain-position-controls .rpg-map-preparation > button {
+    width: 100%;
+  }
+}
+.preparation-steps {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+  margin: 1rem 0;
+}
+.preparation-steps button {
+  min-width: 0;
+  min-height: 52px;
+  font-size: 0.85rem;
+  padding: 0.65rem;
+}
+.preparation-steps button[aria-pressed="true"] {
+  outline: 2px solid #79531d;
+}
+.preparation-quest,
+.preparation-location {
+  border: 1px solid #9a7347;
+  border-radius: 10px;
+  margin: 0.75rem 0;
+  padding: 0.85rem;
+}
+.preparation-location {
+  background: #f1dfb8;
+  color: var(--parchment-ink);
+  display: grid;
+  gap: 0.6rem;
+}
+.preparation-quest-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.preparation-quest-title input {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+#party-preparation label {
+  display: grid;
+  gap: 0.3rem;
+}
+#party-preparation .preparation-quest-title {
+  display: flex;
+}
+.preparation-map-dialog,
+.qr-scanner-dialog {
+  width: min(96vw, 850px);
+  max-height: 96dvh;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #fff0cc;
+  color: var(--parchment-ink);
+  border: 1px solid #9a7347;
+}
+dialog::backdrop {
+  background: #000b;
+}
+.preparation-location-map {
+  height: min(58dvh, 580px);
+  min-height: 200px;
+}
+.qr-scanner-dialog video {
+  width: 100%;
+  max-height: 55dvh;
+  object-fit: cover;
+}
+.qr-scanner-dialog input {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+.lobby-screen.is-organizer-console {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  width: 100%;
+  height: 100dvh;
+  margin: 0;
+  background: linear-gradient(#fff0cc, #e3c38e);
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+.game-qr-feedback {
+  position: fixed;
+  z-index: 1400;
+  bottom: 5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90vw, 480px);
+  padding: 0.75rem;
+  color: #fff2ca;
+  background: #17251f;
+  border: 1px solid #c69b38;
+  border-radius: 10px;
+}
+#map-view .game-qr-scan {
+  bottom: calc(var(--map-commands-bottom) + 54px);
+  border-radius: 50%;
+  padding: 0.3rem;
+  font-size: 1.2rem;
+}
+#qr-scan-result:empty {
+  display: none;
+}
+@media (min-width: 900px) {
+  .preparation-location {
+    grid-template-columns: 1fr 1fr;
+  }
+  .preparation-location > strong,
+  .preparation-location > p {
+    grid-column: 1/-1;
+  }
+}
+
+/* Pages de préparation : seul le contenu défile, les actions restent visibles. */
+.lobby-screen.is-preparation-editor {
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.is-preparation-editor #lobby-room {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.is-preparation-editor [data-room-page="preparation"] {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+#party-preparation.preparation-paged {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.preparation-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 0.25rem;
+}
+.preparation-navigation {
+  flex-shrink: 0;
+  margin-top: 0.35rem;
+}
+.preparation-feedback:empty {
+  display: none;
+}
+.preparation-feedback {
+  color: #7b271b;
+}
+.preparation-card-navigation {
+  display: flex;
+  gap: 0.5rem;
+}
+.preparation-card-navigation button {
+  flex: 1;
+  min-width: 0;
+}
+.lobby-screen
+  :is(
+    .setup-hint,
+    #lobby-status,
+    #lobby-configuration-summary,
+    #lobby-role-title
+  ) {
+  color: #513a25 !important;
+  text-shadow: none;
+}
+.lobby-screen
+  :is(.lobby-form, .preparation-location, .preparation-quest)
+  :is(label, p, small, strong) {
+  color: #352319;
+}
+.lobby-screen .lobby-form > *,
+.lobby-screen button,
+.lobby-screen select {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.lobby-screen select {
+  text-overflow: ellipsis;
+}
+#account-list {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 260px));
+  justify-content: center;
+}
+#account-list .account-row {
+  width: 260px;
+  max-width: 100%;
+  gap: 0.5rem;
+  grid-template-columns: minmax(0, 1fr) 36px;
+}
+#account-list .account-row > button:first-child {
+  height: 60px;
+  min-height: 60px;
+  border-radius: 10px;
+}
+#account-list .account-remove {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  border-radius: 50%;
+  font-size: 1.25rem;
+}
+.preparation-existing-marker {
+  display: grid;
+  place-items: center;
+  background: #fff4d9;
+  color: #513a25;
+  border: 2px solid #79531d;
+  border-radius: 50%;
+  font-size: 17px;
+}
+.preparation-map-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.preparation-map-dialog:not([open]) {
+  display: none;
+}
+.preparation-map-dialog .preparation-location-map {
+  flex: 1;
+  min-height: 160px;
+}
+
+.lobby-screen .setup-progress--interactive > button:disabled {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  opacity: 0.65;
+}
+.preparation-map-dialog {
+  height: min(92dvh, 850px);
+}
+.preparation-map-dialog .rpg-map-preparation {
+  background: #fff4d9;
+  color: #352319;
+  border-color: #9a7347;
+  box-shadow: none;
+}
+.preparation-map-dialog .rpg-map-preparation :is(label, p) {
+  color: #513a25;
+}
+
+.organizer-return {
+  flex-shrink: 0;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.player-placement-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  gap: 0.5rem;
+}
+.player-placement-dialog :is(button, select) {
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal;
+}
+.player-placement-dialog .preparation-location {
+  padding: 0.65rem;
+  color: #352319;
+  background: #fff6df;
+}
+.player-placement-dialog :is(p, label, strong, h2, h3) {
+  color: #352319;
+}
+.player-placement-dialog .preparation-location-map {
+  height: 240px;
+  min-height: 200px;
+}

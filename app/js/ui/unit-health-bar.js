@@ -1,3 +1,4 @@
+import { formatInteger } from "./number-format.js";
 export function renderUnitHealthBar(unit, { tag = "div" } = {}) {
   const maximumQuantity = Math.max(
     1,
@@ -20,5 +21,5 @@ export function renderUnitHealthBar(unit, { tag = "div" } = {}) {
     maximumHealth - combatantHealth - woundedHealth,
   );
   const currentHealth = combatantHealth + woundedHealth;
-  return `<${tag} class="army-health-bar" role="img" aria-label="${currentHealth} PV sur ${maximumHealth} ; ${unit.combatantCount ?? 0} combattants, ${unit.woundedCount ?? 0} blessés"><i class="is-combatant" style="flex:${combatantHealth}"></i><i class="is-wounded" style="flex:${woundedHealth}"></i><i class="is-dead" style="flex:${missingHealth}"></i><small>PV ${currentHealth}/${maximumHealth}</small></${tag}>`;
+  return `<${tag} class="army-health-bar" role="img" aria-label="${formatInteger(currentHealth)} PV sur ${formatInteger(maximumHealth)} ; ${formatInteger(unit.combatantCount ?? 0)} combattants, ${formatInteger(unit.woundedCount ?? 0)} blessés"><i class="is-combatant" style="flex:${combatantHealth}"></i><i class="is-wounded" style="flex:${woundedHealth}"></i><i class="is-dead" style="flex:${missingHealth}"></i><small>PV ${formatInteger(currentHealth)}/${formatInteger(maximumHealth)}</small></${tag}>`;
 }

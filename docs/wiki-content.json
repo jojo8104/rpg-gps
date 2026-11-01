@@ -1,20 +1,42 @@
 {
-  "title": "Le guide de RPG GPS",
-  "intro": "Explorez le monde réel, développez votre héros et dirigez votre armée. Ce wiki décrit le prototype actuel ; les règles peuvent évoluer avec le jeu.",
+  "title": "Les règles de RPG GPS",
+  "intro": "Un guide pour jouer : comprendre son héros, explorer le monde, gérer ses ressources et son armée, accomplir des quêtes et préparer ses combats.",
   "sections": [
     {
       "id": "premiers-pas",
-      "title": "Premiers pas",
-      "paragraphs": [
-        "Après l’accueil, choisissez Jeu rapide, Planifier une partie, Rejoindre une partie ou Partie test, puis votre joueur. Jeu rapide conserve les réglages par défaut. Planifier une partie ouvre d’abord la grande carte de playarea, puis les fiches du scénario, des quêtes et de leurs lieux. La validation du terrain reste visible sans défiler. Le parcours détaillé concerne uniquement le mode IRL.",
-        "Les nouvelles parties sont configurées par défaut pour 1 joueur en GPS réel. Validez la zone GPS avant de vous déclarer prêt ; augmentez la capacité dans les réglages pour accueillir d’autres joueurs. Le duel reste à deux joueurs. Partie test utilise explicitement la simulation et les sauvegardes conservent leurs paramètres. En mode GPS, le navigateur transmet vos mesures de position. En test sur carte fictive, vous déplacez le héros sur la carte. Les interactions et les actions passent dans les deux cas par les mêmes commandes du serveur.",
-        "Le serveur valide la position, les actions et leurs conséquences. Une page hébergée sur GitHub Pages permet de consulter ce guide ; une partie nécessite aussi un backend accessible.",
-        "En jeu, le menu conserve le code de partie et regroupe les outils Cheat, Debug, Heatmap et Brouillard de guerre sous Développement. L’organisateur peut Sauvegarder et quitter ou Quitter sans sauvegarde en détruisant la partie, après confirmation. Ces deux actions ferment la session pour tous les joueurs. La destruction invalide le code et les sessions sans créer de sauvegarde ; les anciennes sauvegardes restent disponibles. Le serveur contrôle cette permission.",
-        "Les boutons des pouvoirs de carte sont affichés en haut de l’écran, en portrait comme en paysage, pour laisser libre le bas où s’ouvrent les lieux. En portrait, le suivi de quête est placé sous les pouvoirs. Ce changement de présentation ne modifie ni les effets, ni les recharges, ni la validation des pouvoirs par le serveur.",
-        "La préparation détaillée permet de retirer les offres de quêtes indépendantes ; une quête définie comme linéaire et les dépendances nécessaires restent obligatoires. Le ravitaillement et Les prospecteurs perdus utilisent le moteur de quêtes actuel. L’ancien scénario à phases reste désactivé. Les lieux partagés gardent une configuration unique et proposent seulement les visibilités et placements permis par leur définition.",
-        "L’organisateur choisit joueur avancé (avec héros), absent, maître du jeu ou PNJ suprême (sans héros, avec un personnage de scénario à incarner). Les rôles sans héros exigent un autre joueur. La console des organisateurs présents permet actuellement d’installer ou déplacer les QR ; les autres outils narratifs restent prévus.",
-        "Le placement QR produit un document HTML autonome prêt à imprimer ou enregistrer en PDF : plusieurs fiches A4 avec code, nom du lieu, date, RPG GPS, illustration, notice et repères de découpe. Découpez et protégez chaque fiche contre la pluie, posez-la puis restez à côté pour enregistrer sa position au smartphone. Le serveur refuse les mesures de plus de 50 m de précision, les positions hors zone et les chevauchements de lieux. Récupérez les fiches après la partie.",
-        "En jeu, Scanner un QR ouvre la fiche du lieu après validation serveur : bon code de partie, lieu accessible, position officielle de moins de 30 secondes et proximité dans le même rayon que l’interaction du lieu. Le scan découvre le lieu sans attribuer de récompense. Les QR restent localisés dans ce parcours IRL ; le mode intérieur et les outils narratifs supplémentaires sont distincts et restent à développer."
+      "title": "Commencer une partie",
+      "summary": "Choisir une aventure, préparer le terrain et comprendre ses objectifs.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Le principe du jeu",
+          "paragraphs": [
+            "Vous incarnez un héros qui explore des lieux, dirige des troupes et accomplit des objectifs. En GPS, vos déplacements réels permettent de vous rapprocher des lieux et des rencontres. En simulation, vous déplacez le héros sur une carte fictive ; les actions et leurs validations restent les mêmes.",
+            "Les objectifs de victoire dépendent du scénario et du mode de partie. Consultez le briefing et le journal : gagner une bataille ne termine pas nécessairement l’aventure."
+          ]
+        },
+        {
+          "title": "Créer, rejoindre ou reprendre",
+          "paragraphs": [
+            "Jeu rapide prépare une salle avec les réglages proposés. Planifier une partie permet de préparer le terrain, les quêtes et les lieux. Rejoindre utilise le code de l’organisateur. Partie test sert aux essais sur carte fictive. Choisir un joueur ne lance pas automatiquement la partie.",
+            "Une reprise conserve les paramètres et la progression de sa sauvegarde. L’organisateur peut jouer avec un héros ou choisir un rôle sans héros prévu par la préparation. Sauvegarder puis quitter et détruire la partie sans sauvegarde ont des conséquences différentes pour tous les participants."
+          ]
+        },
+        {
+          "title": "Terrain et QR codes",
+          "paragraphs": [
+            "La zone autorisée et ses exclusions délimitent le terrain IRL. Des lieux sont connus dès le départ, d’autres se découvrent ou apparaissent pendant les quêtes. Un même lieu peut servir à plusieurs objectifs.",
+            "Un QR code identifie un lieu dans une partie. Le scanner peut le révéler et ouvrir sa fiche, mais ne donne pas une récompense et ne termine pas une quête à lui seul. La proximité reste vérifiée en IRL."
+          ]
+        },
+        {
+          "title": "La boucle d’une aventure",
+          "paragraphs": [
+            "Lire le briefing, explorer, discuter avec les donneurs de quêtes, transporter des ressources, recruter, améliorer ses lieux et préparer ses combats : ces activités alimentent la progression. Le journal permet de retrouver les prochaines étapes.",
+            "Les alliances et la difficulté dépendent des réglages de la partie. Le PvP doit être autorisé : croiser un autre joueur n’est pas à lui seul une permission d’attaque."
+          ]
+        }
       ],
       "references": [
         {
@@ -24,23 +46,142 @@
         {
           "label": "Préparation détaillée IRL et QR codes",
           "file": "party-preparation.md"
+        },
+        {
+          "label": "Idées à implémenter, todo list et carnet d’idées",
+          "file": "idees-et-todo.md"
+        },
+        {
+          "label": "Carte 2D, extraction OSM et cache",
+          "file": "play-area-map.md"
         }
+      ],
+      "seeAlso": [
+        "exploration",
+        "heros-armee",
+        "quetes"
       ]
     },
     {
       "id": "heros-armee",
-      "title": "Héros et armée",
-      "paragraphs": [
-        "Dans une nouvelle partie, les héros joueurs commencent au niveau 1 avec 0 XP, en GPS comme en simulation. Le lancement ne donne plus de cavaliers d’essai ni de niveaux supplémentaires pour les commander. Les forces de départ restent celles de la classe et du scénario. Une reprise de sauvegarde conserve la progression acquise ; les personnages non joueurs du scénario peuvent avoir un niveau supérieur.",
-        "Votre classe définit vos caractéristiques de départ et vos capacités. Consultez les fiches ci-dessous pour comparer les classes.",
-        "Les unités possédées et les armées sont des états distincts. Le recrutement exige un héros présent dans un lieu recruteur, les ressources nécessaires et une capacité d’armée suffisante.",
-        "Les équipements apportent leurs bonus au héros. Les bagages et les emplacements portés sont distincts ; le serveur vérifie les compatibilités avant chaque changement.",
-        "Les gains d’XP du héros et ses passages de niveau s’affichent à l’écran à réception de son état officiel. Plusieurs gains reçus ensemble sont regroupés. Une connexion ou un changement de héros ne rejoue pas les gains précédents. Le message de marche affiche « Distance parcourue », le palier en mètres et, le cas échéant, le bonus kilométrique ; il ne répète pas l’annonce d’XP issue des états officiels. Les messages de quête conservent aussi leur contexte. La correction du test de cet affichage ne change pas les règles de progression ni de récompense.",
-        "Le voyage astral du Mage affiche un cercle violet vif et un double translucide au-dessus du héros. Maintenez le doigt ou le bouton gauche sur la grande poignée « Glisser » du fantôme, puis glissez-le vers un lieu connu, un héros visible ou un groupe autonome détecté dans le cercle. Le pouvoir dure au maximum 10 secondes et se termine après une interaction réussie sur la cible ; un refus ne le consomme pas. Le serveur valide la cible et la portée, sans déplacer le héros réel. La recharge reste de 10 minutes.",
-        "La carte affiche un sprite JRPG propre à la classe : aventurier, mage ou éclaireuse. La marche possède huit orientations relatives à la caméra ; les trois vues ouest sont les miroirs des vues est. Les accessoires peuvent changer de côté visuellement, sans modifier les équipements, les capacités ou les déplacements validés par le serveur.",
-        "Un étendard derrière le héros indique la taille de son armée connue : fanion pour 1 à 9 soldats, bannière verticale inspirée du sashimono pour 10 à 29, longue oriflamme verticale à deux pointes dès 30. Sans armée, aucun étendard. Pour les autres joueurs, il reste masqué tant que les effectifs ne sont pas connus au niveau d’information 3. Les couleurs reprennent celles des relations sur la carte ; ces seuils et cette animation ne changent aucune règle de jeu.",
-        "Les balises de vigie de l’Éclaireur prennent l’apparence d’un petit guetteur immobile et camouflé dans les herbes, avec une capuche et un masque de tissu. Une seule vue de face reste droite lors des rotations de carte. Le sprite mesure environ 40 pixels de haut à l’échelle normale, contre 64 pour un héros. Cette apparence ne modifie ni surveillance, ni détection, ni visibilité validées par le serveur.",
-        "Le glissement du fantôme astral est limité au cercle affiché : il s’arrête au bord même si le doigt ou la souris continue au-delà. Les héros déjà visibles, locaux ou distants, sont dessinés au-dessus des lieux, groupes et décors ; cette priorité d’affichage ne change pas les règles de visibilité ni de jeu."
+      "title": "Héros, classes et progression",
+      "summary": "Comprendre ses caractéristiques, ses niveaux, ses grades et ses aptitudes.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Les trois classes",
+          "paragraphs": [
+            "Le Guerrier est un combattant et chef militaire avec un avantage d’autorité. L’Éclaireur privilégie détection, discrétion, renseignements et vigies. Le Mage dispose de divination, du voyage astral d’interaction et de soins aux héros alliés proches."
+          ]
+        },
+        {
+          "title": "Caractéristiques et limites",
+          "paragraphs": [
+            "L’attaque et la défense interviennent dans les affrontements. La santé fixe les PV maximum ; les PV actuels indiquent ce qui reste au héros. La mobilité et les techniques ont les effets prévus par les règles de combat.",
+            "Le Commandement sert notamment au budget d’ordres tactiques. L’Autorité limite la composition de l’armée. Le grade du héros limite aussi le nombre de troupes : ces trois notions sont différentes."
+          ]
+        },
+        {
+          "title": "Expérience et passages de niveau",
+          "paragraphs": [
+            "Les héros joueurs commencent normalement au niveau 1, avec les forces de leur classe et du scénario. Quêtes, combats et déplacements validés peuvent rapporter de l’XP. Le plafond est le niveau 20.",
+            "Atteindre un seuil d’XP rend un passage de niveau disponible. Les choix d’amélioration proposés doivent être effectués ; un choix en attente peut empêcher le passage suivant. Les aptitudes et la progression sont conservées dans les sauvegardes."
+          ]
+        },
+        {
+          "title": "Grades et nombre de troupes",
+          "paragraphs": [
+            "Le grade du héros ouvre des places de troupes supplémentaires, indépendamment du budget d’ordres de combat."
+          ],
+          "table": {
+            "caption": "Grades du héros et capacités standards",
+            "columns": [
+              "Grade",
+              "Niveau requis",
+              "Troupes maximum",
+              "Bagages"
+            ],
+            "rows": [
+              {
+                "label": "Capitaine",
+                "values": [
+                  1,
+                  3,
+                  8
+                ],
+                "illustration": {
+                  "path": "portraits/hero-warrior-male-anime-v2.png",
+                  "caption": "Portrait de héros ; le grade est indiqué par le libellé de la ligne."
+                }
+              },
+              {
+                "label": "Banneret",
+                "values": [
+                  5,
+                  4,
+                  10
+                ],
+                "illustration": {
+                  "path": "portraits/hero-warrior-male-anime-v2.png",
+                  "caption": "Portrait de héros ; le grade est indiqué par le libellé de la ligne."
+                }
+              },
+              {
+                "label": "Commandant",
+                "values": [
+                  10,
+                  5,
+                  12
+                ],
+                "illustration": {
+                  "path": "portraits/hero-warrior-male-anime-v2.png",
+                  "caption": "Portrait de héros ; le grade est indiqué par le libellé de la ligne."
+                }
+              },
+              {
+                "label": "Seigneur",
+                "values": [
+                  15,
+                  6,
+                  14
+                ],
+                "illustration": {
+                  "path": "portraits/hero-warrior-male-anime-v2.png",
+                  "caption": "Portrait de héros ; le grade est indiqué par le libellé de la ligne."
+                }
+              },
+              {
+                "label": "Maréchal",
+                "values": [
+                  20,
+                  7,
+                  16
+                ],
+                "illustration": {
+                  "path": "portraits/hero-warrior-male-anime-v2.png",
+                  "caption": "Portrait de héros ; le grade est indiqué par le libellé de la ligne."
+                }
+              }
+            ]
+          },
+          "explanation": [
+            "Les limites indiquées sont les capacités standards de chaque grade. Remplir tous les emplacements de troupes exige aussi assez d’autorité. Les bagages constituent une limite distincte."
+          ]
+        },
+        {
+          "title": "Marcher pour progresser",
+          "paragraphs": [
+            "Chaque tranche complète de 500 mètres de trajet fiable apporte 100 XP de marche. Les mesures trop imprécises et les sauts GPS anormaux sont rejetés. Le serveur conserve la distance déjà récompensée pour ne pas la compter deux fois.",
+            "Exemple : 1 200 mètres validés franchissent deux paliers, soit 200 XP de marche. Les 200 mètres restants contribuent au prochain palier."
+          ]
+        },
+        {
+          "title": "Apparence et capacités",
+          "paragraphs": [
+            "Le portrait et le sprite illustrent le héros. Une variation d’apparence ne donne ni classe, ni aptitude, ni équipement supplémentaire. Toutes les variantes graphiques préparées ne sont pas forcément sélectionnables en partie."
+          ]
+        }
       ],
       "references": [
         {
@@ -70,24 +211,687 @@
         {
           "label": "Calques et sprites des héros",
           "file": "hero-sprite-art.md"
+        },
+        {
+          "label": "Variantes visuelles des héros",
+          "file": "hero-gender-variants.md"
+        },
+        {
+          "label": "Portraits anime et personnages composés",
+          "file": "modular-portraits.md"
         }
+      ],
+      "seeAlso": [
+        "classes",
+        "armee",
+        "pouvoirs",
+        "sante"
+      ]
+    },
+    {
+      "id": "exploration",
+      "title": "Carte, GPS et exploration",
+      "summary": "Se déplacer, découvrir les lieux et comprendre les renseignements disponibles.",
+      "audience": "players",
+      "paragraphs": [
+        "Depuis le 1er novembre 2026, les trésors, artefacts et donjons sont placés uniquement hors de l’influence des lieux normaux. Toute cellule touchant leur portée normale est exclue du placement exceptionnel. Le parcours est unique : cartes de localisation, recherche extérieure avec la jauge, puis expédition de récupération (cette dernière reste à implémenter). Les lieux normaux fournissent toujours des indices, des rumeurs et des repères cartographiques."
+      ],
+      "topics": [
+        {
+          "title": "Position et proximité",
+          "paragraphs": [
+            "Voir un lieu sur la carte et être assez proche pour y agir sont deux conditions différentes. Les interactions utilisent votre position officielle et le rayon du lieu ou de la rencontre. Le zoom et l’inclinaison changent la vue, pas les distances de jeu."
+          ]
+        },
+        {
+          "title": "Vision, découverte et brouillard",
+          "paragraphs": [
+            "La classe, les pouvoirs et les règles de partie déterminent les renseignements accessibles. Un lieu à découvrir peut déjà exister sans être visible pour vous ; un lieu connu peut rester hors de portée d’interaction.",
+            "Les informations ennemies sont filtrées. Une bannière ou plusieurs silhouettes dessinées ne permettent pas de déduire les effectifs encore inconnus."
+          ]
+        },
+        {
+          "title": "Discrétion et embuscades",
+          "paragraphs": [
+            "L’immobilité et les capacités de discrétion peuvent réduire la signature détectable du héros. Reprendre le mouvement peut annuler une dissimulation. L’Éclaireur possède ses propres bonus. Cela ne garantit pas une invisibilité universelle face aux règles de détection et pouvoirs adverses."
+          ]
+        },
+        {
+          "title": "Rencontres et groupes autonomes",
+          "paragraphs": [
+            "Armées, éclaireurs, messagers, convois et expéditions peuvent agir dans le monde. Leur mission détermine leur activité ; leur image ne montre pas leur chargement ni leurs effectifs exacts.",
+            "Un groupe peut être ennemi, neutre ou allié. Une apparence de loup ou d’orc ne lui attribue pas à elle seule des statistiques animales ou un comportement de chasse. Consultez sa fiche et les interactions disponibles."
+          ]
+        },
+        {
+          "title": "Recherche et champs de bataille",
+          "paragraphs": [
+            "Un champ de bataille peut rester temporairement dans le monde. Une recherche à proximité peut révéler son site de butin. Connaître le site ne transfère pas automatiquement ses objets dans vos bagages."
+          ]
+        },
+        {
+          "title": "Cartes et parchemins réutilisables",
+          "paragraphs": [
+            "Les nouvelles parties génèrent une à trois cartes complémentaires par site exceptionnel. Les directions sont vérifiées sur les cases de la heatmap. Les lieux normaux servent de repères, sans héberger de site exceptionnel.",
+            "Les indices de localisation et de recherche ont un effet exclusif. Ces documents ne comptent pas dans la capacité de bagage et se lisent sans consommation et proviennent de stocks finis de loot, taverne ou académie. Les écoutes de rumeurs coûtent 5 or et peuvent remettre un message de recherche ou ne donner qu’une conversation sans importance. Les archives sont rachetées entre 5 et 10 or.",
+            "La vente ou la perte en combat d’un indice authentique actif comporte un risque de disparition de 25 %, une fois par site et événement. La disparition s’applique à tous les joueurs ; les objets conservés deviennent obsolètes. La recherche extérieure est disponible ; la récupération reste à raccorder."
+          ]
+        },
+        {
+          "title": "Disparition et annonce aux joueurs",
+          "paragraphs": [
+            "Tous les indices sont fiables : la règle des faux parchemins est retirée. La perte ou la vente d’un indice actif conserve son risque de disparition de 25 %.",
+            "Cinq minutes après une disparition, tous les joueurs reçoivent dans le journal un message : « Le trésor « X » a été découvert par un explorateur. » Le nom est adapté pour un artefact ou un donjon. Ni position ni identité de joueur ne sont révélées. La sauvegarde conserve l’échéance et les joueurs déconnectés retrouvent l’annonce à leur retour."
+          ]
+        },
+        {
+          "title": "Rumeurs et découvertes du terrain",
+          "paragraphs": [
+            "Le chef du lieu de référence explique gratuitement une carte active transportée. En taverne, « Écouter une rumeur » coûte 5 or et peut remettre un message de recherche ou donner une conversation sans importance. Les explications des cartes détenues sont gratuites. Le PNJ utilise le nom, l’anagramme, l’ancien nom ou la légende générés pour la carte. Il n’invente pas de fausse information et ne récite pas les fragments absents.",
+            "Les expéditions de prospection révèlent les gisements traversés et les sites exceptionnels extérieurs actifs. Les spécialistes transportés peuvent révéler les ressources naturelles : réglage configurable de 50 % pour le métier pertinent et 20 % pour les généralistes. Un seul essai par joueur, cellule et spécialité est mémorisé, même après sauvegarde.",
+            "Une découverte ne crée ni exploitation, ni production, ni équipement. Les cellules sous influence enregistrée restent neutralisées. Le journal affiche les connaissances du joueur ; les autres découvertes et les tirages restent privés."
+          ]
+        },
+        {
+          "title": "Écoute payante et messages écrits",
+          "paragraphs": [
+            "Une écoute de rumeur coûte 5 or. Le réglage initial configurable donne 25 % de chance d’obtenir un message de recherche si un indice reste disponible dans le stock de la taverne ; sinon, la conversation est sans importance. Aucune carte n’est nécessaire pour écouter et les rumeurs sans importance sont aussi payantes.",
+            "Un message utile est un item fiable et réutilisable qui aide à chercher sur place, sans indiquer la destination. Les explications des cartes déjà détenues sont gratuites. Les messages, papiers, parchemins et cartes restent consultables dans la section Documents, sans consommer de place de bagage.",
+            "Le serveur mémorise chaque écoute et son résultat. Rejouer une commande ne provoque ni second débit ni nouveau tirage. Les documents peuvent être reçus avec les bagages pleins, depuis une rumeur, un butin ou un transfert autorisé."
+          ]
+        },
+        {
+          "title": "Rechercher un trésor, un artefact ou un donjon à l’extérieur",
+          "paragraphs": [
+            "Le bouton « Chercher un trésor » ouvre une préparation sur la case officielle du héros. Dès l’ouverture acceptée, la recharge de 60 secondes et la discrétion réduite de 50 % commencent. Fermer ou annuler ne les supprime pas. Aucune ressource n’est consommée à l’ouverture.",
+            "Le barème validé donne +20 par indice de recherche correspondant (plafond 40), +10 par métier transporté sélectionné (plafond 30), bois et nourriture +1, bière +2, outil +5 (ressources plafonnées à 30). La jauge est plafonnée à 100 et donne une chance indicative de 90 % multiplié par jauge / 100 si un site actif est présent avec les bons indices.",
+            "Le serveur vérifie les moyens et la présence sur la même case puis consomme les quantités validées, même en cas d’échec. Les documents et spécialistes ne sont pas consommés. Une réussite révèle le site au joueur sans distribuer le butin. Aucun site exceptionnel n’est généré sous l’influence d’un lieu normal.",
+            "Les dates, la préparation et le résultat sont sauvegardés. Rejouer la validation ne provoque ni second débit ni nouveau tirage. La jauge proposée ne prouve pas la présence d’un site et les résultats aléatoires restent privés."
+          ]
+        },
+        {
+          "title": "Préparer et faire partir une expédition exceptionnelle",
+          "paragraphs": [
+            "Après une découverte, le bouton de préparation permet de choisir le site, les PNJ, soldats aptes, chevaux, outils et provisions réellement disponibles. Le serveur applique le barème commun : PNJ plafonnés à 30, volontaires à 20, montures à 10, matériel à 20 et provisions à 20.",
+            "Avec le héros, seuls ses bagages et son armée comptent ; le score baisse si les moyens sont perdus. Depuis un poste de prospection appartenant au joueur, les provisions sont retirées du stock et les soldats de la garnison au départ. Le héros doit être présent au poste. Un départ répété ne double ni les dépenses ni le groupe.",
+            "La préparation est annulable sans dépense. Les trajets, la résolution, le retour, les récompenses et les conséquences des donjons sont disponibles. Les commandes et leurs conséquences sont sauvegardées sans être rejouées."
+          ]
+        },
+        {
+          "title": "Tenter les sites et revenir avec le butin",
+          "paragraphs": [
+            "Le héros tente le site sur sa case ; un groupe envoyé le tente automatiquement à l’arrivée. Artefact : un équipement puissant. Trésor : 200/500/1 000 or et deux items. Donjon : 100/250/500 or, un item et 50/100/200 XP au héros présent et à chaque troupe participante survivante. Les valeurs suivent les difficultés 40/70/100.",
+            "La chance vaut au maximum 95 % : 70 % × score/cible pour les trésors et artefacts ; pour les donjons, le plus faible rapport entre expédition et puissance est retenu. Les moyens réellement présents sont recalculés ; un seul tirage résout la tentative.",
+            "Donjon réussi : dégâts de 10 % des PV maximum et +5 moral pendant cinq minutes ; échoué : 25 % et −10 moral pendant cinq minutes. Les dégâts sont arrondis au supérieur et touchent uniquement les participants. La puissance utilise l’attaque, la défense et les PV actuels du héros présent et des soldats engagés.",
+            "Une victoire ferme le site pour tous. Un échec le laisse actif. Le groupe revient avec ses survivants et moyens restants ; un surplus de stock reste en cargaison. Les items gagnés restent à retirer si les bagages sont pleins. Aucun rejeu ni reprise ne redonne les récompenses."
+          ]
+        },
+        {
+          "title": "Un site fermé pour tous et des indices à archiver",
+          "paragraphs": [
+            "La première victoire ou disparition clôture le site pour toute la partie. Les préparations concurrentes sont annulées immédiatement et les groupes en route sont rappelés, sans nouveau tirage ni dépense de provisions. Un groupe en combat attend la fin de son interruption avant de repartir.",
+            "Le vainqueur conserve son résultat et les items encore à retirer. Les indices actifs du site deviennent obsolètes sans supprimer les objets. Au cartographe, un indice de recherche ou une carte unique vaut 5 or, un fragment de paire 7 or et un fragment de trio 10 or. Une archive ne déclenche aucun nouveau risque et ne peut pas être payée deux fois.",
+            "Une disparition programme une seule annonce pour tous après cinq minutes ; une victoire produit immédiatement un message distinct annonçant que le trésor, le donjon ou l’artefact nommé a été remporté, sans position ni identité du vainqueur. Les commandes rejouées et les reprises ne réactivent pas le site et ne réattribuent ni récompense, ni dégâts, ni moral."
+          ]
+        },
+        {
+          "title": "Fonder un camp et respecter le terrain",
+          "paragraphs": [
+            "Sur une case connue, le héros peut fonder un camp avec 20 bois, 10 nourriture et un outil d’exploration, ou envoyer ces matériaux depuis son poste de prospection. Ce sont les réglages initiaux proposés pour cette étape. Le serveur vérifie la position, l’influence et l’occupation avant toute dépense. La fondation ne crée ni habitants ni production gratuite.",
+            "Le tableau s’applique aux nouveaux camps : terrain vide → camp ou fort ; bois → camp ou bûcheron ; pierre → camp ou carrière ; terre fertile → camp, village ou ville ; fer → camp ou mine de fer ; or → camp ou mine d’or. Les lieux historiques conservent leur progression. Les branches incompatibles sont refusées avant retrait de ressources ou d’XP.",
+            "Les niveaux et habitants suivent leurs règles existantes. Une spécialisation productive au niveau 3 coûte initialement 20 bois, 10 pierre et 10 or, plus l’XP d’évolution requise ; elle produit une unité de sa ressource par cycle serveur. Les évolutions village et fort gardent leurs prérequis et coûts existants.",
+            "Le propre gisement du camp est conservé, tandis que son influence neutralise les cellules voisines et ferme les sites exceptionnels encore actifs qu’elle recouvre. Les installations concurrentes ne créent pas de doublon ; un groupe arrivé sur une case devenue indisponible rapporte ses moyens restants."
+          ]
+        },
+        {
+          "title": "Retrouver ses découvertes sur la carte",
+          "paragraphs": [
+            "Les cinq ressources découvertes disposent de marqueurs ouvrant la préparation d’installation. Un camp prend la place du marqueur de son gisement. Les sites exceptionnels actifs ouvrent la préparation d’expédition ; les résultats restent consultables et les indices périmés restent des documents archivables."
+          ]
+        }
+      ],
+      "references": [
+        {
+          "file": "play-area-map.md",
+          "label": "play-area-map"
+        },
+        {
+          "file": "hero-map-sprites.md",
+          "label": "hero-map-sprites"
+        },
+        {
+          "file": "enemy-map-sprites.md",
+          "label": "enemy-map-sprites"
+        },
+        {
+          "label": "Cartes de localisation, sources et archives",
+          "file": "exploration-clues.md"
+        },
+        {
+          "label": "Rumeurs, prospection et métiers transportés",
+          "file": "exploration-rumors-and-discovery.md"
+        },
+        {
+          "label": "Écouter une rumeur et conserver ses documents",
+          "file": "tavern-rumors-and-documents.md"
+        },
+        {
+          "label": "Recherche extérieure : jauge, discrétion et ressources",
+          "file": "exploration-search.md"
+        },
+        {
+          "file": "exceptional-expeditions.md",
+          "label": "Scores, préparation et départ des expéditions exceptionnelles"
+        },
+        {
+          "file": "exceptional-site-resolution.md",
+          "label": "Récompenses, puissance et conséquences des sites exceptionnels"
+        },
+        {
+          "file": "exceptional-site-closure.md",
+          "label": "Clôture partagée, missions concurrentes et archives"
+        },
+        {
+          "file": "camp-foundation-and-terrain.md",
+          "label": "Fondation, expéditions d’installation et évolutions selon le terrain"
+        },
+        {
+          "file": "exploration-map-and-sheets.md",
+          "label": "Carte des découvertes, préparations, résultats et archives"
+        }
+      ],
+      "seeAlso": [
+        "pouvoirs",
+        "lieux",
+        "butin"
+      ]
+    },
+    {
+      "id": "pouvoirs",
+      "title": "Pouvoirs des classes",
+      "summary": "Utiliser les vigies, la divination et le voyage astral dans leurs limites actuelles.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Conditions et recharge",
+          "paragraphs": [
+            "Un pouvoir a une portée, des conditions et une recharge propres. Le cercle ou la projection aide à choisir la cible ; l’action officielle confirme l’utilisation. Une animation ne prouve pas à elle seule qu’un effet a été appliqué."
+          ]
+        },
+        {
+          "title": "Éclaireur : détection et vigies",
+          "paragraphs": [
+            "Les vigies surveillent une zone ; leur rayon dépend du rang de l’aptitude de l’Éclaireur."
+          ],
+          "table": {
+            "caption": "Vigies de l’Éclaireur",
+            "columns": [
+              "Rang de l’aptitude",
+              "Rayon de vigie",
+              "Vigies maximum"
+            ],
+            "rows": [
+              {
+                "label": "Novice",
+                "values": [
+                  "30 unités de rayon selon le mode",
+                  3
+                ],
+                "illustration": {
+                  "path": "groups/watch-lookout-v1.png",
+                  "caption": "Le guetteur représente une vigie, pas une troupe supplémentaire."
+                }
+              },
+              {
+                "label": "Avancé",
+                "values": [
+                  "37 unités de rayon selon le mode",
+                  3
+                ],
+                "illustration": {
+                  "path": "groups/watch-lookout-v1.png",
+                  "caption": "Le guetteur représente une vigie, pas une troupe supplémentaire."
+                }
+              },
+              {
+                "label": "Maître",
+                "values": [
+                  "45 unités de rayon selon le mode",
+                  3
+                ],
+                "illustration": {
+                  "path": "groups/watch-lookout-v1.png",
+                  "caption": "Le guetteur représente une vigie, pas une troupe supplémentaire."
+                }
+              }
+            ]
+          },
+          "explanation": [
+            "Le catalogue prévoit ces rayons selon le rang de l’aptitude. L’apparence du guetteur ne donne pas de soldat supplémentaire. La vision propre du héros et sa détection ont des bonus distincts."
+          ]
+        },
+        {
+          "title": "Mage : divination et aura",
+          "paragraphs": [
+            "La divination révèle des renseignements pour une durée limitée et possède une recharge. Sa zone dépend du grade. Elle est distincte du service de divination payant proposé par certains lieux.",
+            "L’aura du Mage soigne les héros alliés proches selon les cycles et la portée du grade. Elle ne remplace ni la récupération des troupes ni les conditions de résurrection."
+          ]
+        },
+        {
+          "title": "Mage : voyage astral",
+          "paragraphs": [
+            "Le voyage astral ouvre une interaction à distance sans déplacer le corps réel du Mage."
+          ],
+          "table": {
+            "caption": "Portée du voyage astral selon le grade",
+            "columns": [
+              "Grade",
+              "Portée de ciblage",
+              "Fenêtre active",
+              "Recharge"
+            ],
+            "rows": [
+              {
+                "label": "Capitaine",
+                "values": [
+                  "15 m en GPS / unités en simulation",
+                  "10 secondes",
+                  "10 minutes"
+                ],
+                "illustration": {
+                  "path": "portraits/hero-mage-female-anime-v2.png",
+                  "caption": "Mage utilisant le voyage astral."
+                }
+              },
+              {
+                "label": "Banneret",
+                "values": [
+                  "25 m en GPS / unités en simulation",
+                  "10 secondes",
+                  "10 minutes"
+                ],
+                "illustration": {
+                  "path": "portraits/hero-mage-female-anime-v2.png",
+                  "caption": "Mage utilisant le voyage astral."
+                }
+              },
+              {
+                "label": "Commandant",
+                "values": [
+                  "40 m en GPS / unités en simulation",
+                  "10 secondes",
+                  "10 minutes"
+                ],
+                "illustration": {
+                  "path": "portraits/hero-mage-female-anime-v2.png",
+                  "caption": "Mage utilisant le voyage astral."
+                }
+              },
+              {
+                "label": "Seigneur",
+                "values": [
+                  "60 m en GPS / unités en simulation",
+                  "10 secondes",
+                  "10 minutes"
+                ],
+                "illustration": {
+                  "path": "portraits/hero-mage-female-anime-v2.png",
+                  "caption": "Mage utilisant le voyage astral."
+                }
+              },
+              {
+                "label": "Maréchal",
+                "values": [
+                  "90 m en GPS / unités en simulation",
+                  "10 secondes",
+                  "10 minutes"
+                ],
+                "illustration": {
+                  "path": "portraits/hero-mage-female-anime-v2.png",
+                  "caption": "Mage utilisant le voyage astral."
+                }
+              }
+            ]
+          },
+          "explanation": [
+            "La cible doit être connue ou détectée et rester dans la portée officielle. Le délai actif et la recharge commencent à l’activation. Ouvrir une fiche ne consomme pas à lui seul le pouvoir ; une action réussie le consomme.",
+            "Le héros réel reste sur place. La projection ne donne pas d’XP de marche ni de permission supplémentaire sur les stocks, échanges ou adversaires."
+          ],
+          "example": {
+            "title": "Exemple : cibler un lieu sans déplacer le Mage",
+            "paragraphs": [
+              "Au grade Capitaine, une cible connue dont le centre est à 12 m se trouve dans la portée de 15 m. Une cible à 20 m est hors de cette portée.",
+              "Le ciblage reste soumis à la validation officielle et aux droits du lieu. La projection n’est pas le futur mode de combat à distance."
+            ],
+            "illustration": {
+              "path": "portraits/hero-mage-female-anime-v2.png",
+              "caption": "Le portrait illustre le Mage ; les distances de l’exemple ne sont pas une capture de carte."
+            }
+          }
+        },
+        {
+          "title": "Projets distincts des pouvoirs disponibles",
+          "paragraphs": [
+            "Le combat à distance du fantôme, la Volée de flèches et le Tir de précision du carnet d’idées restent des concepts à intégrer. Ils ne font pas partie du voyage astral d’interaction disponible."
+          ]
+        }
+      ],
+      "references": [
+        {
+          "file": "mage-astral-travel.md",
+          "label": "mage-astral-travel"
+        },
+        {
+          "file": "ranged-combat.md",
+          "label": "ranged-combat"
+        }
+      ],
+      "seeAlso": [
+        "heros-armee",
+        "exploration",
+        "sante"
+      ]
+    },
+    {
+      "id": "armee",
+      "title": "Armée, recrutement et garnisons",
+      "summary": "Former des troupes, respecter l’autorité et entretenir les effectifs.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Troupes, soldats et grades",
+          "paragraphs": [
+            "Une troupe est un groupe de soldats : son grade fixe sa capacité et ajoute un coût d’autorité à celui de son type."
+          ],
+          "table": {
+            "caption": "Grades des troupes",
+            "columns": [
+              "Grade",
+              "XP requise",
+              "Soldats maximum",
+              "Autorité du grade"
+            ],
+            "rows": [
+              {
+                "label": "Soldat",
+                "values": [
+                  0,
+                  6,
+                  1
+                ],
+                "illustration": {
+                  "path": "units/militia-thumbnail.png",
+                  "caption": "Miliciens : exemple visuel de troupe, sans représentation graphique du grade."
+                }
+              },
+              {
+                "label": "Caporal",
+                "values": [
+                  100,
+                  10,
+                  2
+                ],
+                "illustration": {
+                  "path": "units/militia-thumbnail.png",
+                  "caption": "Miliciens : exemple visuel de troupe, sans représentation graphique du grade."
+                }
+              },
+              {
+                "label": "Sergent",
+                "values": [
+                  250,
+                  14,
+                  3
+                ],
+                "illustration": {
+                  "path": "units/militia-thumbnail.png",
+                  "caption": "Miliciens : exemple visuel de troupe, sans représentation graphique du grade."
+                }
+              },
+              {
+                "label": "Adjudant",
+                "values": [
+                  500,
+                  18,
+                  4
+                ],
+                "illustration": {
+                  "path": "units/militia-thumbnail.png",
+                  "caption": "Miliciens : exemple visuel de troupe, sans représentation graphique du grade."
+                }
+              },
+              {
+                "label": "Lieutenant",
+                "values": [
+                  900,
+                  24,
+                  5
+                ],
+                "illustration": {
+                  "path": "units/militia-thumbnail.png",
+                  "caption": "Miliciens : exemple visuel de troupe, sans représentation graphique du grade."
+                }
+              }
+            ]
+          },
+          "explanation": [
+            "Le grade du héros limite le nombre de troupes ; celui de la troupe fixe son effectif. Les valeurs d’XP sont les seuils du grade, pas un prix à payer. La promotion ne remplit pas automatiquement les nouvelles places."
+          ],
+          "example": {
+            "title": "Exemple : une troupe de miliciens",
+            "paragraphs": [
+              "Au grade Soldat, la troupe peut accueillir six soldats. Elle coûte 1 point pour son type et 1 pour son grade, soit 2 points d’autorité. Au grade Caporal, sa capacité devient dix soldats et le coût du grade passe à 2, soit 3 points au total.",
+              "La promotion ne fait pas apparaître les quatre soldats manquants : il faut ensuite compléter la troupe."
+            ],
+            "illustration": {
+              "path": "units/militia-thumbnail.png",
+              "caption": "Illustration de miliciens ; les effectifs de l’exemple sont donnés dans le texte."
+            }
+          }
+        },
+        {
+          "title": "Autorité nécessaire",
+          "paragraphs": [
+            "L’autorité maximale de base vaut 3, plus le bonus de classe, plus le niveau du héros moins 1, plus les bonus d’équipement. Une troupe consomme le coût d’autorité de son type augmenté de celui de son grade.",
+            "Exemple : les miliciens coûtent 1 pour le type et 1 pour le grade Soldat, soit 2 points d’autorité. Une troupe partiellement remplie reste une troupe et garde son coût de grade."
+          ]
+        },
+        {
+          "title": "Recruter et compléter",
+          "paragraphs": [
+            "Le héros doit être présent dans un lieu recruteur accessible. Le type doit y être proposé, des recrues doivent rester en stock et les coûts ainsi que les limites de l’armée doivent être respectés. Une nouvelle troupe commence Soldat, avec au plus six recrues selon le stock disponible.",
+            "Compléter une troupe existante et recruter une nouvelle troupe sont des opérations différentes. Soigner des soldats blessés ne remplit pas les places laissées par des morts."
+          ]
+        },
+        {
+          "title": "Promotion",
+          "paragraphs": [
+            "L’expérience permet d’accéder au grade suivant lorsque ses conditions sont remplies. La promotion augmente la capacité et peut augmenter l’autorité nécessaire. Elle ne crée pas automatiquement tous les soldats des nouvelles places."
+          ]
+        },
+        {
+          "title": "Garnison et formation",
+          "paragraphs": [
+            "Déposer une troupe en garnison la place dans un lieu, distinct de l’armée mobile. Elle conserve son propriétaire. Places disponibles et permissions sont vérifiées avant le transfert. Être allié à un lieu n’autorise pas automatiquement tous les dépôts ou constructions.",
+            "Avant une bataille, les positions Réserve, Gauche, Centre et Droite préparent le déploiement. Faire entrer une réserve pendant le combat suit les règles d’ordres et de cases disponibles."
+          ]
+        }
+      ],
+      "references": [],
+      "seeAlso": [
+        "unites",
+        "heros-armee",
+        "combats",
+        "sante"
+      ]
+    },
+    {
+      "id": "equipement",
+      "title": "Équipements, bagages et transport",
+      "summary": "Porter les bons objets et conserver la place nécessaire aux ressources et missions.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Porté ou transporté",
+          "paragraphs": [
+            "Les emplacements portés sont la tête, le cou, le torse, les mains, les pieds et deux accessoires. Les bagages sont un espace distinct. Une arme à deux mains exige les places nécessaires ; un seul manteau et les combinaisons d’anneaux respectent leurs restrictions."
+          ]
+        },
+        {
+          "title": "Bonus des objets",
+          "paragraphs": [
+            "Les objets ajoutent leurs modificateurs aux caractéristiques. Augmenter les PV maximum ne soigne pas ; retirer un objet de santé peut réduire les PV actuels s’ils dépassent le nouveau maximum.",
+            "L’illustration d’un arc ou d’un bâton ne crée pas une nouvelle portée, de munitions ou de magie. Les effets sont ceux de la fiche d’équipement."
+          ]
+        },
+        {
+          "title": "Emplacements de bagages",
+          "paragraphs": [
+            "Les bagages transportent les lots, objets et personnages nécessaires à l’aventure."
+          ],
+          "table": {
+            "caption": "Capacité standard de bagages",
+            "columns": [
+              "Grade du héros",
+              "Emplacements"
+            ],
+            "rows": [
+              {
+                "label": "Capitaine",
+                "values": [
+                  8
+                ],
+                "illustration": {
+                  "path": "equipment/round-shield.png",
+                  "caption": "Un bouclier transporté illustre un objet de bagage ; il n’augmente pas la capacité du sac."
+                }
+              },
+              {
+                "label": "Banneret",
+                "values": [
+                  10
+                ],
+                "illustration": {
+                  "path": "equipment/round-shield.png",
+                  "caption": "Un bouclier transporté illustre un objet de bagage ; il n’augmente pas la capacité du sac."
+                }
+              },
+              {
+                "label": "Commandant",
+                "values": [
+                  12
+                ],
+                "illustration": {
+                  "path": "equipment/round-shield.png",
+                  "caption": "Un bouclier transporté illustre un objet de bagage ; il n’augmente pas la capacité du sac."
+                }
+              },
+              {
+                "label": "Seigneur",
+                "values": [
+                  14
+                ],
+                "illustration": {
+                  "path": "equipment/round-shield.png",
+                  "caption": "Un bouclier transporté illustre un objet de bagage ; il n’augmente pas la capacité du sac."
+                }
+              },
+              {
+                "label": "Maréchal",
+                "values": [
+                  16
+                ],
+                "illustration": {
+                  "path": "equipment/round-shield.png",
+                  "caption": "Un bouclier transporté illustre un objet de bagage ; il n’augmente pas la capacité du sac."
+                }
+              }
+            ]
+          },
+          "explanation": [
+            "Les ressources empilables occupent des places selon leur taille de lot. Un objet porté et un objet transporté ne sont pas rangés de la même façon. Les valeurs du tableau ne donnent pas un nombre universel d’objets : un lot peut contenir plusieurs unités.",
+            "Avoir assez d’or ne suffit pas si les bagages sont pleins. Déposer, livrer ou échanger peut libérer de la place avant une récupération."
+          ]
+        },
+        {
+          "title": "Acheter, forger et découvrir",
+          "paragraphs": [
+            "Les lieux accessibles proposent commerce, forge, recéleur et découvertes selon leurs bâtiments et services. Des quêtes, victoires et prospections ouvrent aussi des droits à récompense.",
+            "Les acquisitions ordinaires sont limitées par référence pour toute la partie : 6 objets communs, 3 peu communs et 1 rare. Équipements de départ et reliques suivent leurs règles propres. Recharger ne renouvelle pas les achats ou le contingent fini de forge."
+          ]
+        },
+        {
+          "title": "Trésors et récompenses différées",
+          "paragraphs": [
+            "Une récompense débloquée peut attendre son retrait ; il faut encore des places et un quota disponible. Trois lieux distincts visités permettent de repérer le trésor du système d’acquisition.",
+            "Une découverte de ruines utilise une ruine effectivement présente dans le scénario ; elle n’ajoute pas automatiquement un lieu à toutes les cartes. Une cache de prospection attend sur son gisement."
+          ]
+        }
+      ],
+      "references": [
+        {
+          "file": "hero-items.md",
+          "label": "hero-items"
+        }
+      ],
+      "seeAlso": [
+        "economie",
+        "cooperation",
+        "butin"
       ]
     },
     {
       "id": "lieux",
-      "title": "Lieux, économie et territoires",
-      "paragraphs": [
-        "Les lieux donnent accès à des interactions selon leur type, leurs bâtiments et vos permissions : recrutement, commerce, stockage, garnison ou missions.",
-        "Les tests de carte et de réseau vérifient la visibilité des lieux placés, le masquage des emplacements en attente et leur retrait avec leurs liens. Les fixtures de dialogue utilisent des positions et une zone cohérentes avec leur mode ; les tests à deux clients configurent explicitement deux places. Cette maintenance des tests ne change aucune règle de visibilité, de placement ou d’interaction.",
-        "La fiche du scénario distingue le point de départ, le monde connu, les lieux durables à découvrir et les éléments éphémères de quête. La capitale est placée, durable et visible dès le départ. Les lieux du monde connu sont visibles dès placement. Un lieu durable inconnu peut déjà être placé sans être affiché : la proximité du héros ou une révélation officielle l’ajoute à la carte du joueur qui le découvre, et il y reste. Les éléments de quête s’activent lors de leur étape puis sont retirés pour les participants concernés après l’interaction prévue ou à la fin de la quête. Ces règles sont indépendantes des coordonnées et des permissions d’interaction.",
-        "Les améliorations débloquent des services et des bonus. Les stocks, la production et les paiements sont calculés par le serveur.",
-        "Dans le scénario Chaos, les lieux contrôlés contribuent à l’influence territoriale. Les frontières affichées proviennent de l’état officiel du serveur.",
-        "Le placement de l’économie de la capitale ignore les positions candidates hors des limites de coordonnées et poursuit sa recherche dans la zone autorisée. Cette correction du démarrage en simulation ne change pas les ressources, les coûts ni les rythmes économiques. Le contrat de génération reste validé par le serveur sur le monde complet ; il est retiré de la vue partielle du joueur pour permettre sa lecture malgré les emplacements encore en attente de création.",
-        "Les frontières sont affichées avec des angles arrondis, une ligne en surbrillance et un dégradé coloré qui s’efface vers l’intérieur du territoire. Le centre de la zone reste transparent. Les cercles d’interaction des lieux sont plus opaques pour mieux distinguer leur portée. Ces effets sont uniquement visuels : ils ne changent ni les frontières calculées par le serveur, ni les distances d’interaction, ni les délais de conquête.",
-        "Les convois autonomes sont représentés par une caravane animée : un âne tire une charrette chargée et son marchand. Les huit vues suivent la rotation de la caméra. Ce visuel générique ne révèle pas la cargaison exacte et ne modifie ni commerce, ni déplacement, ni détection. La caravane ne porte plus la petite ombre centrale des personnages, qui donnait une impression de lévitation ; cette correction est uniquement visuelle.",
-        "Les éclaireurs autonomes apparaissent seuls, avec une capuche verte et un arc. Les groupes de la faction des bandits utilisent trois brigands animés, sans représenter leur effectif réel. Huit orientations suivent la caméra, avec les vues ouest par miroir. Les déserteurs conservent leur marqueur distinct. Ces dessins ne changent ni détection, ni mouvement, ni combat.",
-        "Les lieux permanents respectent une distance minimale entre leurs centres : somme des deux rayons normaux d’interaction plus 1 mètre en GPS, ou une unité sur la carte fictive. Deux lieux de rayon 25 m exigent donc au moins 51 m. Le serveur refuse un placement trop proche ; le placement automatique et le réseau économique de la capitale suivent la même règle sans réduire le seuil lorsque le terrain est trop petit. Les bonus personnels du héros ne changent pas cet écart. Les marqueurs de quête ou d’événement, les convois, les lieux détruits et les emplacements en attente ne bloquent pas le placement. Les anciennes sauvegardes ne sont pas déplacées automatiquement.",
-        "Le placement peut être aléatoire, fixé en configuration, validé après une distance parcourue ou calculé depuis un point par distance et direction. Le moteur distingue ces stratégies de la visibilité et du cycle de vie ; elles ne sont pas encore toutes proposées dans le formulaire. L’exploration préalable reste à implémenter en deux temps : confirmer une zone accessible sans lui attribuer de lieu, puis l’allouer plus tard à un lieu après une nouvelle validation de l’espacement. Les lieux construits par les joueurs sont hors de ce contrat."
+      "title": "Lieux, bâtiments et conquête",
+      "summary": "Comprendre les services, les droits d’accès, le développement et le contrôle des lieux.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Propriété et relations",
+          "paragraphs": [
+            "Un lieu peut être possédé, allié, neutre ou ennemi. Sa relation, son état et ses services déterminent les actions possibles. Inspecter ne signifie pas pouvoir prélever les réserves ou construire.",
+            "Recrutement, soins, commerce et dialogues exigent la présence et les permissions prévues. Administrer des réserves ou construire est plus restrictif qu’une simple visite."
+          ]
+        },
+        {
+          "title": "Bâtiments et services",
+          "paragraphs": [
+            "Les bâtiments apportent production, population, formations, soins, recrutement ou services. Ils consomment des ressources et occupent les emplacements prévus. Les constructions disponibles dépendent notamment du type et du niveau du lieu.",
+            "Le bonus du niveau courant remplace celui du niveau précédent. Les bâtiments requis pour faire évoluer le camp possèdent certains emplacements réservés, distincts des places libres de développement."
+          ]
+        },
+        {
+          "title": "Développer un camp",
+          "paragraphs": [
+            "La fiche du camp indique les conditions de population, de bâtiments, de progression et de ressources nécessaires à l’évolution. Réunir seulement l’or ne garantit donc pas une montée de niveau.",
+            "Tentes, habitations et maisons se remplacent selon leur branche ; fortifications et services gardent leurs règles lors des évolutions."
+          ]
+        },
+        {
+          "title": "Capturer et contrôler",
+          "paragraphs": [
+            "Un lieu doit être capturable et ses conditions de quête ou de scénario doivent être remplies. Une garnison peut imposer une bataille. Un lieu allié ou déjà possédé n’est pas une nouvelle cible de capture.",
+            "Vaincre les défenseurs et terminer une campagne ne sont pas toujours la même chose : certains objectifs demandent ensuite une prise de contrôle effective."
+          ]
+        },
+        {
+          "title": "Influence et frontières",
+          "paragraphs": [
+            "Lorsque le scénario active les territoires, les lieux contrôlés contribuent à l’influence. La capture et la connexion suivent les conditions de ce système.",
+            "La frontière affichée est une approximation. Elle ne donne pas une vision supplémentaire et ne transforme pas automatiquement tous les lieux entourés en possessions."
+          ]
+        },
+        {
+          "title": "Taverne, formations et services spécialisés",
+          "paragraphs": [
+            "Une taverne propose notamment des missions et des avantages de moral avant bataille. Les écoles militaires et académies peuvent donner des formations sous conditions, avec un nombre limité par niveau et par héros : revenir sans cesse ne donne pas des formations infinies.",
+            "Écuries, champs de tir, casernes et armureries ouvrent des possibilités de recrutement, des places ou des équipements selon leurs niveaux et combinaisons. Les lieux de soin et les fortifications ont leurs effets propres. Le tableau détaillé des bâtiments précise chaque service."
+          ]
+        }
       ],
       "references": [
         {
@@ -117,22 +921,197 @@
         {
           "label": "Carte et catégories de lieux du scénario",
           "file": "scenario-map-definition.md"
+        },
+        {
+          "label": "Sprites des ennemis et de la faune",
+          "file": "enemy-map-sprites.md"
+        },
+        {
+          "label": "Portraits anime et personnages composés",
+          "file": "modular-portraits.md"
         }
+      ],
+      "seeAlso": [
+        "economie",
+        "armee",
+        "quetes"
+      ]
+    },
+    {
+      "id": "economie",
+      "title": "Ressources, production et commerce",
+      "summary": "Produire, stocker, commercer et transporter les moyens de l’aventure.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Stocks et production",
+          "paragraphs": [
+            "Les lieux produisent selon leurs définitions, leur population, leurs bâtiments et leur état. La production avance par cycles officiels et reste soumise aux capacités de stockage et aux pauses. Garder plusieurs écrans ouverts ne crée pas plusieurs revenus.",
+            "Le stock d’un lieu et les possessions du héros sont distincts. Collecter, déposer et réserver des matériaux demandent les permissions et la place dans la destination."
+          ]
+        },
+        {
+          "title": "Marché et imports",
+          "paragraphs": [
+            "Le marché vend ou achète les lots disponibles. Prix, quantités et imports peuvent dépendre du lieu et de son comptoir ; la revente ne rapporte pas le prix d’achat. Forge et rayons d’équipement sont des services distincts.",
+            "Construire un bâtiment peut ouvrir un nouveau rayon marchand, mais ne réinitialise pas les achats déjà effectués dans les autres rayons."
+          ]
+        },
+        {
+          "title": "Impôts",
+          "paragraphs": [
+            "Les lieux imposables accumulent une réserve d’or au rythme des cycles de production."
+          ],
+          "table": {
+            "caption": "Fonctionnement des impôts",
+            "columns": [
+              "Élément",
+              "Valeur ou règle"
+            ],
+            "rows": [
+              {
+                "label": "Population",
+                "values": [
+                  "1 habitant ajoute 1 or au plafond"
+                ],
+                "illustration": {
+                  "path": "markers/village.png",
+                  "caption": "Population"
+                }
+              },
+              {
+                "label": "Bâtiment économique",
+                "values": [
+                  "Chaque niveau ajoute 2 or au plafond"
+                ],
+                "illustration": {
+                  "path": "improvements/farm.png",
+                  "caption": "Bâtiment économique"
+                }
+              },
+              {
+                "label": "Revenu",
+                "values": [
+                  "1 % du plafond par cycle"
+                ],
+                "illustration": {
+                  "path": "markers/capital.png",
+                  "caption": "Revenu"
+                }
+              },
+              {
+                "label": "Collecte",
+                "values": [
+                  "Montant entier disponible ; fractions conservées"
+                ],
+                "illustration": {
+                  "path": "improvements/trading-post.png",
+                  "caption": "Collecte"
+                }
+              }
+            ]
+          },
+          "explanation": [
+            "Le plafond est la population plus deux fois la somme des niveaux des bâtiments économiques. Une réserve pleine cesse de croître. Le contrôleur collecte sur place ; en expert, une collecte réussie réduit le contentement selon le montant."
+          ],
+          "example": {
+            "title": "Exemple : un village et sa ferme",
+            "paragraphs": [
+              "Avec 20 habitants et une ferme niveau 2, le plafond est 20 + 2 × 2 = 24 or. Le revenu est de 0,24 or par cycle.",
+              "Dans cet exemple à situation constante, dix cycles donnent 2,4 or : une collecte retire 2 or et laisse 0,4 or en réserve."
+            ],
+            "illustration": {
+              "path": "improvements/farm.png",
+              "caption": "La ferme illustre les deux niveaux économiques de l’exemple, sans ajouter d’autre bâtiment."
+            }
+          }
+        },
+        {
+          "title": "Population et spécialistes",
+          "paragraphs": [
+            "Les spécialistes peuvent être recrutés, transportés puis installés selon les services et missions. Leurs bonus dépendent de leur fiche et de leur affectation, jamais de leur portrait.",
+            "La population influence développement et services. Une expédition qui emporte des habitants et une installation de travailleur ont des conséquences persistantes sur le lieu.",
+            "Les PNJ, officiers, personnages de quête et populations ne sont pas des marchandises du marché. Leur recrutement, transport ou remise passe par les interactions dédiées, pas par l’achat ou la revente ordinaires."
+          ]
+        },
+        {
+          "title": "Prospection",
+          "paragraphs": [
+            "Un poste de prospection prépare une expédition avec un spécialiste et ses moyens. Le service demande notamment cinq habitants, au moins cinq vivres et un outil d’exploration ; bière et chevaux peuvent modifier la mission.",
+            "L’expédition est un groupe autonome avec provisions, découvertes et retour. Habitants et spécialiste ne reviennent qu’une fois, selon son issue. Les nouvelles parties distribuent les gisements sur le terrain caché. Une prospection révèle les cellules traversées sans créer d’exploitation productive."
+          ]
+        },
+        {
+          "title": "Convois et réseau de la capitale",
+          "paragraphs": [
+            "Les convois acheminent des stocks dans le monde. Le dessin de la charrette ne montre pas le chargement exact : consultez sa fiche.",
+            "Certains scénarios emploient un réseau d’exploitations et une capitale qui dépense réellement ses ressources. Ce réseau et les événements de reconquête ne sont pas une règle universelle de toutes les parties."
+          ]
+        }
+      ],
+      "references": [
+        {
+          "file": "location-taxes.md",
+          "label": "location-taxes"
+        },
+        {
+          "file": "location-improvements.md",
+          "label": "location-improvements"
+        },
+        {
+          "file": "capital-ai.md",
+          "label": "capital-ai"
+        }
+      ],
+      "seeAlso": [
+        "lieux",
+        "equipement",
+        "exploration"
       ]
     },
     {
       "id": "quetes",
-      "title": "Quêtes et coopération",
-      "paragraphs": [
-        "Le test du briefing historique du maréchal vérifie le rôle mondial actuel de Valgrise : ce lieu durable et connu est visible dans la projection et le journal indépendamment de l’acceptation de la quête. Les marqueurs configurés avec une visibilité de quête attendent toujours leur déclencheur. Cette correction du test ne change aucune règle ni récompense.",
-        "Le nouveau moteur à actions propose deux missions à la capitale : Le ravitaillement et Les prospecteurs perdus. Le serveur publie chaque mission uniquement si tous ses lieux existent. Accepter l’une ne masque pas l’autre. Les anciennes quêtes de scénario, de village et de taverne restent désactivées.",
-        "Les prospecteurs perdus se joue en solo : recevez l’ordre du maréchal, rejoignez Valgrise, interrogez Armand, examinez deux indices, fouillez le champ de bataille et récupérez le rapport. Les indices sont représentés par des traces de pas sur la carte ; ce visuel ne change pas leurs règles d’apparition ou d’examen. Une victoire officielle contre les forces de la mine, obtenue après le déblocage de cet objectif, permet de libérer et transporter le géologue. Présentez-le à Armand puis confiez-le aux intendants de la capitale et remettez le rapport au maréchal. La réussite donne une seule fois 50 XP et 25 pièces d’or.",
-        "Le camp de Valgrise est placé relativement à la capitale dès la préparation, au lieu d’apparaître après une distance de marche. Les lieux sont placés dès la préparation mais leur apparition est définie dans le scénario : le camp à l’acceptation, puis le premier indice après la discussion avec Armand, le deuxième après l’examen du premier, le champ de bataille après le deuxième et la mine après la fouille. Seuls les participants les voient ; la proximité ou la simple lecture du dialogue ne les révèle pas. La présence, les dialogues, les bagages, les transferts et les preuves de victoire sont validés par le serveur avec les mêmes actions en GPS et sur carte fictive. Les objectifs sont sauvegardés ; l’abandon ne donne aucune récompense et ne republie pas la mission au même héros.",
-        "Le ravitaillement conserve ses quatre collectes parallèles et sa livraison de vingt rations à Rochegarde. Les objets de quête sont réservés à leur instance ; le journal affiche le titre, les actions et le bilan de chaque mission à partir de la projection officielle.",
-        "À proximité d’un héros allié, vous pouvez demander une conversation ou un échange. Les deux joueurs doivent valider la même offre ; toute modification annule les validations. Le serveur vérifie puis applique les transferts ensemble.",
-        "La préparation inclut les marqueurs de quête, même avec des bâtiments placés manuellement. Les indices portant le rôle clue réservent leur espace même cachés : somme des rayons d’interaction plus 8 unités fictives ou 20 mètres GPS. Une position préférée trop proche est recalculée. Le serveur reconstruit les apparitions et disparitions depuis les instances officielles de quête ; un ancien état de visibilité du monde ne valide aucune action. Le premier indice apparaît après question-chief, le deuxième après inspect-first-trace ; chacun disparaît après son examen. Les objectifs, le combat et les récompenses ne changent pas.",
-        "Le champ appearance d’un lieu de scénario distingue placement et apparition : immédiate, à l’acceptation d’une quête ou après une action précise accomplie. Le serveur vérifie le déclencheur, conserve l’état d’apparition dans la sauvegarde et ne transmet pas les lieux ni leurs positions aux joueurs qui ne les ont pas débloqués. Sans ce champ, les lieux placés restent visibles selon la règle habituelle.",
-        "Les fiches de quête réutilisent les lieux du scénario et respectent leur placement, leur visibilité et leur cycle de vie. Les conditions locationPlaced et locationVisible permettent d’exiger séparément un emplacement confirmé ou un lieu visible pour le participant. Ravitaillement exige la capitale, le fort et les quatre villages placés avant acceptation. Le serveur refuse une interaction sur un emplacement non confirmé, un lieu encore inconnu ou un élément de quête retiré. Une quête de découverte peut cibler un lieu inconnu sans exiger sa visibilité au départ. Les créations libres de lieux par prerequisites restent à raccorder aux placements différés et à ce contrat ; l’exploration préalable reste prévue."
+      "title": "Quêtes, missions et objectifs",
+      "summary": "Accepter une mission, accomplir ses actions et obtenir les récompenses prévues.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Comprendre un objectif",
+          "paragraphs": [
+            "Le journal indique les actions actives. Atteindre, parler, prendre, donner, parcourir, construire et combattre sont des validations différentes. Ouvrir une fiche n’accomplit pas forcément l’objectif.",
+            "Une action peut attendre une étape précédente. Dialogues et résultats de combat peuvent ouvrir des branches ; une branche écartée n’attribue pas les récompenses d’un objectif accompli."
+          ]
+        },
+        {
+          "title": "Transport et preuves",
+          "paragraphs": [
+            "Une livraison exige réellement les ressources ou objets demandés et la présence au destinataire. Un personnage escorté ou un rapport peut occuper une place de bagage.",
+            "Une bataille ne valide une mission que si elle correspond à sa cible et à son instance. Transferts et récompenses sont enregistrés pour éviter les doubles remises après reprise ou reconnexion."
+          ]
+        },
+        {
+          "title": "Missions de chef et de taverne",
+          "paragraphs": [
+            "Chefs de village et tavernes proposent des offres annexes propres au héros : livraisons, messages, spécialistes à installer ou troupes à déposer en garnison.",
+            "Une offre consultée reste valable cinq minutes. Une mission acceptée n’expire pas. Après réussite ou abandon auprès du donneur, l’offre suivante attend cinq minutes. La réussite seule attribue la récompense."
+          ]
+        },
+        {
+          "title": "Disponibilité et scénario",
+          "paragraphs": [
+            "Les quêtes proposées dépendent du scénario et de la préparation. Une fiche au catalogue n’est pas forcément disponible : ses lieux et conditions doivent exister.",
+            "Les prospecteurs perdus restent notamment limités par le raccordement de leurs lieux au monde initial minimal. Les anciens scénarios à phases ne sont pas réactivés parce qu’un document historique les décrit."
+          ]
+        },
+        {
+          "title": "Partager et coopérer",
+          "paragraphs": [
+            "Partager un briefing transmet de l’information, pas une nouvelle participation à une mission. Une quête individuelle ne devient pas automatiquement collective.",
+            "Les nouveaux modes de coopération et conseils stratégiques de l’atelier restent à distinguer des règles exécutées en partie : un formulaire de conception ne prouve pas leur disponibilité."
+          ]
+        }
       ],
       "references": [
         {
@@ -143,17 +1122,180 @@
           "label": "Les prospecteurs perdus",
           "file": "missing-prospectors.md"
         }
+      ],
+      "seeAlso": [
+        "cooperation",
+        "equipement",
+        "lieux"
+      ]
+    },
+    {
+      "id": "cooperation",
+      "title": "Alliances, conversations et échanges",
+      "summary": "Interagir avec les joueurs sans confondre information, propriété et participation.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Équipes et adversaires",
+          "paragraphs": [
+            "Les équipes et alliances déterminent les interactions permises. Attaquer un joueur reste conditionné au PvP et aux règles de présence et de combat. Les renseignements reçus peuvent différer selon le joueur."
+          ]
+        },
+        {
+          "title": "Parler et partager",
+          "paragraphs": [
+            "À proximité d’un héros allié, une demande de conversation peut être acceptée ou refusée. Les options permettent notamment de partager le briefing de quête et d’échanger des renseignements de carte.",
+            "La conversation de vive voix accompagne le jeu ; elle ne remplace pas une commande nécessaire pour transférer un objet ou valider un objectif."
+          ]
+        },
+        {
+          "title": "Échanger biens et unités",
+          "paragraphs": [
+            "Une offre peut inclure ressources, bagages, équipements et troupes avec leur état. Les lots et unités sont transférés entiers selon leur règle. Un équipement porté transféré rejoint les bagages du destinataire.",
+            "Les deux joueurs valident la même version. Modifier l’offre ou les possessions annule les validations. Stocks, bagages et limites d’armée sont revérifiés avant l’application simultanée des deux transferts."
+          ]
+        },
+        {
+          "title": "Distance et disponibilité",
+          "paragraphs": [
+            "Demandes et sessions peuvent expirer. Un combat, une déconnexion ou un éloignement excessif peut interrompre l’interaction. Une acceptation ancienne n’est pas une permission permanente sur les biens d’un allié."
+          ]
+        },
+        {
+          "title": "Quêtes d’équipe",
+          "paragraphs": [
+            "Se répartir transports et renseignements ne suffit pas à créer une récompense collective. Une mission d’équipe doit définir ses participants et leurs permissions.",
+            "Les projets de relais, de simultanéité et de conseil figurent dans le carnet de conception. Ils sont séparés des conversations, échanges et missions disponibles."
+          ]
+        },
+        {
+          "title": "Courrier, messagers et alertes",
+          "paragraphs": [
+            "Un relais d’un lieu possédé permet d’envoyer un messager. Le courrier n’est pas une notification instantanée : le messager poursuit son destinataire et livre après l’avoir rejoint ; il peut être intercepté.",
+            "Les postes de guet surveillent les groupes selon leur niveau et les règles de visibilité. Une nouvelle détection, un déplacement significatif ou une attaque peut déclencher une alerte. Le suivi du guet et le courrier sont distincts d’une conversation directe entre joueurs."
+          ]
+        }
+      ],
+      "references": [
+        {
+          "file": "location-improvements.md",
+          "label": "Relais, guet et courrier"
+        }
+      ],
+      "seeAlso": [
+        "quetes",
+        "armee",
+        "equipement"
       ]
     },
     {
       "id": "combats",
-      "title": "Combats",
-      "paragraphs": [
-        "Les nouveaux combats utilisent un plateau tactique. Les anciennes batailles sauvegardées peuvent conserver le système de duels.",
-        "Préparez les positions de votre armée, puis programmez les ordres de vos cartes. Le commandement du héros détermine le budget d’ordres ; l’autorité limite la composition de l’armée.",
-        "Les déplacements, attaques, défenses, ralliements et charges sont résolus par le serveur. Le terrain, les capacités et l’état des soldats influencent le résultat. Consultez le rapport après la bataille.",
-        "Prévu, non encore disponible : le combat à distance doit ouvrir la bataille sans déplacer le héros réel. Le fantôme astral du Mage combattra seul, infligera des dégâts physiques et réduira le moral adverse. Sa destruction terminera la projection sans blesser le Mage réel. En embuscade, seuls les cavaliers légers et archers montés spécialisés pourront se déployer ; les archers donneront accès à une Volée de flèches et le défenseur ne jouera pas le premier tour. Des sorts de carte pour le Mage et un Tir de précision pour l’Éclaireur sont envisagés. Aucune mana n’est prévue : les pouvoirs utiliseront un cooldown depuis la carte et un coût en Commandement dans une bataille normale, pris sur le budget du tour. Les effets précis, portées, durées de recharge, coûts chiffrés et articulation entre carte et bataille restent à définir ; les règles actuellement disponibles ne sont pas modifiées.",
-        "L’écran tactique privilégie la carte : sa hauteur reste stable lorsque les techniques ou la main s’ouvrent. La validation ✓ et le budget d’ordres sont en haut, séparés de la poignée des réserves ; valider sans ordre fait tenir les positions et passe le tour. Le bouton i ouvre une notice. Les panneaux de résolution et les textes des ordres sont remplacés par les numéros et flèches sur les cases. Les petits socles dégagent les sprites. Les PV perdus, nouveaux blessés et morts apparaissent au-dessus des unités, respectivement en blanc, orange et rouge, à partir des événements officiels du serveur. L’ancien libellé de terrain global est retiré pour éviter une contradiction avec les cases visibles ; la météo reste indiquée. Ce changement de présentation ne modifie pas les règles de combat ni de santé."
+      "title": "Combats tactiques et victoire",
+      "summary": "Programmer ses ordres, exploiter les terrains et comprendre la fin d’une bataille.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Le plateau",
+          "paragraphs": [
+            "Les nouveaux combats utilisent trois colonnes et cinq rangées, avec son camp en bas. Cinq cartes au maximum sont déployées, héros compris. Les réserves et ordres adverses restent cachés.",
+            "Les positions préparées dans l’armée influencent le départ. Un commandant en réserve reste attaquable selon la portée ; une fois déployé, il est ciblé sur sa case."
+          ]
+        },
+        {
+          "title": "Ordres et résolution",
+          "paragraphs": [
+            "Chaque tour dispose d’un budget d’ordres lié au Commandement final du héros."
+          ],
+          "table": {
+            "caption": "Budget d’ordres tactiques",
+            "columns": [
+              "Commandement final entier",
+              "Ordres par tour"
+            ],
+            "rows": [
+              {
+                "label": "2 ou moins",
+                "values": [
+                  2
+                ],
+                "illustration": {
+                  "path": "units/heavy-cavalry-thumbnail.png",
+                  "caption": "Une carte de troupe illustre les ordres ; le budget dépend du héros, pas de la cavalerie."
+                }
+              },
+              {
+                "label": "3",
+                "values": [
+                  3
+                ],
+                "illustration": {
+                  "path": "units/heavy-cavalry-thumbnail.png",
+                  "caption": "Une carte de troupe illustre les ordres ; le budget dépend du héros, pas de la cavalerie."
+                }
+              },
+              {
+                "label": "4",
+                "values": [
+                  4
+                ],
+                "illustration": {
+                  "path": "units/heavy-cavalry-thumbnail.png",
+                  "caption": "Une carte de troupe illustre les ordres ; le budget dépend du héros, pas de la cavalerie."
+                }
+              },
+              {
+                "label": "5 ou plus",
+                "values": [
+                  5
+                ],
+                "illustration": {
+                  "path": "units/heavy-cavalry-thumbnail.png",
+                  "caption": "Une carte de troupe illustre les ordres ; le budget dépend du héros, pas de la cavalerie."
+                }
+              }
+            ]
+          },
+          "explanation": [
+            "Le Commandement final est arrondi à l’entier inférieur, puis borné entre 2 et 5 ordres. Déployer, déplacer, attaquer, défendre, rallier ou charger coûte un ordre ; une carte reçoit au plus un ordre par tour.",
+            "Les deux camps résolvent leurs intentions selon leurs priorités. Les mouvements précèdent les attaques de la même priorité ; les dégâts sont calculés avant leur application simultanée. Une carte sans ordre défend sur place."
+          ]
+        },
+        {
+          "title": "Déplacement et portée",
+          "paragraphs": [
+            "L’infanterie ordinaire se déplace orthogonalement ; épéistes et cavaleries ont les directions de leur spécialité. Une charge peut parcourir deux cases rectilignes sur un trajet autorisé.",
+            "Les archers utilisent leur portée sans avancer après destruction de leur cible. Cavalerie légère et archers montés disposent de harcèlements distincts. Si la cible est sortie de portée, l’attaque peut échouer sans changer automatiquement de cible."
+          ]
+        },
+        {
+          "title": "Terrain et spécialités",
+          "paragraphs": [
+            "Forêt, colline, rochers, eau, pont et structures modifient les conditions. Certains terrains interdisent charges ou harcèlements. Un bonus de défense de 25 % n’est pas une promesse de 25 % de dégâts en moins.",
+            "Les lanciers sont spécialisés contre la cavalerie ; le mur de lances ne protège qu’après son activation. L’infanterie lourde résiste aux archers et ne traverse pas l’eau sans passage autorisé."
+          ]
+        },
+        {
+          "title": "Moral, cohésion et bonus",
+          "paragraphs": [
+            "Le ralliement redonne du moral dans ses limites. La cohésion appartient au camp, pas à une troupe : des ennemis sur sa rangée de départ peuvent la réduire.",
+            "Un bonus central se capture par occupation officielle de sa case. Passer dessus pendant un harcèlement ne suffit pas. Les effets temporaires modifient les caractéristiques ; les gains permanents passent par la fin de bataille."
+          ]
+        },
+        {
+          "title": "Victoire, fuite et conséquences",
+          "paragraphs": [
+            "La chute du commandant ou une cohésion à zéro peut terminer le combat. Une limite de tours évite les blocages et utilise le bilan du moteur ; une égalité reste possible.",
+            "Fuir concède la victoire et conserve les blessures déjà subies. Quitter physiquement la zone n’est pas une annulation libre. Les pertes et récompenses sont appliquées ensuite au monde."
+          ]
+        },
+        {
+          "title": "Systèmes historiques et prévus",
+          "paragraphs": [
+            "Une ancienne sauvegarde peut conserver une bataille en duels. Ses passes et sa volée d’ouverture ne s’appliquent pas telles quelles au plateau actuel. Les nouveaux concepts de combat à distance restent des projets distincts."
+          ]
+        }
       ],
       "references": [
         {
@@ -175,6 +1317,278 @@
         {
           "label": "Combat à distance — concept prévu",
           "file": "ranged-combat.md"
+        },
+        {
+          "label": "Génération et rendu des plateaux",
+          "file": "battlefield-generation.md"
+        }
+      ],
+      "seeAlso": [
+        "armee",
+        "sante",
+        "butin"
+      ]
+    },
+    {
+      "id": "sante",
+      "title": "PV, blessures, soins et retour en jeu",
+      "summary": "Distinguer héros blessé, soldat inapte, mort et récupération.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Soldats aptes, blessés et morts",
+          "paragraphs": [
+            "Chaque soldat conserve ses PV. Au-dessus du seuil de son type, il combat ; entre 1 PV et ce seuil, il est blessé hors combat ; à zéro, il est mort. L’effectif total et l’effectif apte sont donc différents.",
+            "Un dernier soldat apte peut maintenir une troupe jouable. Les morts sont retirés à l’application du résultat : soigner les survivants ne les recrée pas."
+          ]
+        },
+        {
+          "title": "Récupération des troupes",
+          "paragraphs": [
+            "Les survivants d’armée et de garnison récupèrent selon les cycles, hors troupes engagées dans une bataille active. Des services de soins accessibles existent aussi dans les lieux. Soigner des PV, compléter les effectifs et promouvoir un grade sont trois opérations distinctes."
+          ]
+        },
+        {
+          "title": "Soigner son héros",
+          "paragraphs": [
+            "Le réglage actuel ne donne pas de soin naturel passif au héros isolé. Il peut récupérer dans un lieu de soin autorisé ou bénéficier de l’aura d’un Mage allié proche, sous réserve d’être disponible. Les soins sont plafonnés aux PV maximum."
+          ]
+        },
+        {
+          "title": "Revenir après zéro PV",
+          "paragraphs": [
+            "Un héros fantôme doit rejoindre une base reconnue ou une chapelle accessible pour revenir en jeu."
+          ],
+          "table": {
+            "caption": "PV rendus lors du retour du héros",
+            "columns": [
+              "Situation",
+              "PV rendus",
+              "Conditions principales"
+            ],
+            "rows": [
+              {
+                "label": "Retour standard",
+                "values": [
+                  "50 % du maximum",
+                  "Base reconnue ou chapelle autorisée"
+                ],
+                "illustration": {
+                  "path": "improvements/chapel.png",
+                  "caption": "Une chapelle permet le retour selon ses conditions."
+                }
+              },
+              {
+                "label": "Chapelle niveau 2",
+                "values": [
+                  "75 % du maximum",
+                  "Présence et accès validés"
+                ],
+                "illustration": {
+                  "path": "improvements/chapel.png",
+                  "caption": "Chapelle : le niveau est indiqué dans le tableau."
+                }
+              }
+            ]
+          },
+          "explanation": [
+            "Le pourcentage s’applique aux PV maximum du héros. Une contrainte de scénario, notamment une captivité, peut empêcher le retour. Ouvrir une fiche ou voir une animation ne constitue pas une résurrection."
+          ],
+          "example": {
+            "title": "Exemple : un héros avec 20 PV maximum",
+            "paragraphs": [
+              "Le retour standard rend 10 PV. Dans une chapelle de niveau 2 autorisée, il rend 15 PV. Le héros ne revient donc pas automatiquement en pleine santé."
+            ],
+            "illustration": {
+              "path": "improvements/chapel.png",
+              "caption": "Illustration de chapelle pour l’exemple de retour en jeu."
+            }
+          }
+        }
+      ],
+      "references": [],
+      "seeAlso": [
+        "heros-armee",
+        "lieux",
+        "combats"
+      ]
+    },
+    {
+      "id": "butin",
+      "title": "Butin, pertes et conséquences des batailles",
+      "summary": "Lire le rapport et récupérer les objets sans confondre attribution et transport.",
+      "audience": "players",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Lire le rapport",
+          "paragraphs": [
+            "Le rapport distingue survivants, pertes et, selon la résolution, prisonniers, déserteurs et butin. Gagner n’annule pas les blessures et les morts de son camp. Des déserteurs peuvent devenir des groupes autonomes ; ils ne restent pas des troupes disponibles dans votre armée."
+          ]
+        },
+        {
+          "title": "Bénéficiaires et partage",
+          "paragraphs": [
+            "Le partage tient compte des contributions des héros vainqueurs encore actifs. Sans contribution positive pour les départager, le service prévoit un partage entre eux.",
+            "L’attribution donne des droits sur une quantité ; ce n’est pas nécessairement un transfert immédiat dans les bagages. Les objets protégés ne sont pas du butin ordinaire."
+          ]
+        },
+        {
+          "title": "Chercher et collecter",
+          "paragraphs": [
+            "Un site peut devoir être découvert en cherchant sur le champ de bataille. Il faut ensuite être à portée et disposer des places pour collecter. Les objets non récupérés restent soumis aux règles et à l’expiration du site. Un site épuisé peut disparaître avant l’échéance."
+          ]
+        },
+        {
+          "title": "Récompenses et prochain combat",
+          "paragraphs": [
+            "Bonus capturés et trophées d’équipement suivent leurs propres circuits de récompense. Une annonce de victoire ne doit pas appliquer une deuxième fois les gains déjà enregistrés.",
+            "Avant un autre affrontement, vérifiez les soldats aptes, les PV du héros et la place nécessaire au transport du butin."
+          ]
+        }
+      ],
+      "references": [],
+      "seeAlso": [
+        "exploration",
+        "equipement",
+        "sante"
+      ]
+    },
+    {
+      "id": "concevoir-quetes",
+      "title": "Concevoir une quête : fiche, actions et embranchements",
+      "paragraphs": [
+        "Documentation du format actuel. Le moteur prend maintenant en charge les sorties nommées et les liens conditionnels ; les quêtes sans ces champs gardent leurs règles. Le document lié contient un template JSON complet à adapter, les exemples de chaque action et un catalogue de dialogue. Les identifiants d'exemple ne créent pas automatiquement une nouvelle quête jouable.",
+        "Fiche : schemaVersion vaut 1 ; id et title sont obligatoires ; description présente la mission. Utilisez type simple pour le moteur à actions. locationSlotId désigne le lieu proposant la mission, giverNpcId le donneur, interactionLabel son bouton et dialogueId le dialogue de proposition éventuel. participationModes autorise solo, equipe ou competition ; par défaut solo.",
+        "Disponibilité : publicationCondition est une condition de publication, ou null pour aucune. accessConditions contient les conditions toutes nécessaires à l'acceptation. Types disponibles : locationPlaced (locationId), locationVisible (locationId), questCompleted (questId), actionCompleted (actionId, dans une instance), hasResource (resource, amount), hasItem (itemId, amount, défaut 1), flag (path, equals), territoryOccupation (minimumRatio de 0 à 1). Un lieu placé peut être encore invisible ; ne pas exiger sa visibilité initiale pour une découverte.",
+        "Créations : prerequisites ne désigne pas les conditions d'accès mais les éléments à créer. Chaque entrée a id et type : ressource (resource, quantity, locationId), item (itemId, quantity, locationId), lieu ou marqueur (properties avec position explicite). when vaut accepted par défaut, ou published ou un événement officiel. scope world crée un élément commun ; sinon il appartient à l'instance. Un stock créé à published exige world. Réutilisez les lieux existants par leur identifiant ; le placement différé des créations libres reste prévu.",
+        "Action : id unique et action sont obligatoires. requires liste les actions devant toutes être terminées avant activation ; sans dépendance, l'action est active à l'acceptation. interaction est le texte du bouton. assignedPlayerId réserve éventuellement l'action à un joueur. rewards contient les effets appliqués à sa réussite. Les références manquantes, cycles, timer et pass sont refusés. Chaque action réussit une seule fois.",
+        "Atteindre : lieu obligatoire ; le serveur vérifie la présence officielle au lieu visible et accessible. Parcourir : distance strictement positive en mètres ; le serveur compte la distance officielle depuis l'activation, sans créer ni placer un lieu.",
+        "Prendre : origine, quoi, combien obligatoires ; origine est un lieu, quoi un identifiant de ressource ou d'objet, combien un entier positif. Le serveur contrôle présence, accès, stock et transport, puis effectue le transfert. Donner : destinataire, quoi, combien obligatoires ; destinataire est techniquement un lieu, même si le récit parle d'un PNJ. Le serveur contrôle présence, droit de dépôt et quantité transportée, puis livre.",
+        "Parler : dialogue contient id pour retrouver la conversation, qui pour l'interlocuteur et goal pour le résultat attendu ; lieu et interaction permettent de proposer le bouton. Le catalogue séparé contient speakerId, locationId, initialNodeId et nodes. Un nœud contient id, lines et choices ; un choix contient id, label, éventuellement conditions, puis goal ou nextNodeId. Lire le texte ne suffit pas à réussir. Avec outputs, le goal du choix officiel détermine la sortie et les branches. Sans outputs, dialogue.goal reste le résultat attendu.",
+        "Construire : lieu et goal obligatoires. Le résultat vérifie soit improvementId et level (défaut 1), soit type, soit level seul ; choisissez une seule forme. Le serveur contrôle présence, droit de construire et état obtenu. Cette action constate la construction sans lancer le chantier. Combattre : qui obligatoire, ciblant le lieu source, un héros adverse ou un groupe autonome. Sans outputs, une victoire officielle reste requise. Avec outputs, victory, defeat et draw peuvent ouvrir des branches ; la preuve officielle exige toujours une bataille terminée après activation, la participation du héros et une preuve non déjà utilisée dans cette instance. Cette action ne lance pas la bataille.",
+        "Effets de rewards, outcomes et events : xp (amount), resource (resource, amount), item (itemId du catalogue, amount, défaut 1), revealLocation (locationId), flag (path, value), narration (text). Les quantités sont positives. Par défaut l'acteur reçoit l'effet ; recipient participants l'applique à chaque participant, sans partager le montant. outcomes distingue success, failure et abandoned.",
+        "Réactions : events contient id, on, éventuellement actionId et conditions, puis effects et repeat. Une réaction est unique par défaut ; repeat true traite chaque identifiant officiel une seule fois. QuestAccepted, ActionCompleted et QuestFinished sont émis par le moteur ; les autres événements doivent être produits par les services serveur. failQuest est un effet réservé aux réactions pour provoquer l'échec. Le navigateur transmet des intentions, pas des événements ni des preuves fabriquées.",
+        "Enchaînements : transitions contient questId, éventuellement outcome (success, failure ou abandoned) et conditions. La quête suivante est publiée si les conditions sont remplies, sans acceptation automatique. En équipe les actions sont partagées ; en compétition la première instance victorieuse gagne et les autres instances concurrentes actives échouent.",
+        "Comprendre requires : Livrer avec requires [collecter-a, collecter-b] attend les deux collectes A ET B, dans n'importe quel ordre. C'est un parcours avec objectifs parallèles obligatoires. Sans liens, la réussite exige toutes les actions. Avec liens, les actions écartées ne bloquent plus la fin.",
+        "Compatibilité : natures, conditions, locationSlots, offer, steps, initialStepId, childQuestIds, completionPolicy, scenes et presentation restent présents dans le modèle historique ou de composition. Les anciennes étapes ne sont pas exécutées par le moteur à actions et les composites restent à convertir ou implémenter. completionPolicy any ne permet pas de réussir après une seule branche d'actions. L’atelier web conserve la disposition des blocs séparément des règles.",
+        "Embranchements disponibles : actions[].outputs déclare les sorties ; links contient id, from, output, to et éventuellement conditions. Le serveur décide de la sortie : goal du choix de dialogue, victory/defeat/draw du combat officiel, success pour les autres actions. Une cible de lien est verrouillée au départ. Les conditions sont évaluées une seule fois après les effets de la source et sa réaction ActionCompleted ; la décision selected ou discarded est sauvegardée.",
+        "Jonctions : join any (défaut) attend un lien sélectionné ; join all les attend tous. requires reste obligatoire en plus des liens. Les branches impossibles deviennent skipped, sans interaction ni récompense, et leurs descendants sont écartés. Les cycles mixtes sont refusés. La réussite automatique exige toutes les actions terminées ou écartées. Plusieurs liens de la même sortie peuvent ouvrir plusieurs objectifs ; any ne supprime pas un autre chemin déjà sélectionné.",
+        "Fins et réactions : terminalOutcome success ou failure termine la quête et écarte les actions restantes ; une action de fin ne peut pas avoir de lien sortant. Une réaction ActionCompleted peut filtrer actionId et output. Les récompenses par action valent pour toute résolution reconnue, même defeat : utiliser une réaction output victory pour récompenser seulement la victoire. Si tous les liens sont refusés, les objectifs écartés ne bloquent pas la réussite automatique ; prévoir un chemin de repli ou une fin explicite si nécessaire.",
+        "L’éditeur visuel PC est disponible à /editor/ avec validation serveur et export des définitions. Le guide contient une fiche à deux chemins exclusifs rejoignant une action commune. Sorties, exclusions et décisions sont conservées à la reprise ; les anciennes sauvegardes sans liens restent lisibles. Le journal affiche les chemins écartés sans les compter comme objectifs obligatoires."
+      ],
+      "references": [
+        {
+          "label": "Template JSON et fiches détaillées des actions",
+          "file": "quest-authoring-guide.md"
+        },
+        {
+          "label": "Moteur et intégration serveur",
+          "file": "quest-definition.md"
+        },
+        {
+          "label": "Utiliser l’atelier web de quêtes",
+          "file": "quest-editor.md"
+        }
+      ],
+      "summary": "Concevoir des actions, des dialogues et des embranchements validés par le serveur.",
+      "audience": "designers"
+    },
+    {
+      "id": "atelier-quetes",
+      "title": "Atelier web : créer une quête par schéma",
+      "paragraphs": [
+        "Disponible : lancer npm start puis ouvrir /editor/ sur le serveur du jeu (localhost:3000 par défaut). Cette application PC permet de préparer une quête par blocs, sans framework. La validation utilise les modèles du moteur côté serveur. Elle ne modifie aucune partie en cours.",
+        "Schéma : ajouter une action avec la palette, sélectionner le bloc pour éditer ses champs, puis cliquer sur une sortie et sur l’entrée suivante pour les relier. Les flèches possèdent des conditions ; les actions peuvent déclarer des sorties nommées, une jonction OU/ET, des dépendances obligatoires et une fin explicite. Le graphe se déplace et se zoome ; la disposition reste séparée des règles.",
+        "Fiches : les champs s’adaptent à chaque action. Les conversations se construisent avec nœuds, répliques et choix dont les résultats correspondent aux sorties. La fiche de quête expose proposition, participation, conditions, créations et conséquences. Les événements, transitions et certaines propriétés spécialisées sont éditables en JSON avancé. La bibliothèque inclut un exemple à embranchements, le Ravitaillement et les Prospecteurs perdus.",
+        "Monde & carte, optionnel : créer les lieux, régler visibilité et cycle de vie, placer ou déplacer les marqueurs GPS, tracer une play area et ses exclusions. Une quête reste éditable sans terrain. Le serveur contrôle les limites et les espacements avec les modèles officiels. Le fond OpenStreetMap, désactivé par défaut, charge des tuiles pour la zone affichée lorsqu’il est activé. Aucune géolocalisation navigateur n’est demandée.",
+        "Enregistrer conserve le brouillon dans le navigateur et télécharge un projet JSON avec dialogues, monde, terrain et disposition. Importer permet de reprendre ce projet ou une fiche de quête. Valider explique les erreurs et avertissements. Exporter produit une archive ZIP des définitions du moteur après validation ; une erreur bloque cet export. La validation structurelle ne garantit pas toute la faisabilité narrative ou physique.",
+        "Intégration : le ZIP reste disponible pour transférer manuellement les fichiers. Enregistrer dans le jeu sauvegarde un paquet de définitions et met à jour un catalogue JSON lu au redémarrage. Les quêtes, dialogues et nouveaux lieux rejoignent les catalogues du serveur pour les nouvelles parties ; les lieux déjà présents gardent leur fiche officielle. Les lieux libres restent à placer pendant la préparation. Le terrain du projet n’est pas imposé à une partie.",
+        "Ergonomie : le bouton + Nouvelle quête est maintenant en haut de la colonne gauche. Chaque champ de fiche propose une aide dépliable « À quoi sert ce champ ? » expliquant son utilité, ses références, ses unités et son effet réel côté serveur. Les dialogues restent éditables dans les actions Parler.",
+        "Catalogues embarqués : PNJ, GA & objets contient des fiches de PNJ narratifs liés aux conversations, des définitions de groupes autonomes (AutonomousGroup) et des objets uniques ou équipements (createUniqueItemDefinition). Les champs simples possèdent des formulaires ; armées, cargaisons, missions et bonus sont accessibles en JSON avancé. Le projet conserve ces catalogues et l’archive exporte npcs.json, autonomous-groups.json et items.json.",
+        "Validation et limites : les références de PNJ/dialogues, doublons, coordonnées de GA, armées et équipements sont contrôlés par le serveur. Un objet officiel ne peut pas être écrasé ; les nouveaux objets nécessitent encore une intégration au catalogue actif. Un GA du catalogue peut être ajouté aux créations de la quête et sera créé par le serveur au déclencheur choisi. Les PNJ narratifs ne sont pas des héros combattants ni des offres de taverne.",
+        "Scénario & quêtes : ajouter la quête ouverte, importer une quête ou choisir la bibliothèque. Monde, dialogues et fiches sont communs. Les départs sont cochés ; les transitions publient les suivantes après réussite, échec ou abandon. Le serveur contrôle fiches, références, départs et cycles. Enregistrer dans le jeu conserve ces quêtes et leurs départs dans le catalogue ; au redémarrage seules les quêtes de départ sont proposées initialement. Les autres attendent leurs transitions.",
+        "13 octobre 2026 : Enregistrer dans le jeu valide et écrit les quêtes, dialogues et monde dans un paquet versionné de data/quests, puis met à jour editor-catalog.json. Les anciens paquets sont conservés. Après redémarrage, les nouveaux lieux complètent le catalogue de préparation et seules les quêtes de départ sont proposées initialement. Les parties en cours restent intactes. Enregistrement réservé au PC du serveur ; le terrain réel reste choisi dans la préparation. Les objets personnalisés demandent encore leur intégration au catalogue actif.",
+        "Créations de quête : le type ga accepte une fiche AutonomousGroup, un lieu d’apparition, belongsToLocation et dependsOn. Un lieu créé est automatiquement une dépendance ; le serveur crée le lieu avant son groupe, indépendamment de l’ordre du JSON. Le groupe peut appartenir au lieu via owner.kind location et conserve son origine. Il reste autonome, distinct de la garnison interne. accepted, published (portée world) et ActionCompleted filtré par action et sortie permettent de choisir son apparition. Les créations individuelles et les preuves de combat sont isolées par instance ; toute erreur annule la transaction.",
+        "Architecture cible : toutes les créations narratives doivent être décrites par les quêtes et scénarios sérialisés ; les services du jeu conservent leurs créations propres (rogue, actions du joueur, etc.). Le moteur dispose maintenant de la création générique de GA. Les anciens modules narratifs spécialisés existent encore et nécessitent une migration progressive avant leur suppression.",
+        "Apparences, 13 octobre 2026 : la bibliothèque d’images de PNJ, GA & objets accepte PNG, JPEG et WebP. Une fiche de lieu, PNJ, objet ou GA peut sélectionner une icône et une illustration/portrait, avec aperçu ; sans sélection les visuels existants sont conservés. Les créations de lieu et GA possèdent les mêmes choix. Les fichiers restent dans le projet JSON, sont exportés dans assets/images et sauvegardés avec les paquets serveur. Les images installées sont servies par /editor-media, y compris pour les anciennes parties utilisant un ancien paquet. Les lieux et GA utilisent leurs images sur la carte, les fiches de lieu utilisent leur illustration, les dialogues de PNJ leur portrait ; les objets conservent leurs références dans leur catalogue exporté et leur intégration au catalogue actif reste nécessaire. Aucune règle du jeu n’est modifiée.",
+        "Limites des images : 2 Mo par fichier, dimensions maximales 4096 × 4096, 8 Mo par bibliothèque et 16 Mo pour le JSON transmis. Le serveur vérifie format, taille, dimensions, chemins et références. Les SVG et URL externes ne sont pas acceptés. Une image utilisée ne peut pas être retirée avant changement des fiches qui la référencent. Pour un projet trop volumineux pour le stockage du navigateur, conserver le téléchargement JSON. Les images fixes ne sont pas des sprites animés.",
+        "14 octobre 2026 : les champs structurés de l’atelier se remplissent avec des tableaux de clés et des valeurs typées (texte, nombre, oui/non, liste ou sous-tableau), sans saisir du JSON. Les bonus proposent attack, defense, morale, mobility, command et health ; les armées proposent des lignes de troupes. Les clés importées sont conservées, les listes ont des boutons d’ajout et de retrait. Un champ non renseigné reste absent tant qu’il n’est pas rempli. Les exports restent au format serveur et la validation officielle demeure nécessaire ; ce changement d’interface ne modifie aucune règle du jeu.",
+        "14 octobre 2026 : Enregistrer dans le jeu rend maintenant le scénario sélectionnable dans la configuration d’une nouvelle salle après redémarrage du serveur. Le menu affiche les noms reçus du catalogue serveur, dont les scénarios de l’éditeur. Le serveur prépare leur monde et charge uniquement les quêtes appartenant au scénario choisi ; seules les quêtes de départ sont publiées. Les lieux proviennent exclusivement du projet sélectionné ; aucun socle de lieux d’un autre scénario n’est ajouté. En simulation, les coordonnées GPS sont remplacées par des placements de test contrôlés par le même moteur. En GPS, les contraintes du terrain et de placement restent applicables. Changer de scénario réinitialise les choix de lieux et exclusions de la préparation. Les anciennes parties et archives ne sont pas migrées.",
+        "14 octobre 2026 : correction du mélange des lieux entre scénarios. Le catalogue de conception reste commun pour permettre les imports, mais la préparation et le monde lancé utilisent uniquement les emplacements et lieux déclarés dans le projet choisi. Une capitale, une mine ou un fort doit être défini dans ce projet pour y figurer. Le scénario d’origine ne récupère plus les lieux ou les quêtes des paquets installés. Le navigateur affiche directement les placements officiels du scénario en simulation, sans lancer la préparation locale du monde de démonstration. Les anciennes parties conservent leurs lieux ; créer une nouvelle partie après redémarrage pour profiter de ce filtrage.",
+        "14 octobre 2026 : les nouveaux lieux utilisent le placement aléatoire par défaut. Définir une position sur la carte permet un placement fixe ; revenir à Aléatoire pour laisser le serveur choisir. Une play area dessinée dans Monde & carte est conservée dans le scénario installé. Dans la salle, le choix Scénario et terrain est accessible avant le tracé ; les aventures avec une zone portent terrain enregistré. En GPS, choisir cette aventure charge sa zone et ses exclusions, validées automatiquement par le serveur avec les mêmes contrôles que le tracé manuel. Il est alors possible de continuer sans retracer ni confirmer manuellement la zone. Le terrain reste modifiable. En simulation, le terrain GPS du scénario ne remplace pas la carte fictive.",
+        "14 octobre 2026 : les aides des champs indiquent leur rôle : Référence technique (identifiant ou lien), Règle de jeu (effet contrôlé par le serveur), Descriptif / présentation (texte ou visuel), Outil de l’éditeur (organisation du projet), Intégration requise (fiche à raccorder au serveur) et Structure avancée (format composé ou champ importé non catalogué). Les tableaux de clés possèdent aussi une aide par champ. Le rôle narratif d’un PNJ est descriptif, tandis que le rôle d’un lieu dans le monde influence le jeu. L’image d’apparence est une présentation ; le déclencheur appearance d’un lieu est une règle. Les bonus d’objets portent aussi Intégration requise. Ces indications ne changent aucune règle ni disponibilité du contenu.",
+        "14 octobre 2026 : Générer ajoute une fiche aléatoire dans PNJ ou Objets ; Générer un lieu est disponible dans Monde & carte. Les fiches restent modifiables et la génération n’écrase aucun élément existant. Les lieux ont des rayons cohérents et un placement random sans coordonnées imposées. Les équipements ont un emplacement adapté et un bonus numérique entre 1 et 4 ; les objets uniques restent sans bonus. Les PNJ ont un rôle narratif et peuvent être rattachés à un lieu existant, mais leur dialogue reste à écrire. Les noms provisoires utilisent le type et un numéro ; un point de raccordement est prévu pour des dictionnaires de noms ultérieurs. C’est un outil de conception : il ne crée aucun élément en partie et n’intègre pas automatiquement les objets au catalogue actif.",
+        "14 octobre 2026 : Monde & carte utilise Leaflet 1.9.4 avec le fond OpenStreetMap activé par défaut. Déplacer et zoomer la carte, tracer la play area avec Play area puis Terminer le tracé, et ajouter les zones interdites avec Exclusion. Sélectionner un lieu puis cliquer sur la carte impose sa position ; son marqueur est déplaçable. Voir le terrain recadre la zone et les lieux. Les coordonnées restent sauvegardées dans le projet, les exports et le scénario installé ; le format et les validations serveur ne changent pas. La carte et son fond nécessitent une connexion réseau, et ne constituent pas un paquet de tuiles hors ligne exporté.",
+        "20 octobre 2026 : l’atelier propose les modes de quête solo, ouvert, avec leader et groupe physique, ainsi que les mécaniques d’action simultanée, rôles complémentaires, relais et contribution collective. La section Événements stratégiques prépare un conseil physique avec votes séparés, au moins trois stratégies, leurs durées, défis conditionnels, positions et phases. Les modèles sont réutilisables en blocs du scénario avec source et sorties par résultat. Les invitations sont prévues par messager GA différé et les adversaires sont simulés sans GA. Ces données sont conservées dans le projet et exportées dans strategic-events.json ; elles ne sont pas encore exécutées en partie. L’installation de ces projets est refusée jusqu’au raccordement serveur des règles multijoueurs et tactiques. Les règles des parties existantes ne changent pas."
+      ],
+      "references": [
+        {
+          "label": "Guide de l’atelier et limites de la première version",
+          "file": "quest-editor.md"
+        },
+        {
+          "label": "Template et champs du moteur",
+          "file": "quest-authoring-guide.md"
+        }
+      ],
+      "summary": "Utiliser l’atelier web pour préparer un schéma de quête et ses définitions.",
+      "audience": "designers",
+      "topics": [
+        {
+          "title": "Schémas et action Modifier",
+          "paragraphs": [
+            "25 octobre 2026 : le scénario affiche un schéma de quêtes déplaçables et reliables par Réussite, Échec ou Abandon, avec plusieurs départs ou des quêtes indépendantes. Chaque quête affiche Proposition de quête pour ouvrir sa fiche et ses conditions d’accès facultatives ; les traits vers les racines sont une aide visuelle sans action fictive exportée. Les références connues se choisissent par noms dans des menus, et le panneau de droite est redimensionnable. Modifier est une nouvelle action serveur automatique, appliquée une fois au déblocage. Elle propose ressources, objets non équipés du catalogue actif, XP et statistiques de base du héros ; genre du portrait pour son apparence ; images des lieux et GA ; retrait d’un GA pour l’existence. Les aptitudes, la capacité des bagages, la propriété des lieux et la suppression des héros ou lieux restent à développer."
+          ],
+          "table": {
+            "caption": "Contrôles vérifiés du prélèvement",
+            "columns": [
+              "Opération",
+              "Comportement"
+            ],
+            "rows": [
+              {
+                "label": "Retirer une ressource",
+                "values": [
+                  "Au plus le montant disponible, sans dette"
+                ],
+                "illustration": {
+                  "path": "markers/quest.png",
+                  "caption": "Marqueur de quête utilisé dans le jeu ; ce contrôle appartient à la progression officielle de la quête."
+                }
+              },
+              {
+                "label": "Commande répétée",
+                "values": [
+                  "Aucun second prélèvement"
+                ],
+                "illustration": {
+                  "path": "markers/quest.png",
+                  "caption": "Marqueur de quête utilisé dans le jeu ; ce contrôle appartient à la progression officielle de la quête."
+                }
+              },
+              {
+                "label": "Déclenchement",
+                "values": [
+                  "Automatique après les dépendances et liens du graphe"
+                ],
+                "illustration": {
+                  "path": "markers/quest.png",
+                  "caption": "Marqueur de quête utilisé dans le jeu ; ce contrôle appartient à la progression officielle de la quête."
+                }
+              }
+            ]
+          },
+          "explanation": [
+            "La transaction et les contrôles du serveur restent obligatoires. Les images changent uniquement la présentation ; les modifications de ressources et de statistiques influencent le jeu. Les blocs stratégiques restent des données de conception."
+          ],
+          "example": {
+            "title": "Refus dans une conversation du maréchal",
+            "paragraphs": [
+              "Une quête de convocation contient Parler avec Accepter / Refuser. Accepter publie la mission suivante en terminant la convocation en réussite. Refuser mène à Modifier → Héros → Ressource → gold → Retirer → 20, puis à une fin d’échec. La conversation appartient à une quête déjà acceptée ; le refus natif d’une offre avant acceptation reste à développer."
+            ]
+          }
         }
       ]
     },
@@ -182,15 +1596,294 @@
       "id": "dashboard-monitoring",
       "title": "Dashboard et suivi historique",
       "paragraphs": [
-        "Le Dashboard administrateur affiche la carte et les informations des parties, avec un onglet par partie. Il enregistre sur disque un relevé compact du monde toutes les 4 secondes pendant les périodes où un joueur est connecté ; les 2 000 derniers relevés sont consultables, soit environ 2 h 13 min de jeu continu. Sans joueur, les relevés et la simulation sont arrêtés.",
+        "Le jeu et le Dashboard affichent désormais une distinction explicite : les données déjà en banque restent disponibles, mais les surfaces manquantes ne sont pas téléchargées après échec fournisseur. Les rejets HTTP conservent leur statut amont dans le message et le champ providerStatus ; les erreurs et journaux distinguent expiration, accès réseau et rejet HTTP. Le vrai worker transmet ces métadonnées. Les journaux ne contiennent ni polygone, URL, corps de réponse fournisseur ni identifiant joueur. La pause croissante et la limite d’un seul appel restent inchangées : aucun test supplémentaire, découpage ou nouvel essai automatique n’est déclenché par ce diagnostic.",
+        "Dans /dashboard/, la clé administrateur ouvre désormais Cartes sauvegardées et banque géographique. Le panneau se charge à son ouverture ou avec Actualiser la banque : consulter et prévisualiser ne déclenchent aucune extraction Overpass. Il indique le volume total, le budget, les octets protégés, les fichiers, la couverture de chaque carte nommée et ses sources. L’aperçu affiche un fond OpenStreetMap simple sous les couvertures enregistrées. Il charge des tuiles d’affichage avec attribution, sans extraction Overpass. Les suppressions bloquées précisent les usages à retirer (carte, partie ou sauvegarde). Les fichiers affichent les cartes, parties ou sauvegardes qui les utilisent. Compléter les données exige une action explicite et utilise le service d’extraction habituel, avec sa réutilisation de couverture et ses limites. Supprimer une carte nommée retire uniquement sa référence de bibliothèque ; les terrains des parties et leurs sauvegardes restent inchangés, et les fichiers peuvent rester dans la banque selon son budget. Supprimer un fichier ou vider les données inutilisées exige une confirmation ; le serveur refuse les fichiers protégés et suspend ces suppressions pendant une préparation ou un nettoyage. Les fichiers étrangers au format géré ne sont jamais proposés ni supprimés. Toutes ces API utilisent la même clé administrateur ; aucun joueur n’est connecté par leur consultation. Le changement ne modifie ni les règles, ni les gains, ni les positions officielles du jeu.",
+        "Les API et fichiers du Dashboard sont chargés depuis le serveur sans cache du service worker ni repli hors ligne, afin de retrouver les parties actuelles et la version déployée. Sans RPG_GPS_DASHBOARD_TOKEN configuré, la clé change au redémarrage : reprendre celle du dernier journal. Une nouvelle session de navigateur demande une connexion ; le jeu et le Dashboard doivent utiliser le même serveur. Aucun changement des règles du jeu.",
+        "Le Dashboard administrateur affiche la carte et les informations des parties, avec un onglet par partie. Il enregistre sur disque un relevé compact toutes les 4 secondes, même après déconnexion du dernier joueur. Sans joueur, la simulation reste en pause mais les relevés continuent avec un statut de pause ; les héros déconnectés n’augmentent pas la heatmap. Le Dashboard indique la date du dernier relevé, sans connecter de faux joueur.",
         "Les graphiques comparent la puissance de tous les héros et les totaux par équipe. Un sélecteur de héros affiche les effectifs par type, armée et garnisons côte à côte, autorité et marqueurs de victoire ou défaite. Un sélecteur de lieu affiche population, niveau et production par cycle.",
         "Le score indicatif additionne attaque finale, défense finale et PV actuels du héros, puis les effectifs pondérés par qualité du type et mobilité pour les unités mobiles. Les garnisons sont comptées une seule fois, rattachées au premier héros du propriétaire par identifiant stable. Ces coefficients de supervision ne changent pas les règles ni les combats.",
-        "Les relevés sont des mesures compactes, pas des sauvegardes complètes restaurables. Le stockage tourne sur 11 segments de 200 lignes au maximum et expose les 2 000 derniers relevés. La heatmap conserve séparément les 2 000 dernières mesures de position de tous les joueurs. Aucun historique ancien n’est reconstitué."
+        "Les relevés de supervision sont conservés sur disque pendant toute la partie, par segments de 200 lignes, sans rotation automatique. Ils incluent les positions des héros et des groupes autonomes, y compris ceux disparus ensuite. Le Dashboard propose une chronologie, les parcours cumulés des joueurs et des GA, et une heatmap cumulée des joueurs jusqu’à l’instant sélectionné. La suppression explicite de la partie supprime aussi son historique. Les anciennes données déjà supprimées ne peuvent pas être reconstituées. Ces mesures ne sont pas des sauvegardes restaurables et ne changent aucune règle.",
+        "Les joueurs disposent de fiches détaillées : héros, classe, grade, progression, PV, caractéristiques, armée, équipement, inventaire, ressources et quêtes avec leurs objectifs. Des fiches dédiées détaillent les lieux, garnisons, stocks, production, GA, missions, chargements et objets. Une recherche filtre les listes ; les champs complémentaires sont présentés sous forme de libellés et rubriques dépliables, sans JSON brut. Les fiches restent celles de l’état officiel actuel, même lorsqu’on consulte un trajet passé.",
+        "La perspective d’un joueur affiche son trajet et permet d’activer son champ de vision et le brouillard supervisé. Le serveur fournit la vision et conserve une exploration distincte par joueur à partir des positions officielles, avec des dates de première révélation et persistance au redémarrage. L’ancienne exploration locale du navigateur n’est pas récupérable : la date de début du suivi est indiquée. Les frontières actuelles des camps proviennent directement du moteur. Les marqueurs administrateur restent visibles sur le brouillard ; les pouvoirs temporaires de vision sont affichés au présent seulement. Ces informations de supervision n’appliquent aucun gain ni changement de règle.",
+        "Les graphiques partagent une échelle de temps réglable : tout l’historique, 5, 15, 30 minutes ou 1 heure. Le curseur permet de consulter une période passée ; Revenir au direct réactive le suivi. Le graphique de production affiche aussi les stocks en colonnes, avec un axe distinct. Les nouveaux relevés additionnent réserve du lieu et production accumulée ; les anciens conservent leurs données initiales. Ce suivi ne change aucune règle du jeu.",
+        "Le Dashboard est organisé en onglets Parties, Graphiques, Cartes et Sauvegardes. La présentation est compacte et autorise le défilement vertical de la page, avec les onglets accessibles en haut. Les cartes nommées sont des vignettes carrées sur la moitié gauche, avec aperçu à droite ; sur téléphone les colonnes se superposent. Les sauvegardes sont présentées en tableau avec nom, organisateur, date, joueurs et taille JSON UTF-8 calculée par le serveur. Cette taille est celle de chaque entrée sérialisée, regroupée dans server-state.json, pas un fichier indépendant. Sauvegardes liste toutes les parties sauvegardées du serveur et permet leur suppression après confirmation et validation administrateur. La suppression est persistée ; les comptes et parties déjà chargées sont conservés. Aucun changement des règles du moteur.",
+        "Les fiches des lieux présentent les PNJ : responsable explicite ou par défaut, personnages des bâtiments présents, offres actuellement affectées à la taverne et PNJ du monde explicitement rattachés au lieu. Le nom et la fonction sont visibles ; les informations détaillent notamment coûts, effets et cycles de présence. La consultation n’initialise aucune rotation de taverne, ne recrute personne et ne modifie aucune règle. Sans affectation enregistrée, aucune offre n’est inventée. Les listes décrivent l’état officiel actuel."
       ],
       "references": [
         {
           "label": "Relevés, graphiques et formule de puissance",
           "file": "dashboard-monitoring.md"
+        }
+      ],
+      "summary": "Consulter les états officiels et interpréter les relevés historiques du monde.",
+      "audience": "administrators"
+    },
+    {
+      "id": "commandes-powershell",
+      "title": "Commandes PowerShell et accès au serveur",
+      "paragraphs": [
+        "Sur Windows, ouvrir PowerShell et se placer dans le projet avec Set-Location 'C:\\Users\\A\\Desktop\\HTML\\RPG GPS'. Depuis ce dossier, npm.cmd run deploy lance les tests, transfère et installe la version locale sur le serveur Linux. npm.cmd évite les problèmes éventuels de politique d’exécution de npm.ps1.",
+        "Accès au Dashboard : dans une première fenêtre PowerShell, saisir ssh -N -L 3001:127.0.0.1:3000 rpg-gps-server, laisser la fenêtre ouverte, puis ouvrir http://127.0.0.1:3001/dashboard/ dans le navigateur. Il est normal de ne plus pouvoir saisir de commandes : le tunnel reste actif. Ctrl + C le ferme.",
+        "Pour trouver la clé, ouvrir une deuxième fenêtre PowerShell, saisir ssh rpg-gps-server, puis sur Linux journalctl -u rpg-gps -n 30 --no-pager. Chercher la clé du Dashboard ; utiliser -n 200 si nécessaire. Si l’accès au journal est refusé, ajouter sudo. Le mot de passe Linux ne s’affiche pas pendant la saisie. exit revient à PowerShell sans fermer le tunnel de la première fenêtre.",
+        "Alternative depuis PowerShell : ssh rpg-gps-server 'journalctl -u rpg-gps -n 30 --no-pager' consulte le journal sans terminal Linux interactif. Sans RPG_GPS_DASHBOARD_TOKEN configuré, la clé change à chaque redémarrage du serveur.",
+        "Sur Linux, systemctl --no-pager --full status rpg-gps vérifie le service ; journalctl -u rpg-gps -f suit le journal ; free -h affiche la mémoire ; df -h / affiche le disque. sudo systemctl restart rpg-gps redémarre tout le service et interrompt les connexions : le document lié distingue aussi arrêt et démarrage.",
+        "Sur Windows, npm.cmd start lance un serveur local distinct du serveur Linux. npm.cmd test lance les tests. npm.cmd run wiki:build -- --note 'Description du changement' génère le wiki et son historique ; npm.cmd run wiki:export prépare son export sans publier. Ces commandes de maintenance ne changent aucune règle du jeu."
+      ],
+      "references": [
+        {
+          "label": "Commandes à copier et procédure Windows / Linux",
+          "file": "powershell-server-guide.md"
+        }
+      ],
+      "summary": "Déployer, ouvrir un tunnel SSH et consulter le serveur depuis Windows.",
+      "audience": "administrators"
+    },
+    {
+      "id": "portrait-tools",
+      "title": "Atelier des portraits",
+      "summary": "Composer et régler l’apparence des personnages.",
+      "audience": "development",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Accessoires et cadrage — 25 octobre 2026",
+          "paragraphs": [
+            "Les portraits permettent de cumuler plusieurs accessoires de la même bibliothèque : barbe, cicatrice, bijoux et pendentif. La barbe a désormais une opacité fixe de 100 %, y compris après import d’un ancien réglage ; les autres accessoires gardent leurs réglages. Dans l’éditeur, le déplacement global du personnage est autorisé de −150 % à +150 % horizontalement et verticalement. Le cadrage du dialogue reste fixe. Ces règles de présentation ne modifient aucune caractéristique ni action du jeu."
+          ]
+        }
+      ],
+      "references": [
+        {
+          "label": "Bibliothèque et règles de composition des portraits",
+          "file": "modular-portraits.md"
+        }
+      ]
+    },
+    {
+      "id": "ressources-cachees",
+      "title": "Ressources cachées et campements",
+      "summary": "Conception prévue : ressources cachées, campements, découvertes exceptionnelles et parchemins d’indices.",
+      "audience": "planned",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Des ressources invisibles dans la grille",
+          "paragraphs": [
+            "À la définition de la play area, chaque carré de la heatmap peut contenir de la pierre, du bois, du fer, de l’or, de la terre fertile ou rien. Ces zones restent invisibles aux joueurs. L’influence d’un lieu existant annule les ressources exploitables des cellules concernées."
+          ]
+        },
+        {
+          "title": "Découvrir puis construire",
+          "paragraphs": [
+            "Les prospections peuvent révéler les ressources. Les spécialistes transportés par un joueur ont aussi une chance de découverte selon leur spécialité. Après découverte, une expédition d’installation ou le joueur sur place peut construire un campement, qui devra évoluer pour se spécialiser selon la ressource."
+          ]
+        },
+        {
+          "title": "Statut et paramètres à définir",
+          "paragraphs": [
+            "Ce parcours est à implémenter. Le prototype crée actuellement directement un lieu producteur lors d’une découverte par prospection. La répartition, les chances de découverte, les coûts et les paliers de spécialisation restent à définir ; aucune valeur n’est présumée. Le serveur devra valider toutes ces actions en GPS comme sur carte fictive."
+          ]
+        },
+        {
+          "title": "Marqueurs des terrains découverts",
+          "paragraphs": [
+            "Cinq illustrations transparentes sont disponibles : pierre, bois, fer, or et terre fertile. Elles montrent des ressources naturelles sans bâtiment, pour distinguer le gisement du futur campement. Une cellule vide ne possède pas de marqueur. Leur affichage en partie reste à raccorder au système de découverte validé par le serveur."
+          ]
+        },
+        {
+          "title": "Trésors, artefacts et donjons : une seule interaction",
+          "paragraphs": [
+            "Les découvertes exceptionnelles sont placées uniquement hors de l’influence des lieux normaux. Les villages, mines et forts restent des repères cartographiques et des sources d’indices et de rumeurs.",
+            "Hors d’un lieu connu, l’interaction se fait à la découverte sur le terrain ou en lançant une expédition de prospection. Les répartitions sont validées : rien 45 %, bois 20 %, pierre 15 %, terre fertile 12 %, fer 6 %, or 2 %. Un tirage exceptionnel indépendant donne aucune découverte 94 %, trésor 3 %, artefact 2 %, donjon 1 % ; les chances de découverte restent distinctes."
+          ]
+        },
+        {
+          "title": "Cartes et parchemins d’indices",
+          "paragraphs": [
+            "Un indice de localisation est une carte au trésor lisible qui aide à situer un lieu. Un indice de recherche est un parchemin utilisé pour rechercher sur place : il contribue à la jauge extérieure ou au déblocage d’une interaction exceptionnelle dans un lieu connu. Un indice possède un seul de ces effets, jamais les deux. Ces items peuvent provenir d’un loot, d’une taverne ou d’une académie de magie.",
+            "Un parchemin peut être perdu lors d’un combat ou vendu. La vente ou la perte d’un indice encore utile comporte un risque de 25 % de faire disparaître la découverte associée pour tous les joueurs. Le moment précis de résolution reste à définir. Une zone perd aussi son statut exceptionnel dès qu’un joueur l’a remportée : elle ne peut plus fournir ses récompenses aux autres joueurs. Ces fonctionnalités restent à implémenter."
+          ]
+        },
+        {
+          "title": "Scores et récompenses des lieux exceptionnels",
+          "paragraphs": [
+            "Une expédition vers un artefact utilise le score d’expédition et donne un seul item puissant. Un trésor utilise le score d’expédition et donne une somme d’or importante et des items. Un donjon utilise les scores de puissance et d’expédition et donne de l’or, un item et de l’XP en cas de réussite.",
+            "Le score d’expédition dépend du nombre de PNJ, de volontaires, de montures, du matériel et des ressources engagés. Comparé au score à atteindre, il détermine le taux de réussite. Les coefficients, la formule, les montants de récompense et la combinaison avec la puissance pour les donjons restent à définir."
+          ]
+        },
+        {
+          "title": "Partir soi-même ou envoyer une expédition",
+          "paragraphs": [
+            "Après la découverte d’un lieu exceptionnel, le joueur peut constituer lui-même son expédition : les moyens sont transportés dans ses bagages, et les volontaires l’accompagnent comme troupe. Il peut aussi préparer et envoyer une expédition depuis la tente de prospection grâce aux interactions dédiées.",
+            "Les deux parcours devront suivre les mêmes règles validées par le serveur. Les sites sont tous extérieurs aux lieux normaux et à leur influence. Les coûts, délais, pertes et nouvelles tentatives restent à définir. Un trésor disparu reste indisponible pour tous les joueurs, y compris les expéditions déjà en route. Ces parcours sont à implémenter."
+          ]
+        },
+        {
+          "title": "Évolutions autorisées selon le terrain",
+          "paragraphs": [
+            "La ressource du terrain impose les types autorisés : rien → camp ou fort ; bois → camp ou camp de bûcheron ; pierre → camp ou carrière ; terre fertile → camp, village ou ville ; fer → camp ou mine de fer ; or → camp ou mine d’or.",
+            "Le serveur devra bloquer toute évolution incompatible. Un camp en forêt ne peut donc devenir ni fort, ni village, ni mine. Cette liste concerne les camps fondés et leurs évolutions ; les coûts et les paliers restent à définir. La découverte lors d’un passage avec des spécialistes transportés est confirmée."
+          ]
+        },
+        {
+          "title": "Une découverte exceptionnelle se termine pour tous",
+          "paragraphs": [
+            "Artefact, trésor ou donjon : la zone perd son statut exceptionnel lorsqu’un joueur la remporte ou lorsqu’elle est déclarée disparue à la suite de la vente ou de la perte d’un indice. Cette clôture est partagée entre tous les joueurs et empêche une seconde attribution des récompenses.",
+            "Le contenu naturel de la cellule reste distinct de cette découverte. Le serveur conservera son issue pour les sauvegardes et les missions concurrentes ; le risque de disparition après vente ou perte d’un indice actif est fixé à 25 %, avec des modalités de résolution restant à préciser."
+          ]
+        },
+        {
+          "title": "Cartes de localisation en un à trois fragments",
+          "paragraphs": [
+            "Au début de la partie, le serveur devra générer automatiquement les textes de localisation de chaque lieu exceptionnel. Une série contient une à trois cartes au trésor, selon la position et la valeur du site. Elles se lisent seules, par paire ou par trio dans un ordre cohérent. Leur génération ne les donne pas automatiquement aux joueurs.",
+            "Exemple en trois fragments : « 4 cases au nord du village A, puis… », « …tourne à l’est et continue de… », « …marcher de 2 cases. » Les cases sont celles de la grille de la play area. Le calcul précis du nombre de fragments et l’origine du comptage restent à définir."
+          ]
+        },
+        {
+          "title": "Décoder un nom de lieu et écouter une rumeur",
+          "paragraphs": [
+            "Les cartes de localisation indiquent des directions en cases depuis un repère. Le chef du lieu de référence et les PNJ de taverne expliquent gratuitement les cartes détenues, sans donner de bonus de recherche. Les désignations visant un site intérieur sont abandonnées.",
+            "Depuis le 29 octobre 2026, écouter une rumeur est une action distincte à 5 or : elle peut remettre un message de recherche fiable ou donner une conversation sans importance. Le réglage initial est de 25 % d’indice utile si le stock le permet. Les messages, papiers et parchemins sont hors capacité des bagages."
+          ]
+        },
+        {
+          "title": "Chercher un trésor à l’extérieur",
+          "paragraphs": [
+            "À l’endroit supposé grâce aux cartes, le joueur utilise « Chercher un trésor ». L’utilisation déclenche immédiatement 60 secondes de recharge et une réduction de discrétion de 50 % pendant 60 secondes. Le joueur prépare ensuite une jauge avec des indices de recherche, des spécialistes, du bois, de la nourriture, de la bière ou des outils. Les ressources engagées sont consommées à la validation ; les indices ne le sont pas.",
+            "Plus la jauge est remplie, plus la tentative peut débusquer un trésor, un artefact ou l’entrée d’un donjon. Les cartes de localisation ne donnent pas aussi un bonus à cette jauge. Les quantités, contributions, probabilités et zone couverte restent à définir. Ces règles sont prévues, pas encore implémentées."
+          ]
+        },
+        {
+          "title": "Ancienne proposition de dialogue intérieur abandonnée",
+          "paragraphs": [
+            "Depuis le 1er novembre 2026, les sites exceptionnels sont uniquement extérieurs. Les dialogues de recherche dans les lieux normaux sont abandonnés. Les versions antérieures restent consultables dans l’historique."
+          ]
+        },
+        {
+          "title": "Articulation de la recherche et des scores",
+          "paragraphs": [
+            "La recherche des donjons suit le même processus que celle des trésors et artefacts. Les choix du dialogue améliorent le score d’expédition ; les moyens préparés et les exigences du site déterminent ensuite la résolution. Une ressource déjà consommée pour rechercher ne compte pas de nouveau dans le chargement restant.",
+            "La recherche active ne supprime pas les découvertes par prospection ou spécialistes transportés. Une simple révélation ne clôt pas le site pour tous : seule une victoire ou une disparition met fin à son statut exceptionnel. La formule du taux de réussite reste à définir."
+          ]
+        },
+        {
+          "title": "Indices réutilisables et archives",
+          "paragraphs": [
+            "Les indices de localisation et de recherche ne sont pas consommés. Après la découverte ou la disparition de la récompense, ils restent des items, devenus inutiles pour cette recherche. Ils peuvent être vendus à un cartographe ou un géographe pour archives ; le prix est de 5 à 10 pièces d’or par item.",
+            "Cette vente d’archives se distingue de la vente d’un indice encore utile, qui garde le risque de disparition prévu. Il est recommandé que la vente d’archives ne déclenche pas une nouvelle disparition. Le périmètre de l’obsolescence après une révélation individuelle reste à préciser afin de préserver les droits des autres joueurs."
+          ]
+        },
+        {
+          "title": "Ancien exemple narratif conservé dans l’historique",
+          "paragraphs": [
+            "Depuis le 1er novembre 2026, les sites exceptionnels sont uniquement extérieurs. Les dialogues de recherche dans les lieux normaux sont abandonnés. Les versions antérieures restent consultables dans l’historique."
+          ]
+        },
+        {
+          "title": "Donjons : dégâts et moral après une tentative",
+          "paragraphs": [
+            "Après chaque tentative dans un donjon, réussie ou échouée, le héros participant et ses troupes engagées subissent des dégâts et une modification du moral selon le résultat. La simple recherche de l’entrée ou la préparation du dialogue ne déclenche pas ces conséquences. Un héros absent d’une expédition envoyée ne subit pas ses dégâts.",
+            "Les montants, la répartition des dégâts, les valeurs et la durée des effets de moral ainsi que les pertes possibles restent à définir. Une victoire donne les récompenses prévues et clôt le site pour tous ; un échec ne clôt pas automatiquement le donjon. Le serveur devra appliquer et sauvegarder les conséquences une seule fois. Ces règles sont à implémenter."
+          ]
+        },
+        {
+          "title": "Paramètres validés le 26 octobre 2026",
+          "paragraphs": [
+            "Répartition naturelle avant influence : rien 45 %, bois 20 %, pierre 15 %, terre fertile 12 %, fer 6 %, or 2 %. Tirage exceptionnel indépendant : aucune découverte 94 %, trésor 3 %, artefact 2 %, donjon 1 %. Il ne s’agit pas des probabilités de découverte.",
+            "Le risque de disparition lors de la vente ou de la perte d’un indice actif est de 25 %. Les archives valent de 5 à 10 pièces d’or par item. Les bonus narratifs dépendent des informations obtenues dans la narration ; aucun montant universel n’est décidé."
+          ]
+        },
+        {
+          "title": "Barème d’expédition validé",
+          "paragraphs": [
+            "Barème validé : cinq catégories plafonnées pour 100 points de base. PNJ : spécialiste pertinent +10, autre PNJ utile +2, plafond 30 ; volontaires +2 par individu, plafond 20 ; montures +2, plafond 10 ; outils d’exploration +5, plafond 20 ; ressources nourriture +1, bois +1, bière +2, plafond 20. Le bonus narratif s’ajoute ensuite. Chaque moyen est compté une seule fois.",
+            "Taux de réussite validé : minimum de 95 % et de 70 % multiplié par le rapport score total / score cible. Atteindre la cible donne 70 % ; les cibles retenues sont 40, 70 ou 100 selon la difficulté. Pour un donjon, retenir le plus faible rapport entre préparation et puissance, avec un seul tirage. Ces chiffres sont validés en conception et restent à implémenter.",
+            "Une proposition distincte pour la jauge de recherche figure dans la spécification : indices, spécialistes et ressources contribuent à une jauge de 100 points, sans bonus des cartes de localisation. Elle est validée et disponible pour la recherche extérieure depuis le 30 octobre 2026."
+          ]
+        },
+        {
+          "title": "Bruit des tavernes : conversations, pas faux objets",
+          "paragraphs": [
+            "Le mélange est désormais raccordé : chaque écoute en taverne coûte 5 or. Le PNJ peut remettre un message de recherche écrit et fiable, ou raconter une histoire sans importance. Aucun faux objet indice n’est créé.",
+            "Le réglage initial configurable est de 25 % d’indice utile si la taverne en possède en stock ; sinon la réponse est une conversation d’ambiance. Le résultat et le paiement sont sauvegardés, sans nouveau débit au rejeu de la même commande. Les documents ne comptent pas dans les bagages."
+          ]
+        }
+      ],
+      "references": [
+        {
+          "label": "Règles prévues et limites actuelles",
+          "file": "hidden-resource-cells.md"
+        }
+      ]
+    },
+    {
+      "id": "exploration-persistence",
+      "title": "Persistance de l’exploration",
+      "summary": "Modèles privés du serveur, sauvegardes versionnées et reprise des anciennes parties.",
+      "audience": "development",
+      "paragraphs": [],
+      "topics": [
+        {
+          "title": "Socle disponible",
+          "paragraphs": [
+            "Un état d’exploration versionné est désormais intégré aux sauvegardes officielles : cellules naturelles, sites exceptionnels, découvertes par joueur, séries et items d’indices, recherches et expéditions. Les anciennes sauvegardes reçoivent un état vide sans nouveau tirage."
+          ]
+        },
+        {
+          "title": "Confidentialité et limites",
+          "paragraphs": [
+            "Le bloc privé est retiré des réponses réseau aux joueurs, y compris à l’organisateur, et ne peut pas être injecté par l’initialisation navigateur. Les modèles conservent les échéances et résultats sans les rejouer. La génération est désormais exécutée côté serveur au lancement des nouvelles parties ; les interactions de découverte, recherche, construction et récupération restent à raccorder."
+          ]
+        },
+        {
+          "title": "Génération des nouvelles parties — 28 octobre 2026",
+          "paragraphs": [
+            "Le serveur distribue les contenus naturels et exceptionnels sur la grille partagée avec la heatmap, hors exclusions. Une cellule touchée par la portée normale d’un lieu permanent placé est neutralisée. Aucun site exceptionnel n’y est placé. Les anciens sites intérieurs actifs sont clôturés à la reprise, sans récompense ni nouveau tirage ; leurs indices deviennent des archives.",
+            "Les répartitions validées sont utilisées pour deux tirages indépendants. Une graine privée et les résultats sont sauvegardés. Les grands terrains adaptent la taille des cellules pour rester sous 20 000 cellules candidates ; la taille de base reste inchangée pour les terrains plus petits. Aucune reprise ne relance la génération."
+          ]
+        },
+        {
+          "title": "Vue publique et droits de lecture — 28 octobre 2026",
+          "paragraphs": [
+            "Le serveur fournit une vue d’exploration distincte par joueur : ressources et sites découverts, indices détenus, recherches et missions propres. Une carte ne montre que les fragments possédés ; elle ne transmet ni cible interne, ni texte manquant, . Les identifiants publics sont opaques et propres au destinataire.",
+            "Les résultats précalculés restent cachés jusqu’à leur résolution officielle. La protection s’applique aux événements, aux synchronisations et aux accusés de commandes avant la création des deltas. L’alliance et le rôle d’organisateur ne donnent pas accès aux indices d’un autre joueur. Le contrat de lecture est implémenté ; les actions de découverte et récupération restent à raccorder."
+          ]
+        },
+        {
+          "title": "Cartes et cycle de vie des indices — 28 octobre 2026",
+          "paragraphs": [
+            "Le lancement serveur génère et vérifie les séries de cartes, puis crée les objets à effet exclusif. La preuve de localisation, les destinations, les provenances privées et les tirages de disparition restent dans la sauvegarde officielle. Les offres publiques sont calculées par le serveur et exécutées par les mêmes commandes en GPS et en simulation.",
+            "Le journal persistant des événements de perte empêche plusieurs tirages pour un site lors du même combat. La vente, la perte, la collecte, les réserves et les archives ne dupliquent pas les parchemins. Tous les indices sont fiables. Une disparition programme une annonce mondiale à cinq minutes, conservée dans les sauvegardes et filtrée jusqu’à son échéance."
+          ]
+        },
+        {
+          "title": "PNJ, rumeurs et essais de découverte — 28 octobre 2026",
+          "paragraphs": [
+            "Les explications apprises et les essais de spécialistes sont persistants. Le serveur examine les segments réellement parcourus par les groupes et les positions reçues pour le héros. La découverte des gisements historiques ne crée plus de producteur. Les mêmes commandes sont utilisées en GPS et en simulation.",
+            "La vue publique fournit les seules rumeurs autorisées, avec des options opaques. Les essais ratés, les tirages et le reste du terrain demeurent privés. La recherche active, la fondation et les récompenses des expéditions restent distinctes."
+          ]
+        }
+      ],
+      "references": [
+        {
+          "label": "Format et validation de l’état persistant",
+          "file": "exploration-persistence.md"
+        },
+        {
+          "label": "Génération et exclusion des sites sous influence",
+          "file": "exploration-generation.md"
+        },
+        {
+          "label": "Connaissances autorisées et secrets réseau",
+          "file": "exploration-privacy.md"
+        },
+        {
+          "label": "Cartes générées et objets indices",
+          "file": "exploration-clues.md"
+        },
+        {
+          "label": "Raccordement des PNJ et des découvertes",
+          "file": "exploration-rumors-and-discovery.md"
         }
       ]
     }

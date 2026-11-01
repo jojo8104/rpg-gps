@@ -40,7 +40,8 @@ export async function versionArticles({
     });
     await writeFile(
       new URL(`wiki/${file}`, root),
-      `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(article.title)} — version ${version}</title><link rel="stylesheet" href="../../wiki.css"></head><body><header><p class="eyebrow">Archive du wiki · Version ${version}</p><h1>${escape(article.title)}</h1><p>${escape(entry.date.slice(0, 10))} · ${escape(entry.note)}</p><a href="../../index.html#${article.id}">Lire l’article actuel</a></header><main class="archive-content">${article.snapshot}</main></body></html>\n`,
+      `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escape(article.title)} — version ${version}</title><link rel="stylesheet" href="../../wiki.css"></head><body><header><p class="eyebrow">Archive du wiki · Version ${version}</p><h1>${escape(article.title)}</h1><p>${escape(entry.date.slice(0, 10))} · ${escape(entry.note)}</p><a href="../../${article.currentHref ?? `index.html#${article.id}`}">Lire l’article actuel</a></header><main class="archive-content">${article.snapshot}</main></body></html>\n`,
+      { flag: "wx" },
     );
     versions.push(entry);
   }

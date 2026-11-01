@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fr">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="../../app/css/battle-tactics.css" />
+  <style>
+    body {
+      margin: 0;
+      background: #202d27;
+      color: #eee;
+      padding: 12px;
+      font: 14px system-ui;
+    }
+    #battle {
+      max-width: 450px;
+      height: 900px;
+      margin: auto;
+    }
+    button {
+      font: inherit;
+    }
+  </style>
+  <p>
+    Fixture de présentation : données d'unités fictives, carte produite par le
+    serveur.
+  </p>
+  <button id="flip">Changer de camp</button
+  ><button id="lock">Verrouiller / déverrouiller</button>
+  <div id="battle"></div>
+  <script type="module">
+    import { renderTacticalBattleView } from "../../app/js/ui/tactical-battle-view.js";
+    const battlefield = await fetch(
+      "/api/playtest/battlefield?seed=test-1",
+    ).then((response) => response.json());
+    const state = {
+      round: 1,
+      phase: "CHOICE",
+      troops: [],
+      players: ["a", "b"].map((id) => ({
+        id,
+        locked: false,
+        orderBudget: 3,
+        cohesion: 20,
+        hero: { name: `Commandant ${id}`, health: 100, maxHealth: 100 },
+      })),
+      encounter: {
+        terrain: { label: "Plaine" },
+        weather: { label: "Temps sec" },
+      },
+      tactics: {
+        battlefield,
+        positions: { "HERO:a": { x: 1, y: 4 }, "HERO:b": { x: 1, y: 0 } },
+        options: {},
+      },
+    };
+    let teamId = "a";
+    function draw() {
+      renderTacticalBattleView({
+        element: document.querySelector("#battle"),
+        battle: { duel: state },
+        teamId,
+        selected: null,
+        orders: [],
+        fanOpen: false,
+        specialOpen: false,
+        charge: false,
+        submitting: false,
+        message: "Essai graphique",
+        onFan() {},
+        onSelect() {},
+        onCell() {},
+        onSpecial() {},
+        onBase() {},
+        onCancel() {},
+        onPriority() {},
+        onLock() {},
+        onFlee() {},
+      });
+    }
+    document.querySelector("#flip").onclick = () => {
+      teamId = teamId === "a" ? "b" : "a";
+      draw();
+    };
+    document.querySelector("#lock").onclick = () => {
+      state.players.forEach((player) => (player.locked = !player.locked));
+      draw();
+    };
+    draw();
+  </script>
+</html>

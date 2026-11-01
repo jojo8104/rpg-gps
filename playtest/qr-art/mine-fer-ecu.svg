@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" role="img" aria-labelledby="title"><title id="title">Mine de fer</title><rect width="200" height="220" fill="white"/><path d="M22 18H178V100Q178 164 100 203Q22 164 22 100Z" fill="white" stroke="black" stroke-width="7" stroke-linejoin="round"/><path d="M34 30H166V100Q166 154 100 189Q34 154 34 100Z" fill="none" stroke="black" stroke-width="2"/><g stroke="black" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"><g transform="rotate(-40 100 96)" stroke="black" stroke-linejoin="round">
+<path d="M96 57H104V141Q100 146 96 141Z" fill="white" stroke-width="4"/>
+<path d="M62 69Q69 43 100 43Q131 43 138 69Q119 55 100 55Q81 55 62 69Z" fill="black" stroke-width="2"/>
+<path d="M95 44H105V59H95Z" fill="white" stroke-width="3"/>
+</g>
+<path fill="white" d="M74 154L87 139H120L135 154L125 170H83Z"/><path fill="none" d="M74 154H135M87 139L95 154L91 170M120 139L113 154L117 170"/></g></svg>

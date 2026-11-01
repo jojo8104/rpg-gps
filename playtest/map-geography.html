@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <base href="../app/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Prévisualisation carte 2D</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link rel="stylesheet" href="../app/css/map-preparation.css" />
+    <link rel="stylesheet" href="../app/css/map.css" />
+    <link rel="stylesheet" href="../app/css/map-camera.css" />
+    <link rel="stylesheet" href="../app/css/parchment-theme.css" />
+    <style>
+      body {
+        margin: 0;
+        background: #26382a;
+        color: #f4ead3;
+        font: 15px system-ui;
+      }
+      header {
+        padding: 12px 16px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-size: 20px;
+      }
+      p {
+        margin: 6px 0;
+      }
+      button {
+        min-height: 40px;
+      }
+      #map {
+        height: calc(100dvh - 145px);
+        min-height: 320px;
+        background: #879c61;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Prévisualisation du fond 2D</h1>
+      <p>
+        Exemple synthétique : forêt, lac avec îlot, chemins et bâtiments. Aucune
+        partie créée.
+      </p>
+      <button id="example">Voir l’exemple 2D</button>
+      <button id="center">Centrer le héros</button>
+      <button id="walk">Tester la marche</button>
+      <details id="landscape-tools">
+        <summary>Menu</summary>
+        <button id="close-game-menu" hidden>Fermer</button>
+      </details>
+      <button id="prepare">Voir la carte réelle et rechercher un lieu</button>
+    </header>
+    <div id="map" aria-label="Carte de prévisualisation"></div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module">
+      import { createGeographyLayer } from "../app/js/map/GeographyRenderer.js";
+      import { createMapPanes } from "../app/js/map/MapLayers.js";
+      import { MapCamera } from "../app/js/map/MapCamera.js";
+      import { MapBillboards } from "../app/js/map/MapBillboards.js";
+      import { LocationRenderer } from "../app/js/map/LocationRenderer.js";
+      import { UnitRenderer } from "../app/js/map/UnitRenderer.js";
+      import { createMapPreparationControls } from "../app/js/map/MapPreparationControls.js";
+      const map = L.map("map", {
+        maxZoom: 20,
+        zoomSnap: 0.25,
+        zoomAnimation: false,
+      }).setView([48.855, 2.35], 16);
+      createMapPanes(map);
+      const camera = new MapCamera(map, { mode: "gps" });
+      const polygon = [
+        [48.85, 2.34],
+        [48.85, 2.36],
+        [48.86, 2.36],
+        [48.86, 2.34],
+      ].map(([latitude, longitude]) => ({ latitude, longitude }));
+      camera.sync({ setupActive: false, polygon });
+      L.polygon(
+        polygon.map((p) => [p.latitude, p.longitude]),
+        { color: "#f7d66c", fill: false },
+      ).addTo(map);
+      const billboards = new MapBillboards(map);
+      const { watchLookoutSprite } = await import('../app/js/map/watch-lookout-sprite.js');
+      const watchMarker = L.marker([48.8534, 2.3504], { icon: L.divIcon({className:'watch-lookout-anchor',html:''}) }).addTo(map);
+      billboards.set('preview-watch', {marker:watchMarker,kind:'watch',html:watchLookoutSprite(),label:'Vigie camouflée'});
+      const { caravanSprite } = await import("../app/js/map/caravan-sprite.js");
+      const convoyMarker = L.marker([48.8542, 2.351], {
+        icon: L.divIcon({ className: "", html: "" }),
+      }).addTo(map);
+      billboards.set("preview-caravan", {
+        marker: convoyMarker,
+        kind: "caravan",
+        heading: 135,
+        walking: true,
+        html: caravanSprite(),
+        label: "Caravane de prévisualisation",
+        onClick: () => {
+          document.querySelector("h1").textContent = "Caravane sélectionnée";
+        },
+      });
+      const units = new UnitRenderer({ map, mode: "gps", billboards });
+      units.render({ latitude: 48.855, longitude: 2.35 }, 60, 90);
+      let walkTimer = null;
+      document.querySelector("#walk").addEventListener("click", () => {
+        const button = document.querySelector("#walk");
+        if (walkTimer) {
+          clearInterval(walkTimer);
+          walkTimer = null;
+          button.textContent = "Tester la marche";
+          return;
+        }
+        button.textContent = "Arrêter la marche";
+        clearInterval(walkTimer);
+        let index = 0;
+        const positions = [
+          [48.855, 2.35],
+          [48.855, 2.351],
+          [48.8555, 2.352],
+          [48.856, 2.352],
+          [48.8565, 2.351],
+          [48.8565, 2.35],
+          [48.856, 2.349],
+          [48.8555, 2.349],
+          [48.855, 2.35],
+        ];
+        walkTimer = setInterval(() => {
+          const previous = positions[index++],
+            next = positions[index];
+          const heading =
+            (Math.atan2(next[1] - previous[1], next[0] - previous[0]) * 180) /
+            Math.PI;
+          units.render(
+            { latitude: next[0], longitude: next[1] },
+            null,
+            heading,
+          );
+          camera.setHeading(heading);
+          if (index === positions.length - 1) index = 0;
+        }, 800);
+      });
+      const locations = new LocationRenderer({
+        map,
+        billboards,
+        onSelect: () => {},
+      });
+      for (const [id, type, name, latitude, longitude] of [
+        ["village", "village", "Village", 48.8555, 2.353],
+        ["fort", "fort", "Fort", 48.853, 2.347],
+      ])
+        locations.render({
+          id,
+          type,
+          name,
+          position: { latitude, longitude },
+          owner: type === "fort" ? "enemy" : "ally",
+          interactionRadius: 80,
+          questMarker: type === "fort" ? "combat" : null,
+          state: "discovered",
+        });
+      camera.setHeading(90);
+      let centered = false;
+      document.querySelector("#center").addEventListener("click", () => {
+        map.panTo([48.855, 2.35]);
+        camera.setFollowHeading(centered);
+        centered = !centered;
+      });
+      const area = (kind, coordinates) => ({
+        kind,
+        geometry: { type: "Polygon", coordinates },
+      });
+      const line = (kind, coordinates) => ({
+        kind,
+        subtype: "footway",
+        geometry: { type: "LineString", coordinates },
+      });
+      const data = {
+        features: [
+          area("forest", [
+            [
+              [2.342, 48.85],
+              [2.35, 48.85],
+              [2.349, 48.86],
+              [2.342, 48.86],
+              [2.342, 48.85],
+            ],
+          ]),
+          area("grass", [
+            [
+              [2.35, 48.85],
+              [2.36, 48.85],
+              [2.36, 48.86],
+              [2.35, 48.86],
+              [2.35, 48.85],
+            ],
+          ]),
+          area("water", [
+            [
+              [2.351, 48.856],
+              [2.358, 48.856],
+              [2.358, 48.86],
+              [2.351, 48.86],
+              [2.351, 48.856],
+            ],
+            [
+              [2.353, 48.857],
+              [2.355, 48.857],
+              [2.355, 48.859],
+              [2.353, 48.859],
+              [2.353, 48.857],
+            ],
+          ]),
+          area("building", [
+            [
+              [2.349, 48.853],
+              [2.35, 48.853],
+              [2.35, 48.854],
+              [2.349, 48.854],
+              [2.349, 48.853],
+            ],
+          ]),
+          line("road", [
+            [2.34, 48.85],
+            [2.35, 48.855],
+            [2.36, 48.854],
+          ]),
+          line("waterway", [
+            [2.36, 48.86],
+            [2.36, 48.855],
+            [2.358, 48.85],
+          ]),
+        ],
+      };
+      const game = createGeographyLayer(map, data).addTo(map);
+      const real = L.tileLayer(
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom: 19,
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+        },
+      );
+      let search = null;
+      document.querySelector("#prepare").addEventListener("click", () => {
+        camera.sync({ setupActive: true, polygon });
+        game.remove();
+        real.addTo(map);
+        search ??= createMapPreparationControls(map);
+        search.addTo(map);
+      });
+      document.querySelector("#example").addEventListener("click", () => {
+        camera.sync({ setupActive: false, polygon });
+        real.remove();
+        search?.remove();
+        game.addTo(map);
+        map.setView([48.855, 2.35], 16);
+      });
+    </script>
+  </body>
+</html>

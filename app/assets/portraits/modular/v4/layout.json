@@ -1,0 +1,12 @@
+{
+  "width": 512,
+  "height": 832,
+  "face": { "male": [163, 98, 185, 228], "female": [163, 103, 185, 215] },
+  "neck": { "male": [196, 275, 120, 123], "female": [201, 267, 110, 131] },
+  "hairOffsetY": 12,
+  "hairBackOffsetY": 8,
+  "femaleEyeOffsetXPerSide": 7,
+  "maleTorsoScaleY": 0.88,
+  "torsoAnchorY": 320,
+  "chestStartY": 395
+}

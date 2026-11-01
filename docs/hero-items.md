@@ -40,7 +40,7 @@ Depuis un lieu accessible où le héros est présent : **Équipements · commerc
 | Combat                            | La première victoire contre l’équipe ennemie d’un lieu ouvre un trophée pour un héros vainqueur actif. Pas de trophée supplémentaire pour les duels libres.                                              |
 | Trésor                            | Chaque lieu distinct visité apporte un fragment, jusqu’à trois. Le trésor se trouve au troisième lieu visité ; une seule récupération par héros.                                                         |
 | Ruines                            | Une découverte par lieu de type `ruin`, partagée entre tous les joueurs. Cette règle s’applique aux ruines présentes dans un scénario ; elle n’ajoute pas automatiquement de lieux à la carte.           |
-| Prospection                       | La première découverte d’un gisement ouvre une cache sur ce site pour le joueur découvreur. Une seule cache par zone, même après une nouvelle expédition.                                                |
+| Prospection | Une nouvelle découverte ne donne pas d’équipement. Les caches déjà débloquées dans une ancienne sauvegarde conservent leurs conditions. |
 | Échange entre joueurs             | Utilise les échanges existants, avec validation des deux joueurs : objets transportés ou équipés transférés sans en créer de nouveaux.                                                                   |
 
 Les tirages dépendent des identifiants de lieux et de récompenses. Recharger, rouvrir le panneau, monter un bâtiment de niveau ou le reconstruire ne réinitialise pas les achats et commandes effectués. Chaque rayon marchand a un tirage indépendant : construire un autre bâtiment ne relance pas les rayons existants.
@@ -101,3 +101,9 @@ La remise exige un exemplaire dans les bagages et la présence au lieu lié ; un
 `Game.toJSON()` / `Game.fromJSON()` et l’état multijoueur transportent `itemAcquisitionState` (quotas, achats, commandes, récompenses et visites). Les anciens instantanés sans ce champ démarrent avec un état vide. La projection réseau masque les récompenses et visites des autres joueurs.
 
 Tests dédiés : `node --test tests/hero-items.test.js`. Le catalogue et les règles d’acquisition ne dépendent ni du DOM ni du GPS.
+
+28 octobre 2026 — une nouvelle découverte par prospection ne débloque plus d’équipement ni de lieu producteur. Les anciens droits déjà enregistrés conservent leurs conditions.
+
+## Documents hors capacité des bagages
+
+Depuis le 29 octobre 2026, les messages, lettres, papiers, parchemins et cartes de localisation ne consomment aucune place dans les bagages du héros. Ils restent des objets consultables et transportables. Ils peuvent être reçus malgré des bagages pleins, y compris par le butin, et restent soumis à leurs règles de remise, perte, vente et archives. Les autres objets conservent leur encombrement.
